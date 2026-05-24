@@ -1501,6 +1501,170 @@ html, body {
   transform: scale(0.96) !important;
   box-shadow: 0 8px 20px rgba(26,26,26,0.1) !important;
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+   PHASE 2-4 — Glassmorphic Overhaul, Gauges, Calendar, Celebration
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── Completion Gauge Bars ─────────────────────────────────────────────── */
+.completion-gauges { padding: 4px 20px 0; }
+.completion-gauges-hdr {
+  font-size: 0.58rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--muted); padding: 20px 0 14px;
+}
+.gauge-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 11px 0; border-bottom: 1px solid rgba(26,26,26,0.04);
+}
+.gauge-row:last-child { border-bottom: none; }
+.gauge-muscle {
+  font-size: 13px; font-weight: 500; color: var(--charcoal);
+  width: 90px; flex-shrink: 0; letter-spacing: -0.01em;
+}
+.gauge-bar-track {
+  flex: 1; height: 2px; background: rgba(26,26,26,0.07); border-radius: 2px;
+  position: relative; overflow: visible;
+}
+.gauge-bar-fill {
+  height: 100%; border-radius: 2px;
+  background: linear-gradient(90deg, rgba(240,160,130,0.65) 0%, rgba(232,90,70,0.90) 100%);
+  position: relative;
+  transition: width 750ms cubic-bezier(0.16,1,0.3,1);
+  min-width: 2px;
+}
+.gauge-bar-fill::after {
+  content: ''; position: absolute; right: -4px; top: -3.5px;
+  width: 9px; height: 9px; border-radius: 50%;
+  background: rgb(228,88,68);
+  box-shadow: 0 0 10px rgba(228,88,68,0.50), 0 0 4px rgba(228,88,68,0.30);
+}
+.gauge-pct-label {
+  font-size: 10px; font-weight: 700; color: rgba(26,26,26,0.35);
+  width: 34px; text-align: right; flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── 5-Week History Calendar ───────────────────────────────────────────── */
+/* ── 5-Week Calendar — full-width mobile layout ──────────────────────── */
+.cal-section { padding: 20px 16px 48px; }
+.cal-section-hdr {
+  font-size: 0.58rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 16px;
+}
+/* DOW header indented to align with circles (week-lbl = 26px + 5px gap) */
+.cal-dow-header {
+  display: flex; gap: 5px; padding: 0 0 8px 31px;
+}
+.cal-dow-cell {
+  flex: 1; text-align: center; font-size: 9px;
+  color: rgba(26,26,26,0.28); letter-spacing: 0.06em; text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+.cal-grid { display: flex; flex-direction: column; gap: 5px; }
+.cal-week-row { display: flex; align-items: center; gap: 5px; }
+.cal-week-lbl {
+  font-size: 7.5px; color: rgba(26,26,26,0.26); width: 26px; flex-shrink: 0;
+  letter-spacing: 0.04em; text-transform: uppercase; text-align: right;
+}
+/* circles fill remaining width — no max-width cap */
+.cal-days-row { display: flex; gap: 5px; flex: 1; min-width: 0; }
+.cal-day-cell {
+  flex: 1; aspect-ratio: 1;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; position: relative; cursor: default;
+  transition: transform 150ms ease; min-width: 0;
+}
+.cal-day-blank  { background: transparent; }
+.cal-day-open   { background: rgba(26,26,26,0.045); }
+.cal-day-done   {
+  background: var(--charcoal);
+  box-shadow: 0 4px 16px rgba(26,26,26,0.22); cursor: pointer;
+}
+.cal-day-done:active { transform: scale(0.86); }
+/* digit scales with circle via clamp — crisp monospace centering */
+.cal-day-num {
+  font-size: clamp(9px, 2.4vw, 13px); font-weight: 600;
+  font-variant-numeric: tabular-nums; line-height: 1;
+}
+.cal-day-blank .cal-day-num  { color: rgba(26,26,26,0.13); }
+.cal-day-open .cal-day-num   { color: rgba(26,26,26,0.24); }
+.cal-day-done .cal-day-num   { color: rgba(255,255,255,0.94); }
+
+/* ── Calendar Day Popup (frosted glass) ──────────────────────────────── */
+#cal-popup {
+  position: fixed; inset: 0;
+  background: rgba(10,10,20,0.52);
+  backdrop-filter: blur(22px) saturate(1.5);
+  -webkit-backdrop-filter: blur(22px) saturate(1.5);
+  z-index: 650;
+  display: none; align-items: center; justify-content: center;
+  padding: 32px 24px; opacity: 0;
+  transition: opacity 280ms ease;
+}
+#cal-popup.visible { opacity: 1; }
+#cal-popup-panel {
+  width: 100%; max-width: 340px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0.16) 100%);
+  border: 1px solid rgba(255,255,255,0.58);
+  border-radius: 28px;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.42),
+              inset 0 1.5px 0 rgba(255,255,255,0.75),
+              inset 0 -1px 0 rgba(255,255,255,0.12);
+  padding: 28px 24px 32px;
+  transform: translateY(24px) scale(0.95);
+  transition: transform 380ms cubic-bezier(0.34,1.56,0.64,1);
+  position: relative;
+}
+#cal-popup.visible #cal-popup-panel { transform: translateY(0) scale(1); }
+.cal-popup-close {
+  position: absolute; top: 16px; right: 16px;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(26,26,26,0.10); border: 1px solid rgba(26,26,26,0.08);
+  cursor: pointer; font-size: 13px; color: var(--charcoal);
+  display: flex; align-items: center; justify-content: center;
+}
+.cal-popup-date {
+  font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase;
+  color: rgba(26,26,26,0.42); margin-bottom: 6px;
+}
+.cal-popup-session {
+  font-family: var(--font-hero); font-style: italic;
+  font-size: 28px; font-weight: 600;
+  color: var(--charcoal); line-height: 1.1; margin-bottom: 4px;
+}
+.cal-popup-prog {
+  font-size: 10px; color: rgba(26,26,26,0.38);
+  text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 20px;
+}
+.cal-popup-stats { display: flex; gap: 10px; }
+.cal-popup-stat {
+  flex: 1; background: rgba(255,255,255,0.42);
+  border-radius: 12px; padding: 12px 10px;
+  border: 1px solid rgba(255,255,255,0.62); text-align: center;
+}
+.cal-popup-stat-val { font-size: 16px; font-weight: 700; color: var(--charcoal); }
+.cal-popup-stat-lbl {
+  font-size: 9px; color: rgba(26,26,26,0.42);
+  text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px;
+}
+
+/* ── Week Complete — Iridescent Pearl Ripple Celebration ────────────── */
+@keyframes pearlRippleA {
+  0%   { r: 18; opacity: 0.58; stroke-width: 2; }
+  100% { r: 155; opacity: 0; stroke-width: 0.5; }
+}
+@keyframes pearlRippleB {
+  0%   { r: 18; opacity: 0.42; stroke-width: 1.5; }
+  100% { r: 125; opacity: 0; stroke-width: 0.5; }
+}
+@keyframes pearlRippleC {
+  0%   { r: 18; opacity: 0.28; stroke-width: 1; }
+  100% { r: 95; opacity: 0; stroke-width: 0.5; }
+}
+.ripple-a { animation: pearlRippleA 2.8s ease-out infinite; }
+.ripple-b { animation: pearlRippleB 2.8s ease-out 0.72s infinite; }
+.ripple-c { animation: pearlRippleC 2.8s ease-out 1.44s infinite; }
+
 </style>
 </head>
 <body>
@@ -3564,7 +3728,7 @@ const EX_ALIASES = {
   'calf raise':'standing calf raise',
   'tricep extension':'overhead triceps extension',
   'overhead extension':'overhead triceps extension',
-  'cable crunch':'cable crunch','decline situp':'plate-weighted decline sit-up',
+  'cable crunch':'cable crunch','cable machine crunch':'cable crunch','decline situp':'plate-weighted decline sit-up',
   'hanging leg':'hanging leg raise','roman chair':'roman chair leg raise',
   'pec fly':'pec deck','cable crossover':'cable fly',
   'bayesian curl':'bayesian cable curl',
@@ -3630,10 +3794,10 @@ const MUSCLE_MAP = {
   'triceps kickback (cable)':'Triceps','close grip bench press':'Triceps',
   'dumbbell skullcrusher':'Triceps','triceps pressdown (bar)':'Triceps',
   'standing calf raise':'Calves','seated calf raise':'Calves',
-  'cable crunch':'Core','plate-weighted decline sit-up':'Core',
+  'cable crunch':'Core','cable machine crunch':'Core','plate-weighted decline sit-up':'Core',
   'hanging leg raise':'Core','roman chair leg raise':'Core',
   'plank':'Core','pull-in':'Core','ab wheel':'Core',
-  'deadlift':'Back','barbell shrug':'Traps',
+  'deadlift':'Hamstrings','barbell shrug':'Traps',
 };
 
 // ── Barbell exercises (for plate calculator) ─────────────────────────────────
@@ -4374,19 +4538,28 @@ function updateWorkoutPill() {
 
 // ── Command Center helpers ────────────────────────────────────────────────────
 
-function buildSilhouetteSVG(targets, actuals) {
-  // Premium desaturated palette — replaces traffic-light system
-  // Not started  → near-invisible taupe stroke   #E3DDD3
-  // <50% volume  → muted terracotta / clay rose  #C4876E
-  // 50–99%       → soft desaturated amber-gold   #C4944A
-  // 100%+        → muted forest / studio charcoal #4A6154
+function buildSilhouetteSVG(targets, actuals, weekComplete) {
+  // Glassmorphic warm peach-coral palette per spec
   function col(muscle) {
     const t = targets[muscle] || 0, a = actuals[muscle] || 0;
-    if (!t || !a) return '#E3DDD3';
+    if (!t) return 'rgba(212,203,193,0.24)';
+    if (!a) return 'rgba(212,203,193,0.28)';
     const p = a / t;
-    if (p >= 1)   return '#4A6154';
-    if (p >= 0.5) return '#C4944A';
-    return '#C4876E';
+    if (p >= 1)   return 'rgba(232,95,72,0.78)';
+    if (p >= 0.5) return 'rgba(240,148,118,0.58)';
+    return 'rgba(242,165,138,0.38)';
+  }
+  function isActive(muscle) {
+    const t = targets[muscle] || 0, a = actuals[muscle] || 0;
+    return t > 0 && a > 0;
+  }
+  function glowFilter(muscle) {
+    if (!isActive(muscle)) return 'none';
+    const t = targets[muscle] || 0, a = actuals[muscle] || 0;
+    const p = a / t;
+    if (p >= 1)   return 'url(#glowFull)';
+    if (p >= 0.5) return 'url(#glowMid)';
+    return 'url(#glowLight)';
   }
   function pulse(muscle) {
     const t = targets[muscle] || 0, a = actuals[muscle] || 0;
@@ -4400,7 +4573,6 @@ function buildSilhouetteSVG(targets, actuals) {
     .map(m => [m, col(m)])
   );
 
-  // Shared body outline path (used twice: filled base + sheen overlay)
   const BODY = `M80,10 C67,10 60,18 60,29 C60,40 67,46 74,50
     C64,54 50,62 42,72 C34,82 30,96 28,110
     L23,136 L21,167 C21,176 25,183 34,185
@@ -4413,142 +4585,143 @@ function buildSilhouetteSVG(targets, actuals) {
     C110,62 96,54 86,50 C93,46 100,40 100,29
     C100,18 93,10 80,10Z`;
 
+  const celebSVG = weekComplete ? `
+    <circle cx="80" cy="195" fill="none" stroke="rgba(248,218,200,0.62)" class="ripple-a" pointer-events="none"/>
+    <circle cx="80" cy="195" fill="none" stroke="rgba(255,225,210,0.44)" class="ripple-b" pointer-events="none"/>
+    <circle cx="80" cy="195" fill="none" stroke="rgba(255,235,222,0.30)" class="ripple-c" pointer-events="none"/>
+  ` : '';
+
   return `<svg viewBox="0 0 160 400" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <!-- Layered drop shadow for physical depth -->
-    <filter id="bsf" x="-22%" y="-5%" width="144%" height="116%">
-      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="rgba(0,0,0,0.10)"/>
-      <feDropShadow dx="0" dy="3"  stdDeviation="5"  flood-color="rgba(0,0,0,0.07)"/>
+    <filter id="bsf" x="-30%" y="-7%" width="160%" height="120%">
+      <feDropShadow dx="0" dy="20" stdDeviation="22" flood-color="rgba(26,26,26,0.08)"/>
+      <feDropShadow dx="0" dy="6"  stdDeviation="8"  flood-color="rgba(26,26,26,0.05)"/>
+      <feDropShadow dx="-3" dy="3" stdDeviation="5"  flood-color="rgba(255,255,255,0.25)"/>
     </filter>
-    <!-- Radial highlight — simulates ambient occlusion from top-left key light -->
-    <radialGradient id="bodySheen" cx="36%" cy="16%" r="64%">
-      <stop offset="0%"   stop-color="rgba(255,255,255,0.22)"/>
-      <stop offset="55%"  stop-color="rgba(255,255,255,0.05)"/>
-      <stop offset="100%" stop-color="rgba(0,0,0,0.04)"/>
+    <radialGradient id="bodyGlass" cx="30%" cy="13%" r="70%">
+      <stop offset="0%"   stop-color="rgba(255,255,255,0.30)"/>
+      <stop offset="42%"  stop-color="rgba(255,255,255,0.08)"/>
+      <stop offset="100%" stop-color="rgba(26,26,26,0.05)"/>
     </radialGradient>
-    <!-- Subtle bottom vignette to ground the figure -->
+    <linearGradient id="bodyBase" x1="0.22" y1="0" x2="0.78" y2="1">
+      <stop offset="0%"   stop-color="rgba(246,241,235,0.75)"/>
+      <stop offset="100%" stop-color="rgba(230,222,212,0.62)"/>
+    </linearGradient>
     <linearGradient id="bodyFade" x1="0" y1="0" x2="0" y2="1">
       <stop offset="70%" stop-color="rgba(0,0,0,0)"/>
-      <stop offset="100%" stop-color="rgba(0,0,0,0.06)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0.08)"/>
     </linearGradient>
+    <filter id="glowFull" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowMid" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glowLight" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
   </defs>
 
-  <!-- ① Base body silhouette ─────────────────────────────────── -->
-  <path fill="#EAE4DC" filter="url(#bsf)" d="${BODY}"/>
+  ${celebSVG}
 
-  <!-- ② Head + neck ────────────────────────────────────────────  -->
-  <circle cx="80" cy="28" r="18" fill="#D9D1C8"/>
-  <path fill="#D1C9C0"
+  <!-- Base — frosted glass foundation -->
+  <path fill="url(#bodyBase)" filter="url(#bsf)" d="${BODY}"/>
+
+  <!-- Head + neck -->
+  <circle cx="80" cy="28" r="18" fill="rgba(208,198,186,0.72)"/>
+  <path fill="rgba(198,188,176,0.66)"
     d="M74,44 C77,51 83,51 86,44 L87,57 C84,63 76,63 73,57Z"/>
 
-  <!-- ③ Muscle groups — all bezier, no straight-line polygons ── -->
-
-  <!-- Traps: flows from neck base up to shoulder peaks -->
-  <path ${g('Traps')} fill="${c['Traps']}" opacity="0.84"
+  <!-- Traps -->
+  <path ${g('Traps')} fill="${c['Traps']}" filter="${{ Traps: glowFilter('Traps') }.Traps}" opacity="0.88"
     d="M75,46 C78,50 82,50 85,46
        C97,56 114,65 107,74 C96,78 80,80 64,78
        C57,74 46,65 75,46Z"/>
 
-  <!-- Shoulders (deltoid): smooth teardrop curves -->
-  <path ${g('Shoulders')} fill="${c['Shoulders']}" opacity="0.90"
-    d="M42,71 C30,76 22,87 22,100
-       C22,112 29,122 38,123
-       C44,118 49,106 49,91
-       C49,82 46,75 42,71Z"/>
-  <path ${g('Shoulders')} fill="${c['Shoulders']}" opacity="0.90"
-    d="M118,71 C130,76 138,87 138,100
-       C138,112 131,122 122,123
-       C116,118 111,106 111,91
-       C111,82 114,75 118,71Z"/>
+  <!-- Shoulders -->
+  <path ${g('Shoulders')} fill="${c['Shoulders']}" filter="${{ Shoulders: glowFilter('Shoulders') }.Shoulders}" opacity="0.92"
+    d="M42,71 C30,76 22,87 22,100 C22,112 29,122 38,123
+       C44,118 49,106 49,91 C49,82 46,75 42,71Z"/>
+  <path ${g('Shoulders')} fill="${c['Shoulders']}" filter="${{ Shoulders: glowFilter('Shoulders') }.Shoulders}" opacity="0.92"
+    d="M118,71 C130,76 138,87 138,100 C138,112 131,122 122,123
+       C116,118 111,106 111,91 C111,82 114,75 118,71Z"/>
 
-  <!-- Chest: twin pec surfaces with natural lower curve -->
-  <path ${g('Chest')} fill="${c['Chest']}" opacity="0.90"
+  <!-- Chest -->
+  <path ${g('Chest')} fill="${c['Chest']}" filter="${{ Chest: glowFilter('Chest') }.Chest}" opacity="0.93"
     d="M50,70 Q80,80 110,70
-       C116,84 116,104 108,121
-       Q80,129 52,121
+       C116,84 116,104 108,121 Q80,129 52,121
        C44,104 44,84 50,70Z"/>
 
-  <!-- Back / Lats: lateral wedge visible from front -->
-  <path ${g('Back')} fill="${c['Back']}" opacity="0.80"
-    d="M34,84 C26,96 24,110 26,124
-       L33,138 C38,120 43,103 44,84
-       C40,79 36,80 34,84Z"/>
-  <path ${g('Back')} fill="${c['Back']}" opacity="0.80"
-    d="M126,84 C134,96 136,110 134,124
-       L127,138 C122,120 117,103 116,84
-       C120,79 124,80 126,84Z"/>
+  <!-- Back / Lats -->
+  <path ${g('Back')} fill="${c['Back']}" filter="${{ Back: glowFilter('Back') }.Back}" opacity="0.82"
+    d="M34,84 C26,96 24,110 26,124 L33,138
+       C38,120 43,103 44,84 C40,79 36,80 34,84Z"/>
+  <path ${g('Back')} fill="${c['Back']}" filter="${{ Back: glowFilter('Back') }.Back}" opacity="0.82"
+    d="M126,84 C134,96 136,110 134,124 L127,138
+       C122,120 117,103 116,84 C120,79 124,80 126,84Z"/>
 
-  <!-- Biceps: organic oval following natural muscle belly -->
-  <path ${g('Biceps')} fill="${c['Biceps']}" opacity="0.90"
-    d="M22,92 C17,102 17,118 22,130
-       C26,136 33,136 37,130
-       C41,118 41,102 36,92
-       C32,85 26,85 22,92Z"/>
-  <path ${g('Biceps')} fill="${c['Biceps']}" opacity="0.90"
-    d="M138,92 C143,102 143,118 138,130
-       C134,136 127,136 123,130
-       C119,118 119,102 124,92
-       C128,85 134,85 138,92Z"/>
+  <!-- Biceps -->
+  <path ${g('Biceps')} fill="${c['Biceps']}" filter="${{ Biceps: glowFilter('Biceps') }.Biceps}" opacity="0.93"
+    d="M22,92 C17,102 17,118 22,130 C26,136 33,136 37,130
+       C41,118 41,102 36,92 C32,85 26,85 22,92Z"/>
+  <path ${g('Biceps')} fill="${c['Biceps']}" filter="${{ Biceps: glowFilter('Biceps') }.Biceps}" opacity="0.93"
+    d="M138,92 C143,102 143,118 138,130 C134,136 127,136 123,130
+       C119,118 119,102 124,92 C128,85 134,85 138,92Z"/>
 
-  <!-- Triceps: thin posterior strip along outer arm -->
-  <path ${g('Triceps')} fill="${c['Triceps']}" opacity="0.70"
-    d="M19,88 C17,98 17,115 19,127 L24,125
-       C22,113 22,98 24,88Z"/>
-  <path ${g('Triceps')} fill="${c['Triceps']}" opacity="0.70"
-    d="M141,88 C143,98 143,115 141,127 L136,125
-       C138,113 138,98 136,88Z"/>
+  <!-- Triceps -->
+  <path ${g('Triceps')} fill="${c['Triceps']}" filter="${{ Triceps: glowFilter('Triceps') }.Triceps}" opacity="0.72"
+    d="M19,88 C17,98 17,115 19,127 L24,125 C22,113 22,98 24,88Z"/>
+  <path ${g('Triceps')} fill="${c['Triceps']}" filter="${{ Triceps: glowFilter('Triceps') }.Triceps}" opacity="0.72"
+    d="M141,88 C143,98 143,115 141,127 L136,125 C138,113 138,98 136,88Z"/>
 
-  <!-- Forearms: neutral vellum-adjacent tone, tapered -->
-  <path fill="#D4CCC4"
-    d="M20,130 C17,141 17,158 20,167 L26,165
-       C24,155 23,140 25,130Z"/>
-  <path fill="#D4CCC4"
-    d="M140,130 C143,141 143,158 140,167 L134,165
-       C136,155 137,140 135,130Z"/>
+  <!-- Forearms (neutral) -->
+  <path fill="rgba(198,188,178,0.44)"
+    d="M20,130 C17,141 17,158 20,167 L26,165 C24,155 23,140 25,130Z"/>
+  <path fill="rgba(198,188,178,0.44)"
+    d="M140,130 C143,141 143,158 140,167 L134,165 C136,155 137,140 135,130Z"/>
 
-  <!-- Core / Abs: extends from chest base to hip -->
-  <path ${g('Core')} fill="${c['Core']}" opacity="0.88"
-    d="M44,103 Q80,129 116,103
-       L116,166 Q80,176 44,166Z"/>
+  <!-- Core / Abs -->
+  <path ${g('Core')} fill="${c['Core']}" filter="${{ Core: glowFilter('Core') }.Core}" opacity="0.90"
+    d="M44,103 Q80,129 116,103 L116,166 Q80,176 44,166Z"/>
 
-  <!-- Glutes: wide hip curve -->
-  <path ${g('Glutes')} fill="${c['Glutes']}" opacity="0.86"
+  <!-- Glutes -->
+  <path ${g('Glutes')} fill="${c['Glutes']}" filter="${{ Glutes: glowFilter('Glutes') }.Glutes}" opacity="0.88"
     d="M43,165 Q80,176 117,165
-       C122,175 122,192 117,198
-       Q80,202 43,198
+       C122,175 122,192 117,198 Q80,202 43,198
        C38,192 38,175 43,165Z"/>
 
-  <!-- Quads: natural teardrop thigh shapes -->
-  <path ${g('Quads')} fill="${c['Quads']}" opacity="0.90"
-    d="M40,197 Q60,202 77,200
-       C77,235 75,260 73,282 L46,278
+  <!-- Quads -->
+  <path ${g('Quads')} fill="${c['Quads']}" filter="${{ Quads: glowFilter('Quads') }.Quads}" opacity="0.93"
+    d="M40,197 Q60,202 77,200 C77,235 75,260 73,282 L46,278
        C43,255 40,222 40,197Z"/>
-  <path ${g('Quads')} fill="${c['Quads']}" opacity="0.90"
-    d="M83,200 Q100,202 120,197
-       C120,222 117,255 114,278 L87,282
+  <path ${g('Quads')} fill="${c['Quads']}" filter="${{ Quads: glowFilter('Quads') }.Quads}" opacity="0.93"
+    d="M83,200 Q100,202 120,197 C120,222 117,255 114,278 L87,282
        C85,260 83,235 83,200Z"/>
 
-  <!-- Hamstrings: medial gap between quad paths -->
-  <path ${g('Hamstrings')} fill="${c['Hamstrings']}" opacity="0.64"
+  <!-- Hamstrings -->
+  <path ${g('Hamstrings')} fill="${c['Hamstrings']}" filter="${{ Hamstrings: glowFilter('Hamstrings') }.Hamstrings}" opacity="0.68"
     d="M70,202 L80,200 L80,284 L69,281Z"/>
-  <path ${g('Hamstrings')} fill="${c['Hamstrings']}" opacity="0.64"
+  <path ${g('Hamstrings')} fill="${c['Hamstrings']}" filter="${{ Hamstrings: glowFilter('Hamstrings') }.Hamstrings}" opacity="0.68"
     d="M80,200 L90,202 L91,281 L80,284Z"/>
 
-  <!-- Calves: gastrocnemius diamond shape -->
-  <path ${g('Calves')} fill="${c['Calves']}" opacity="0.88"
-    d="M46,279 Q60,285 74,280
-       C73,310 71,338 70,358 L48,355
+  <!-- Calves -->
+  <path ${g('Calves')} fill="${c['Calves']}" filter="${{ Calves: glowFilter('Calves') }.Calves}" opacity="0.91"
+    d="M46,279 Q60,285 74,280 C73,310 71,338 70,358 L48,355
        C47,334 46,305 46,279Z"/>
-  <path ${g('Calves')} fill="${c['Calves']}" opacity="0.88"
-    d="M86,280 Q100,285 114,279
-       C114,305 113,334 112,355 L90,358
+  <path ${g('Calves')} fill="${c['Calves']}" filter="${{ Calves: glowFilter('Calves') }.Calves}" opacity="0.91"
+    d="M86,280 Q100,285 114,279 C114,305 113,334 112,355 L90,358
        C89,338 87,310 86,280Z"/>
 
-  <!-- ④ 3D sheen overlay — floats above everything, non-interactive -->
-  <path fill="url(#bodySheen)" opacity="0.65" pointer-events="none" d="${BODY}"/>
-  <!-- Bottom vignette to ground the figure -->
-  <path fill="url(#bodyFade)" opacity="0.8" pointer-events="none" d="${BODY}"/>
-
+  <!-- Frosted glass sheen overlay -->
+  <path fill="url(#bodyGlass)" opacity="0.72" pointer-events="none" d="${BODY}"/>
+  <!-- Bottom vignette -->
+  <path fill="url(#bodyFade)" opacity="0.88" pointer-events="none" d="${BODY}"/>
+  <!-- Crystal rim highlight -->
+  <path fill="none" stroke="rgba(255,255,255,0.30)" stroke-width="1.0"
+        opacity="0.55" pointer-events="none" d="${BODY}"/>
 </svg>`;
 }
 
@@ -4577,26 +4750,59 @@ function getMuscleVolumeHistory(muscle) {
 }
 
 // ── Muscle tap → premium glass overlay with SVG polyline chart ───────────────
+
+function getEpleyOverloadByMuscle(muscle) {
+  const hist = getHistory();
+  const now = Date.now();
+  const msW = 7 * 24 * 3600 * 1000;
+  return Array.from({ length: 5 }, (_, i) => {
+    const wStart = now - (5 - i) * msW;
+    const wEnd   = now - (4 - i) * msW;
+    let peakOverload = 0;
+    for (const w of hist) {
+      if (w.endTime < wStart || w.endTime >= wEnd || !w.sets) continue;
+      const prog = PROGRAMS.find(p => p.id === w.programId);
+      if (!prog) continue;
+      const sess = prog.sessions.find(s => s.id === w.sessionId);
+      if (!sess) continue;
+      for (const [key, sets] of Object.entries(w.sets)) {
+        const ex = sess.exercises[parseInt(key.split('_').pop())];
+        if (!ex) continue;
+        if (getMuscle(stripSuperset(ex.name)) !== muscle) continue;
+        const validSets = sets.filter(Boolean);
+        const totalReps  = validSets.reduce((s, x) => s + (x.r || 0), 0);
+        const maxWeight  = validSets.reduce((m, x) => Math.max(m, x.w || 0), 0);
+        if (maxWeight > 0 && totalReps > 0) {
+          const overload = Math.round(maxWeight * (1 + 0.033 * totalReps));
+          if (overload > peakOverload) peakOverload = overload;
+        }
+      }
+    }
+    return { label: `w${i + 1}`, value: peakOverload };
+  });
+}
+
 function openMuscleGraph(muscle) {
-  const weeks  = getMuscleVolumeHistory(muscle); // [{label, sets}, ×5]
-  const vals   = weeks.map(w => w.sets);
+  const weeks  = getEpleyOverloadByMuscle(muscle);
+  const vals   = weeks.map(w => w.value);
   const labels = weeks.map(w => w.label);
   const peak   = Math.max(...vals, 1);
   const thisWk = vals[4];
   const lastWk = vals[3];
   const delta  = thisWk - lastWk;
-  const deltaColor = delta >= 0 ? '#22C55E' : '#EF4444';
+  const deltaColor = delta >= 0 ? 'rgba(96,184,110,0.95)' : 'rgba(228,88,68,0.95)';
   const deltaStr   = (delta >= 0 ? '+' : '') + delta;
 
-  // ── SVG polyline area chart ────────────────────────────────
-  const W = 322, H = 110;
-  const pad = { l: 10, r: 10, t: 14, b: 26 };
+  // Luxury SVG line chart
+  const W = 292, H = 98;
+  const pad = { l: 14, r: 14, t: 18, b: 26 };
   const cW = W - pad.l - pad.r, cH = H - pad.t - pad.b;
-  const minV = Math.min(...vals), maxV = peak;
+  const minV = Math.min(...vals.filter(v => v > 0)) || 0;
+  const maxV = peak;
   const range = maxV - minV || 1;
 
   const xs = vals.map((_, i) => pad.l + (i / (vals.length - 1)) * cW);
-  const ys = vals.map(v  => pad.t + cH - ((v - minV) / range) * cH);
+  const ys = vals.map(v  => pad.t + cH - ((Math.max(v, minV) - minV) / range) * cH);
 
   const linePts  = xs.map((x, i) => `${x.toFixed(1)},${ys[i].toFixed(1)}`).join(' ');
   const areaPath = `M${xs[0].toFixed(1)},${ys[0].toFixed(1)} `
@@ -4604,71 +4810,76 @@ function openMuscleGraph(muscle) {
     + ` L${xs[xs.length-1].toFixed(1)},${(H-pad.b).toFixed(1)}`
     + ` L${xs[0].toFixed(1)},${(H-pad.b).toFixed(1)} Z`;
 
-  // Subtle horizontal grid at 0%, 50%, 100% of range
+  const hasData = vals.filter(v => v > 0).length >= 2;
+
   const gridLines = [0, 0.5, 1].map(f => {
     const y   = pad.t + cH * (1 - f);
     const val = Math.round(minV + f * range);
-    return `<line x1="${pad.l}" y1="${y.toFixed(1)}" x2="${(W-pad.r).toFixed(1)}" y2="${y.toFixed(1)}"
-              stroke="rgba(255,255,255,0.15)" stroke-width="1" stroke-dasharray="3,3"/>
-            <text x="${pad.l}" y="${(y - 3).toFixed(1)}" font-size="8"
-              fill="rgba(255,255,255,0.35)" font-family="-apple-system,sans-serif">${val}</text>`;
+    return val > 0 ? `<line x1="${pad.l}" y1="${y.toFixed(1)}" x2="${(W-pad.r).toFixed(1)}"
+      y2="${y.toFixed(1)}" stroke="rgba(255,255,255,0.09)"
+      stroke-width="1" stroke-dasharray="2,5"/>
+      <text x="${pad.l}" y="${(y-3).toFixed(1)}" font-size="7.5"
+        fill="rgba(255,255,255,0.26)" font-family="-apple-system,sans-serif">${val}</text>` : '';
   }).join('');
 
   const dots = xs.map((x, i) => {
+    if (!vals[i]) return '';
     const isNow = i === vals.length - 1;
     return `<circle cx="${x.toFixed(1)}" cy="${ys[i].toFixed(1)}"
-      r="${isNow ? 5 : vals[i] > 0 ? 3 : 2}"
-      fill="${isNow ? '#F04E23' : vals[i] > 0 ? 'rgba(240,78,35,0.55)' : 'rgba(255,255,255,0.18)'}"/>`;
+      r="${isNow ? 4.5 : 2.5}"
+      fill="${isNow ? '#F0826A' : 'rgba(240,148,118,0.65)'}">
+      ${isNow ? `<animate attributeName="opacity" values="1;0.6;1" dur="2.2s" repeatCount="indefinite"/>` : ''}
+    </circle>`;
   }).join('');
 
   const lbls = labels.map((lbl, i) =>
     `<text x="${xs[i].toFixed(1)}" y="${H - 5}" text-anchor="middle"
-      font-size="9" fill="rgba(255,255,255,0.42)"
-      font-family="-apple-system,sans-serif">${lbl}</text>`
+      font-size="8" fill="rgba(255,255,255,0.38)"
+      font-family="'Courier New', monospace">${lbl}</text>`
   ).join('');
 
-  const chartSVG = vals.filter(v => v > 0).length >= 2
+  const chartSVG = hasData
     ? `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px;display:block;overflow:visible">
         <defs>
-          <linearGradient id="mAreaGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%"   stop-color="#F04E23" stop-opacity="0.30"/>
-            <stop offset="100%" stop-color="#F04E23" stop-opacity="0.02"/>
+          <linearGradient id="epleyAreaGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="rgba(240,130,105,0.30)"/>
+            <stop offset="100%" stop-color="rgba(240,130,105,0.02)"/>
           </linearGradient>
         </defs>
         ${gridLines}
-        <path d="${areaPath}" fill="url(#mAreaGrad)"/>
-        <polyline points="${linePts}" fill="none" stroke="#F04E23"
-          stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="${areaPath}" fill="url(#epleyAreaGrad)"/>
+        <polyline points="${linePts}" fill="none" stroke="rgba(240,148,118,0.88)"
+          stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
         ${dots}${lbls}
       </svg>`
-    : `<p class="graph-no-data" style="color:rgba(255,255,255,0.45)">
-        Log at least 2 weeks to see your trend.
-       </p>`;
+    : `<p style="font-size:12px;color:rgba(255,255,255,0.40);font-style:italic;margin:18px 0;text-align:center">Log 2+ weeks to see your overload trend.</p>`;
 
-  // ── Populate #graph-content and open #graph-backdrop ──────
-  document.getElementById('graph-content').innerHTML = `
-    <div class="graph-ex-title">${muscle}</div>
-    <div class="graph-meta">Sets · Past 5 Weeks</div>
-    <div class="graph-svg-wrap">${chartSVG}</div>
-    <div class="graph-stat-row">
-      <div class="graph-stat">
-        <div class="graph-stat-val">${thisWk}</div>
-        <div class="graph-stat-lbl">This Week</div>
+  document.getElementById('muscle-graph-content').innerHTML = `
+    <div class="mg-muscle-title">${muscle}</div>
+    <div class="mg-meta">Progressive Overload · Epley Index</div>
+    <div style="margin:10px 0 6px">${chartSVG}</div>
+    <div class="mg-stat-row">
+      <div class="mg-stat">
+        <div class="mg-stat-val">${thisWk > 0 ? thisWk : '—'}</div>
+        <div class="mg-stat-lbl">This Week</div>
       </div>
-      <div class="graph-stat">
-        <div class="graph-stat-val" style="color:${deltaColor}">${deltaStr}</div>
-        <div class="graph-stat-lbl">vs Last</div>
+      <div class="mg-stat">
+        <div class="mg-stat-val" style="color:${deltaColor};font-size:${Math.abs(delta)>99?'14px':'18px'}">
+          ${thisWk > 0 && lastWk > 0 ? deltaStr : '—'}
+        </div>
+        <div class="mg-stat-lbl">vs Last</div>
       </div>
-      <div class="graph-stat">
-        <div class="graph-stat-val">${peak}</div>
-        <div class="graph-stat-lbl">Peak Sets</div>
+      <div class="mg-stat">
+        <div class="mg-stat-val">${peak > 0 ? peak : '—'}</div>
+        <div class="mg-stat-lbl">Peak</div>
       </div>
     </div>`;
 
-  const bd = document.getElementById('graph-backdrop');
-  bd.style.display = 'flex';
-  requestAnimationFrame(() => bd.classList.add('visible'));
+  const ov = document.getElementById('muscle-graph-overlay');
+  ov.style.display = 'flex';
+  requestAnimationFrame(() => ov.classList.add('visible'));
 }
+
 
 // Alias — muscle overlay tap-outside still calls this; just delegate to the shared close
 function closeMuscleGraph(e) { closeProgressGraph(e); }
@@ -4743,7 +4954,7 @@ function renderHome() {
     </div>
 
     <div class="premium-totem-container">
-      ${typeof buildSilhouetteSVG === 'function' ? buildSilhouetteSVG(targets, actuals) : ''}
+      ${typeof buildSilhouetteSVG === 'function' ? buildSilhouetteSVG(targets, actuals, checkWeekComplete()) : ''}
     </div>
 
     <div class="premium-metrics-strip">
@@ -4755,7 +4966,7 @@ function renderHome() {
         <span style="opacity:0.15;font-style:normal;">│</span>
         <div class="metric-item">
           <svg viewBox="0 0 24 24"><path d="M6.5 6.5A2.5 2.5 0 0 1 9 4h0a2.5 2.5 0 0 1 2.5 2.5V8"/><path d="M14.5 8V6.5A2.5 2.5 0 0 1 17 4h0a2.5 2.5 0 0 1 2.5 2.5v4A8.5 8.5 0 0 1 11 19h-1a8 8 0 0 1-8-8v-1.5A2.5 2.5 0 0 1 4.5 7H5a2.5 2.5 0 0 1 2.5 2.5V11"/><path d="M11.5 8H14"/></svg>
-          volume <span>${volPct}%</span>
+          complete <span>${volPct}%</span>
         </div>
       </div>
     </div>
@@ -6151,41 +6362,11 @@ function closeProgressGraph(e) {
   setTimeout(() => { bd.style.display = 'none'; }, 300);
 }
 
-// ── History screen ────────────────────────────────────────────────────────────
+
 function renderHistory() {
   const el = document.getElementById('screen-history');
   if (!el) return;
-  const hist = getHistory();
-  const progress = getMuscleProgress();
   const tab = ST.histTab;
-
-  const progressHtml = progress.length === 0 ? `
-    <div class="empty-state">
-      <div class="empty-title">DCR Gym</div>
-      <div class="empty-sub">Your first session is waiting.</div>
-      <button class="btn btn-primary" style="width:200px" onclick="Maps('prog')">Start a Workout</button>
-    </div>` : `
-    <div class="progress-table">
-      ${progress.map(p => `
-        <div class="prog-row" onclick="showMuscleDetail('${p.muscle}')">
-          <div class="status-dot dot-${p.dot}"></div>
-          <div class="prog-row-muscle">${p.muscle}</div>
-          <svg class="prog-row-sparkline" viewBox="0 0 60 24">${renderSparkline(p.values)}</svg>
-          <div class="prog-row-1rm">${p.latest > 0 ? p.latest + 'kg' : '—'}</div>
-        </div>`).join('')}
-    </div>`;
-
-  const workoutsHtml = hist.length === 0 ? `
-    <div class="empty-state">
-      <div class="empty-title">DCR Gym</div>
-      <div class="empty-sub">Your first session is waiting.</div>
-      <button class="btn btn-primary" style="width:200px" onclick="Maps('prog')">Start a Workout</button>
-    </div>` : hist.slice().reverse().map(w => `
-    <div class="history-card">
-      <h3>${w.sessionName || 'Workout'}</h3>
-      <div class="history-card-meta">${new Date(w.endTime).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})} · ${formatDuration(w.duration||0)} · ${Math.round(Object.values(w.sets||{}).flat().reduce((s,x)=>s+(x.w||0)*(x.r||0),0))}kg</div>
-    </div>`).join('');
-
   el.innerHTML = `
   <div class="screen-content">
     <div class="page-header"><h1>Progress</h1></div>
@@ -6194,10 +6375,177 @@ function renderHistory() {
       <button class="hist-tab ${tab==='workouts'?'active':''}" onclick="setHistTab('workouts')">Workouts</button>
     </div>
     <div id="hist-body">
-      ${tab === 'progress' ? progressHtml : workoutsHtml}
+      ${tab === 'progress' ? renderProgressGauges() : renderWorkoutsCalendarView()}
     </div>
   </div>`;
 }
+
+function renderProgressGauges() {
+  const progId = ST.defaultProgram || ST.currentProgram;
+  const prog = progId ? PROGRAMS.find(p => p.id === progId) : null;
+
+  if (!prog) {
+    return `<div class="empty-state">
+      <div class="empty-title">DCR Gym</div>
+      <div class="empty-sub">Select a program to track completion.</div>
+      <button class="btn btn-primary" style="width:200px" onclick="Maps('prog')">Choose Program</button>
+    </div>`;
+  }
+
+  // Scheduled sets per muscle across the full program week
+  const scheduledSets = {};
+  for (const sess of prog.sessions) {
+    for (const ex of sess.exercises) {
+      const muscle = getMuscle(stripSuperset(ex.name));
+      if (muscle === 'Other') continue;
+      scheduledSets[muscle] = (scheduledSets[muscle] || 0) + (ex.workingSets || 3);
+    }
+  }
+
+  // Completed sets this week per muscle
+  const weekStart = (() => { const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() - d.getDay()); return d.getTime(); })();
+  const completedSets = {};
+  for (const w of getHistory()) {
+    if (w.programId !== progId || w.endTime < weekStart || !w.sets) continue;
+    const wp = PROGRAMS.find(p => p.id === w.programId);
+    if (!wp) continue;
+    const ws = wp.sessions.find(s => s.id === w.sessionId);
+    if (!ws) continue;
+    for (const [key, sets] of Object.entries(w.sets)) {
+      const exIdx = parseInt(key.split('_').pop());
+      const ex = ws.exercises[exIdx];
+      if (!ex) continue;
+      const muscle = getMuscle(stripSuperset(ex.name));
+      if (muscle === 'Other') continue;
+      completedSets[muscle] = (completedSets[muscle] || 0) + (sets || []).filter(Boolean).length;
+    }
+  }
+
+  // Sort by completion pct desc
+  const muscles = Object.keys(scheduledSets).sort((a, b) => {
+    const pa = (completedSets[a] || 0) / (scheduledSets[a] || 1);
+    const pb = (completedSets[b] || 0) / (scheduledSets[b] || 1);
+    return pb - pa;
+  });
+
+  const gaugesHTML = muscles.length ? `
+  <div class="completion-gauges">
+    <div class="completion-gauges-hdr">Weekly Set Completion</div>
+    ${muscles.map(m => {
+      const scheduled = scheduledSets[m] || 0;
+      const completed = Math.min(completedSets[m] || 0, scheduled);
+      const pct = scheduled > 0 ? Math.round((completed / scheduled) * 100) : 0;
+      return `<div class="gauge-row">
+        <div class="gauge-muscle">${m}</div>
+        <div class="gauge-bar-track">
+          <div class="gauge-bar-fill" style="width:${pct}%"></div>
+        </div>
+        <div class="gauge-pct-label">${pct}%</div>
+      </div>`;
+    }).join('')}
+  </div>` : `<div style="padding:24px 20px;font-size:13px;color:var(--muted);font-style:italic">No exercises found for this program.</div>`;
+
+  return gaugesHTML;
+}
+
+function renderFiveWeekCalendar() {
+  const hist = getHistory();
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  // Map dateKey → array of workout entries
+  const workoutByDay = {};
+  for (const w of hist) {
+    const d = new Date(w.endTime);
+    const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    if (!workoutByDay[key]) workoutByDay[key] = [];
+    workoutByDay[key].push(w);
+  }
+
+  // Anchor to end of current week (Saturday)
+  const currentDow = today.getDay();
+  const weekEnd = new Date(today);
+  weekEnd.setDate(today.getDate() + (6 - currentDow));
+
+  const dows = ['S','M','T','W','T','F','S'];
+
+  let weeksHTML = '';
+  for (let wk = 4; wk >= 0; wk--) {
+    const weekLabel = wk === 0 ? 'now' : `-${wk}w`;
+    let daysHTML = '';
+    for (let dow = 0; dow < 7; dow++) {
+      const d = new Date(weekEnd);
+      d.setDate(weekEnd.getDate() - wk * 7 - (6 - dow));
+      const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      const dayNum = d.getDate();
+      const isFuture = d > today;
+      const workouts = workoutByDay[key] || [];
+      const hasWorkout = workouts.length > 0;
+
+      if (isFuture) {
+        daysHTML += `<div class="cal-day-cell cal-day-blank"><span class="cal-day-num">${dayNum}</span></div>`;
+      } else if (hasWorkout) {
+        const w = workouts[0];
+        const sessName = (w.sessionName || 'Workout').replace(/'/g, "\\'");
+        const dateStr  = d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }).replace(/'/g, "\\'");
+        const dur  = formatDuration(w.duration || 0);
+        const vol  = Math.round(Object.values(w.sets || {}).flat().filter(Boolean).reduce((s, x) => s + (x.w||0)*(x.r||0), 0));
+        daysHTML += `<div class="cal-day-cell cal-day-done"
+          onclick="openCalDay('${sessName}','${dateStr}','${dur}','${vol}kg')"
+          title="${sessName}">
+          <span class="cal-day-num">${dayNum}</span>
+        </div>`;
+      } else {
+        daysHTML += `<div class="cal-day-cell cal-day-open"><span class="cal-day-num">${dayNum}</span></div>`;
+      }
+    }
+    weeksHTML += `<div class="cal-week-row">
+      <div class="cal-week-lbl">${weekLabel}</div>
+      <div class="cal-days-row">${daysHTML}</div>
+    </div>`;
+  }
+
+  return `<div class="cal-section">
+    <div class="cal-section-hdr">5-Week Training Calendar</div>
+    <div class="cal-dow-header">
+      ${dows.map(d => `<div class="cal-dow-cell">${d}</div>`).join('')}
+    </div>
+    <div class="cal-grid">${weeksHTML}</div>
+  </div>`;
+}
+
+function openCalDay(sessName, dateStr, dur, vol) {
+  const popup = document.getElementById('cal-popup');
+  if (!popup) return;
+  document.getElementById('cal-popup-content').innerHTML = `
+    <div class="cal-popup-date">${dateStr}</div>
+    <div class="cal-popup-session">routine // ${sessName.toLowerCase()}</div>
+    <div class="cal-popup-stats">
+      <div class="cal-popup-stat">
+        <div class="cal-popup-stat-val">${dur}</div>
+        <div class="cal-popup-stat-lbl">Duration</div>
+      </div>
+      <div class="cal-popup-stat">
+        <div class="cal-popup-stat-val">${vol}</div>
+        <div class="cal-popup-stat-lbl">Volume</div>
+      </div>
+    </div>`;
+  popup.style.display = 'flex';
+  requestAnimationFrame(() => popup.classList.add('visible'));
+}
+
+function closeCalPopup() {
+  const popup = document.getElementById('cal-popup');
+  if (!popup) return;
+  popup.classList.remove('visible');
+  setTimeout(() => { popup.style.display = 'none'; }, 280);
+}
+
+function renderWorkoutsCalendarView() {
+  // Calendar fills the full view — no lists, no fallback text below
+  return renderFiveWeekCalendar();
+}
+
 
 function setHistTab(t) {
   ST.histTab = t;
@@ -6656,6 +7004,17 @@ function mergeHistories(local, remote) {
   return [...map.values()].sort((a, b) => (a.endTime||0) - (b.endTime||0));
 }
 
+
+function checkWeekComplete() {
+  const progId = ST.defaultProgram;
+  if (!progId) return false;
+  const prog = PROGRAMS.find(p => p.id === progId);
+  if (!prog) return false;
+  const weekStart = (() => { const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() - d.getDay()); return d.getTime(); })();
+  const doneThisWeek = new Set(getHistory().filter(w => w.programId === progId && w.endTime >= weekStart).map(w => w.sessionId));
+  return prog.sessions.every(s => doneThisWeek.has(s.id));
+}
+
 function init() {
   // Register SW
   if ('serviceWorker' in navigator) {
@@ -6701,5 +7060,13 @@ function init() {
 
 init();
 </script>
+
+<div id="cal-popup" onclick="closeCalPopup()">
+  <div id="cal-popup-panel" onclick="event.stopPropagation()">
+    <button class="cal-popup-close" onclick="closeCalPopup()">&#x2715;</button>
+    <div id="cal-popup-content"></div>
+  </div>
+</div>
+
 </body>
 </html>
