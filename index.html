@@ -141,6 +141,177 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
 .nav-btn.active { color: var(--charcoal); }
 .nav-btn svg { width: 20px; height: 20px; stroke-width: 1.5; }
 
+/* ── Masthead gear icon ── */
+.masthead-gear {
+  position: absolute; top: 48px; right: 28px;
+  background: none; border: none; cursor: pointer; padding: 8px;
+  color: var(--muted); opacity: 0.55;
+  transition: opacity 200ms ease, transform 300ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.masthead-gear:active { transform: rotate(45deg); opacity: 1; }
+.masthead-gear svg { width: 18px; height: 18px; display: block; }
+
+/* ── Analysis screen ── */
+#screen-analysis { overflow: hidden; height: 100svh; }
+.analysis-wrap {
+  display: flex; flex-direction: column;
+  height: 100svh;
+  padding: 52px 28px calc(var(--nav-h) + 20px);
+  box-sizing: border-box;
+  justify-content: space-between;
+}
+.analysis-eyebrow {
+  font-family: var(--font-body); font-size: 10px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--muted); opacity: 0.6;
+  flex-shrink: 0;
+}
+/* Ring zone */
+.analysis-ring-zone {
+  display: flex; flex-direction: column; align-items: center;
+  flex-shrink: 0; padding-top: 4px;
+}
+.analysis-ring-container {
+  position: relative; width: 160px; height: 160px;
+}
+.analysis-ring-container svg {
+  width: 160px; height: 160px; display: block;
+}
+.analysis-ring-score {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+.analysis-ring-number {
+  font-family: 'Cormorant Garamond', serif; font-size: 2.8rem;
+  font-weight: 300; font-style: italic; line-height: 1;
+  color: var(--charcoal); letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.analysis-ring-label {
+  font-family: var(--font-body); font-size: 9px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--muted); opacity: 0.65; margin-top: 3px;
+}
+.analysis-factor-label {
+  font-family: var(--font-body); font-size: 9.5px; letter-spacing: 0.08em;
+  color: var(--muted); opacity: 0.55; margin-top: 10px; font-style: italic;
+  text-align: center;
+}
+/* Vitals row */
+.analysis-vitals-row {
+  display: flex; align-items: baseline; justify-content: center;
+  gap: 12px; flex-shrink: 0;
+}
+.analysis-vital-block { text-align: center; }
+.analysis-vital-num {
+  font-family: 'Cormorant Garamond', serif; font-size: 2.4rem;
+  font-weight: 300; font-style: italic; line-height: 1;
+  color: var(--charcoal); letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.analysis-vital-unit {
+  font-family: var(--font-body); font-size: 10px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted); opacity: 0.6;
+}
+.analysis-vitals-sep {
+  font-family: var(--font-body); font-size: 18px; color: var(--border);
+  opacity: 0.5; padding-bottom: 4px;
+}
+/* Chart zone */
+.analysis-chart-zone { flex: 1; min-height: 0; display: flex; flex-direction: column; padding-top: 8px; }
+.analysis-chart-label {
+  font-size: 9px; text-transform: uppercase; letter-spacing: 0.16em;
+  color: var(--muted); opacity: 0.55; margin-bottom: 8px; flex-shrink: 0;
+}
+.analysis-chart-legend {
+  display: flex; gap: 14px; margin-bottom: 8px; flex-shrink: 0;
+}
+.analysis-legend-item {
+  display: flex; align-items: center; gap: 5px;
+  font-family: var(--font-body); font-size: 8.5px; letter-spacing: 0.08em;
+  color: var(--muted); opacity: 0.7; text-transform: lowercase;
+}
+.analysis-legend-dot {
+  width: 14px; height: 1.5px; border-radius: 1px; flex-shrink: 0;
+}
+.analysis-chart-svg-wrap { flex: 1; min-height: 0; }
+.analysis-chart-svg-wrap svg { width: 100%; height: 100%; display: block; }
+/* Connect / sync footer */
+.analysis-connect-link {
+  font-family: var(--font-body); font-size: 9.5px; letter-spacing: 0.12em;
+  text-transform: lowercase; color: var(--muted); opacity: 0.45;
+  background: none; border: none; cursor: pointer; padding: 0;
+  text-decoration: underline; text-underline-offset: 3px;
+  flex-shrink: 0; text-align: center;
+}
+.analysis-connect-link:active { opacity: 1; }
+
+/* ── Analysis HUD bar ── */
+.analysis-eyebrow-row {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.analysis-hud-right {
+  display: flex; align-items: center; gap: 6px;
+}
+.analysis-hud-dot {
+  width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0;
+}
+.analysis-hud-dot.live {
+  background: oklch(72.3% 0.190 145);
+  animation: hud-pulse 2.8s ease-in-out infinite;
+}
+.analysis-hud-dot.stale {
+  background: oklch(62% 0.155 38);
+  opacity: 0.7;
+}
+@keyframes hud-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 oklch(72.3% 0.190 145 / 0.45); }
+  55%       { box-shadow: 0 0 0 4px oklch(72.3% 0.190 145 / 0); }
+}
+.analysis-hud-meta {
+  font-family: var(--font-body); font-size: 8.5px; letter-spacing: 0.09em;
+  color: var(--muted); opacity: 0.45; text-transform: lowercase;
+}
+.analysis-hud-refresh {
+  font-family: var(--font-body); font-size: 9px; letter-spacing: 0.10em;
+  text-transform: lowercase; color: var(--muted); opacity: 0.35;
+  background: none; border: none; cursor: pointer; padding: 0 0 0 4px;
+  transition: opacity 0.2s;
+}
+.analysis-hud-refresh:active { opacity: 0.9; }
+@keyframes hud-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── Post-workout insight card ── */
+.insight-card {
+  margin: 16px 16px 0;
+  background: rgba(250,247,242,0.90);
+  backdrop-filter: blur(12px) saturate(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 16px 18px;
+  box-shadow: 0 2px 12px rgba(44,36,26,0.06), 0 8px 32px rgba(44,36,26,0.04);
+}
+.insight-card-eyebrow {
+  font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.18em;
+  color: var(--muted); opacity: 0.6; margin-bottom: 8px;
+}
+.insight-card-body {
+  font-size: 12.5px; line-height: 1.65; color: var(--text-secondary);
+  font-family: var(--font-body);
+}
+.insight-card-body strong {
+  color: var(--charcoal); font-weight: 600;
+}
+.insight-card-meta {
+  margin-top: 10px; font-size: 9.5px; color: var(--muted);
+  opacity: 0.5; letter-spacing: 0.06em;
+}
+
 /* ── Splash — hard-coded inside #app, purely cosmetic ── */
 #splash {
   position: absolute; inset: 0; background: var(--bg);
@@ -502,27 +673,75 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
 }
 #workout-header.travel-locked { padding-bottom: 8px !important; }
 
-/* ── Rest timer mini banner ── */
+/* ── Rest timer HUD — non-blocking persistent ticker ── */
 #rest-banner {
-  position: fixed; bottom: calc(var(--nav-h) + 12px);
-  left: 16px; right: 16px; z-index: 150;
-  background: var(--charcoal); border-radius: 20px;
-  box-shadow: var(--shadow-deep);
-  padding: 14px 16px 14px 20px;
-  display: none; align-items: center; gap: 14px;
-  transform: translateY(20px); opacity: 0;
-  transition: transform 350ms cubic-bezier(0.34,1.56,0.64,1), opacity 250ms ease;
+  position: fixed;
+  bottom: calc(var(--nav-h) + 16px);
+  left: 50%; transform: translateX(-50%) translateY(20px);
+  width: calc(100% - 32px); max-width: 400px;
+  z-index: 150;
+  /* Luxury glassmorphism */
+  background: rgba(250, 247, 242, 0.82);
+  backdrop-filter: blur(12px) saturate(1.5);
+  -webkit-backdrop-filter: blur(12px) saturate(1.5);
+  border: 1px solid rgba(240, 78, 35, 0.18);
+  border-radius: 22px;
+  box-shadow:
+    0 2px 8px  rgba(42,36,33,0.055),
+    0 8px 28px rgba(42,36,33,0.045),
+    0 0 0 1px rgba(255,255,255,0.55) inset;
+  padding: 12px 16px 12px 14px;
+  display: none; align-items: center; gap: 12px;
+  opacity: 0;
+  transition: transform 380ms cubic-bezier(0.34,1.56,0.64,1),
+              opacity 260ms cubic-bezier(0.16,1,0.3,1);
+  pointer-events: all;
 }
-#rest-banner.visible { display: flex; transform: translateY(0); opacity: 1; }
+#rest-banner.visible {
+  display: flex;
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+/* Accent pulse strip along top edge */
 #rest-banner::before {
-  content: ''; position: absolute; top: 0; left: 20px; right: 20px;
-  height: 2px; background: var(--accent); border-radius: 0 0 2px 2px; opacity: 0.7;
+  content: ''; position: absolute; top: 0; left: 24px; right: 24px;
+  height: 1.5px; background: var(--accent); border-radius: 0 0 2px 2px; opacity: 0.55;
 }
-.rest-countdown {
-  font-family: var(--font-hero); font-size: 34px; font-weight: 700;
-  color: var(--accent); min-width: 58px; line-height: 1;
+/* SVG ring container */
+#rest-hud-ring {
+  position: relative; width: 44px; height: 44px; flex-shrink: 0;
+}
+#rest-hud-ring svg {
+  width: 44px; height: 44px; transform: rotate(-90deg); display: block;
+}
+#rest-hud-track {
+  fill: none; stroke: oklch(22.8% 0.018 42 / 0.10); stroke-width: 2.5; stroke-linecap: round;
+}
+#rest-hud-fill {
+  fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linecap: round;
+  transition: stroke-dashoffset 200ms linear;
+}
+#rest-hud-digit-wrap {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+#rest-hud-digit {
+  font-family: var(--font-body); font-size: 9px; font-weight: 700;
+  color: var(--accent); line-height: 1;
   font-variant-numeric: tabular-nums;
-  animation: restPulse 1s ease-in-out infinite;
+  letter-spacing: -0.3px;
+}
+/* Label: RESTING · 01:45 */
+.rest-hud-label-wrap { flex: 1; overflow: hidden; }
+.rest-hud-word {
+  font-family: var(--font-body); font-size: 8.5px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--muted); opacity: 0.55; margin-bottom: 3px;
+}
+#rest-countdown {
+  font-family: var(--font-hero); font-size: 28px; font-weight: 300;
+  font-style: italic; color: var(--charcoal); line-height: 1;
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.02em;
 }
 @keyframes restPulse { 0%,100%{opacity:1} 50%{opacity:0.65} }
 .rest-info { flex: 1; overflow: hidden; }
@@ -535,32 +754,31 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .rest-skip {
-  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 12px; padding: 7px 14px; font-size: 12px; font-weight: 600;
-  color: rgba(255,255,255,0.5); cursor: pointer; flex-shrink: 0;
-  transition: background 150ms;
+  background: rgba(42,36,33,0.06); border: 1px solid rgba(42,36,33,0.10);
+  border-radius: 12px; padding: 8px 16px; font-size: 11px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: lowercase;
+  color: var(--text-secondary); cursor: pointer; flex-shrink: 0;
+  font-family: var(--font-body);
+  transition: background 150ms, border-color 150ms;
 }
-.rest-skip:active { background: rgba(255,255,255,0.15); }
+.rest-skip:active { background: rgba(42,36,33,0.12); }
 .rest-plus {
-  background: rgba(240,78,35,0.15); border: 1px solid rgba(240,78,35,0.25);
+  background: rgba(240,78,35,0.10); border: 1px solid rgba(240,78,35,0.20);
   border-radius: 10px; padding: 6px 10px; font-size: 11px; font-weight: 700;
   color: var(--accent); cursor: pointer; flex-shrink: 0;
   transition: background 150ms; letter-spacing: 0.3px;
+  font-family: var(--font-body);
 }
-.rest-plus:active { background: rgba(240,78,35,0.28); }
+.rest-plus:active { background: rgba(240,78,35,0.22); }
 
-/* ── Ambient rest overlay ── */
+/* ── Ambient rest overlay — DISABLED: replaced by non-blocking HUD ── */
 #rest-overlay {
-  position: fixed; inset: 0; z-index: 160;
-  background: rgba(10,9,8,0.62);
-  backdrop-filter: blur(4px) saturate(0.6);
-  -webkit-backdrop-filter: blur(4px) saturate(0.6);
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 16px;
-  opacity: 0; pointer-events: none;
-  transition: opacity 320ms cubic-bezier(0.4,0,0.2,1);
+  display: none !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
 }
-#rest-overlay.visible { opacity: 1; pointer-events: all; }
+#rest-overlay.visible { display: none !important; }
 #rest-ring-wrap { position: relative; width: 192px; height: 192px; }
 #rest-ring-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
 #rest-ring-track { fill: none; stroke: rgba(255,255,255,0.07); stroke-width: 3; }
@@ -706,6 +924,39 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
   background: none; border: none; font-family: var(--font-body); cursor: text;
 }
 .ex-notes:focus { color: var(--text); }
+
+/* ── Inline note toggle button ── */
+.ex-note-btn {
+  width: 28px; height: 28px; border-radius: 14px;
+  border: 1px solid var(--border); background: none;
+  color: var(--muted); cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: color 150ms, border-color 150ms, background 150ms;
+}
+.ex-note-btn:active { background: rgba(42,36,33,0.06); }
+.ex-note-btn.has-note { color: var(--accent); border-color: rgba(240,78,35,0.35); }
+
+/* ── Inline note panel ── */
+.ex-note-panel {
+  max-height: 0; overflow: hidden;
+  transition: max-height 280ms cubic-bezier(0.16,1,0.3,1);
+  margin-top: 0;
+}
+.ex-note-panel.open { max-height: 120px; }
+.ex-note-area {
+  width: 100%; padding: 10px 12px;
+  border: 1px solid var(--border); border-radius: 12px;
+  background: rgba(250,247,242,0.85);
+  font-family: var(--font-body); font-size: 12.5px;
+  color: var(--text); line-height: 1.55;
+  resize: none; outline: none;
+  margin-top: 10px; margin-bottom: 6px;
+  font-style: italic;
+  transition: border-color 150ms;
+  min-height: 60px;
+}
+.ex-note-area:focus { border-color: rgba(240,78,35,0.45); font-style: normal; }
+.ex-note-area::placeholder { color: var(--muted); opacity: 0.6; font-style: italic; }
 
 /* Set rows */
 .set-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; position: relative; }
@@ -1301,6 +1552,7 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
   <div id="screen-workout"          class="screen" style="display:none"></div>
   <div id="screen-history"          class="screen" style="display:none"></div>
   <div id="screen-settings"         class="screen" style="display:none"></div>
+  <div id="screen-analysis"         class="screen" style="display:none"></div>
   <div id="screen-workouts-browser" class="screen" style="display:none"></div>
 </div>
 <nav id="bottom-nav" style="display:none">
@@ -1316,19 +1568,28 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
     History
   </button>
-  <button class="nav-btn" data-nav="settings" onclick="Maps('settings')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-    Settings
+  <button class="nav-btn" data-nav="analysis" onclick="Maps('analysis')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3l1.5 3.5L17 8l-3.5 1.5L12 13l-1.5-3.5L7 8l3.5-1.5L12 3z"/><path d="M19 13l0.8 1.9 1.9 0.8-1.9 0.8L19 18.4l-0.8-1.9-1.9-0.8 1.9-0.8L19 13z"/><path d="M5 17l0.6 1.4 1.4 0.6-1.4 0.6L5 21l-0.6-1.4-1.4-0.6 1.4-0.6L5 17z"/></svg>
+    AI
   </button>
 </nav>
 <div id="rest-banner">
-  <div class="rest-countdown" id="rest-countdown">0:00</div>
-  <div class="rest-info">
-    <div class="rest-next" id="rest-next-text"></div>
-    <div class="rest-after" id="rest-after-text"></div>
+  <!-- Inline SVG countdown wheel -->
+  <div id="rest-hud-ring">
+    <svg viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg">
+      <circle id="rest-hud-track" cx="22" cy="22" r="19"/>
+      <circle id="rest-hud-fill"  cx="22" cy="22" r="19"/>
+    </svg>
+    <div id="rest-hud-digit-wrap">
+      <div id="rest-hud-digit">—</div>
+    </div>
   </div>
-  <button class="rest-plus" onclick="addRestTime(30)">+30s</button>
-  <button class="rest-skip" onclick="cancelRestTimer()">Skip</button>
+  <!-- Label + numeric readout: RESTING · 01:45 -->
+  <div class="rest-hud-label-wrap">
+    <div class="rest-hud-word">Resting</div>
+    <div id="rest-countdown">0:00</div>
+  </div>
+  <button class="rest-skip" onclick="cancelRestTimer()">skip</button>
 </div>
 <div id="rest-overlay">
   <div id="rest-ring-wrap">
@@ -3708,6 +3969,7 @@ let ST = {
   travelMode: false,
   travelLocked: false,
   workoutSets: {},      // key: `${sessionId}_${exIdx}` → [{w,r,ts}]
+  workoutNotes: {},     // key: `${sessionId}_${exIdx}` → session-scoped note string
   workoutStart: null,
   durationSecs: 0,
   durationTimer: null,
@@ -3731,6 +3993,24 @@ let ST = {
   notifEnabled: false,
   swReg: null,
   defaultProgram: null,
+  fitbit: {
+    readinessScore: 88,
+    readinessFactor: null,          // lowest sub-component label e.g. 'hrv balance'
+    sleepScore: 82,
+    restingHR: 62,
+    hrv: 56,
+    deepSleepMinutes: 85,
+    remSleepMinutes: 95,
+    lightSleepMinutes: 210,
+    averageWorkoutHR: null,
+    spo2: null,
+    // Mock trailing arrays — displayed when not yet connected
+    trailingReadiness: [74, 80, 85, 79, 82, 88, 91],
+    trailingSleep:     [70, 78, 82, 75, 80, 82, 85],
+    trailingHRV:       [48, 52, 55, 50, 53, 56, 58],
+    connected: false,
+    lastSync: null,
+  },
 };
 
 // ── History helpers ───────────────────────────────────────────────────────────
@@ -3995,7 +4275,8 @@ function startRestTimer(seconds, exName, nextText, afterText, isLast) {
   ST.restTicker = setInterval(tickRest, 200);
 
   renderRestBanner();
-  renderRestOverlay();   // ← ambient fullscreen dim
+  // renderRestOverlay() — replaced by non-blocking HUD; overlay disabled.
+  initRestHudRing();
 }
 
 function addRestTime(secs) {
@@ -4046,7 +4327,18 @@ function tickRest() {
   }
   const el = document.getElementById('rest-countdown');
   if (el) el.textContent = formatDuration(remaining);
-  updateRestOverlayUI(remaining);
+  updateRestHudRing(remaining);
+  updateRestOverlayUI(remaining); // kept for backward compat (overlay is hidden)
+}
+
+function initRestHudRing() {
+  // Pre-compute strokeDasharray for the HUD ring (r=19, circ = 2πr)
+  const r = 19, circ = 2 * Math.PI * r;
+  const fill = document.getElementById('rest-hud-fill');
+  if (fill) {
+    fill.style.strokeDasharray  = circ.toFixed(2);
+    fill.style.strokeDashoffset = '0'; // starts full
+  }
 }
 
 function renderRestBanner() {
@@ -4060,10 +4352,22 @@ function renderRestBanner() {
   }
   const cd = document.getElementById('rest-countdown');
   if (cd) cd.textContent = formatDuration(remaining);
-  const nx = document.getElementById('rest-next-text');
-  if (nx) nx.textContent = ST.restNextText;
-  const af = document.getElementById('rest-after-text');
-  if (af) af.textContent = ST.restAfterText;
+  updateRestHudRing(remaining);
+}
+
+function updateRestHudRing(remaining) {
+  // Update mini SVG ring in HUD
+  const fill  = document.getElementById('rest-hud-fill');
+  const digit = document.getElementById('rest-hud-digit');
+  const r = 19, circ = 2 * Math.PI * r;
+  if (fill && ST.restDuration > 0) {
+    const pct = Math.max(0, Math.min(1, remaining / ST.restDuration));
+    fill.style.strokeDashoffset = (circ * (1 - pct)).toFixed(2);
+  }
+  if (digit) {
+    // Show seconds only if ≤99s, else formatted
+    digit.textContent = remaining > 99 ? formatDuration(remaining) : remaining + 's';
+  }
 }
 
 // ── Ambient fullscreen rest overlay ─────────────────────────────────────────
@@ -4104,10 +4408,10 @@ function updateRestOverlayUI(remaining) {
 }
 
 // ── Navigation ────────────────────────────────────────────────────────────────
-const SCREENS = ['home','prog','session','workout','history','settings','workouts-browser'];
+const SCREENS = ['home','prog','session','workout','history','settings','workouts-browser','analysis'];
 
 // ── Navigation tab order for slide direction resolution ─────────────────────
-const SCREEN_ORDER = ['home', 'workouts-browser', 'history', 'settings'];
+const SCREEN_ORDER = ['home', 'workouts-browser', 'history', 'analysis'];
 
 function Maps(to, data={}) {
   const from = ST.screen;
@@ -4121,6 +4425,7 @@ function Maps(to, data={}) {
   else if (to === 'history')     renderHistory();
   else if (to === 'settings')    renderSettings();
   else if (to === 'workouts-browser') renderWorkoutsBrowser();
+  else if (to === 'analysis')    renderAnalysis();
 
   // Nav visibility: hidden only during active training session
   const nav = document.getElementById('bottom-nav');
@@ -4207,15 +4512,15 @@ function updateWorkoutPill() {
 // ── Command Center helpers ────────────────────────────────────────────────────
 
 function buildSilhouetteSVG(targets, actuals, weekComplete) {
-  // Glassmorphic warm peach-coral palette per spec
+  // ── Chromatic volume threshold logic (Pillar IV) ──────────────────────────
+  // >50% weekly volume completion → luxury gold; ≤50% → standard terracotta
   function col(muscle) {
     const t = targets[muscle] || 0, a = actuals[muscle] || 0;
-    if (!t) return 'oklch(79% 0.018 55 / 0.24)';
-    if (!a) return 'oklch(79% 0.018 55 / 0.28)';
+    if (!t) return 'oklch(79% 0.018 55 / 0.24)';    // no target → neutral warm
+    if (!a) return 'oklch(79% 0.018 55 / 0.28)';    // no actuals → neutral warm
     const p = a / t;
-    if (p >= 1)   return 'oklch(58.5% 0.210 32 / 0.78)';
-    if (p >= 0.5) return 'oklch(68% 0.165 38 / 0.58)';
-    return 'oklch(76% 0.120 44 / 0.38)';
+    if (p > 0.50) return 'oklch(78% 0.124 88 / 0.82)';  // >50% → luxury gold #C9A84C
+    return 'oklch(58.5% 0.210 32 / 0.62)';              // ≤50% → terracotta accent
   }
   function isActive(muscle) {
     const t = targets[muscle] || 0, a = actuals[muscle] || 0;
@@ -4225,9 +4530,8 @@ function buildSilhouetteSVG(targets, actuals, weekComplete) {
     if (!isActive(muscle)) return 'none';
     const t = targets[muscle] || 0, a = actuals[muscle] || 0;
     const p = a / t;
-    if (p >= 1)   return 'url(#glowFull)';
-    if (p >= 0.5) return 'url(#glowMid)';
-    return 'url(#glowLight)';
+    if (p > 0.50) return 'url(#glowGold)';   // >50% → gold bloom filter
+    return 'url(#glowLight)';                 // ≤50% → subtle terracotta halo
   }
   function pulse(muscle) {
     const t = targets[muscle] || 0, a = actuals[muscle] || 0;
@@ -4330,6 +4634,19 @@ function buildSilhouetteSVG(targets, actuals, weekComplete) {
         values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.14 0" result="dimBloom"/>
       <feMerge>
         <feMergeNode in="dimBloom"/>
+        <feMergeNode in="innerGlow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <!-- Gold volumetric bloom — luxury accent for >50% completion muscles -->
+    <filter id="glowGold" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2.0" result="innerBlur"/>
+      <feComposite in="innerBlur" in2="SourceGraphic" operator="in" result="innerGlow"/>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="9" result="outerBloom"/>
+      <feColorMatrix in="outerBloom" type="matrix"
+        values="1.1 0.2 0 0 0  0.7 0.9 0 0 0  0 0 0.2 0 0  0 0 0 0.38 0" result="goldBloom"/>
+      <feMerge>
+        <feMergeNode in="goldBloom"/>
         <feMergeNode in="innerGlow"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
@@ -4735,6 +5052,9 @@ function renderHome() {
 
     <div class="premium-masthead">
       <div class="brand-title">DCR Gym</div>
+      <button class="masthead-gear" onclick="Maps('settings')" aria-label="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      </button>
     </div>
 
     <div class="premium-totem-container">
@@ -5167,6 +5487,12 @@ function renderWorkout() {
           <button class="ex-graph-btn" onclick="showProgressGraph(event,'${name}')" title="Progress">⬆</button>
           ${cueAvail || true ? `<button class="ex-cue-btn" onclick="showCue(event,'${key}',${i})">?</button>` : ''}
           ${travel ? '' : `<button class="ex-cue-btn" onclick="showSubs(event,'${key}',${i})" title="Substitutions">⇄</button>`}
+          <button class="ex-note-btn${(ST.workoutNotes[key] || noteVal) ? ' has-note' : ''}" id="notebtn-${key}"
+            onclick="toggleNotePanel(event,'${key}','${noteKey}')" title="Add note">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
+            </svg>
+          </button>
           <svg class="ex-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
       </div>
@@ -5182,8 +5508,13 @@ function renderWorkout() {
               <span class="rest-time-display" id="rest-lbl-${key}" onclick="editRestTime('${key}',${i},this)" title="Tap to edit">${formatDuration(restSec)}</span>
             </div>
           </div>
-          <div class="ex-notes" id="note-${key}" contenteditable="true" placeholder="Add a note..."
-            onblur="saveNote('${noteKey}',this.innerText)">${noteVal}</div>
+          <!-- Inline note panel — revealed by header pen icon -->
+          <div class="ex-note-panel${(ST.workoutNotes[key] || noteVal) ? ' open' : ''}" id="notepanel-${key}">
+            <textarea class="ex-note-area" id="noteinput-${key}"
+              placeholder="Session notes…"
+              oninput="saveSessionNote('${key}','${noteKey}',this.value)"
+            >${ST.workoutNotes[key] !== undefined ? ST.workoutNotes[key] : noteVal}</textarea>
+          </div>
         </div>
       </div>
     </div>`;
@@ -5617,6 +5948,35 @@ function saveNote(nameKey, text) {
   saveNotes(notes);
 }
 
+// ── Inline session-scoped note panel ─────────────────────────────────────────
+function toggleNotePanel(e, key, nameKey) {
+  e.stopPropagation();
+  const panel = document.getElementById('notepanel-' + key);
+  const btn   = document.getElementById('notebtn-'   + key);
+  if (!panel) return;
+  const opening = !panel.classList.contains('open');
+  panel.classList.toggle('open', opening);
+  if (opening) {
+    // Focus the textarea after CSS transition completes
+    setTimeout(() => {
+      const ta = document.getElementById('noteinput-' + key);
+      if (ta) ta.focus();
+    }, 290);
+  }
+}
+
+function saveSessionNote(key, nameKey, text) {
+  // Session-scoped: stored in ST.workoutNotes[key]
+  ST.workoutNotes[key] = text;
+  // Also persist to global per-exercise notes for pre-fill across sessions
+  const notes = getNotes();
+  notes[nameKey] = text.trim();
+  saveNotes(notes);
+  // Update icon state
+  const btn = document.getElementById('notebtn-' + key);
+  if (btn) btn.classList.toggle('has-note', text.trim().length > 0);
+}
+
 function showCue(e, key, exIdx) {
   e.stopPropagation();
   const prog = PROGRAMS.find(p => p.id === ST.currentProgram);
@@ -5743,7 +6103,8 @@ function startWorkoutFromHome(progId, sessId) {
   ST.currentSession = sessId;
   ST.travelMode = false;
   ST.travelLocked = false;
-  ST.workoutSets = {};
+  ST.workoutSets   = {};
+  ST.workoutNotes  = {};   // reset session-scoped notes for fresh workout
   ST.expandedCards = new Set();
   ST.completedCards = new Set();
   ST.durationSecs = 0;
@@ -5841,6 +6202,103 @@ function cancelWorkout() {
   Maps('home');
 }
 
+// ── Post-workout insight engine ───────────────────────────────────────────────
+function generateInsightCard(entry, duration, volume) {
+  const fb      = ST.fitbit;
+  const sleep   = fb.sleepScore;
+  const hrv     = fb.hrv;
+  const rhr     = fb.restingHR;
+  const readiness = fb.readinessScore;
+
+  // ── Card 1: Readiness Synthesis ───────────────────────────────────────────
+  let synthesisTag  = 'readiness synthesis';
+  let synthesisBody = '';
+
+  if (readiness >= 85) {
+    synthesisBody = `Programmed training parameters sustained completely against a commanding <strong>${readiness}%</strong> systemic readiness pool. Central nervous system recovery efficiency remains exceptional. Conditions favor progressive overload on your next neuro-load block.`;
+  } else if (readiness >= 75) {
+    synthesisBody = `Volume profile executed within a steady <strong>${readiness}%</strong> readiness baseline. Autonomic reserve is intact — standard 48-hour structural recovery window applies before your next primary compound session.`;
+  } else {
+    synthesisBody = `Training load held consistent against a tightened <strong>${readiness}%</strong> readiness floor. Prioritize immediately accessible parasympathetic protocols — thermal down-regulation, mineral timing, and extended sleep architecture tonight — to fast-track baseline restoration.`;
+    synthesisTag = 'autonomic strategy';
+  }
+
+  // ── Card 2: Tactical Recovery (existing sleep/HRV/RHR logic) ─────────────
+  let tacticalTag  = 'tactical optimization';
+  let tacticalBody = '';
+
+  if (sleep !== null && sleep < 70) {
+    tacticalBody = `Performance thresholds held constant relative to a restricted <strong>${sleep}%</strong> sleep efficiency window. Prioritize immediate parasympathetic down-regulation protocols — contrasted hydrotherapy or targeted 4-7-8 breathing windows — to protect baseline autonomic tone before the next session.`;
+    tacticalTag  = 'recovery alert';
+  } else if (hrv !== null && hrv < 45) {
+    tacticalBody = `HRV reading of <strong>${hrv}ms</strong> indicates elevated autonomic stress post-session. Extend your passive recovery window by 24–36 hours before your next neuro-load block. Prioritize hydration and whole-food carbohydrate replenishment.`;
+    tacticalTag  = 'hrv advisory';
+  } else if (rhr !== null && rhr > 68) {
+    tacticalBody = `Resting heart rate at <strong>${rhr}bpm</strong> — slightly elevated baseline suggests residual systemic fatigue. Monitor sleep architecture tonight; if pattern persists across two sessions, consider a deload micro-cycle.`;
+    tacticalTag  = 'cardiovascular note';
+  } else if (sleep !== null && sleep >= 85 && hrv !== null && hrv >= 55) {
+    tacticalBody = `Optimal recovery architecture confirmed — <strong>${sleep}%</strong> sleep efficiency, <strong>${hrv}ms</strong> HRV. Autonomic tone is high. Physiological conditions favor a progressive overload push in your next session.`;
+    tacticalTag  = 'readiness window';
+  } else {
+    tacticalBody = `Session logged. Sleep efficiency <strong>${sleep !== null ? sleep + '%' : '—'}</strong>, HRV <strong>${hrv !== null ? hrv + 'ms' : '—'}</strong>. Standard recovery protocols apply — prioritize 7–9 hours sleep and adequate protein synthesis window post-session.`;
+    tacticalTag  = 'session complete';
+  }
+
+  const card = {
+    id: entry.id,
+    sessionId: entry.sessionId,
+    sessionName: entry.sessionName,
+    volume: Math.round(volume),
+    duration,
+    ts: Date.now(),
+    synthesisTag,
+    synthesisBody,
+    tacticalTag,
+    tacticalBody,
+  };
+
+  LS.set('dcrgym_last_insight', card);
+}
+
+function getLastInsightCard() {
+  return LS.get('dcrgym_last_insight', null);
+}
+
+function renderInsightCardHTML(card) {
+  if (!card) return '';
+  const timeAgo = (() => {
+    const diff = Date.now() - (card.ts || 0);
+    const h = Math.floor(diff / 3600000);
+    const d = Math.floor(diff / 86400000);
+    if (d > 0) return `${d}d ago`;
+    if (h > 0) return `${h}h ago`;
+    return 'just now';
+  })();
+  const meta = `${card.sessionName ? card.sessionName.toLowerCase() + ' · ' : ''}${formatDuration(card.duration)} · ${card.volume}kg · ${timeAgo}`;
+
+  // Card 1 — Readiness Synthesis (new format) or legacy fallback
+  const card1 = card.synthesisBody ? `
+  <div class="insight-card" style="margin-bottom:8px">
+    <div class="insight-card-eyebrow">${card.synthesisTag || 'readiness synthesis'}</div>
+    <div class="insight-card-body">${card.synthesisBody}</div>
+    <div class="insight-card-meta">${meta}</div>
+  </div>` : `
+  <div class="insight-card" style="margin-bottom:8px">
+    <div class="insight-card-eyebrow">${card.tag || 'session complete'}</div>
+    <div class="insight-card-body">${card.directive || ''}</div>
+    <div class="insight-card-meta">${meta}</div>
+  </div>`;
+
+  // Card 2 — Tactical Recovery
+  const card2 = card.tacticalBody ? `
+  <div class="insight-card">
+    <div class="insight-card-eyebrow">${card.tacticalTag || 'tactical optimization'}</div>
+    <div class="insight-card-body">${card.tacticalBody}</div>
+  </div>` : '';
+
+  return card1 + card2;
+}
+
 function finishWorkout() {
   // Guard: warn if exercises incomplete
   const prog = PROGRAMS.find(p => p.id === ST.currentProgram);
@@ -5892,11 +6350,15 @@ function finishWorkout() {
     duration,
     travelMode: ST.travelMode,
     sets: ST.workoutSets,
+    notes: { ...ST.workoutNotes },   // session-scoped exercise notes snapshot
   };
   hist.push(entry);
   saveHistory(hist);
   LS.remove('dcrgym_current_workout');
   bgSyncToSheets(); // optimistic background push
+
+  // Generate and persist post-workout insight card
+  generateInsightCard(entry, duration, volume);
 
   ST.lastSummary = { duration, volume, prevDur, prevVol, biggestGain };
   const milestone = checkMilestone();
@@ -5962,11 +6424,20 @@ function showFinish() {
     }
   }).join('') : '';
 
-  // Stats
-  const durText = formatDuration(s.duration || 0);
-  const volText = (s.volume || 0) > 0 ? (s.volume > 999 ? Math.round(s.volume/1000)+'k' : s.volume)+'kg' : '—';
+  // Stats — volume display removed per UI spec (III)
+  const durText  = formatDuration(s.duration || 0);
   const gainText = s.biggestGain ? '+'+s.biggestGain.gain+'kg' : '—';
   const gainLabel = s.biggestGain ? s.biggestGain.name : 'Top gain';
+
+  // Set compliance %
+  const prog2 = PROGRAMS.find(p => p.id === ST.currentProgram);
+  const sess2 = prog2 && prog2.sessions.find(ss => ss.id === ST.currentSession);
+  let compliancePct = '—';
+  if (sess2) {
+    const total   = sess2.exercises.length;
+    const done    = sess2.exercises.filter((_,i) => ST.completedCards.has(`${sess2.id}_${i}`)).length;
+    compliancePct = total > 0 ? Math.round((done / total) * 100) + '%' : '—';
+  }
 
   const el = document.createElement('div');
   el.id = 'finish-screen';
@@ -5975,7 +6446,7 @@ function showFinish() {
     <div class="finish-session-label">${sess ? sess.name : 'Session'} complete</div>
     <div class="finish-stats-row">
       <div class="finish-stat"><div class="finish-stat-val">${durText}</div><div class="finish-stat-lbl">Duration</div></div>
-      <div class="finish-stat"><div class="finish-stat-val">${volText}</div><div class="finish-stat-lbl">Volume</div></div>
+      <div class="finish-stat"><div class="finish-stat-val">${compliancePct}</div><div class="finish-stat-lbl">Compliance</div></div>
       <div class="finish-stat"><div class="finish-stat-val" style="font-size:14px;line-height:1.2">${gainText}</div><div class="finish-stat-lbl">${gainLabel.split(' ')[0]}</div></div>
     </div>
     ${prog ? `<div class="finish-plan-table">${tableRows}</div>` : ''}
@@ -6399,8 +6870,9 @@ function closeCalPopup() {
 }
 
 function renderWorkoutsCalendarView() {
-  // Calendar fills the full view — no lists, no fallback text below
-  return renderFiveWeekCalendar();
+  // Insight card pinned above calendar if a post-workout card exists
+  const insightHTML = renderInsightCardHTML(getLastInsightCard());
+  return insightHTML + renderFiveWeekCalendar();
 }
 
 
@@ -6454,6 +6926,237 @@ function renderDetailChart(values) {
     return `${x},${y}`;
   }).join(' ');
   return `<polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+}
+
+// ── Analysis screen ───────────────────────────────────────────────────────────
+function renderAnalysis() {
+  const el = document.getElementById('screen-analysis');
+  if (!el) return;
+
+  const fb = ST.fitbit;
+
+  // ── HUD status ─────────────────────────────────────────────────────────────
+  const today     = new Date().toISOString().slice(0, 10);
+  const isFresh   = fb.fetchedAt === today;
+  const dotClass  = isFresh ? 'live' : 'stale';
+  const hudStatus = isFresh
+    ? 'operational · fetched today'
+    : fb.fetchedAt
+      ? `stale · ${fb.fetchedAt}`
+      : 'no data · tap ↻';
+  const hudHTML = `
+    <div class="analysis-eyebrow-row">
+      <div class="analysis-eyebrow">// analysis</div>
+      <div class="analysis-hud-right">
+        <div class="analysis-hud-dot ${dotClass}"></div>
+        <span class="analysis-hud-meta">${hudStatus}</span>
+        <button class="analysis-hud-refresh" onclick="fetchFitbitData(true)" title="force live pull">↻</button>
+      </div>
+    </div>`;
+
+  // ── Ring color by readiness threshold ─────────────────────────────────────
+  const score = fb.readinessScore ?? null;
+  const scoreDisplay = score !== null ? score : 0;
+  const ringColor = score === null
+    ? 'oklch(82% 0.018 72)'      // neutral parchment — no data yet
+    : score >= 85
+      ? 'oklch(72.3% 0.190 145)' // emerald — peak
+      : score >= 75
+        ? 'oklch(78% 0.09 85)'   // warm sand — steady
+        : 'oklch(62% 0.155 38)'; // amber/terracotta — deficit
+
+  // ── Ring SVG math ──────────────────────────────────────────────────────────
+  const CX = 80, CY = 80, R = 68;
+  const CIRC = 2 * Math.PI * R;
+  const fillDash = (scoreDisplay / 100) * CIRC;
+  const trackStroke = 'oklch(91.2% 0.012 72)';
+
+  const ringSVG = `
+    <svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="${CX}" cy="${CY}" r="${R}"
+        fill="none" stroke="${trackStroke}" stroke-width="4.5"
+        stroke-linecap="round"/>
+      <circle cx="${CX}" cy="${CY}" r="${R}"
+        fill="none" stroke="${ringColor}" stroke-width="4.5"
+        stroke-linecap="round"
+        stroke-dasharray="${fillDash.toFixed(2)} ${CIRC.toFixed(2)}"
+        transform="rotate(-90 ${CX} ${CY})"
+        style="transition:stroke-dasharray 900ms cubic-bezier(0.34,1.1,0.64,1);filter:drop-shadow(0 0 6px ${ringColor.replace(')','/0.45)')})"/>
+    </svg>`;
+
+  // ── Limiting factor label ──────────────────────────────────────────────────
+  const factorHTML = fb.readinessFactor
+    ? `<div class="analysis-factor-label">limiting factor // ${fb.readinessFactor}</div>`
+    : '';
+
+  // ── Trailing chart ─────────────────────────────────────────────────────────
+  const chartHTML = buildTrailingChart(fb);
+
+  // ── Footer ─────────────────────────────────────────────────────────────────
+  const footerHTML = !fb.connected
+    ? `<button class="analysis-connect-link" onclick="Maps('settings')">[ connect fitbit ]</button>`
+    : `<div class="analysis-connect-link" style="cursor:default;text-decoration:none;">
+        synced ${fb.lastSync ? new Date(fb.lastSync).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : 'never'}
+       </div>`;
+
+  el.innerHTML = `
+  <div class="analysis-wrap">
+    ${hudHTML}
+
+    <div class="analysis-ring-zone">
+      <div class="analysis-ring-container">
+        ${ringSVG}
+        <div class="analysis-ring-score">
+          <div class="analysis-ring-number">${score !== null ? score : '–'}</div>
+          <div class="analysis-ring-label">readiness</div>
+        </div>
+      </div>
+      ${factorHTML}
+    </div>
+
+    <div class="analysis-vitals-row">
+      <div class="analysis-vital-block">
+        <div class="analysis-vital-num">${fb.sleepScore ?? '–'}</div>
+        <div class="analysis-vital-unit">% sleep</div>
+      </div>
+      <div class="analysis-vitals-sep">│</div>
+      <div class="analysis-vital-block">
+        <div class="analysis-vital-num">${fb.restingHR ?? '–'}</div>
+        <div class="analysis-vital-unit">bpm rhr</div>
+      </div>
+    </div>
+
+    <div class="analysis-chart-zone">
+      <div class="analysis-chart-label">7-day biometric trail</div>
+      <div class="analysis-chart-legend">
+        <div class="analysis-legend-item">
+          <div class="analysis-legend-dot" style="background:oklch(58.5% 0.210 32)"></div>readiness
+        </div>
+        <div class="analysis-legend-item">
+          <div class="analysis-legend-dot" style="background:oklch(55% 0.08 240)"></div>sleep
+        </div>
+        <div class="analysis-legend-item">
+          <div class="analysis-legend-dot" style="background:oklch(72% 0.14 85)"></div>hrv
+        </div>
+      </div>
+      <div class="analysis-chart-svg-wrap">
+        ${chartHTML}
+      </div>
+    </div>
+
+    ${footerHTML}
+  </div>`;
+
+  // Cache-first: only hit the live endpoint if today's data isn't already loaded
+  if (!isFresh) fetchFitbitData(false);
+}
+
+function buildTrailingChart(fb) {
+  const R  = fb.trailingReadiness || [];
+  const SL = fb.trailingSleep     || [];
+  const HV = fb.trailingHRV       || [];
+  const N  = Math.min(R.length, SL.length, HV.length);
+  if (N < 2) return `<svg viewBox="0 0 300 110" xmlns="http://www.w3.org/2000/svg">
+    <text x="150" y="55" text-anchor="middle" font-family="'Cormorant Garamond',serif"
+      font-style="italic" font-size="13" fill="oklch(60% 0.018 55)" opacity="0.45">
+      complete more days to build your trail
+    </text></svg>`;
+
+  // Real calendar day labels — today rightmost, trailing N days
+  const DAYS = ['S','M','T','W','T','F','S'];
+  const today = new Date();
+  const dayLabels = [];
+  for (let i = N - 1; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    dayLabels.push(DAYS[d.getDay()]);
+  }
+
+  const W = 300, H = 110, PAD_X = 8, PAD_TOP = 8, LABEL_H = 18;
+  const chartH = H - PAD_TOP - LABEL_H;
+
+  function normalizeSeries(arr) {
+    const slice = arr.slice(-N);
+    const mn = Math.min(...slice), mx = Math.max(...slice);
+    const rng = mx - mn || 1;
+    return slice.map(v => (v - mn) / rng);
+  }
+
+  function buildPath(normalized) {
+    return normalized.map((v, i) => {
+      const x = PAD_X + (i / (N - 1)) * (W - PAD_X * 2);
+      const y = PAD_TOP + (1 - v) * chartH;
+      return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(' ');
+  }
+
+  const rNorm  = normalizeSeries(R);
+  const slNorm = normalizeSeries(SL);
+  const hvNorm = normalizeSeries(HV);
+
+  // X-axis tick labels
+  const ticksHTML = dayLabels.map((lbl, i) => {
+    const x = PAD_X + (i / (N - 1)) * (W - PAD_X * 2);
+    return `<text x="${x.toFixed(1)}" y="${H - 2}" text-anchor="middle"
+      font-family="var(--font-body,monospace)" font-size="8" letter-spacing="0.04em"
+      fill="oklch(60% 0.018 55)" opacity="0.5">${lbl}</text>`;
+  }).join('');
+
+  // Micro crosshair at today (rightmost point)
+  const todayX = (W - PAD_X).toFixed(1);
+  const crosshair = `<line x1="${todayX}" y1="${PAD_TOP}" x2="${todayX}" y2="${H - LABEL_H}"
+    stroke="oklch(60% 0.018 55)" stroke-width="0.5" opacity="0.18" stroke-dasharray="2,2"/>`;
+
+  return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+    ${crosshair}
+    <path d="${buildPath(slNorm)}" fill="none" stroke="oklch(55% 0.08 240)"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.75"/>
+    <path d="${buildPath(hvNorm)}" fill="none" stroke="oklch(72% 0.14 85)"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.75"/>
+    <path d="${buildPath(rNorm)}" fill="none" stroke="oklch(58.5% 0.210 32)"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    ${ticksHTML}
+  </svg>`;
+}
+
+async function fetchFitbitData(force = false) {
+  const s = getSettings();
+  if (!s.sheets) return;
+
+  // Cache-first: if today's data is already stored and this isn't a forced pull, skip
+  if (!force) {
+    const today = new Date().toISOString().slice(0, 10);
+    if (ST.fitbit.fetchedAt === today) return;
+  }
+
+  // Animate the ↻ button into loading state if visible
+  const btn = document.querySelector('.analysis-hud-refresh');
+  if (btn) {
+    btn.textContent = '↻';
+    btn.style.animation = 'hud-spin 0.9s linear infinite';
+    btn.disabled = true;
+    btn.style.opacity = '0.65';
+  }
+
+  const fitbitEndpoint = s.sheets + '?action=getFitbit';
+  try {
+    const res = await fetch(fitbitEndpoint, { method: 'GET' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (data && data.fitbit) {
+      Object.assign(ST.fitbit, data.fitbit, { connected: true, lastSync: Date.now() });
+      LS.set('dcrgym_fitbit', ST.fitbit);
+      if (ST.screen === 'analysis') renderAnalysis();
+    }
+  } catch(e) {
+    console.warn('[DCR Gym] Fitbit fetch failed (non-fatal):', e);
+    // Reset button on failure without full re-render
+    if (btn) {
+      btn.style.animation = '';
+      btn.disabled = false;
+      btn.style.opacity = '0.35';
+    }
+  }
 }
 
 // ── Settings screen ───────────────────────────────────────────────────────────
@@ -6899,6 +7602,11 @@ function bootstrapApp() {
   try {
     ST.defaultProgram = LS.get('dcrgym_default_prog');
     getSettings();
+    // Fitbit hydration — merge stored biometric data over defaults
+    const storedFitbit = LS.get('dcrgym_fitbit', null);
+    if (storedFitbit && typeof storedFitbit === 'object') {
+      Object.assign(ST.fitbit, storedFitbit);
+    }
   } catch(e) {
     console.warn('[DCR Gym Shell] State hydration fault (non-fatal):', e);
   }
