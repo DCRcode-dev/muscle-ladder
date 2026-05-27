@@ -1141,47 +1141,71 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
 }
 .hist-tab.active { background: var(--card); color: var(--text); box-shadow: var(--shadow); }
 
-/* ── Completion Gauge Bars (Progress tab) ── */
-.completion-gauges { padding: 4px 20px 0; }
-.completion-gauges-hdr {
-  font-size: 0.58rem; letter-spacing: 0.18em; text-transform: uppercase;
-  color: var(--muted); padding: 20px 0 14px;
+/* ── Bio-Data Matrix Grid (Progress tab) ── */
+.progress-grid-wrap {
+  padding: 4px 16px 8px;
+  display: flex;
+  flex-direction: column;
 }
-.gauge-row {
-  display: flex; align-items: center; gap: 10px;
-  padding: 8px 0; border-bottom: 1px solid oklch(22.8% 0.018 42 / 0.04);
+.bio-matrix {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow:
+    0 2px 8px rgba(42,36,33,0.07),
+    0 6px 24px rgba(42,36,33,0.05),
+    inset 0 0 0 0.5px rgba(42,36,33,0.08);
+  /* fixed height so it never scrolls — fills space between tabs and nav */
+  height: calc(100svh - var(--header-h) - var(--nav-h) - 80px);
+  max-height: 560px;
 }
-.gauge-row:last-child { border-bottom: none; }
-.gauge-muscle {
-  font-size: 12px; font-weight: 600; color: var(--charcoal);
-  width: 84px; flex-shrink: 0; letter-spacing: -0.01em;
+.bm-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 3px 6px;
+  gap: 3px;
+  position: relative;
+  overflow: hidden;
 }
-/* SVG arc dial — true tapered stroke-linecap:round needle */
-.gauge-arc-wrap { flex: 1; height: 24px; display: flex; align-items: center; }
-.gauge-arc-wrap svg { width: 100%; height: 24px; overflow: visible; display: block; }
-.gauge-arc-track {
-  fill: none;
-  stroke: oklch(22.8% 0.018 42 / 0.09);
-  stroke-width: 2.5;
-  stroke-linecap: round;
+.bm-tile::after {
+  content: '';
+  position: absolute; inset: 0;
+  border-right: 0.5px solid rgba(42,36,33,0.065);
+  border-bottom: 0.5px solid rgba(42,36,33,0.065);
+  pointer-events: none;
 }
-.gauge-arc-fill {
-  fill: none;
-  stroke-width: 2.5;
-  stroke-linecap: round;
-  stroke: oklch(58.5% 0.210 32);
-  filter: drop-shadow(0 0 3px oklch(58.5% 0.210 32 / 0.50));
-  transition: stroke-dashoffset 750ms cubic-bezier(0.34,1.36,0.64,1);
+.bm-tile.ta { background: #E0E0E0; }
+.bm-tile.tb { background: #FAF7F2; }
+/* Dormant tile: not scheduled this week — visually isolated, grid alignment preserved */
+.bm-tile.ghost {
+  opacity: 0.35;
+  filter: grayscale(100%);
+  mix-blend-mode: luminosity;
 }
-.gauge-arc-fill.is-full {
-  stroke: oklch(72.3% 0.190 145);
-  filter: drop-shadow(0 0 5px oklch(72.3% 0.190 145 / 0.60));
+.bm-tile.ghost.ta { background: #C8C4BC; }
+.bm-tile.ghost.tb { background: #DEDAD2; }
+.bm-ring-box {
+  flex-shrink: 0;
+  /* +40% over baseline 54px = 75.6px → 76px */
+  width: min(76px, calc((100vw - 32px) / 4 - 8px));
+  height: min(76px, calc((100vw - 32px) / 4 - 8px));
 }
-.gauge-pct-label {
-  font-size: 10px; font-weight: 700;
-  color: oklch(22.8% 0.018 42 / 0.38);
-  width: 32px; text-align: right; flex-shrink: 0;
-  font-variant-numeric: tabular-nums lining-nums;
+.bm-ring-box svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.bm-label {
+  font-family: var(--font-hero);
+  font-size: 7.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--charcoal);
+  opacity: 0.55;
+  text-align: center;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
 /* ── 5-Week Calendar (Workouts tab) ── */
@@ -1566,7 +1590,7 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
   </button>
   <button class="nav-btn" data-nav="history" onclick="Maps('history')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-    History
+    Progress
   </button>
   <button class="nav-btn" data-nav="analysis" onclick="Maps('analysis')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3l1.5 3.5L17 8l-3.5 1.5L12 13l-1.5-3.5L7 8l3.5-1.5L12 3z"/><path d="M19 13l0.8 1.9 1.9 0.8-1.9 0.8L19 18.4l-0.8-1.9-1.9-0.8 1.9-0.8L19 13z"/><path d="M5 17l0.6 1.4 1.4 0.6-1.4 0.6L5 21l-0.6-1.4-1.4-0.6 1.4-0.6L5 17z"/></svg>
@@ -6203,7 +6227,7 @@ function cancelWorkout() {
 }
 
 // ── Post-workout insight engine ───────────────────────────────────────────────
-function generateInsightCard(entry, duration, volume) {
+function generateInsightCard(entry, duration) {
   const fb      = ST.fitbit;
   const sleep   = fb.sleepScore;
   const hrv     = fb.hrv;
@@ -6248,7 +6272,6 @@ function generateInsightCard(entry, duration, volume) {
     id: entry.id,
     sessionId: entry.sessionId,
     sessionName: entry.sessionName,
-    volume: Math.round(volume),
     duration,
     ts: Date.now(),
     synthesisTag,
@@ -6274,7 +6297,7 @@ function renderInsightCardHTML(card) {
     if (h > 0) return `${h}h ago`;
     return 'just now';
   })();
-  const meta = `${card.sessionName ? card.sessionName.toLowerCase() + ' · ' : ''}${formatDuration(card.duration)} · ${card.volume}kg · ${timeAgo}`;
+  const meta = `${card.sessionName ? card.sessionName.toLowerCase() + ' · ' : ''}${formatDuration(card.duration)} · ${timeAgo}`;
 
   // Card 1 — Readiness Synthesis (new format) or legacy fallback
   const card1 = card.synthesisBody ? `
@@ -6316,13 +6339,11 @@ function finishWorkout() {
   if (ST.wakeLock) ST.wakeLock.release().catch(()=>{});
   cancelRestTimer();
   const duration = ST.durationSecs;
-  const volume = calcVolume();
 
   // Save to history
   const hist = getHistory();
   // Previous same session for comparison (prog/sess already declared above)
   const prevSame = hist.filter(w => w.sessionId === ST.currentSession).slice(-1)[0];
-  const prevVol = prevSame ? Object.values(prevSame.sets || {}).flat().reduce((s,x)=>s+(x.w||0)*(x.r||0),0) : null;
   const prevDur = prevSame ? prevSame.duration : null;
 
   // Biggest gain
@@ -6358,9 +6379,9 @@ function finishWorkout() {
   bgSyncToSheets(); // optimistic background push
 
   // Generate and persist post-workout insight card
-  generateInsightCard(entry, duration, volume);
+  generateInsightCard(entry, duration);
 
-  ST.lastSummary = { duration, volume, prevDur, prevVol, biggestGain };
+  ST.lastSummary = { duration, prevDur, biggestGain };
   const milestone = checkMilestone();
   if (milestone) {
     ST.milestoneN = milestone;
@@ -6672,7 +6693,7 @@ function renderHistory() {
   <div class="screen-content">
     <div class="page-header"><h1>Progress</h1></div>
     <div class="history-tabs">
-      <button class="hist-tab ${tab==='progress'?'active':''}" onclick="setHistTab('progress')">Progress</button>
+      <button class="hist-tab ${tab==='progress'?'active':''}" onclick="setHistTab('progress')">Muscles</button>
       <button class="hist-tab ${tab==='workouts'?'active':''}" onclick="setHistTab('workouts')">Workouts</button>
     </div>
     <div id="hist-body">
@@ -6693,7 +6714,7 @@ function renderProgressGauges() {
     </div>`;
   }
 
-  // Scheduled sets per muscle across the full program week
+  // ── Scheduled sets per muscle across the full program week ──
   const scheduledSets = {};
   for (const sess of prog.sessions) {
     for (const ex of sess.exercises) {
@@ -6703,7 +6724,7 @@ function renderProgressGauges() {
     }
   }
 
-  // Completed sets this week per muscle
+  // ── Completed sets this week per muscle ──
   const weekStart = (() => { const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() - d.getDay()); return d.getTime(); })();
   const completedSets = {};
   for (const w of getHistory()) {
@@ -6722,58 +6743,106 @@ function renderProgressGauges() {
     }
   }
 
-  // Sort by completion pct desc
-  const muscles = Object.keys(scheduledSets).sort((a, b) => {
+  if (!Object.keys(scheduledSets).length) {
+    return `<div style="padding:24px 20px;font-size:13px;color:var(--muted);font-style:italic">No exercises found for this program.</div>`;
+  }
+
+  // ── Sort by completion % desc, cap/pad to exactly 16 cells ──
+  const GRID_SIZE = 16;
+  const sorted = Object.keys(scheduledSets).sort((a, b) => {
     const pa = (completedSets[a] || 0) / (scheduledSets[a] || 1);
     const pb = (completedSets[b] || 0) / (scheduledSets[b] || 1);
     return pb - pa;
-  });
+  }).slice(0, GRID_SIZE);
 
-  // SVG arc gauge builder — stroke-linecap:round tapered dials per mandate
-  function buildArcGauge(pct, isFull) {
-    const R = 7;                          // arc radius
-    const cx = 12, cy = 12;              // centre of 24×24 viewBox
-    const circ = 2 * Math.PI * R;        // full circumference
-    const trackDash  = circ * 0.82;      // 82% arc (open at bottom)
-    const fillDash   = trackDash * Math.min(pct / 100, 1);
-    const rotate     = -90 + (360 * 0.09); // start at ~10% from top
+  // Pad to 16 with ghost entries
+  while (sorted.length < GRID_SIZE) sorted.push(null);
 
-    return `<svg viewBox="0 0 24 24" style="width:24px;height:24px;flex-shrink:0;display:block">
-      <circle cx="${cx}" cy="${cy}" r="${R}"
-        fill="none"
-        stroke="oklch(91.2% 0.012 72)"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-dasharray="${trackDash.toFixed(2)} ${circ.toFixed(2)}"
-        transform="rotate(${rotate} ${cx} ${cy})"/>
-      <circle cx="${cx}" cy="${cy}" r="${R}"
-        fill="none"
-        stroke="${isFull ? 'oklch(72.3% 0.190 145)' : 'oklch(58.5% 0.210 32)'}"
-        stroke-width="2.5"
-        stroke-linecap="round"
-        stroke-dasharray="${fillDash.toFixed(2)} ${circ.toFixed(2)}"
-        transform="rotate(${rotate} ${cx} ${cy})"
-        style="filter:drop-shadow(0 0 ${isFull ? 5 : 3}px ${isFull ? 'oklch(72.3% 0.190 145 / 0.60)' : 'oklch(58.5% 0.210 32 / 0.50)'});transition:stroke-dasharray 750ms cubic-bezier(0.34,1.36,0.64,1)"/>
+  // ── SVG ring builder — terracotta arc + sketch displacement + glow ──
+  const BM_R    = 33;
+  const BM_CIRC = +(2 * Math.PI * BM_R).toFixed(3);  // 207.345
+
+  function buildRing(pct, idx, isGhost) {
+    const filled    = +((pct / 100) * BM_CIRC).toFixed(3);
+    const hasFill   = pct > 0 && !isGhost;
+    const pctColor  = isGhost ? '#B0ACA4' : (hasFill ? '#2A2421' : '#A8A49C');
+    const fontSize  = pct >= 100 ? 14 : (pct >= 10 ? 16 : 18);
+    const bgStroke  = isGhost ? '#C8C4BC' : '#B8B4AC';
+
+    const filterDefs = hasFill ? `
+      <defs>
+        <filter id="bmsk${idx}" x="-6%" y="-6%" width="112%" height="112%" color-interpolation-filters="linearRGB">
+          <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="2" seed="${idx * 11 + 5}" result="noise"/>
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.55" xChannelSelector="R" yChannelSelector="G"/>
+        </filter>
+        <filter id="bmgl${idx}" x="-35%" y="-35%" width="170%" height="170%">
+          <feGaussianBlur stdDeviation="2" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>` : '';
+
+    const activeArc = hasFill ? `
+      <circle cx="50" cy="50" r="${BM_R}"
+        fill="none" stroke="#2A2421" stroke-width="2.6" stroke-linecap="round"
+        stroke-dasharray="0 ${BM_CIRC}"
+        transform="rotate(-90 50 50)"
+        filter="url(#bmsk${idx})"
+        class="bm-arc" data-filled="${filled}"/>
+      <circle cx="50" cy="50" r="${BM_R}"
+        fill="none" stroke="#2A2421" stroke-width="1.4" stroke-linecap="round"
+        stroke-dasharray="0 ${BM_CIRC}"
+        transform="rotate(-90 50 50)"
+        filter="url(#bmgl${idx})"
+        opacity="0.18"
+        class="bm-arc" data-filled="${filled}"/>` : '';
+
+    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" overflow="visible">
+      ${filterDefs}
+      <circle cx="50" cy="50" r="${BM_R}" fill="none" stroke="${bgStroke}" stroke-width="4.2" stroke-linecap="round"/>
+      ${activeArc}
+      <text x="50" y="52"
+        text-anchor="middle" dominant-baseline="middle"
+        font-family="'Courier New',Courier,monospace"
+        font-size="${fontSize}" font-weight="700"
+        fill="${pctColor}"
+        font-variant-numeric="tabular-nums lining-nums"
+        letter-spacing="-0.4">${isGhost ? '—' : pct + '%'}</text>
     </svg>`;
   }
 
-  const gaugesHTML = muscles.length ? `
-  <div class="completion-gauges">
-    <div class="completion-gauges-hdr">Weekly Set Completion</div>
-    ${muscles.map(m => {
-      const scheduled = scheduledSets[m] || 0;
-      const completed = Math.min(completedSets[m] || 0, scheduled);
-      const pct = scheduled > 0 ? Math.round((completed / scheduled) * 100) : 0;
-      const isFull = pct >= 100;
-      return `<div class="gauge-row">
-        <div class="gauge-muscle">${m}</div>
-        <div class="gauge-arc-wrap">${buildArcGauge(pct, isFull)}</div>
-        <div class="gauge-pct-label" style="${isFull ? 'color:oklch(72.3% 0.190 145)' : ''}">${pct}%</div>
-      </div>`;
-    }).join('')}
-  </div>` : `<div style="padding:24px 20px;font-size:13px;color:var(--muted);font-style:italic">No exercises found for this program.</div>`;
+  // ── Build tile HTML ──
+  const tilesHTML = sorted.map((muscle, i) => {
+    const row      = Math.floor(i / 4);
+    const col      = i % 4;
+    const isA      = (row + col) % 2 === 0;
+    const isGhost  = muscle === null;
+    const scheduled = isGhost ? 1 : (scheduledSets[muscle] || 1);
+    const completed = isGhost ? 0 : Math.min(completedSets[muscle] || 0, scheduled);
+    const pct       = isGhost ? 0 : Math.round((completed / scheduled) * 100);
 
-  return gaugesHTML;
+    return `<div class="bm-tile ${isA ? 'ta' : 'tb'}${isGhost ? ' ghost' : ''}">
+      <div class="bm-ring-box">${buildRing(pct, i, isGhost)}</div>
+      <span class="bm-label">${isGhost ? '' : muscle}</span>
+    </div>`;
+  }).join('');
+
+  // ── Kick off staggered arc animation after DOM paint ──
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      document.querySelectorAll('#hist-body .bm-arc').forEach((arc, i) => {
+        const filled = arc.dataset.filled;
+        if (!filled) return;
+        setTimeout(() => {
+          arc.style.transition = 'stroke-dasharray 0.78s cubic-bezier(0.4,0,0.2,1)';
+          arc.setAttribute('stroke-dasharray', filled + ' ' + BM_CIRC);
+        }, 60 + i * 22);
+      });
+    });
+  });
+
+  return `<div class="progress-grid-wrap">
+    <div class="bio-matrix">${tilesHTML}</div>
+  </div>`;
 }
 
 function renderFiveWeekCalendar() {
