@@ -918,6 +918,30 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
 .ex-card.expanded .ex-body { max-height: 900px; }
 .ex-body-inner { padding: 0 16px 16px; }
 .warmup-hint { font-style: italic; font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+/* ── Warm-up set row ── */
+.warmup-row {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 10px;
+  padding: 8px 10px; border-radius: 10px; min-width: 0; box-sizing: border-box;
+  background: oklch(97% 0.008 72 / 0.7);
+  border: 1px dashed oklch(78% 0.030 60 / 0.5);
+}
+.warmup-label {
+  font-size: 10px; font-family: var(--font-mono); letter-spacing: 0.12em;
+  color: var(--muted); text-transform: uppercase; white-space: nowrap; flex-shrink: 0;
+}
+.warmup-input {
+  flex: 1; min-width: 0; height: 36px; border: 1px solid var(--border); border-radius: 8px;
+  text-align: center; font-size: 14px; font-weight: 600; font-family: var(--font-body);
+  background: transparent; color: var(--text); outline: none; box-sizing: border-box;
+}
+.warmup-sep { font-size: 13px; color: var(--muted); flex-shrink: 0; }
+.warmup-dismiss {
+  width: 26px; height: 26px; flex-shrink: 0; border: none; background: none;
+  cursor: pointer; color: var(--muted); font-size: 16px; line-height: 1;
+  display: flex; align-items: center; justify-content: center; border-radius: 50%;
+  transition: background 150ms, color 150ms;
+}
+.warmup-dismiss:active { background: oklch(91% 0.012 72); color: var(--charcoal); }
 .ex-notes {
   font-style: italic; font-size: 12px; color: var(--muted);
   margin-bottom: 10px; outline: none; width: 100%;
@@ -959,14 +983,15 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
 .ex-note-area::placeholder { color: var(--muted); opacity: 0.6; font-style: italic; }
 
 /* Set rows */
-.set-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; position: relative; }
+.set-row { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; position: relative; min-width: 0; overflow: hidden; box-sizing: border-box; }
+.set-input { min-width: 0; width: 0; flex: 1 1 0; box-sizing: border-box; max-width: 72px; }
 .set-num { font-size: 12px; color: var(--muted); width: 22px; flex-shrink: 0;
   font-variant-numeric: tabular-nums; }
 .set-input {
-  flex: 1; height: 44px; border: 1px solid var(--border);
+  flex: 1; min-width: 0; height: 44px; border: 1px solid var(--border);
   border-radius: 10px; text-align: center;
   font-size: 16px; font-weight: 600; font-family: var(--font-body);
-  background: var(--bg); color: var(--text); outline: none;
+  background: var(--bg); color: var(--text); outline: none; box-sizing: border-box;
   transition: all 0.2s cubic-bezier(0.25,1,0.5,1);
   -webkit-appearance: none;
   font-variant-numeric: tabular-nums;
@@ -1166,8 +1191,8 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 5px 3px 6px;
-  gap: 3px;
+  padding: 8px 3px 8px;
+  gap: 5px;
   position: relative;
   overflow: hidden;
 }
@@ -1180,33 +1205,27 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
 }
 .bm-tile.ta { background: #E0E0E0; }
 .bm-tile.tb { background: #FAF7F2; }
-/* Dormant tile: not scheduled this week — visually isolated, grid alignment preserved */
-.bm-tile.ghost {
-  opacity: 0.35;
-  filter: grayscale(100%);
-  mix-blend-mode: luminosity;
-}
-.bm-tile.ghost.ta { background: #C8C4BC; }
-.bm-tile.ghost.tb { background: #DEDAD2; }
+/* Ghost tiles removed from DOM — no CSS needed */
 .bm-ring-box {
   flex-shrink: 0;
-  /* +40% over baseline 54px = 75.6px → 76px */
-  width: min(76px, calc((100vw - 32px) / 4 - 8px));
-  height: min(76px, calc((100vw - 32px) / 4 - 8px));
+  /* 40% larger: baseline 54px → 76px */
+  width: min(76px, calc((100vw - 32px) / 4 - 6px));
+  height: min(76px, calc((100vw - 32px) / 4 - 6px));
 }
 .bm-ring-box svg { width: 100%; height: 100%; display: block; overflow: visible; }
 .bm-label {
-  font-family: var(--font-hero);
-  font-size: 7.5px;
-  font-weight: 700;
-  letter-spacing: 0.09em;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--charcoal);
-  opacity: 0.55;
+  opacity: 0.65;
   text-align: center;
   line-height: 1;
   flex-shrink: 0;
 }
+.bm-label.complete { color: oklch(52% 0.18 145); opacity: 1; font-weight: 700; }
 
 /* ── 5-Week Calendar (Workouts tab) ── */
 .cal-section { padding: 0 16px 48px; margin-top: 8px; }
@@ -1598,21 +1617,19 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
   </button>
 </nav>
 <div id="rest-banner">
-  <!-- Inline SVG countdown wheel -->
+  <!-- SVG ring — no digit inside, ring only -->
   <div id="rest-hud-ring">
     <svg viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg">
       <circle id="rest-hud-track" cx="22" cy="22" r="19"/>
       <circle id="rest-hud-fill"  cx="22" cy="22" r="19"/>
     </svg>
-    <div id="rest-hud-digit-wrap">
-      <div id="rest-hud-digit">—</div>
-    </div>
   </div>
-  <!-- Label + numeric readout: RESTING · 01:45 -->
+  <!-- Label + numeric readout -->
   <div class="rest-hud-label-wrap">
     <div class="rest-hud-word">Resting</div>
     <div id="rest-countdown">0:00</div>
   </div>
+  <button class="rest-plus" onclick="addRestTime(30)">+30s</button>
   <button class="rest-skip" onclick="cancelRestTimer()">skip</button>
 </div>
 <div id="rest-overlay">
@@ -3992,8 +4009,11 @@ let ST = {
   currentSession: null,
   travelMode: false,
   travelLocked: false,
-  workoutSets: {},      // key: `${sessionId}_${exIdx}` → [{w,r,ts}]
+  workoutSets: {},      // key: `${sessionId}_${exIdx}` → [{w,r,ts}]  |  `${key}_wu` for warm-up
   workoutNotes: {},     // key: `${sessionId}_${exIdx}` → session-scoped note string
+  dismissedWarmups: new Set(),  // in-memory: normalised exercise names with warm-up dismissed
+  syncQueue: [],        // pending Sheets pushes — drained on 'online' or next boot
+  audioCtx: null,
   workoutStart: null,
   durationSecs: 0,
   durationTimer: null,
@@ -4264,13 +4284,22 @@ function playSound(type) {
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
       osc.start(); osc.stop(ctx.currentTime + 0.15);
     } else if (type === 'chime') {
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(523, ctx.currentTime);
-      osc.frequency.setValueAtTime(659, ctx.currentTime + 0.1);
-      osc.frequency.setValueAtTime(784, ctx.currentTime + 0.2);
-      gain.gain.setValueAtTime(0.15, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
-      osc.start(); osc.stop(ctx.currentTime + 0.5);
+      // High-impact commanding buzzer — three layered oscillators
+      const now = ctx.currentTime;
+      [[220,'sawtooth',0.38],[440,'square',0.22],[880,'sine',0.18]].forEach(([freq, waveType, vol]) => {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        const dist = ctx.createWaveShaper();
+        const curve = new Float32Array(256);
+        for (let k = 0; k < 256; k++) { const x = (k * 2) / 256 - 1; curve[k] = (Math.PI + 200) * x / (Math.PI + 200 * Math.abs(x)); }
+        dist.curve = curve;
+        o.type = waveType; o.frequency.setValueAtTime(freq, now);
+        g.gain.setValueAtTime(vol, now);
+        g.gain.setValueAtTime(vol * 1.2, now + 0.04);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
+        o.connect(dist); dist.connect(g); g.connect(ctx.destination);
+        o.start(now); o.stop(now + 0.65);
+      });
     }
   } catch(e){}
 }
@@ -4536,15 +4565,14 @@ function updateWorkoutPill() {
 // ── Command Center helpers ────────────────────────────────────────────────────
 
 function buildSilhouetteSVG(targets, actuals, weekComplete) {
-  // ── Chromatic volume threshold logic (Pillar IV) ──────────────────────────
-  // >50% weekly volume completion → luxury gold; ≤50% → standard terracotta
+  // ── 4-state chromatic fill: none / coral / gold / sage ───────────────────
   function col(muscle) {
     const t = targets[muscle] || 0, a = actuals[muscle] || 0;
-    if (!t) return 'oklch(79% 0.018 55 / 0.24)';    // no target → neutral warm
-    if (!a) return 'oklch(79% 0.018 55 / 0.28)';    // no actuals → neutral warm
+    if (!t || !a) return 'oklch(79% 0.018 55 / 0.22)';   // 0% — neutral warm ghost
     const p = a / t;
-    if (p > 0.50) return 'oklch(78% 0.124 88 / 0.82)';  // >50% → luxury gold #C9A84C
-    return 'oklch(58.5% 0.210 32 / 0.62)';              // ≤50% → terracotta accent
+    if (p > 0.90) return 'oklch(56% 0.100 145 / 0.82)';  // >90% — sage #7A9A72
+    if (p > 0.50) return 'oklch(70% 0.110 82 / 0.84)';   // 50–90% — gold #C9A84C
+    return 'oklch(58.5% 0.210 32 / 0.65)';               // 1–49% — terracotta coral
   }
   function isActive(muscle) {
     const t = targets[muscle] || 0, a = actuals[muscle] || 0;
@@ -4554,8 +4582,9 @@ function buildSilhouetteSVG(targets, actuals, weekComplete) {
     if (!isActive(muscle)) return 'none';
     const t = targets[muscle] || 0, a = actuals[muscle] || 0;
     const p = a / t;
-    if (p > 0.50) return 'url(#glowGold)';   // >50% → gold bloom filter
-    return 'url(#glowLight)';                 // ≤50% → subtle terracotta halo
+    if (p > 0.90) return 'url(#glowGold)';   // >90% sage — reuse gold bloom
+    if (p > 0.50) return 'url(#glowGold)';   // 50–90% gold bloom
+    return 'url(#glowLight)';                 // coral halo
   }
   function pulse(muscle) {
     const t = targets[muscle] || 0, a = actuals[muscle] || 0;
@@ -4813,6 +4842,47 @@ function getMuscleVolumeHistory(muscle) {
 
 // ── Muscle tap → premium glass overlay with SVG polyline chart ───────────────
 
+// ── e1RM helpers (Epley: weight × (1 + reps/30)) ─────────────────────────────
+function calcE1RM(weight, reps) {
+  if (!weight || !reps || reps <= 0) return 0;
+  return Math.round(weight * (1 + reps / 30));
+}
+
+// Top set = heaviest weight; ties broken by highest reps
+function getTopSetE1RM(sets) {
+  if (!sets || !sets.length) return 0;
+  const valid = sets.filter(s => s && s.w > 0 && s.r > 0);
+  if (!valid.length) return 0;
+  const top = valid.reduce((best, s) => {
+    if (s.w > best.w) return s;
+    if (s.w === best.w && s.r > best.r) return s;
+    return best;
+  }, valid[0]);
+  return calcE1RM(top.w, top.r);
+}
+
+// Session aggregate e1RM = sum of all exercises' top-set e1RM
+// excludes _wu warm-up keys
+function getSessionE1RM(histEntry, prog) {
+  if (!histEntry || !histEntry.sets || !prog) return 0;
+  const sess = prog.sessions.find(s => s.id === histEntry.sessionId);
+  if (!sess) return 0;
+  let total = 0;
+  for (const [key, sets] of Object.entries(histEntry.sets)) {
+    if (key.endsWith('_wu')) continue;  // exclude warm-up sets
+    total += getTopSetE1RM(sets);
+  }
+  return total;
+}
+
+// Returns the previous history entry for the same sessionId (excluding current)
+function getPrevSessionEntry(sessionId, excludeId) {
+  const hist = getHistory()
+    .filter(w => w.sessionId === sessionId && w.id !== excludeId)
+    .sort((a, b) => (b.endTime || 0) - (a.endTime || 0));
+  return hist[0] || null;
+}
+
 function getEpleyOverloadByMuscle(muscle) {
   const hist = getHistory();
   const now = Date.now();
@@ -4820,7 +4890,7 @@ function getEpleyOverloadByMuscle(muscle) {
   return Array.from({ length: 5 }, (_, i) => {
     const wStart = now - (5 - i) * msW;
     const wEnd   = now - (4 - i) * msW;
-    let peakOverload = 0;
+    let peakE1RM = 0;
     for (const w of hist) {
       if (w.endTime < wStart || w.endTime >= wEnd || !w.sets) continue;
       const prog = PROGRAMS.find(p => p.id === w.programId);
@@ -4828,19 +4898,16 @@ function getEpleyOverloadByMuscle(muscle) {
       const sess = prog.sessions.find(s => s.id === w.sessionId);
       if (!sess) continue;
       for (const [key, sets] of Object.entries(w.sets)) {
-        const ex = sess.exercises[parseInt(key.split('_').pop())];
+        if (key.endsWith('_wu')) continue;
+        const exIdx = parseInt(key.split('_').pop());
+        const ex = sess.exercises[exIdx];
         if (!ex) continue;
         if (getMuscle(stripSuperset(ex.name)) !== muscle) continue;
-        const validSets = sets.filter(Boolean);
-        const totalReps  = validSets.reduce((s, x) => s + (x.r || 0), 0);
-        const maxWeight  = validSets.reduce((m, x) => Math.max(m, x.w || 0), 0);
-        if (maxWeight > 0 && totalReps > 0) {
-          const overload = Math.round(maxWeight * (1 + 0.033 * totalReps));
-          if (overload > peakOverload) peakOverload = overload;
-        }
+        const e = getTopSetE1RM(sets);
+        if (e > peakE1RM) peakE1RM = e;
       }
     }
-    return { label: `w${i + 1}`, value: peakOverload };
+    return { label: `w${i + 1}`, value: peakE1RM };
   });
 }
 
@@ -4901,95 +4968,114 @@ function openMuscleGraph(eOrMuscle, muscleOpt) {
     panel.style.transformOrigin = 'center center';
   }
 
+  // ── e1RM weekly data ──────────────────────────────────────────────────────
   const weeks  = getEpleyOverloadByMuscle(muscle);
   const vals   = weeks.map(w => w.value);
   const labels = weeks.map(w => w.label);
   const peak   = Math.max(...vals, 1);
-  const thisWk = vals[4];
-  const lastWk = vals[3];
-  const delta  = thisWk - lastWk;
-  const deltaColor = delta >= 0 ? 'rgba(96,184,110,0.95)' : 'rgba(228,88,68,0.95)';
-  const deltaStr   = (delta >= 0 ? '+' : '') + delta;
+  const thisWk = vals[4] || 0;
+  const prevWk = vals[3] || 0;
+  const hasData = vals.filter(v => v > 0).length >= 2;
 
-  // Luxury SVG line chart
-  const W = 292, H = 98;
-  const pad = { l: 14, r: 14, t: 18, b: 26 };
+  // Delta % vs previous week
+  let deltaBadge;
+  if (!hasData || (thisWk === 0 && prevWk === 0)) {
+    deltaBadge = `<span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:oklch(60% 0.018 55);letter-spacing:0.04em">Baseline Established</span>`;
+  } else if (prevWk === 0) {
+    deltaBadge = `<span style="color:oklch(52% 0.18 145);font-family:'Courier New',monospace;font-size:20px;font-weight:700;letter-spacing:-0.5px">▲ New</span>`;
+  } else {
+    const pct = Math.round(((thisWk - prevWk) / prevWk) * 100);
+    const up  = pct >= 0;
+    deltaBadge = `<span style="color:${up ? 'oklch(52% 0.18 145)' : 'oklch(55% 0.20 28)'};font-family:'Courier New',monospace;font-size:22px;font-weight:700;letter-spacing:-0.5px">${up ? '▲' : '▼'} ${up ? '+' : ''}${pct}%</span>`;
+  }
+
+  // ── Premium SVG line chart (dark charcoal on frosted glass) ──────────────
+  const W = 288, H = 92;
+  const pad = { l: 10, r: 10, t: 14, b: 24 };
   const cW = W - pad.l - pad.r, cH = H - pad.t - pad.b;
-  const minV = Math.min(...vals.filter(v => v > 0)) || 0;
-  const maxV = peak;
+  const minV = Math.min(...vals.filter(v => v > 0)) * 0.92 || 0;
+  const maxV = peak * 1.05 || 1;
   const range = maxV - minV || 1;
 
   const xs = vals.map((_, i) => pad.l + (i / (vals.length - 1)) * cW);
-  const ys = vals.map(v  => pad.t + cH - ((Math.max(v, minV) - minV) / range) * cH);
+  const ys = vals.map(v  => v > 0
+    ? pad.t + cH - ((v - minV) / range) * cH
+    : pad.t + cH);
 
-  const linePts  = xs.map((x, i) => `${x.toFixed(1)},${ys[i].toFixed(1)}`).join(' ');
-  const areaPath = `M${xs[0].toFixed(1)},${ys[0].toFixed(1)} `
-    + xs.map((x, i) => `L${x.toFixed(1)},${ys[i].toFixed(1)}`).join(' ')
-    + ` L${xs[xs.length-1].toFixed(1)},${(H-pad.b).toFixed(1)}`
-    + ` L${xs[0].toFixed(1)},${(H-pad.b).toFixed(1)} Z`;
-
-  const hasData = vals.filter(v => v > 0).length >= 2;
-
-  const gridLines = [0, 0.5, 1].map(f => {
-    const y   = pad.t + cH * (1 - f);
-    const val = Math.round(minV + f * range);
-    return val > 0 ? `<line x1="${pad.l}" y1="${y.toFixed(1)}" x2="${(W-pad.r).toFixed(1)}"
-      y2="${y.toFixed(1)}" stroke="rgba(255,255,255,0.09)"
-      stroke-width="1" stroke-dasharray="2,5"/>
-      <text x="${pad.l}" y="${(y-3).toFixed(1)}" font-size="7.5"
-        fill="rgba(255,255,255,0.26)" font-family="-apple-system,sans-serif">${val}</text>` : '';
-  }).join('');
+  const linePts  = vals.map((v, i) => v > 0 ? `${xs[i].toFixed(1)},${ys[i].toFixed(1)}` : null).filter(Boolean).join(' ');
+  const areaPath = `M${xs[0].toFixed(1)},${(pad.t + cH).toFixed(1)} `
+    + vals.map((v, i) => v > 0 ? `L${xs[i].toFixed(1)},${ys[i].toFixed(1)}` : '').join(' ')
+    + ` L${xs[xs.length-1].toFixed(1)},${(pad.t + cH).toFixed(1)} Z`;
 
   const dots = xs.map((x, i) => {
     if (!vals[i]) return '';
     const isNow = i === vals.length - 1;
+    const fill  = isNow ? 'oklch(58.5% 0.210 32)' : 'oklch(58.5% 0.210 32 / 0.40)';
     return `<circle cx="${x.toFixed(1)}" cy="${ys[i].toFixed(1)}"
-      r="${isNow ? 4.5 : 2.5}"
-      fill="${isNow ? '#F0826A' : 'rgba(240,148,118,0.65)'}">
-      ${isNow ? `<animate attributeName="opacity" values="1;0.6;1" dur="2.2s" repeatCount="indefinite"/>` : ''}
+      r="${isNow ? 4 : 2.5}" fill="${fill}" stroke="${isNow ? 'oklch(97.8% 0.008 72)' : 'none'}" stroke-width="${isNow ? 1.5 : 0}">
+      ${isNow ? `<animate attributeName="r" values="4;5;4" dur="2.4s" repeatCount="indefinite"/>` : ''}
     </circle>`;
   }).join('');
 
   const lbls = labels.map((lbl, i) =>
-    `<text x="${xs[i].toFixed(1)}" y="${H - 5}" text-anchor="middle"
-      font-size="8" fill="rgba(255,255,255,0.38)"
-      font-family="'Courier New', monospace">${lbl}</text>`
+    `<text x="${xs[i].toFixed(1)}" y="${H - 4}" text-anchor="middle"
+      font-size="8.5" fill="oklch(44% 0.025 55)"
+      font-family="'Cormorant Garamond',serif" font-style="italic">${lbl}</text>`
   ).join('');
+
+  const valLabels = vals.map((v, i) => v > 0
+    ? `<text x="${xs[i].toFixed(1)}" y="${(ys[i] - 5).toFixed(1)}" text-anchor="middle"
+        font-size="7" fill="oklch(44% 0.025 55 / 0.55)"
+        font-family="'Courier New',monospace">${v}</text>` : '').join('');
 
   const chartSVG = hasData
     ? `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px;display:block;overflow:visible">
         <defs>
-          <linearGradient id="epleyAreaGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%"   stop-color="rgba(240,130,105,0.30)"/>
-            <stop offset="100%" stop-color="rgba(240,130,105,0.02)"/>
+          <linearGradient id="e1rmAreaGrad${muscle.replace(/\s/g,'')}" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="oklch(58.5% 0.210 32 / 0.12)"/>
+            <stop offset="100%" stop-color="oklch(58.5% 0.210 32 / 0.01)"/>
           </linearGradient>
         </defs>
-        ${gridLines}
-        <path d="${areaPath}" fill="url(#epleyAreaGrad)"/>
-        <polyline points="${linePts}" fill="none" stroke="rgba(240,148,118,0.88)"
-          stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-        ${dots}${lbls}
+        <line x1="${pad.l}" y1="${(pad.t+cH).toFixed(1)}" x2="${(W-pad.r).toFixed(1)}" y2="${(pad.t+cH).toFixed(1)}"
+          stroke="oklch(72% 0.030 60 / 0.25)" stroke-width="0.75"/>
+        <path d="${areaPath}" fill="url(#e1rmAreaGrad${muscle.replace(/\s/g,'')})"/>
+        <polyline points="${linePts}" fill="none" stroke="oklch(58.5% 0.210 32 / 0.70)"
+          stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        ${dots}${lbls}${valLabels}
       </svg>`
-    : `<p style="font-size:12px;color:rgba(255,255,255,0.40);font-style:italic;margin:18px 0;text-align:center">Log 2+ weeks to see your overload trend.</p>`;
+    : `<p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:oklch(60% 0.018 55);margin:20px 0;text-align:center">Log two weeks to see your strength curve.</p>`;
 
   document.getElementById('muscle-graph-content').innerHTML = `
-    <div class="mg-muscle-title">${muscle}</div>
-    <div class="mg-meta">Progressive Overload · Epley Index</div>
-    <div style="margin:10px 0 6px">${chartSVG}</div>
-    <div class="mg-stat-row">
-      <div class="mg-stat">
-        <div class="mg-stat-val">${thisWk > 0 ? thisWk : '—'}</div>
-        <div class="mg-stat-lbl">This Week</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;
+      font-size:22px;color:oklch(22.8% 0.018 42);letter-spacing:0.04em;
+      text-transform:uppercase;margin-bottom:2px">${muscle}</div>
+    <div style="font-family:'Courier New',monospace;font-size:8px;letter-spacing:0.18em;
+      text-transform:uppercase;color:oklch(60% 0.018 55);margin-bottom:14px">
+      e1RM · Epley Formula · 5 Week Trail</div>
+    <div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid oklch(91.2% 0.012 72)">
+      ${deltaBadge}
+    </div>
+    <div style="margin:0 0 6px">${chartSVG}</div>
+    <div style="display:flex;gap:0;margin-top:12px;border-top:1px solid oklch(91.2% 0.012 72);padding-top:10px">
+      <div style="flex:1;text-align:center">
+        <div style="font-family:'Courier New',monospace;font-size:17px;font-weight:700;
+          color:oklch(22.8% 0.018 42);font-variant-numeric:tabular-nums">${thisWk > 0 ? thisWk + '<span style="font-size:10px;font-weight:400;color:oklch(60% 0.018 55)">kg</span>' : '—'}</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:10px;
+          color:oklch(60% 0.018 55);margin-top:2px">this week</div>
       </div>
-      <div class="mg-stat">
-        <div class="mg-stat-val" style="color:${deltaColor};font-size:${Math.abs(delta)>99?'14px':'18px'}">
-          ${thisWk > 0 && lastWk > 0 ? deltaStr : '—'}
-        </div>
-        <div class="mg-stat-lbl">vs Last</div>
+      <div style="width:1px;background:oklch(91.2% 0.012 72)"></div>
+      <div style="flex:1;text-align:center">
+        <div style="font-family:'Courier New',monospace;font-size:17px;font-weight:700;
+          color:oklch(22.8% 0.018 42);font-variant-numeric:tabular-nums">${prevWk > 0 ? prevWk + '<span style="font-size:10px;font-weight:400;color:oklch(60% 0.018 55)">kg</span>' : '—'}</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:10px;
+          color:oklch(60% 0.018 55);margin-top:2px">prev week</div>
       </div>
-      <div class="mg-stat">
-        <div class="mg-stat-val">${peak > 0 ? peak : '—'}</div>
-        <div class="mg-stat-lbl">Peak</div>
+      <div style="width:1px;background:oklch(91.2% 0.012 72)"></div>
+      <div style="flex:1;text-align:center">
+        <div style="font-family:'Courier New',monospace;font-size:17px;font-weight:700;
+          color:oklch(22.8% 0.018 42);font-variant-numeric:tabular-nums">${peak > 0 ? peak + '<span style="font-size:10px;font-weight:400;color:oklch(60% 0.018 55)">kg</span>' : '—'}</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:10px;
+          color:oklch(60% 0.018 55);margin-top:2px">peak</div>
       </div>
     </div>`;
 
@@ -4999,8 +5085,17 @@ function openMuscleGraph(eOrMuscle, muscleOpt) {
 }
 
 
-// Alias — muscle overlay tap-outside still calls this; just delegate to the shared close
-function closeMuscleGraph(e) { closeProgressGraph(e); }
+// ── Dedicated muscle overlay close — fixes guard bug (was delegating to graph-backdrop check) ──
+function closeMuscleGraph(e) {
+  const ov = document.getElementById('muscle-graph-overlay');
+  // Allow close from: the ✕ button (no event), or tap directly on the overlay backdrop
+  if (e && e.target !== ov) return;
+  if (ov) {
+    ov.classList.remove('visible');
+    setTimeout(() => { ov.style.display = 'none'; }, 320);
+  }
+  _clearSilhouetteFocus();
+}
 
 function _clearSilhouetteFocus() {
   const totemEl = document.querySelector('.premium-totem-container');
@@ -5018,15 +5113,24 @@ function renderHome() {
   const container = document.getElementById('screen-home');
   if (!container) return;
 
-  // ── 1. Native data retrieval — all guards intact ──────────────────────────────
-  const stats  = typeof getStats === 'function' ? getStats() : {};
-  const streak = stats.streak || 0;
-
-  let volPct          = 0;
+  // ── 1. Native data retrieval ───────────────────────────────────────────────────
   let nextSessionName = 'SESSION';
   let targets         = {};
   let actuals         = {};
   let ns              = null;
+
+  // Streak = distinct sessions completed this week for the active program
+  const progId    = ST.defaultProgram || ST.currentProgram;
+  const progObj   = progId ? PROGRAMS.find(p => p.id === progId) : null;
+  const weekStartMs = (() => { const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() - d.getDay()); return d.getTime(); })();
+  const doneThisWeek = new Set(
+    getHistory()
+      .filter(w => w.programId === progId && w.endTime >= weekStartMs)
+      .map(w => w.sessionId)
+  );
+  const streak     = doneThisWeek.size;
+  const totalSess  = progObj ? progObj.sessions.length : 0;
+  const volPct     = totalSess > 0 ? Math.min(100, Math.round((streak / totalSess) * 100)) : 0;
 
   if (typeof getNextSession === 'function') {
     ns = getNextSession();
@@ -5037,12 +5141,6 @@ function renderHome() {
         if (vMuscle) {
           targets = vMuscle.targets || {};
           actuals = vMuscle.actuals || {};
-          let tSum = 0, aSum = 0;
-          for (const m of Object.keys(targets)) {
-            tSum += targets[m] || 0;
-            aSum += (actuals[m] || 0);
-          }
-          volPct = tSum > 0 ? Math.min(100, Math.round((aSum / tSum) * 100)) : 0;
         }
       }
     }
@@ -5490,8 +5588,23 @@ function renderWorkout() {
       ${plateHtml}`;
     }
 
-    const warmupText = ex.warmupSets && ex.warmupSets !== '0' ?
-      `<div class="warmup-hint">↑ ${ex.warmupSets} warmup sets before working sets</div>` : '';
+    // Warm-up set row — one interactive row; hidden if user dismissed for this exercise
+    const wuKey = `${key}_wu`;
+    const wuDismissed = ST.dismissedWarmups.has(normalizeEx(name));
+    const wuLogged = ST.workoutSets[wuKey] && ST.workoutSets[wuKey][0];
+    const wuPreW = wuLogged ? wuLogged.w : (lastPerf && lastPerf[0] ? Math.round((lastPerf[0].w || 0) * 0.5) : '');
+    const warmupRowHtml = (!wuDismissed) ? `
+      <div class="warmup-row" id="wurow-${key}">
+        <span class="warmup-label">warm-up</span>
+        <input class="warmup-input" id="wuwi-${key}" type="number" inputmode="decimal"
+          value="${wuPreW}" placeholder="kg" min="0" step="0.5" onclick="this.select()">
+        <span class="warmup-sep">×</span>
+        <input class="warmup-input" id="wuri-${key}" type="number" inputmode="numeric"
+          value="${wuLogged ? wuLogged.r : ''}" placeholder="reps" min="0" onclick="this.select()"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();logWarmup('${key}');}">
+        <button class="warmup-dismiss" onclick="dismissWarmup(event,'${key}','${normalizeEx(name)}')" title="Remove warm-up">✕</button>
+      </div>` : '';
+    const warmupText = '';
 
     const noteKey = normalizeEx(name);
     const noteVal = notes[noteKey] || '';
@@ -5522,7 +5635,7 @@ function renderWorkout() {
       </div>
       <div class="ex-body">
         <div class="ex-body-inner">
-          ${warmupText}
+          ${warmupRowHtml}
           ${suggestion ? `<div class="weight-suggestion">💡 Suggested start: ~${suggestion.w}kg (based on ${suggestion.basis})</div>` : ''}
           ${overloadNudge}
           ${setRows}
@@ -5887,6 +6000,38 @@ function logSet(key, si, exIdx) {
   }
 }
 
+// ── Warm-up set: log (saves to _wu key, no rest timer) ───────────────────────
+function logWarmup(key) {
+  const wuwi = document.getElementById('wuwi-' + key);
+  const wuri = document.getElementById('wuri-' + key);
+  if (!wuwi || !wuri) return;
+  const w = parseFloat(wuwi.value) || 0;
+  const r = parseInt(wuri.value) || 0;
+  if (!r) { wuri.focus(); return; }
+  const wuKey = key + '_wu';
+  if (!ST.workoutSets[wuKey]) ST.workoutSets[wuKey] = [];
+  ST.workoutSets[wuKey][0] = { w, r, ts: Date.now() };
+  autoSave();
+  if (navigator.vibrate) navigator.vibrate(15);
+  // Visual confirmation — briefly tint the row
+  const row = document.getElementById('wurow-' + key);
+  if (row) {
+    row.style.background = 'oklch(88% 0.06 145 / 0.25)';
+    row.style.borderColor = 'oklch(72% 0.19 145 / 0.4)';
+    setTimeout(() => { row.style.background = ''; row.style.borderColor = ''; }, 600);
+  }
+}
+
+// ── Warm-up set: dismiss (in-memory, no localStorage) ────────────────────────
+function dismissWarmup(e, key, exNameNorm) {
+  e.stopPropagation();
+  ST.dismissedWarmups.add(exNameNorm);
+  delete ST.workoutSets[key + '_wu'];
+  autoSave();
+  const row = document.getElementById('wurow-' + key);
+  if (row) { row.style.opacity = '0'; row.style.maxHeight = '0'; row.style.margin = '0'; row.style.padding = '0'; setTimeout(() => row.remove(), 260); }
+}
+
 function unlogSet(key, si, exIdx) {
   if (!ST.workoutSets[key]) return;
   ST.workoutSets[key][si] = null;
@@ -5905,7 +6050,7 @@ function unlogSet(key, si, exIdx) {
     btn.onclick = () => logSet(key, si, exIdx);
   }
 
-  // Un-complete the card if it was marked done
+  // Un-complete the card if it was marked done; re-expand so user can see sets
   const prog = PROGRAMS.find(p => p.id === ST.currentProgram);
   const sess = prog && prog.sessions.find(s => s.id === ST.currentSession);
   if (sess) {
@@ -5914,9 +6059,11 @@ function unlogSet(key, si, exIdx) {
     const remaining = (ST.workoutSets[key] || []).filter(Boolean).length;
     if (remaining < totalSets) {
       ST.completedCards.delete(key);
+      ST.expandedCards.add(key);
       const card = document.getElementById('excard-' + key);
       if (card) {
         card.classList.remove('completed');
+        card.classList.add('expanded');
         const nameEl = card.querySelector('.ex-name');
         if (nameEl) nameEl.innerHTML = stripSuperset(ex.name);
       }
@@ -6371,17 +6518,26 @@ function finishWorkout() {
     duration,
     travelMode: ST.travelMode,
     sets: ST.workoutSets,
-    notes: { ...ST.workoutNotes },   // session-scoped exercise notes snapshot
+    notes: { ...ST.workoutNotes },
   };
   hist.push(entry);
   saveHistory(hist);
   LS.remove('dcrgym_current_workout');
-  bgSyncToSheets(); // optimistic background push
+  bgSyncToSheets();
 
-  // Generate and persist post-workout insight card
+  // e1RM delta vs previous same session
+  const currentProg = PROGRAMS.find(p => p.id === ST.currentProgram);
+  const curE1RM  = getSessionE1RM(entry, currentProg);
+  const prevEntry = getPrevSessionEntry(ST.currentSession, entry.id);
+  const prevE1RM  = prevEntry ? getSessionE1RM(prevEntry, currentProg) : 0;
+  let e1rmDelta = null;
+  if (curE1RM > 0 && prevE1RM > 0) {
+    e1rmDelta = Math.round(((curE1RM - prevE1RM) / prevE1RM) * 100);
+  }
+
   generateInsightCard(entry, duration);
 
-  ST.lastSummary = { duration, prevDur, biggestGain };
+  ST.lastSummary = { duration, prevDur, biggestGain, e1rmDelta, curE1RM };
   const milestone = checkMilestone();
   if (milestone) {
     ST.milestoneN = milestone;
@@ -6460,11 +6616,38 @@ function showFinish() {
     compliancePct = total > 0 ? Math.round((done / total) * 100) + '%' : '—';
   }
 
+  // e1RM delta badge
+  let e1rmBadgeHTML = '';
+  if (s.e1rmDelta !== null && s.e1rmDelta !== undefined) {
+    const up = s.e1rmDelta >= 0;
+    e1rmBadgeHTML = `
+      <div style="margin:0 auto 18px;padding:12px 20px;border-radius:14px;
+        background:${up ? 'oklch(52% 0.18 145 / 0.08)' : 'oklch(55% 0.20 28 / 0.08)'};
+        border:1px solid ${up ? 'oklch(52% 0.18 145 / 0.25)' : 'oklch(55% 0.20 28 / 0.25)'};
+        text-align:center;max-width:320px">
+        <div style="font-family:'Courier New',monospace;font-size:26px;font-weight:700;
+          color:${up ? 'oklch(52% 0.18 145)' : 'oklch(55% 0.20 28)'};letter-spacing:-0.5px">
+          ${up ? '▲' : '▼'} ${up ? '+' : ''}${s.e1rmDelta}%
+        </div>
+        <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:12px;
+          color:oklch(60% 0.018 55);margin-top:3px">e1RM vs previous session</div>
+      </div>`;
+  } else if (s.curE1RM > 0) {
+    e1rmBadgeHTML = `
+      <div style="margin:0 auto 18px;padding:10px 20px;border-radius:14px;
+        background:oklch(91.2% 0.012 72 / 0.6);border:1px solid oklch(78% 0.030 60 / 0.4);
+        text-align:center;max-width:320px">
+        <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;
+          color:oklch(60% 0.018 55)">Baseline Established · ${s.curE1RM}kg e1RM</div>
+      </div>`;
+  }
+
   const el = document.createElement('div');
   el.id = 'finish-screen';
   el.innerHTML = `
     <div class="finish-headline">Done.</div>
     <div class="finish-session-label">${sess ? sess.name : 'Session'} complete</div>
+    ${e1rmBadgeHTML}
     <div class="finish-stats-row">
       <div class="finish-stat"><div class="finish-stat-val">${durText}</div><div class="finish-stat-lbl">Duration</div></div>
       <div class="finish-stat"><div class="finish-stat-val">${compliancePct}</div><div class="finish-stat-lbl">Compliance</div></div>
@@ -6747,82 +6930,71 @@ function renderProgressGauges() {
     return `<div style="padding:24px 20px;font-size:13px;color:var(--muted);font-style:italic">No exercises found for this program.</div>`;
   }
 
-  // ── Sort by completion % desc, cap/pad to exactly 16 cells ──
-  const GRID_SIZE = 16;
+  // ── Sort by completion % desc — NO ghost tiles, only programmed muscles ──
   const sorted = Object.keys(scheduledSets).sort((a, b) => {
     const pa = (completedSets[a] || 0) / (scheduledSets[a] || 1);
     const pb = (completedSets[b] || 0) / (scheduledSets[b] || 1);
     return pb - pa;
-  }).slice(0, GRID_SIZE);
+  });
+  // No padding — variable rows
 
-  // Pad to 16 with ghost entries
-  while (sorted.length < GRID_SIZE) sorted.push(null);
+  // ── SVG ring builder — 40% larger (r=46), success green at 100%, serif labels ──
+  const BM_R    = 46;
+  const BM_CIRC = +(2 * Math.PI * BM_R).toFixed(3);
 
-  // ── SVG ring builder — terracotta arc + sketch displacement + glow ──
-  const BM_R    = 33;
-  const BM_CIRC = +(2 * Math.PI * BM_R).toFixed(3);  // 207.345
+  function buildRing(pct, idx) {
+    const filled     = +((pct / 100) * BM_CIRC).toFixed(3);
+    const hasFill    = pct > 0;
+    const isComplete = pct >= 100;
+    // Colour scheme: complete = success green, partial = charcoal, empty = muted
+    const arcColor  = isComplete ? 'oklch(52% 0.18 145)' : 'oklch(22.8% 0.018 42)';
+    const pctColor  = isComplete ? 'oklch(52% 0.18 145)' : (hasFill ? 'oklch(22.8% 0.018 42)' : 'oklch(65% 0.020 55)');
+    const bgStroke  = 'oklch(78% 0.018 55 / 0.45)';
+    const fontSize  = pct >= 100 ? 15 : (pct >= 10 ? 17 : 19);
 
-  function buildRing(pct, idx, isGhost) {
-    const filled    = +((pct / 100) * BM_CIRC).toFixed(3);
-    const hasFill   = pct > 0 && !isGhost;
-    const pctColor  = isGhost ? '#B0ACA4' : (hasFill ? '#2A2421' : '#A8A49C');
-    const fontSize  = pct >= 100 ? 14 : (pct >= 10 ? 16 : 18);
-    const bgStroke  = isGhost ? '#C8C4BC' : '#B8B4AC';
-
-    const filterDefs = hasFill ? `
+    const filterDefs = hasFill && !isComplete ? `
       <defs>
         <filter id="bmsk${idx}" x="-6%" y="-6%" width="112%" height="112%" color-interpolation-filters="linearRGB">
           <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="2" seed="${idx * 11 + 5}" result="noise"/>
-          <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.55" xChannelSelector="R" yChannelSelector="G"/>
-        </filter>
-        <filter id="bmgl${idx}" x="-35%" y="-35%" width="170%" height="170%">
-          <feGaussianBlur stdDeviation="2" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.5" xChannelSelector="R" yChannelSelector="G"/>
         </filter>
       </defs>` : '';
 
     const activeArc = hasFill ? `
       <circle cx="50" cy="50" r="${BM_R}"
-        fill="none" stroke="#2A2421" stroke-width="2.6" stroke-linecap="round"
+        fill="none" stroke="${arcColor}" stroke-width="${isComplete ? 3.2 : 2.8}" stroke-linecap="round"
         stroke-dasharray="0 ${BM_CIRC}"
         transform="rotate(-90 50 50)"
-        filter="url(#bmsk${idx})"
-        class="bm-arc" data-filled="${filled}"/>
-      <circle cx="50" cy="50" r="${BM_R}"
-        fill="none" stroke="#2A2421" stroke-width="1.4" stroke-linecap="round"
-        stroke-dasharray="0 ${BM_CIRC}"
-        transform="rotate(-90 50 50)"
-        filter="url(#bmgl${idx})"
-        opacity="0.18"
+        ${hasFill && !isComplete ? `filter="url(#bmsk${idx})"` : ''}
         class="bm-arc" data-filled="${filled}"/>` : '';
 
     return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" overflow="visible">
       ${filterDefs}
-      <circle cx="50" cy="50" r="${BM_R}" fill="none" stroke="${bgStroke}" stroke-width="4.2" stroke-linecap="round"/>
+      <circle cx="50" cy="50" r="${BM_R}" fill="none" stroke="${bgStroke}" stroke-width="4" stroke-linecap="round"/>
       ${activeArc}
-      <text x="50" y="52"
+      <text x="50" y="53"
         text-anchor="middle" dominant-baseline="middle"
         font-family="'Courier New',Courier,monospace"
-        font-size="${fontSize}" font-weight="700"
+        font-size="${fontSize}" font-weight="900"
         fill="${pctColor}"
         font-variant-numeric="tabular-nums lining-nums"
-        letter-spacing="-0.4">${isGhost ? '—' : pct + '%'}</text>
+        letter-spacing="-0.5">${pct}%</text>
     </svg>`;
   }
 
-  // ── Build tile HTML ──
+  // ── Build tile HTML — no ghost tiles, only programmed muscles ──
   const tilesHTML = sorted.map((muscle, i) => {
-    const row      = Math.floor(i / 4);
-    const col      = i % 4;
-    const isA      = (row + col) % 2 === 0;
-    const isGhost  = muscle === null;
-    const scheduled = isGhost ? 1 : (scheduledSets[muscle] || 1);
-    const completed = isGhost ? 0 : Math.min(completedSets[muscle] || 0, scheduled);
-    const pct       = isGhost ? 0 : Math.round((completed / scheduled) * 100);
+    const row       = Math.floor(i / 4);
+    const col       = i % 4;
+    const isA       = (row + col) % 2 === 0;
+    const scheduled = scheduledSets[muscle] || 1;
+    const completed = Math.min(completedSets[muscle] || 0, scheduled);
+    const pct       = Math.round((completed / scheduled) * 100);
+    const isComplete = pct >= 100;
 
-    return `<div class="bm-tile ${isA ? 'ta' : 'tb'}${isGhost ? ' ghost' : ''}">
-      <div class="bm-ring-box">${buildRing(pct, i, isGhost)}</div>
-      <span class="bm-label">${isGhost ? '' : muscle}</span>
+    return `<div class="bm-tile ${isA ? 'ta' : 'tb'}">
+      <div class="bm-ring-box">${buildRing(pct, i)}</div>
+      <span class="bm-label${isComplete ? ' complete' : ''}">${muscle}</span>
     </div>`;
   }).join('');
 
@@ -6833,9 +7005,9 @@ function renderProgressGauges() {
         const filled = arc.dataset.filled;
         if (!filled) return;
         setTimeout(() => {
-          arc.style.transition = 'stroke-dasharray 0.78s cubic-bezier(0.4,0,0.2,1)';
+          arc.style.transition = 'stroke-dasharray 0.85s cubic-bezier(0.4,0,0.2,1)';
           arc.setAttribute('stroke-dasharray', filled + ' ' + BM_CIRC);
-        }, 60 + i * 22);
+        }, 60 + i * 28);
       });
     });
   });
@@ -7251,7 +7423,13 @@ function renderSettings() {
         <input type="file" accept=".csv" onchange="importStrongCSV(this)" style="font-size:13px;max-width:160px">
       </div>
       <div class="settings-row"><label>Export history</label>
-        <button onclick="exportCSV()" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer">Export CSV</button>
+        <div style="display:flex;gap:8px">
+          <button onclick="exportCSV()" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer">CSV</button>
+          <button onclick="exportJSON()" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer">JSON</button>
+        </div>
+      </div>
+      <div class="settings-row"><label>Restore from JSON</label>
+        <input type="file" accept=".json" onchange="importJSON(this)" style="font-size:13px;max-width:160px">
       </div>
       <div class="settings-row"><label>Google Sheets URL</label>
         <input type="url" value="${s.sheets||''}" placeholder="Apps Script URL"
@@ -7584,46 +7762,116 @@ async function pullFromSheets() {
   } catch(e) { /* silent — background op */ }
 }
 
+// ── Sync failure queue — persists failed pushes to LS, drains on 'online' ────
+function enqueueSyncPayload(payload) {
+  const queue = LS.get('dcrgym_sync_queue', []);
+  queue.push({ payload, ts: Date.now() });
+  LS.set('dcrgym_sync_queue', queue);
+}
+
+async function drainSyncQueue() {
+  const s = getSettings();
+  if (!s.sheets || !navigator.onLine) return;
+  const queue = LS.get('dcrgym_sync_queue', []);
+  if (!queue.length) return;
+  const failed = [];
+  for (const item of queue) {
+    try {
+      const resp = await fetch(s.sheets, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(item.payload)
+      });
+      if (!resp.ok) failed.push(item);
+    } catch(e) { failed.push(item); }
+  }
+  LS.set('dcrgym_sync_queue', failed);
+}
+
+// Listen for connectivity restore — drain queue automatically
+window.addEventListener('online', () => { drainSyncQueue().catch(() => {}); });
+
+// ── JSON full-fidelity backup export ─────────────────────────────────────────
+function exportJSON() {
+  const hist = getHistory();
+  const blob = new Blob([JSON.stringify({ version: 2, exportedAt: Date.now(), history: hist }, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  const date = new Date().toISOString().slice(0, 10);
+  a.href = url; a.download = `dcrgym-backup-${date}.json`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── JSON full-fidelity backup import ─────────────────────────────────────────
+function importJSON(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      const incoming = Array.isArray(data) ? data : (data.history || []);
+      if (!incoming.length) { alert('No workout history found in this backup file.'); return; }
+      const local  = getHistory();
+      const merged = mergeHistories(local, incoming);
+      const added  = merged.length - local.length;
+      saveHistory(merged);
+      bgSyncToSheets().catch(() => {});
+      alert(`Restored ${added} new workout${added !== 1 ? 's' : ''} from backup. Total: ${merged.length}.`);
+    } catch(err) {
+      alert('Could not read backup file. Make sure it is a valid DCR Gym JSON export.');
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
 async function bgSyncToSheets() {
   const s = getSettings();
   if (!s.sheets) return;
   const hist = getHistory();
+  // Full state blob — queue on failure
+  const statePayload = { action: 'saveState', history: hist, ts: Date.now() };
   try {
-    // Save full state blob for bidirectional sync
-    fetch(s.sheets, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ action:'saveState', history:hist, ts:Date.now() })
+    const r = await fetch(s.sheets, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(statePayload)
     });
-    // Also push human-readable rows
-    const prog = PROGRAMS.find(p => p.id === ST.currentProgram);
-    const sess = prog && prog.sessions.find(ss => ss.id === ST.currentSession);
-    if (prog && sess && hist.length > 0) {
-      const last = hist[hist.length - 1];
-      const exercises = sess.exercises.map((ex, i) => {
-        const key = `${sess.id}_${i}`;
-        const sets = (last.sets[key] || []).filter(Boolean).map(s => ({weight:s.w, reps:s.r}));
-        return { name: stripSuperset(ex.name), sets };
-      }).filter(ex => ex.sets.length);
-      fetch(s.sheets, {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({
-          action: 'syncWorkouts',
-          workouts: [{
-            id: last.id,
-            date: last.endTime,
-            programName: prog.name,
-            sessionName: sess.name,
-            duration: last.duration,
-            totalVolume: calcVolume(),
-            totalSets: exercises.reduce((n,e)=>n+e.sets.length,0),
-            exercises
-          }]
-        })
+    if (!r.ok) throw new Error('non-ok');
+  } catch(e) {
+    if (!navigator.onLine) enqueueSyncPayload(statePayload);
+  }
+
+  // Human-readable workout rows — also queued on failure
+  const prog = PROGRAMS.find(p => p.id === ST.currentProgram);
+  const sess = prog && prog.sessions.find(ss => ss.id === ST.currentSession);
+  if (prog && sess && hist.length > 0) {
+    const last = hist[hist.length - 1];
+    const exercises = sess.exercises.map((ex, i) => {
+      const key = `${sess.id}_${i}`;
+      const sets = (last.sets[key] || []).filter(s => s && !String(key).endsWith('_wu')).map(s => ({ weight: s.w, reps: s.r }));
+      return { name: stripSuperset(ex.name), sets };
+    }).filter(ex => ex.sets.length);
+    const rowPayload = {
+      action: 'syncWorkouts',
+      workouts: [{
+        id: last.id, date: last.endTime,
+        programName: prog.name, sessionName: sess.name,
+        duration: last.duration,
+        totalE1RM: getSessionE1RM(last, prog),
+        totalSets: exercises.reduce((n, e) => n + e.sets.length, 0),
+        exercises
+      }]
+    };
+    try {
+      const r2 = await fetch(s.sheets, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(rowPayload)
       });
+      if (!r2.ok) throw new Error('non-ok');
+    } catch(e) {
+      if (!navigator.onLine) enqueueSyncPayload(rowPayload);
     }
-  } catch(e) { /* silent */ }
+  }
 }
 
 async function manualSync() {
@@ -7684,6 +7932,12 @@ function bootstrapApp() {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').then(r => { ST.swReg = r; }).catch(() => {});
   }
+
+  // ── Silent auto-pull from Sheets on every app open ────────────────────────
+  pullFromSheets().catch(() => {});
+
+  // ── Drain any pending sync queue items (offline → online recovery) ────────
+  drainSyncQueue();
 
   // Dismiss splash — belt-and-suspenders: remove active class, zero z-index
   if (splash) {
