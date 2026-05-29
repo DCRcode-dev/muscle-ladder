@@ -152,138 +152,220 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
 .masthead-gear:active { transform: rotate(45deg); opacity: 1; }
 .masthead-gear svg { width: 18px; height: 18px; display: block; }
 
-/* ── Analysis screen ── */
-#screen-analysis { overflow: hidden; height: 100svh; }
-.analysis-wrap {
-  display: flex; flex-direction: column;
+/* ── Analysis screen — Luxe Biometric Dashboard ── */
+#screen-analysis { overflow: hidden; height: 100svh; background: #FAF7F2; }
+.ana-wrap {
   height: 100svh;
-  padding: 52px 28px calc(var(--nav-h) + 20px);
+  display: flex; flex-direction: column;
+  padding: 48px 14px calc(var(--nav-h) + 12px);
   box-sizing: border-box;
-  justify-content: space-between;
+  gap: 9px;
+  background: #FAF7F2;
 }
-.analysis-eyebrow {
-  font-family: var(--font-body); font-size: 10px; letter-spacing: 0.16em;
-  text-transform: uppercase; color: var(--muted); opacity: 0.6;
-  flex-shrink: 0;
-}
-/* Ring zone */
-.analysis-ring-zone {
-  display: flex; flex-direction: column; align-items: center;
-  flex-shrink: 0; padding-top: 4px;
-}
-.analysis-ring-container {
-  position: relative; width: 160px; height: 160px;
-}
-.analysis-ring-container svg {
-  width: 160px; height: 160px; display: block;
-}
-.analysis-ring-score {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  pointer-events: none;
-}
-.analysis-ring-number {
-  font-family: 'Cormorant Garamond', serif; font-size: 2.8rem;
-  font-weight: 300; font-style: italic; line-height: 1;
-  color: var(--charcoal); letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums lining-nums;
-}
-.analysis-ring-label {
-  font-family: var(--font-body); font-size: 9px; letter-spacing: 0.14em;
-  text-transform: uppercase; color: var(--muted); opacity: 0.65; margin-top: 3px;
-}
-.analysis-factor-label {
-  font-family: var(--font-body); font-size: 9.5px; letter-spacing: 0.08em;
-  color: var(--muted); opacity: 0.55; margin-top: 10px; font-style: italic;
-  text-align: center;
-}
-/* Vitals row */
-.analysis-vitals-row {
-  display: flex; align-items: baseline; justify-content: center;
-  gap: 12px; flex-shrink: 0;
-}
-.analysis-vital-block { text-align: center; }
-.analysis-vital-num {
-  font-family: 'Cormorant Garamond', serif; font-size: 2.4rem;
-  font-weight: 300; font-style: italic; line-height: 1;
-  color: var(--charcoal); letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums lining-nums;
-}
-.analysis-vital-unit {
-  font-family: var(--font-body); font-size: 10px; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--muted); opacity: 0.6;
-}
-.analysis-vitals-sep {
-  font-family: var(--font-body); font-size: 18px; color: var(--border);
-  opacity: 0.5; padding-bottom: 4px;
-}
-/* Chart zone */
-.analysis-chart-zone { flex: 1; min-height: 0; display: flex; flex-direction: column; padding-top: 8px; }
-.analysis-chart-label {
-  font-size: 9px; text-transform: uppercase; letter-spacing: 0.16em;
-  color: var(--muted); opacity: 0.55; margin-bottom: 8px; flex-shrink: 0;
-}
-.analysis-chart-legend {
-  display: flex; gap: 14px; margin-bottom: 8px; flex-shrink: 0;
-}
-.analysis-legend-item {
-  display: flex; align-items: center; gap: 5px;
-  font-family: var(--font-body); font-size: 8.5px; letter-spacing: 0.08em;
-  color: var(--muted); opacity: 0.7; text-transform: lowercase;
-}
-.analysis-legend-dot {
-  width: 14px; height: 1.5px; border-radius: 1px; flex-shrink: 0;
-}
-.analysis-chart-svg-wrap { flex: 1; min-height: 0; }
-.analysis-chart-svg-wrap svg { width: 100%; height: 100%; display: block; }
-/* Connect / sync footer */
-.analysis-connect-link {
-  font-family: var(--font-body); font-size: 9.5px; letter-spacing: 0.12em;
-  text-transform: lowercase; color: var(--muted); opacity: 0.45;
-  background: none; border: none; cursor: pointer; padding: 0;
-  text-decoration: underline; text-underline-offset: 3px;
-  flex-shrink: 0; text-align: center;
-}
-.analysis-connect-link:active { opacity: 1; }
 
-/* ── Analysis HUD bar ── */
-.analysis-eyebrow-row {
+/* ── Header ── */
+.ana-header {
   display: flex; align-items: center; justify-content: space-between;
-  flex-shrink: 0;
+  flex-shrink: 0; padding: 0 2px;
 }
-.analysis-hud-right {
-  display: flex; align-items: center; gap: 6px;
+.ana-header-title {
+  font-family: var(--font-body); font-size: 10px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: #1A1714; opacity: 0.55;
 }
-.analysis-hud-dot {
+.ana-status-row { display: flex; align-items: center; gap: 8px; }
+.ana-status-item {
+  display: flex; align-items: center; gap: 4px;
+  font-family: var(--font-body); font-size: 7px; letter-spacing: 0.10em;
+  text-transform: uppercase; color: #1A1714; opacity: 0.35;
+}
+.ana-hud-dot {
   width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0;
 }
-.analysis-hud-dot.live {
-  background: oklch(72.3% 0.190 145);
-  animation: hud-pulse 2.8s ease-in-out infinite;
+.ana-hud-dot.live {
+  background: #28A745;
+  animation: ana-pulse-g 2.8s ease-in-out infinite;
 }
-.analysis-hud-dot.stale {
-  background: oklch(62% 0.155 38);
-  opacity: 0.7;
+.ana-hud-dot.stale { background: #C9701A; opacity: 0.7; }
+@keyframes ana-pulse-g {
+  0%,100% { box-shadow: 0 0 0 0 rgba(40,167,69,0.5); }
+  55%      { box-shadow: 0 0 0 4px rgba(40,167,69,0); }
 }
-@keyframes hud-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 oklch(72.3% 0.190 145 / 0.45); }
-  55%       { box-shadow: 0 0 0 4px oklch(72.3% 0.190 145 / 0); }
+.ana-refresh-btn {
+  font-size: 12px; color: #1A1714; opacity: 0.25;
+  background: none; border: none; cursor: pointer; padding: 0; line-height: 1;
+  transition: opacity 0.18s;
 }
-.analysis-hud-meta {
-  font-family: var(--font-body); font-size: 8.5px; letter-spacing: 0.09em;
-  color: var(--muted); opacity: 0.45; text-transform: lowercase;
+.ana-refresh-btn:active { opacity: 0.8; }
+@keyframes ana-spin {
+  from { transform: rotate(0deg); } to { transform: rotate(360deg); }
 }
-.analysis-hud-refresh {
-  font-family: var(--font-body); font-size: 9px; letter-spacing: 0.10em;
-  text-transform: lowercase; color: var(--muted); opacity: 0.35;
-  background: none; border: none; cursor: pointer; padding: 0 0 0 4px;
-  transition: opacity 0.2s;
+
+/* ── Summary grid ── */
+.ana-summary {
+  display: grid;
+  grid-template-columns: 1fr 152px 1fr;
+  gap: 8px;
+  flex-shrink: 0;
+  align-items: center;
 }
-.analysis-hud-refresh:active { opacity: 0.9; }
-@keyframes hud-spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+.ana-pods-col { display: flex; flex-direction: column; gap: 7px; }
+
+/* ── Neumorphic pods ── */
+.ana-pod {
+  background: #FAF7F2;
+  border-radius: 14px;
+  box-shadow:
+    8px 8px 18px #d9d6ce,
+    -8px -8px 18px #ffffff,
+    inset -2px -2px 5px rgba(0,0,0,0.04),
+    inset 2px 2px 5px rgba(255,255,255,0.55);
+  padding: 10px 8px 9px;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  min-height: 0;
 }
+.ana-pod-icon { font-size: 12px; line-height: 1; opacity: 0.45; }
+.ana-pod-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.85rem; font-weight: 600; font-style: italic; line-height: 1;
+  color: #1A1714; letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.ana-pod-label {
+  font-family: var(--font-body); font-size: 6.5px; letter-spacing: 0.20em;
+  text-transform: uppercase; color: #1A1714; opacity: 0.40;
+}
+.ana-pod-bar-track {
+  width: 85%; height: 2px;
+  background: rgba(0,0,0,0.07); border-radius: 1px;
+  overflow: hidden; margin-top: 3px; flex-shrink: 0;
+}
+.ana-pod-bar-fill { height: 100%; border-radius: 1px; transition: width 0.7s ease; }
+
+/* ── Central readiness dial ── */
+.ana-dial-zone {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 5px;
+}
+.ana-dial-outer {
+  width: 152px; height: 152px; border-radius: 50%;
+  background: #FAF7F2;
+  box-shadow:
+    10px 10px 20px #d9d6ce,
+    -10px -10px 20px #ffffff,
+    inset -2px -2px 5px rgba(0,0,0,0.05),
+    inset 2px 2px 5px rgba(255,255,255,0.5);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; flex-shrink: 0;
+}
+.ana-dial-svg {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  border-radius: 50%; overflow: visible;
+}
+.ana-dial-inner {
+  width: 106px; height: 106px; border-radius: 50%;
+  background: #FAF7F2;
+  box-shadow:
+    5px 5px 12px #d4d1c9,
+    -5px -5px 12px #ffffff,
+    inset -1px -1px 4px rgba(0,0,0,0.04),
+    inset 1px 1px 4px rgba(255,255,255,0.5);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 1;
+}
+.ana-dial-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.7rem; font-weight: 700; font-style: italic; line-height: 1;
+  color: #1A1714; letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "liga" 1, "dlig" 1;
+}
+.ana-dial-lbl {
+  font-family: var(--font-body); font-size: 7px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: #1A1714; opacity: 0.45; margin-top: 3px;
+}
+.ana-factor-lbl {
+  font-family: var(--font-body); font-size: 7.5px; letter-spacing: 0.08em;
+  color: #1A1714; opacity: 0.38; font-style: italic; text-align: center;
+  padding: 0 4px;
+}
+
+/* ── Glassmorphic chart panel ── */
+.ana-chart-panel {
+  flex: 1; min-height: 0;
+  background: rgba(250,247,242,0.88);
+  backdrop-filter: blur(12px) saturate(1.1);
+  -webkit-backdrop-filter: blur(12px) saturate(1.1);
+  border: 0.75px solid rgba(210,207,200,0.65);
+  border-radius: 16px;
+  box-shadow:
+    6px 6px 16px #d4d1c9,
+    -4px -4px 10px #ffffff,
+    inset 0 1px 0 rgba(255,255,255,0.80);
+  display: flex; flex-direction: column;
+  padding: 11px 13px 8px; gap: 6px; overflow: hidden;
+  position: relative;
+}
+.ana-chart-top {
+  display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+}
+.ana-chart-title {
+  font-family: var(--font-body); font-size: 7.5px; letter-spacing: 0.20em;
+  text-transform: uppercase; color: #1A1714; opacity: 0.38;
+}
+.ana-legend { display: flex; gap: 10px; }
+.ana-legend-item {
+  display: flex; align-items: center; gap: 4px;
+  font-family: var(--font-body); font-size: 7px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: #1A1714; opacity: 0.48;
+}
+.ana-legend-swatch {
+  width: 18px; height: 3px; border-radius: 2px; flex-shrink: 0;
+}
+.ana-chart-body {
+  flex: 1; min-height: 0; position: relative;
+}
+.ana-chart-body svg { width: 100%; height: 100%; display: block; overflow: visible; }
+
+/* Hover popover */
+.ana-popover {
+  position: absolute; pointer-events: none; opacity: 0;
+  transition: opacity 0.14s ease;
+  background: rgba(250,247,242,0.97);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 0.75px solid rgba(210,207,200,0.75);
+  border-radius: 11px;
+  box-shadow: 3px 5px 18px rgba(0,0,0,0.10), 0 1px 0 rgba(255,255,255,0.9) inset;
+  padding: 9px 12px; min-width: 136px; z-index: 10;
+}
+.ana-popover.visible { opacity: 1; }
+.ana-popover-day {
+  font-family: var(--font-body); font-size: 7.5px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: #1A1714; opacity: 0.45;
+  margin-bottom: 5px; padding-bottom: 5px;
+  border-bottom: 0.5px solid rgba(0,0,0,0.08);
+}
+.ana-popover-row {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--font-body); font-size: 8.5px; letter-spacing: 0.04em;
+  color: #1A1714; line-height: 1.9;
+}
+.ana-popover-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.ana-popover-val {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-weight: 600; margin-left: auto; letter-spacing: 0.02em;
+}
+
+/* Sync footer */
+.ana-sync-footer {
+  font-family: var(--font-body); font-size: 8px; letter-spacing: 0.12em;
+  text-transform: lowercase; color: #1A1714; opacity: 0.28;
+  text-align: center; flex-shrink: 0;
+  background: none; border: none; cursor: pointer; padding: 0;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.ana-sync-footer:active { opacity: 0.75; }
 
 /* ── Post-workout insight card ── */
 .insight-card {
@@ -1683,7 +1765,8 @@ window.onerror = function(msg, url, line, col, error) {
     '<p><b>Fault:</b> ' + msg + '</p>' +
     '<p><b>Location:</b> Line ' + line + ', Col ' + col + '</p>' +
     '<pre style="background:#fff;padding:16px;border-radius:6px;overflow-x:auto;border:1px solid #ddd;font-size:11px;white-space:pre-wrap">' + (error ? error.stack : '') + '</pre>' +
-    '<button onclick="localStorage.clear();location.reload()" style="margin-top:20px;padding:12px 24px;background:oklch(25% 0.01 40);color:#fff;border:none;border-radius:30px;cursor:pointer;font-size:12px;letter-spacing:1px;text-transform:lowercase;font-family:monospace">reset cache &amp; reload</button>' +
+    '<button onclick="(function(){if(\'caches\' in window){caches.keys().then(function(k){k.forEach(function(n){caches.delete(n)})})}; if(\'serviceWorker\' in navigator){navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister()})})}; setTimeout(function(){location.reload(true)},300)})()" style="margin-top:20px;padding:12px 24px;background:oklch(25% 0.01 40);color:#fff;border:none;border-radius:30px;cursor:pointer;font-size:12px;letter-spacing:1px;text-transform:lowercase;font-family:monospace">clear cache &amp; reload</button>' +
+    '<p style="margin-top:12px;font-size:10px;color:oklch(50% 0.01 40);font-family:monospace">your workout history is preserved — only app cache is cleared</p>' +
     '</div>';
   return false;
 };
@@ -4038,20 +4121,19 @@ let ST = {
   swReg: null,
   defaultProgram: null,
   fitbit: {
-    readinessScore: 88,
-    readinessFactor: null,          // lowest sub-component label e.g. 'hrv balance'
-    sleepScore: 82,
-    restingHR: 62,
-    hrv: 56,
-    deepSleepMinutes: 85,
-    remSleepMinutes: 95,
-    lightSleepMinutes: 210,
+    readinessScore: null,
+    readinessFactor: null,
+    sleepScore: null,
+    restingHR: null,
+    hrv: null,
+    deepSleepMinutes: null,
+    remSleepMinutes: null,
+    lightSleepMinutes: null,
     averageWorkoutHR: null,
     spo2: null,
-    // Mock trailing arrays — displayed when not yet connected
-    trailingReadiness: [74, 80, 85, 79, 82, 88, 91],
-    trailingSleep:     [70, 78, 82, 75, 80, 82, 85],
-    trailingHRV:       [48, 52, 55, 50, 53, 56, 58],
+    trailingReadiness: [],
+    trailingSleep:     [],
+    trailingHRV:       [],
     connected: false,
     lastSync: null,
   },
@@ -4064,7 +4146,7 @@ function getNotes() { return LS.get('dcrgym_notes', {}); }
 function saveNotes(n) { LS.set('dcrgym_notes', n); }
 function getRestTimes() { return LS.get('dcrgym_rest', {}); }
 function saveRestTimes(r) { LS.set('dcrgym_rest', r); }
-function getSettings() { return LS.get('dcrgym_settings', {sound:true,sheets:'https://script.google.com/macros/s/AKfycbw0wuLK7zNr7fAZiVm_xqQO1UJM-bTWfMcGzSjW2i5oawY85yPXdG-TycgT4eKBstM_/exec',weightUnit:'kg'}); }
+function getSettings() { return LS.get('dcrgym_settings', {sound:true,sheets:'https://script.google.com/macros/s/AKfycbxcAKZDYOzbSJ1a5OjqYRo9OyL9OIhEhoos8a4aQE5MB68atj7XAWQeyTuulmB6UFUt/exec',weightUnit:'kg'}); }
 function saveSettings(s) { LS.set('dcrgym_settings', s); }
 
 function getLastPerformance(exName) {
@@ -6872,6 +6954,18 @@ function renderHistory() {
   const el = document.getElementById('screen-history');
   if (!el) return;
   const tab = ST.histTab;
+  let bodyHTML = '';
+  try {
+    bodyHTML = tab === 'progress' ? renderProgressGauges() : renderWorkoutsCalendarView();
+  } catch(err) {
+    console.error('[DCR Gym] renderHistory tab error:', err);
+    bodyHTML = `<div style="padding:32px 20px;text-align:center">
+      <div style="font-family:var(--font-serif);font-style:italic;font-size:18px;color:var(--text-secondary);margin-bottom:12px">Display error</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:16px">${err.message}</div>
+      <button onclick="setHistTab('workouts')" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;margin-right:8px">View Workouts</button>
+      <button onclick="recoverFromCloud()" style="background:oklch(25% 0.01 40);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer">Recover ↓</button>
+    </div>`;
+  }
   el.innerHTML = `
   <div class="screen-content">
     <div class="page-header"><h1>Progress</h1></div>
@@ -6880,7 +6974,7 @@ function renderHistory() {
       <button class="hist-tab ${tab==='workouts'?'active':''}" onclick="setHistTab('workouts')">Workouts</button>
     </div>
     <div id="hist-body">
-      ${tab === 'progress' ? renderProgressGauges() : renderWorkoutsCalendarView()}
+      ${bodyHTML}
     </div>
   </div>`;
 }
@@ -7169,233 +7263,424 @@ function renderDetailChart(values) {
   return `<polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
 }
 
-// ── Analysis screen ───────────────────────────────────────────────────────────
+// ── Analysis screen — Luxe Biometric Dashboard ───────────────────────────────
 function renderAnalysis() {
   const el = document.getElementById('screen-analysis');
   if (!el) return;
 
   const fb = ST.fitbit;
 
-  // ── HUD status ─────────────────────────────────────────────────────────────
-  const today     = new Date().toISOString().slice(0, 10);
-  const isFresh   = fb.fetchedAt === today;
-  const dotClass  = isFresh ? 'live' : 'stale';
-  const hudStatus = isFresh
-    ? 'operational · fetched today'
-    : fb.fetchedAt
-      ? `stale · ${fb.fetchedAt}`
-      : 'no data · tap ↻';
-  const hudHTML = `
-    <div class="analysis-eyebrow-row">
-      <div class="analysis-eyebrow">// analysis</div>
-      <div class="analysis-hud-right">
-        <div class="analysis-hud-dot ${dotClass}"></div>
-        <span class="analysis-hud-meta">${hudStatus}</span>
-        <button class="analysis-hud-refresh" onclick="fetchFitbitData(true)" title="force live pull">↻</button>
+  // Status
+  const today   = new Date().toISOString().slice(0, 10);
+  const isFresh = fb.fetchedAt === today;
+  const dotCls  = isFresh ? 'live' : 'stale';
+  const statusLabel = isFresh ? 'Live' : (fb.fetchedAt ? 'Stale' : 'No Sync');
+  const statusIcon  = isFresh ? '●' : '○';
+
+  // Dial
+  const score    = fb.readinessScore ?? null;
+  const scoreVal = score !== null ? score : 0;
+  // Ring color: green for good, amber for moderate, terracotta for deficit
+  const arcColor = score === null ? '#B0A898'
+    : score >= 85 ? '#28A745'
+    : score >= 75 ? '#C9921A'
+    :               '#C04E2A';
+
+  const CX = 76, CY = 76, R = 62;
+  const CIRC     = 2 * Math.PI * R;
+  const fillDash = ((scoreVal / 100) * CIRC).toFixed(2);
+
+  // Pods data
+  const sleepVal = fb.sleepScore  ?? null;
+  const rhrVal   = fb.restingHR   ?? null;
+  const hrvVal   = fb.hrv         ?? null;
+  const deepVal  = fb.deepSleepMinutes > 0 ? Math.round(fb.deepSleepMinutes) : null;
+
+  function pod(icon, num, label, barColor, barPct) {
+    const display = num !== null ? num : '–';
+    const pct     = num !== null ? Math.min(100, barPct) : 0;
+    return `<div class="ana-pod">
+      <div class="ana-pod-icon">${icon}</div>
+      <div class="ana-pod-num">${display}</div>
+      <div class="ana-pod-label">${label}</div>
+      <div class="ana-pod-bar-track">
+        <div class="ana-pod-bar-fill" style="width:${pct}%;background:${barColor}"></div>
       </div>
     </div>`;
+  }
 
-  // ── Ring color by readiness threshold ─────────────────────────────────────
-  const score = fb.readinessScore ?? null;
-  const scoreDisplay = score !== null ? score : 0;
-  const ringColor = score === null
-    ? 'oklch(82% 0.018 72)'      // neutral parchment — no data yet
-    : score >= 85
-      ? 'oklch(72.3% 0.190 145)' // emerald — peak
-      : score >= 75
-        ? 'oklch(78% 0.09 85)'   // warm sand — steady
-        : 'oklch(62% 0.155 38)'; // amber/terracotta — deficit
+  const syncTime  = fb.lastSync
+    ? new Date(fb.lastSync).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})
+    : 'never';
+  const footerTxt    = fb.connected ? `synced ${syncTime}` : '[ connect fitbit ]';
+  const footerAction = fb.connected
+    ? `fetchFitbitData(true)`
+    : fb.authUrl ? `window.open('${fb.authUrl}','_blank')` : `Maps('settings')`;
 
-  // ── Ring SVG math ──────────────────────────────────────────────────────────
-  const CX = 80, CY = 80, R = 68;
-  const CIRC = 2 * Math.PI * R;
-  const fillDash = (scoreDisplay / 100) * CIRC;
-  const trackStroke = 'oklch(91.2% 0.012 72)';
-
-  const ringSVG = `
-    <svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="${CX}" cy="${CY}" r="${R}"
-        fill="none" stroke="${trackStroke}" stroke-width="4.5"
-        stroke-linecap="round"/>
-      <circle cx="${CX}" cy="${CY}" r="${R}"
-        fill="none" stroke="${ringColor}" stroke-width="4.5"
-        stroke-linecap="round"
-        stroke-dasharray="${fillDash.toFixed(2)} ${CIRC.toFixed(2)}"
-        transform="rotate(-90 ${CX} ${CY})"
-        style="transition:stroke-dasharray 900ms cubic-bezier(0.34,1.1,0.64,1);filter:drop-shadow(0 0 6px ${ringColor.replace(')','/0.45)')})"/>
-    </svg>`;
-
-  // ── Limiting factor label ──────────────────────────────────────────────────
-  const factorHTML = fb.readinessFactor
-    ? `<div class="analysis-factor-label">limiting factor // ${fb.readinessFactor}</div>`
-    : '';
-
-  // ── Trailing chart ─────────────────────────────────────────────────────────
-  const chartHTML = buildTrailingChart(fb);
-
-  // ── Footer ─────────────────────────────────────────────────────────────────
-  const footerHTML = !fb.connected
-    ? `<button class="analysis-connect-link" onclick="Maps('settings')">[ connect fitbit ]</button>`
-    : `<div class="analysis-connect-link" style="cursor:default;text-decoration:none;">
-        synced ${fb.lastSync ? new Date(fb.lastSync).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : 'never'}
-       </div>`;
+  const factorLine = fb.readinessFactor
+    ? `<div class="ana-factor-lbl">${fb.readinessFactor}</div>` : '';
 
   el.innerHTML = `
-  <div class="analysis-wrap">
-    ${hudHTML}
+  <div class="ana-wrap">
 
-    <div class="analysis-ring-zone">
-      <div class="analysis-ring-container">
-        ${ringSVG}
-        <div class="analysis-ring-score">
-          <div class="analysis-ring-number">${score !== null ? score : '–'}</div>
-          <div class="analysis-ring-label">readiness</div>
+    <!-- Header -->
+    <div class="ana-header">
+      <span class="ana-header-title">// Analysis</span>
+      <div class="ana-status-row">
+        <div class="ana-status-item">
+          <div class="ana-hud-dot ${dotCls}"></div>
+          ${statusLabel}
         </div>
-      </div>
-      ${factorHTML}
-    </div>
-
-    <div class="analysis-vitals-row">
-      <div class="analysis-vital-block">
-        <div class="analysis-vital-num">${fb.sleepScore ?? '–'}</div>
-        <div class="analysis-vital-unit">% sleep</div>
-      </div>
-      <div class="analysis-vitals-sep">│</div>
-      <div class="analysis-vital-block">
-        <div class="analysis-vital-num">${fb.restingHR ?? '–'}</div>
-        <div class="analysis-vital-unit">bpm rhr</div>
+        <div class="ana-status-item" onclick="Maps('settings')" style="cursor:pointer;text-decoration:underline;text-underline-offset:2px;">
+          Connect
+        </div>
+        <button class="ana-refresh-btn" id="ana-refresh" onclick="fetchFitbitData(true)" title="refresh">↻</button>
       </div>
     </div>
 
-    <div class="analysis-chart-zone">
-      <div class="analysis-chart-label">7-day biometric trail</div>
-      <div class="analysis-chart-legend">
-        <div class="analysis-legend-item">
-          <div class="analysis-legend-dot" style="background:oklch(58.5% 0.210 32)"></div>readiness
+    <!-- Summary pods + dial -->
+    <div class="ana-summary">
+
+      <div class="ana-pods-col">
+        ${pod('🌙', sleepVal, 'Sleep', '#B8860B', sleepVal)}
+        ${pod('⚡', hrvVal,   'HRV',   '#1A5276', Math.round((hrvVal ?? 0) / 120 * 100))}
+      </div>
+
+      <div class="ana-dial-zone">
+        <div class="ana-dial-outer">
+          <svg class="ana-dial-svg" viewBox="0 0 152 152" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="${CX}" cy="${CY}" r="${R}"
+              fill="none" stroke="#E0DDD6" stroke-width="7.5" stroke-linecap="round"/>
+            <circle cx="${CX}" cy="${CY}" r="${R}"
+              fill="none" stroke="${arcColor}" stroke-width="7.5" stroke-linecap="round"
+              stroke-dasharray="${fillDash} ${CIRC.toFixed(2)}"
+              transform="rotate(-90 ${CX} ${CY})"
+              style="transition:stroke-dasharray 900ms cubic-bezier(0.34,1.1,0.64,1);
+                     filter:drop-shadow(0 0 7px ${arcColor}88)"/>
+          </svg>
+          <div class="ana-dial-inner">
+            <div class="ana-dial-num">${score !== null ? score : '–'}</div>
+            <div class="ana-dial-lbl">Readiness</div>
+          </div>
         </div>
-        <div class="analysis-legend-item">
-          <div class="analysis-legend-dot" style="background:oklch(55% 0.08 240)"></div>sleep
-        </div>
-        <div class="analysis-legend-item">
-          <div class="analysis-legend-dot" style="background:oklch(72% 0.14 85)"></div>hrv
+        ${factorLine}
+      </div>
+
+      <div class="ana-pods-col">
+        ${pod('♥', rhrVal,  'RHR',   '#8B1A1A', Math.round(100 - ((rhrVal ?? 60) - 40) / 60 * 100))}
+        ${pod('💤', deepVal, 'Deep', '#2E4053', Math.round((deepVal ?? 0) / 120 * 100))}
+      </div>
+
+    </div>
+
+    <!-- Chart panel -->
+    <div class="ana-chart-panel">
+      <div class="ana-chart-top">
+        <div class="ana-chart-title">7-Day Biometric Trail</div>
+        <div class="ana-legend">
+          <div class="ana-legend-item">
+            <div class="ana-legend-swatch" style="background:#28A745"></div>Readiness
+          </div>
+          <div class="ana-legend-item">
+            <div class="ana-legend-swatch" style="background:#B8860B"></div>Sleep
+          </div>
+          <div class="ana-legend-item">
+            <div class="ana-legend-swatch" style="background:#1A5276"></div>HRV
+          </div>
         </div>
       </div>
-      <div class="analysis-chart-svg-wrap">
-        ${chartHTML}
+      <div class="ana-chart-body" id="ana-chart-body">
+        ${buildBiometricChart(fb)}
+        <div class="ana-popover" id="ana-popover"></div>
       </div>
     </div>
 
-    ${footerHTML}
+    <button class="ana-sync-footer" onclick="${footerAction}">${footerTxt}</button>
+
   </div>`;
 
-  // Cache-first: only hit the live endpoint if today's data isn't already loaded
-  if (!isFresh) fetchFitbitData(false);
+  // Always fetch on tab open — personal app, no reason to serve stale data
+  fetchFitbitData(false);
+  requestAnimationFrame(() => initChartHover(fb));
 }
 
-function buildTrailingChart(fb) {
+function buildBiometricChart(fb) {
   const R  = fb.trailingReadiness || [];
   const SL = fb.trailingSleep     || [];
   const HV = fb.trailingHRV       || [];
-  const N  = Math.min(R.length, SL.length, HV.length);
-  if (N < 2) return `<svg viewBox="0 0 300 110" xmlns="http://www.w3.org/2000/svg">
-    <text x="150" y="55" text-anchor="middle" font-family="'Cormorant Garamond',serif"
-      font-style="italic" font-size="13" fill="oklch(60% 0.018 55)" opacity="0.45">
-      complete more days to build your trail
-    </text></svg>`;
+  const N  = Math.max(R.length, SL.length, HV.length, 0);
 
-  // Real calendar day labels — today rightmost, trailing N days
-  const DAYS = ['S','M','T','W','T','F','S'];
-  const today = new Date();
-  const dayLabels = [];
+  if (N < 2) {
+    return `<svg viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+      <text x="150" y="52" text-anchor="middle" font-family="'Cormorant Garamond',serif"
+        font-style="italic" font-size="13" fill="#8C8680" opacity="0.45">
+        complete more sessions to build your trail
+      </text></svg>`;
+  }
+
+  const DAYS_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const today      = new Date();
+  const labels     = [];
   for (let i = N - 1; i >= 0; i--) {
-    const d = new Date(today);
-    d.setDate(today.getDate() - i);
-    dayLabels.push(DAYS[d.getDay()]);
+    const d = new Date(today); d.setDate(today.getDate() - i);
+    labels.push(DAYS_SHORT[d.getDay()]);
   }
 
-  const W = 300, H = 110, PAD_X = 8, PAD_TOP = 8, LABEL_H = 18;
-  const chartH = H - PAD_TOP - LABEL_H;
+  const W = 300, H = 100, PX = 16, PT = 8, LH = 14;
+  const chartH = H - PT - LH;
+  const uid = 'c' + Math.random().toString(36).slice(2, 6);
 
-  function normalizeSeries(arr) {
-    const slice = arr.slice(-N);
-    const mn = Math.min(...slice), mx = Math.max(...slice);
+  function normSeries(arr) {
+    const sl = arr.slice(-N);
+    // Pad if shorter
+    while (sl.length < N) sl.unshift(sl[0] ?? 0);
+    const mn = Math.min(...sl), mx = Math.max(...sl);
     const rng = mx - mn || 1;
-    return slice.map(v => (v - mn) / rng);
+    return sl.map(v => (v - mn) / rng);
   }
 
-  function buildPath(normalized) {
-    return normalized.map((v, i) => {
-      const x = PAD_X + (i / (N - 1)) * (W - PAD_X * 2);
-      const y = PAD_TOP + (1 - v) * chartH;
-      return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
-    }).join(' ');
+  function catmullRom(pts) {
+    if (pts.length < 2) return '';
+    let d = `M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[Math.max(0, i - 1)];
+      const p1 = pts[i], p2 = pts[i + 1];
+      const p3 = pts[Math.min(pts.length - 1, i + 2)];
+      const cp1x = p1[0] + (p2[0] - p0[0]) / 6;
+      const cp1y = p1[1] + (p2[1] - p0[1]) / 6;
+      const cp2x = p2[0] - (p3[0] - p1[0]) / 6;
+      const cp2y = p2[1] - (p3[1] - p1[1]) / 6;
+      d += ` C${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
+    }
+    return d;
   }
 
-  const rNorm  = normalizeSeries(R);
-  const slNorm = normalizeSeries(SL);
-  const hvNorm = normalizeSeries(HV);
+  function toPoints(norm) {
+    return norm.map((v, i) => [
+      PX + (i / (N - 1)) * (W - PX * 2),
+      PT + (1 - v) * chartH
+    ]);
+  }
 
-  // X-axis tick labels
-  const ticksHTML = dayLabels.map((lbl, i) => {
-    const x = PAD_X + (i / (N - 1)) * (W - PAD_X * 2);
-    return `<text x="${x.toFixed(1)}" y="${H - 2}" text-anchor="middle"
-      font-family="var(--font-body,monospace)" font-size="8" letter-spacing="0.04em"
-      fill="oklch(60% 0.018 55)" opacity="0.5">${lbl}</text>`;
+  function areaClose(path, pts) {
+    const lx = pts[pts.length - 1][0].toFixed(1);
+    const by = (PT + chartH).toFixed(1);
+    return `${path} L${lx},${by} L${pts[0][0].toFixed(1)},${by} Z`;
+  }
+
+  const rN  = normSeries(R);
+  const slN = normSeries(SL);
+  const hvN = normSeries(HV);
+  const rPts  = toPoints(rN);
+  const slPts = toPoints(slN);
+  const hvPts = toPoints(hvN);
+  const rPath  = catmullRom(rPts);
+  const slPath = catmullRom(slPts);
+  const hvPath = catmullRom(hvPts);
+
+  // Tick marks + labels
+  const ticks = labels.map((lbl, i) => {
+    const x = PX + (i / (N - 1)) * (W - PX * 2);
+    return `
+      <line x1="${x.toFixed(1)}" y1="${(PT + chartH + 1).toFixed(1)}"
+            x2="${x.toFixed(1)}" y2="${(PT + chartH + 3).toFixed(1)}"
+        stroke="#8C8680" stroke-width="0.75" opacity="0.35"/>
+      <text x="${x.toFixed(1)}" y="${H - 1}" text-anchor="middle"
+        font-family="var(--font-body,monospace)" font-size="7" letter-spacing="0.06em"
+        fill="#8C8680" opacity="0.50">${lbl}</text>`;
   }).join('');
 
-  // Micro crosshair at today (rightmost point)
-  const todayX = (W - PAD_X).toFixed(1);
-  const crosshair = `<line x1="${todayX}" y1="${PAD_TOP}" x2="${todayX}" y2="${H - LABEL_H}"
-    stroke="oklch(60% 0.018 55)" stroke-width="0.5" opacity="0.18" stroke-dasharray="2,2"/>`;
+  // Today vertical rule
+  const todayX = (W - PX).toFixed(1);
 
-  return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
-    ${crosshair}
-    <path d="${buildPath(slNorm)}" fill="none" stroke="oklch(55% 0.08 240)"
-      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.75"/>
-    <path d="${buildPath(hvNorm)}" fill="none" stroke="oklch(72% 0.14 85)"
-      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.75"/>
-    <path d="${buildPath(rNorm)}" fill="none" stroke="oklch(58.5% 0.210 32)"
-      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-    ${ticksHTML}
+  return `<svg id="ana-trail-svg-${uid}" data-uid="${uid}"
+      viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"
+      width="100%" height="100%" preserveAspectRatio="none">
+    <defs>
+      <linearGradient id="gr-r-${uid}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#28A745" stop-opacity="0.22"/>
+        <stop offset="100%" stop-color="#28A745" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="gr-sl-${uid}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#B8860B" stop-opacity="0.18"/>
+        <stop offset="100%" stop-color="#B8860B" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="gr-hv-${uid}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#1A5276" stop-opacity="0.16"/>
+        <stop offset="100%" stop-color="#1A5276" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+
+    <!-- Today rule -->
+    <line x1="${todayX}" y1="${PT}" x2="${todayX}" y2="${(PT + chartH).toFixed(1)}"
+      stroke="#8C8680" stroke-width="0.6" opacity="0.18" stroke-dasharray="2.5,3"/>
+
+    <!-- HRV band -->
+    <path d="${areaClose(hvPath, hvPts)}" fill="url(#gr-hv-${uid})"/>
+    <path d="${hvPath}" fill="none" stroke="#1A5276"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.70"/>
+
+    <!-- Sleep band -->
+    <path d="${areaClose(slPath, slPts)}" fill="url(#gr-sl-${uid})"/>
+    <path d="${slPath}" fill="none" stroke="#B8860B"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.72"/>
+
+    <!-- Readiness band (topmost) -->
+    <path d="${areaClose(rPath, rPts)}" fill="url(#gr-r-${uid})"/>
+    <path d="${rPath}" fill="none" stroke="#28A745"
+      stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/>
+
+    <!-- Pointer (hidden by default) -->
+    <line id="ana-ptr-${uid}" x1="0" y1="${PT}" x2="0" y2="${(PT + chartH).toFixed(1)}"
+      stroke="#1A1714" stroke-width="0.75" opacity="0.22" stroke-dasharray="2,3"
+      display="none"/>
+
+    <!-- Data point dots at each day -->
+    ${rPts.map((p, i) => `
+      <circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2.2"
+        fill="#28A745" opacity="0.80"
+        style="filter:drop-shadow(0 0 2px #28A74580)"/>
+    `).join('')}
+
+    ${ticks}
   </svg>`;
+}
+
+function initChartHover(fb) {
+  const body    = document.getElementById('ana-chart-body');
+  const popover = document.getElementById('ana-popover');
+  if (!body || !popover) return;
+
+  const svgEl = body.querySelector('svg');
+  if (!svgEl) return;
+
+  const R  = fb.trailingReadiness || [];
+  const SL = fb.trailingSleep     || [];
+  const HV = fb.trailingHRV       || [];
+  const N  = Math.max(R.length, SL.length, HV.length, 0);
+  if (N < 2) return;
+
+  const uid    = svgEl.dataset.uid;
+  const ptr    = document.getElementById(`ana-ptr-${uid}`);
+  const W      = 300, PX = 16;
+  const chartW = W - PX * 2;
+
+  const DAYS_LONG = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const today = new Date();
+
+  function getDayLabel(idxFromEnd) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - idxFromEnd);
+    return DAYS_LONG[d.getDay()];
+  }
+
+  function onMove(clientX) {
+    const rect   = svgEl.getBoundingClientRect();
+    const relX   = (clientX - rect.left) / rect.width; // 0–1
+    const normX  = (relX * W - PX) / chartW;           // 0–1 within chart
+    const idx    = Math.round(Math.max(0, Math.min(1, normX)) * (N - 1));
+    const svgX   = PX + (idx / (N - 1)) * chartW;
+
+    if (ptr) {
+      ptr.setAttribute('x1', svgX.toFixed(1));
+      ptr.setAttribute('x2', svgX.toFixed(1));
+      ptr.setAttribute('display', 'block');
+    }
+
+    const rVal  = R[R.length  - N + idx]  ?? null;
+    const slVal = SL[SL.length - N + idx] ?? null;
+    const hvVal = HV[HV.length - N + idx] ?? null;
+    const dayName = getDayLabel(N - 1 - idx);
+
+    popover.innerHTML = `
+      <div class="ana-popover-day">${dayName}</div>
+      <div class="ana-popover-row">
+        <div class="ana-popover-dot" style="background:#28A745"></div>
+        Readiness
+        <span class="ana-popover-val">${rVal !== null ? rVal : '–'}</span>
+      </div>
+      <div class="ana-popover-row">
+        <div class="ana-popover-dot" style="background:#B8860B"></div>
+        Sleep
+        <span class="ana-popover-val">${slVal !== null ? slVal : '–'}</span>
+      </div>
+      <div class="ana-popover-row">
+        <div class="ana-popover-dot" style="background:#1A5276"></div>
+        HRV
+        <span class="ana-popover-val">${hvVal !== null ? hvVal : '–'}</span>
+      </div>`;
+
+    popover.classList.add('visible');
+
+    // Position popover: keep it inside bounds
+    const bodyRect = body.getBoundingClientRect();
+    const px = clientX - bodyRect.left + 10;
+    const py = 10;
+    const maxLeft = bodyRect.width - 148;
+    popover.style.left = `${Math.max(4, Math.min(px, maxLeft))}px`;
+    popover.style.top  = `${py}px`;
+  }
+
+  body.addEventListener('mousemove',  e => onMove(e.clientX));
+  body.addEventListener('touchmove',  e => { e.preventDefault(); onMove(e.touches[0].clientX); }, { passive: false });
+  body.addEventListener('mouseleave', () => {
+    popover.classList.remove('visible');
+    if (ptr) ptr.setAttribute('display','none');
+  });
+  body.addEventListener('touchend',   () => {
+    setTimeout(() => {
+      popover.classList.remove('visible');
+      if (ptr) ptr.setAttribute('display','none');
+    }, 1800);
+  });
 }
 
 async function fetchFitbitData(force = false) {
   const s = getSettings();
-  if (!s.sheets) return;
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxcAKZDYOzbSJ1a5OjqYRo9OyL9OIhEhoos8a4aQE5MB68atj7XAWQeyTuulmB6UFUt/exec';
+  const base = (s.sheets && s.sheets.trim()) ? s.sheets.trim() : SCRIPT_URL;
+  const endpoint = base + '?action=getFitbit';
 
-  // Cache-first: if today's data is already stored and this isn't a forced pull, skip
+  // Cache-first: skip only if we have a fresh successful fetch from today AND not forced
   if (!force) {
     const today = new Date().toISOString().slice(0, 10);
-    if (ST.fitbit.fetchedAt === today) return;
+    if (ST.fitbit.fetchedAt === today && ST.fitbit.connected) return;
   }
 
-  // Animate the ↻ button into loading state if visible
-  const btn = document.querySelector('.analysis-hud-refresh');
+  // Spin the refresh button
+  const btn = document.querySelector('.ana-refresh-btn') || document.querySelector('#ana-refresh');
   if (btn) {
-    btn.textContent = '↻';
-    btn.style.animation = 'hud-spin 0.9s linear infinite';
-    btn.disabled = true;
-    btn.style.opacity = '0.65';
+    btn.style.animation = 'ana-spin 0.9s linear infinite';
+    btn.style.opacity   = '0.65';
+    btn.disabled        = true;
   }
 
-  const fitbitEndpoint = s.sheets + '?action=getFitbit';
+  console.log('[DCR Gym] Fetching biometrics from:', endpoint);
+
   try {
-    const res = await fetch(fitbitEndpoint, { method: 'GET' });
+    const res = await fetch(endpoint, { method: 'GET', mode: 'cors' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
+    console.log('[DCR Gym] Biometric response:', data);
+    if (data && data.connected === false && data.authUrl) {
+      // Not yet authorized — store the auth URL and re-render so the Connect button appears
+      ST.fitbit.connected = false;
+      ST.fitbit.authUrl   = data.authUrl;
+      if (ST.screen === 'analysis') renderAnalysis();
+      return;
+    }
     if (data && data.fitbit) {
+      // Null values from server ARE valid — they replace mocks
       Object.assign(ST.fitbit, data.fitbit, { connected: true, lastSync: Date.now() });
       LS.set('dcrgym_fitbit', ST.fitbit);
       if (ST.screen === 'analysis') renderAnalysis();
     }
   } catch(e) {
-    console.warn('[DCR Gym] Fitbit fetch failed (non-fatal):', e);
-    // Reset button on failure without full re-render
+    console.error('[DCR Gym] Biometric fetch failed:', e.message, endpoint);
     if (btn) {
       btn.style.animation = '';
-      btn.disabled = false;
-      btn.style.opacity = '0.35';
+      btn.style.opacity   = '0.30';
+      btn.disabled        = false;
     }
   }
 }
@@ -7434,6 +7719,9 @@ function renderSettings() {
       <div class="settings-row"><label>Google Sheets URL</label>
         <input type="url" value="${s.sheets||''}" placeholder="Apps Script URL"
           onchange="saveSetting('sheets',this.value)" style="font-size:12px;width:160px">
+      </div>
+      <div class="settings-row"><label>Recover from cloud</label>
+        <button id="recover-btn" onclick="recoverFromCloud()" style="background:oklch(25% 0.01 40);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:13px;cursor:pointer;font-family:var(--font-mono);letter-spacing:0.04em">Recover ↓</button>
       </div>
       <div class="settings-row"><label>Cloud sync</label>
         <button id="sync-now-btn" onclick="manualSync()" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer">Sync Now</button>
@@ -7762,16 +8050,37 @@ async function pullFromSheets() {
   } catch(e) { /* silent — background op */ }
 }
 
-// ── Sync failure queue — persists failed pushes to LS, drains on 'online' ────
+// ── Sync queue — queue-first persistence layer ────────────────────────────────
+// Every payload is enqueued before the fetch attempt. On fetch success, it is
+// dequeued. On any failure (online or offline), it stays queued and drains on
+// next boot or on connectivity restore. Nothing is ever silently dropped.
+
 function enqueueSyncPayload(payload) {
-  const queue = LS.get('dcrgym_sync_queue', []);
+  let queue = LS.get('dcrgym_sync_queue', []);
+  // Deduplicate by action + ts to avoid pile-up on retries
+  const key = (payload.action || '') + (payload.ts || '');
+  if (key && queue.some(i => (i.payload.action || '') + (i.payload.ts || '') === key)) return;
   queue.push({ payload, ts: Date.now() });
+  // Cap at 50 entries — keep newest, drop oldest saveState entries first
+  if (queue.length > 50) {
+    const saveStateIdxs = queue.map((i,n) => i.payload.action==='saveState'?n:-1).filter(n=>n>=0);
+    if (saveStateIdxs.length > 1) queue.splice(saveStateIdxs[0], 1); // drop oldest saveState
+    else queue.shift(); // drop oldest entry
+  }
   LS.set('dcrgym_sync_queue', queue);
+}
+
+function dequeueSyncPayload(payload) {
+  const key = (payload.action || '') + (payload.ts || '');
+  if (!key) return;
+  const queue = LS.get('dcrgym_sync_queue', []);
+  const filtered = queue.filter(i => (i.payload.action || '') + (i.payload.ts || '') !== key);
+  LS.set('dcrgym_sync_queue', filtered);
 }
 
 async function drainSyncQueue() {
   const s = getSettings();
-  if (!s.sheets || !navigator.onLine) return;
+  if (!s.sheets) return;
   const queue = LS.get('dcrgym_sync_queue', []);
   if (!queue.length) return;
   const failed = [];
@@ -7782,12 +8091,13 @@ async function drainSyncQueue() {
         body: JSON.stringify(item.payload)
       });
       if (!resp.ok) failed.push(item);
+      // success — item is NOT added to failed → effectively dequeued
     } catch(e) { failed.push(item); }
   }
   LS.set('dcrgym_sync_queue', failed);
 }
 
-// Listen for connectivity restore — drain queue automatically
+// Drain on connectivity restore AND on every boot (see bootstrapApp)
 window.addEventListener('online', () => { drainSyncQueue().catch(() => {}); });
 
 // ── JSON full-fidelity backup export ─────────────────────────────────────────
@@ -7829,26 +8139,29 @@ async function bgSyncToSheets() {
   const s = getSettings();
   if (!s.sheets) return;
   const hist = getHistory();
-  // Full state blob — queue on failure
+
+  // ── Full state blob ───────────────────────────────────────────────────────
+  // Queue-first: enqueue immediately as insurance, then attempt live fetch.
+  // If fetch succeeds, dequeue. If it fails for ANY reason (online or offline),
+  // the payload stays in the queue and will be drained on next boot or reconnect.
   const statePayload = { action: 'saveState', history: hist, ts: Date.now() };
+  enqueueSyncPayload(statePayload);
   try {
     const r = await fetch(s.sheets, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(statePayload)
     });
-    if (!r.ok) throw new Error('non-ok');
-  } catch(e) {
-    if (!navigator.onLine) enqueueSyncPayload(statePayload);
-  }
+    if (r.ok) dequeueSyncPayload(statePayload);
+  } catch(e) { /* stays queued — will drain on next boot */ }
 
-  // Human-readable workout rows — also queued on failure
+  // ── Human-readable workout rows ───────────────────────────────────────────
   const prog = PROGRAMS.find(p => p.id === ST.currentProgram);
   const sess = prog && prog.sessions.find(ss => ss.id === ST.currentSession);
   if (prog && sess && hist.length > 0) {
     const last = hist[hist.length - 1];
     const exercises = sess.exercises.map((ex, i) => {
       const key = `${sess.id}_${i}`;
-      const sets = (last.sets[key] || []).filter(s => s && !String(key).endsWith('_wu')).map(s => ({ weight: s.w, reps: s.r }));
+      const sets = (last.sets[key] || []).filter(s => s && s.r > 0 && !key.endsWith('_wu')).map(s => ({ weight: s.w, reps: s.r }));
       return { name: stripSuperset(ex.name), sets };
     }).filter(ex => ex.sets.length);
     const rowPayload = {
@@ -7862,15 +8175,14 @@ async function bgSyncToSheets() {
         exercises
       }]
     };
+    enqueueSyncPayload(rowPayload);
     try {
       const r2 = await fetch(s.sheets, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(rowPayload)
       });
-      if (!r2.ok) throw new Error('non-ok');
-    } catch(e) {
-      if (!navigator.onLine) enqueueSyncPayload(rowPayload);
-    }
+      if (r2.ok) dequeueSyncPayload(rowPayload);
+    } catch(e) { /* stays queued */ }
   }
 }
 
@@ -7884,6 +8196,33 @@ async function manualSync() {
     if (btn) { btn.textContent = 'Synced ✓'; setTimeout(()=>{ btn.textContent='Sync Now'; btn.disabled=false; }, 2000); }
   } catch(e) {
     if (btn) { btn.textContent = 'Error'; btn.disabled = false; }
+  }
+}
+
+async function recoverFromCloud() {
+  const btn = document.getElementById('recover-btn');
+  const s = getSettings();
+  if (!s.sheets) {
+    if (btn) { btn.textContent = 'No URL set'; setTimeout(()=>{ btn.textContent='Recover ↓'; }, 2000); }
+    return;
+  }
+  if (btn) { btn.textContent = 'Pulling…'; btn.disabled = true; }
+  try {
+    const before = getHistory().length;
+    await pullFromSheets();
+    const after = getHistory().length;
+    const added = after - before;
+    if (btn) {
+      btn.textContent = added > 0 ? `Restored ${added} workout${added!==1?'s':''}` : 'Up to date ✓';
+      setTimeout(()=>{ btn.textContent='Recover ↓'; btn.disabled=false; }, 3000);
+    }
+    if (added > 0) {
+      // Refresh home & history screens to reflect recovered data
+      renderHome();
+      if (ST.screen === 'history') renderHistory();
+    }
+  } catch(e) {
+    if (btn) { btn.textContent = 'Failed'; btn.disabled = false; }
   }
 }
 
@@ -7918,11 +8257,25 @@ function bootstrapApp() {
   // State hydration — fully wrapped, LS proxy handles any storage exceptions
   try {
     ST.defaultProgram = LS.get('dcrgym_default_prog');
+    // Auto-migrate URL — replace any old script URL with the current V9 deployment
+    const CURRENT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxcAKZDYOzbSJ1a5OjqYRo9OyL9OIhEhoos8a4aQE5MB68atj7XAWQeyTuulmB6UFUt/exec';
+    const storedSettings = LS.get('dcrgym_settings', null);
+    if (storedSettings && storedSettings.sheets && storedSettings.sheets !== CURRENT_SCRIPT_URL) {
+      storedSettings.sheets = CURRENT_SCRIPT_URL;
+      LS.set('dcrgym_settings', storedSettings);
+    }
     getSettings();
-    // Fitbit hydration — merge stored biometric data over defaults
+    // Fitbit hydration — restore last known values; fetchFitbitData will overwrite on tab open
     const storedFitbit = LS.get('dcrgym_fitbit', null);
     if (storedFitbit && typeof storedFitbit === 'object') {
-      Object.assign(ST.fitbit, storedFitbit);
+      // Only restore if the stored data was from today — discard stale cached sessions
+      const today = new Date().toISOString().slice(0, 10);
+      if (storedFitbit.fetchedAt === today) {
+        Object.assign(ST.fitbit, storedFitbit);
+      } else {
+        // Stale cache — clear it so renderAnalysis shows dashes until live fetch completes
+        LS.set('dcrgym_fitbit', null);
+      }
     }
   } catch(e) {
     console.warn('[DCR Gym Shell] State hydration fault (non-fatal):', e);
@@ -7970,7 +8323,8 @@ function bootstrapApp() {
       '<h2 style="font-family:serif;font-style:italic">[System Boot Fault]</h2>' +
       '<p style="margin-top:10px">' + err.message + '</p>' +
       '<pre style="background:#fff;padding:12px;font-size:11px;overflow-x:auto;margin-top:10px">' + (err.stack || '') + '</pre>' +
-      '<button onclick="localStorage.clear();location.reload()" style="margin-top:20px;padding:10px 20px;background:#2A2421;color:#fff;border:none;border-radius:8px;cursor:pointer">Reset Application Cache</button>' +
+      '<button onclick="(function(){if(\'caches\' in window){caches.keys().then(function(k){k.forEach(function(n){caches.delete(n)})})}; if(\'serviceWorker\' in navigator){navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister()})})}; setTimeout(function(){location.reload(true)},300)})()" style="margin-top:20px;padding:10px 20px;background:#2A2421;color:#fff;border:none;border-radius:8px;cursor:pointer">Clear Cache &amp; Reload</button>' +
+      '<p style="margin-top:8px;font-size:11px;color:#888;font-family:sans-serif">Workout history is preserved.</p>' +
       '</div>';
     return;
   }
@@ -7991,7 +8345,8 @@ function runBootSequence() {
       '<h2 style="font-family:serif;font-style:italic">[System Boot Fault]</h2>' +
       '<p style="margin-top:10px">' + fatalError.message + '</p>' +
       '<pre style="background:#fff;padding:12px;font-size:11px;overflow-x:auto;margin-top:10px">' + (fatalError.stack || '') + '</pre>' +
-      '<button onclick="localStorage.clear();location.reload()" style="margin-top:20px;padding:10px 20px;background:#2A2421;color:#fff;border:none;border-radius:8px;cursor:pointer">Reset Application Cache</button>' +
+      '<button onclick="(function(){if(\'caches\' in window){caches.keys().then(function(k){k.forEach(function(n){caches.delete(n)})})}; if(\'serviceWorker\' in navigator){navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister()})})}; setTimeout(function(){location.reload(true)},300)})()" style="margin-top:20px;padding:10px 20px;background:#2A2421;color:#fff;border:none;border-radius:8px;cursor:pointer">Clear Cache &amp; Reload</button>' +
+      '<p style="margin-top:8px;font-size:11px;color:#888;font-family:sans-serif">Workout history is preserved.</p>' +
       '</div>';
   }
 }
