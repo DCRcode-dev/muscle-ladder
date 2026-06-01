@@ -1065,8 +1065,8 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
 .ex-note-area::placeholder { color: var(--muted); opacity: 0.6; font-style: italic; }
 
 /* Set rows */
-.set-row { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; position: relative; min-width: 0; overflow: hidden; box-sizing: border-box; }
-.set-input { min-width: 0; width: 0; flex: 1 1 0; box-sizing: border-box; max-width: 72px; }
+.set-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 8px; position: relative; width: 100%; min-width: 0; overflow: visible; box-sizing: border-box; }
+.set-input { min-width: 0; flex: 1 1 0; box-sizing: border-box; }
 .set-num { font-size: 12px; color: var(--muted); width: 22px; flex-shrink: 0;
   font-variant-numeric: tabular-nums; }
 .set-input {
@@ -1084,7 +1084,7 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
 .set-log-btn {
   width: 44px; height: 44px; border-radius: 12px; border: none;
   background: var(--accent); color: #fff; font-size: 18px;
-  cursor: pointer; flex-shrink: 0;
+  cursor: pointer; flex-shrink: 0; margin-left: auto;
   display: flex; align-items: center; justify-content: center;
   transition: background 150ms;
 }
