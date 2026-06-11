@@ -114,7 +114,11 @@ html, body {
 .screen.slide-in-right  { transform: translateX(30%);  opacity: 0; pointer-events: none; }
 .screen.slide-in-left   { transform: translateX(-30%); opacity: 0; pointer-events: none; }
 .screen-content { padding-bottom: calc(var(--nav-h) + 24px); }
-body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
+/* Island non-occlusion: every screen glides down beneath the rest capsule */
+.screen { transition: transform 350ms cubic-bezier(0.16,1,0.3,1),
+                      opacity  350ms cubic-bezier(0.16,1,0.3,1),
+                      padding-top 340ms cubic-bezier(0.16,1,0.3,1); }
+body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58px); }
 
 /* ── Bottom nav ── */
 #bottom-nav {
@@ -774,151 +778,93 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
 #workout-header.travel-locked { padding-bottom: 8px !important; }
 
 /* ── Rest timer HUD — non-blocking persistent ticker ── */
-#rest-banner {
+/* ── Rest Island — Dynamic-Island-style floating capsule, top-center ──
+   Global: lives outside the screen containers and follows every view.
+   Non-occlusion rule: screens pad down beneath it (body.rest-active),
+   it never covers interactive elements, and touches outside its bounds
+   pass straight through (it is a small fixed element, not an overlay). */
+#rest-island {
   position: fixed;
-  bottom: calc(var(--nav-h) + 16px);
-  left: 50%; transform: translateX(-50%) translateY(20px);
-  width: calc(100% - 32px); max-width: 400px;
-  z-index: 150;
-  /* Luxury glassmorphism */
-  background: rgba(250, 247, 242, 0.82);
-  backdrop-filter: blur(12px) saturate(1.5);
-  -webkit-backdrop-filter: blur(12px) saturate(1.5);
-  border: 1px solid rgba(240, 78, 35, 0.18);
-  border-radius: 22px;
+  top: calc(env(safe-area-inset-top, 0px) + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-76px) scale(0.92);
+  z-index: 400;
+  background: #1A1A1A;
+  border-radius: 27px;
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 18px 8px 10px;
+  max-width: 178px;
   box-shadow:
-    0 2px 8px  rgba(42,36,33,0.055),
-    0 8px 28px rgba(42,36,33,0.045),
-    0 0 0 1px rgba(255,255,255,0.55) inset;
-  padding: 12px 16px 12px 14px;
-  display: none; align-items: center; gap: 12px;
+    0 1px 2px  rgba(26,22,18,0.16),
+    0 4px 12px rgba(26,22,18,0.20),
+    0 14px 38px rgba(26,22,18,0.26);
   opacity: 0;
-  transition: transform 380ms cubic-bezier(0.34,1.56,0.64,1),
-              opacity 260ms cubic-bezier(0.16,1,0.3,1);
-  pointer-events: all;
+  pointer-events: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none; -webkit-user-select: none;
+  transition: transform 420ms cubic-bezier(0.16,1,0.3,1),
+              opacity   260ms cubic-bezier(0.16,1,0.3,1),
+              max-width 340ms cubic-bezier(0.16,1,0.3,1),
+              background 340ms cubic-bezier(0.16,1,0.3,1);
 }
-#rest-banner.visible {
-  display: flex;
-  transform: translateX(-50%) translateY(0);
+#rest-island.visible {
+  transform: translateX(-50%) translateY(0) scale(1);
   opacity: 1;
+  pointer-events: auto;
 }
-/* Accent pulse strip along top edge */
-#rest-banner::before {
-  content: ''; position: absolute; top: 0; left: 24px; right: 24px;
-  height: 1.5px; background: var(--accent); border-radius: 0 0 2px 2px; opacity: 0.55;
-}
-/* SVG ring container */
-#rest-hud-ring {
-  position: relative; width: 44px; height: 44px; flex-shrink: 0;
-}
-#rest-hud-ring svg {
-  width: 44px; height: 44px; transform: rotate(-90deg); display: block;
-}
+#rest-island.expanded { max-width: min(92vw, 390px); }
+#rest-island.go { background: #1E5631; }
+#rest-island:active { transform: translateX(-50%) translateY(0) scale(0.97); }
+#rest-hud-ring { position: relative; width: 36px; height: 36px; flex-shrink: 0; }
+#rest-hud-ring svg { width: 36px; height: 36px; transform: rotate(-90deg); display: block; }
 #rest-hud-track {
-  fill: none; stroke: oklch(22.8% 0.018 42 / 0.10); stroke-width: 2.5; stroke-linecap: round;
+  fill: none; stroke: rgba(250,247,242,0.16); stroke-width: 2.5; stroke-linecap: round;
 }
 #rest-hud-fill {
   fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linecap: round;
-  transition: stroke-dashoffset 200ms linear;
+  transition: stroke-dashoffset 200ms linear, stroke 340ms;
 }
-#rest-hud-digit-wrap {
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-}
-#rest-hud-digit {
-  font-family: var(--font-body); font-size: 9px; font-weight: 700;
-  color: var(--accent); line-height: 1;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.3px;
-}
-/* Label: RESTING · 01:45 */
-.rest-hud-label-wrap { flex: 1; overflow: hidden; }
-.rest-hud-word {
-  font-family: var(--font-body); font-size: 8.5px; letter-spacing: 0.18em;
-  text-transform: uppercase; color: var(--muted); opacity: 0.55; margin-bottom: 3px;
-}
+#rest-island.go #rest-hud-fill { stroke: #4ADE80; }
 #rest-countdown {
-  font-family: var(--font-hero); font-size: 28px; font-weight: 300;
-  font-style: italic; color: var(--charcoal); line-height: 1;
+  font-family: var(--font-hero); font-size: 23px; font-weight: 300;
+  font-style: italic; color: #FAF7F2; line-height: 1;
   font-variant-numeric: tabular-nums lining-nums;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em; flex-shrink: 0;
+  padding-bottom: 2px;
 }
+#rest-island.go #rest-countdown { color: #BBF7D0; font-style: normal; font-weight: 400; }
+#ri-detail {
+  display: flex; align-items: center; gap: 8px;
+  max-width: 0; opacity: 0; overflow: hidden;
+  transition: max-width 340ms cubic-bezier(0.16,1,0.3,1),
+              opacity   240ms cubic-bezier(0.16,1,0.3,1) 60ms;
+  white-space: nowrap;
+}
+#rest-island.expanded #ri-detail,
+#rest-island.go #ri-detail { max-width: 270px; opacity: 1; }
+#ri-next {
+  font-size: 11.5px; line-height: 1.35; color: rgba(250,247,242,0.78);
+  white-space: normal; max-width: 158px;
+  overflow: hidden; display: -webkit-box;
+  -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+.ri-btn {
+  border: none; border-radius: 13px; padding: 7px 11px;
+  font-family: var(--font-body); font-size: 11px; font-weight: 700;
+  cursor: pointer; flex-shrink: 0; letter-spacing: 0.02em;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 160ms cubic-bezier(0.16,1,0.3,1), background 160ms;
+}
+.ri-btn:active { transform: scale(0.94); }
+.ri-add  { background: rgba(240,78,35,0.22);  color: #FFB39E; }
+.ri-skip { background: rgba(250,247,242,0.12); color: rgba(250,247,242,0.72); }
 @keyframes restPulse { 0%,100%{opacity:1} 50%{opacity:0.65} }
-.rest-info { flex: 1; overflow: hidden; }
-.rest-next {
-  font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.9);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+@keyframes islandGoPulse {
+  0%,100% { box-shadow: 0 1px 2px rgba(26,22,18,0.16), 0 4px 12px rgba(26,22,18,0.20), 0 14px 38px rgba(26,22,18,0.26), 0 0 0 0 rgba(74,222,128,0.35); }
+  50%     { box-shadow: 0 1px 2px rgba(26,22,18,0.16), 0 4px 12px rgba(26,22,18,0.20), 0 14px 38px rgba(26,22,18,0.26), 0 0 0 9px rgba(74,222,128,0); }
 }
-.rest-after {
-  font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 3px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.rest-skip {
-  background: rgba(42,36,33,0.06); border: 1px solid rgba(42,36,33,0.10);
-  border-radius: 12px; padding: 8px 16px; font-size: 11px; font-weight: 600;
-  letter-spacing: 0.08em; text-transform: lowercase;
-  color: var(--text-secondary); cursor: pointer; flex-shrink: 0;
-  font-family: var(--font-body);
-  transition: background 150ms, border-color 150ms;
-}
-.rest-skip:active { background: rgba(42,36,33,0.12); }
-.rest-plus {
-  background: rgba(240,78,35,0.10); border: 1px solid rgba(240,78,35,0.20);
-  border-radius: 10px; padding: 6px 10px; font-size: 11px; font-weight: 700;
-  color: var(--accent); cursor: pointer; flex-shrink: 0;
-  transition: background 150ms; letter-spacing: 0.3px;
-  font-family: var(--font-body);
-}
-.rest-plus:active { background: rgba(240,78,35,0.22); }
-
-/* ── Ambient rest overlay — DISABLED: replaced by non-blocking HUD ── */
-#rest-overlay {
-  display: none !important;
-  pointer-events: none !important;
-  opacity: 0 !important;
-  visibility: hidden !important;
-}
-#rest-overlay.visible { display: none !important; }
-#rest-ring-wrap { position: relative; width: 192px; height: 192px; }
-#rest-ring-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-#rest-ring-track { fill: none; stroke: rgba(255,255,255,0.07); stroke-width: 3; }
-#rest-ring-fill {
-  fill: none; stroke: rgba(240,78,35,0.72);
-  stroke-width: 3; stroke-linecap: round;
-  transition: stroke-dashoffset 240ms linear;
-}
-#rest-overlay-time {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-}
-#rest-overlay-digits {
-  font-family: var(--font-hero); font-size: 58px; font-weight: 700;
-  color: #fff; line-height: 1; letter-spacing: -2px;
-  font-variant-numeric: tabular-nums;
-}
-#rest-overlay-label {
-  font-size: 0.62rem; text-transform: uppercase;
-  letter-spacing: 0.22em; color: rgba(255,255,255,0.38); margin-top: 4px;
-}
-#rest-overlay-next {
-  font-size: 13px; color: rgba(255,255,255,0.72);
-  text-align: center; max-width: 260px; line-height: 1.45; padding: 0 24px;
-}
-#rest-overlay-skip {
-  background: rgba(255,255,255,0.09); border: 1px solid rgba(255,255,255,0.14);
-  border-radius: 24px; padding: 12px 32px; font-size: 13px; font-weight: 600;
-  color: rgba(255,255,255,0.5); cursor: pointer; font-family: var(--font-body);
-  transition: background 150ms; margin-top: 4px;
-}
-#rest-overlay-skip:active { background: rgba(255,255,255,0.18); }
-#rest-overlay-add {
-  background: rgba(240,78,35,0.18); border: 1px solid rgba(240,78,35,0.28);
-  border-radius: 24px; padding: 10px 28px; font-size: 12px; font-weight: 700;
-  color: var(--accent); cursor: pointer; font-family: var(--font-body);
-  letter-spacing: 0.04em; transition: background 150ms;
-}
-#rest-overlay-add:active { background: rgba(240,78,35,0.32); }
+#rest-island.go { animation: islandGoPulse 1.6s cubic-bezier(0.16,1,0.3,1) infinite; }
 
 /* ── Active workout pill ── */
 #workout-pill {
@@ -1658,7 +1604,7 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
 .stat-lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
 
 /* Tabular lining for all numeric metrics globally */
-.stat-val, .wh-duration, .rest-countdown, #rest-overlay-digits,
+.stat-val, .wh-duration, #rest-countdown,
 .pill-dur, .mg-stat-val, .graph-stat-val, .cal-popup-stat-val,
 .gauge-pct-label, .finish-stat-val {
   font-variant-numeric: tabular-nums lining-nums;
@@ -1716,36 +1662,20 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
     AI
   </button>
 </nav>
-<div id="rest-banner">
-  <!-- SVG ring — no digit inside, ring only -->
+<!-- ── Rest Island — global floating capsule, follows you to every screen ── -->
+<div id="rest-island" onclick="toggleRestIsland(event)">
   <div id="rest-hud-ring">
-    <svg viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg">
-      <circle id="rest-hud-track" cx="22" cy="22" r="19"/>
-      <circle id="rest-hud-fill"  cx="22" cy="22" r="19"/>
+    <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+      <circle id="rest-hud-track" cx="18" cy="18" r="15"/>
+      <circle id="rest-hud-fill"  cx="18" cy="18" r="15"/>
     </svg>
   </div>
-  <!-- Label + numeric readout -->
-  <div class="rest-hud-label-wrap">
-    <div class="rest-hud-word">Resting</div>
-    <div id="rest-countdown">0:00</div>
+  <div id="rest-countdown">0:00</div>
+  <div id="ri-detail">
+    <div id="ri-next"></div>
+    <button class="ri-btn ri-add"  onclick="event.stopPropagation();addRestTime(30)">+30s</button>
+    <button class="ri-btn ri-skip" onclick="event.stopPropagation();cancelRestTimer()">skip</button>
   </div>
-  <button class="rest-plus" onclick="addRestTime(30)">+30s</button>
-  <button class="rest-skip" onclick="cancelRestTimer()">skip</button>
-</div>
-<div id="rest-overlay">
-  <div id="rest-ring-wrap">
-    <svg id="rest-ring-svg" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg">
-      <circle id="rest-ring-track" cx="96" cy="96" r="88"/>
-      <circle id="rest-ring-fill"  cx="96" cy="96" r="88"/>
-    </svg>
-    <div id="rest-overlay-time">
-      <div id="rest-overlay-digits">0:00</div>
-      <div id="rest-overlay-label">Rest</div>
-    </div>
-  </div>
-  <div id="rest-overlay-next"></div>
-  <button id="rest-overlay-add"  onclick="addRestTime(30)">+ 30 sec</button>
-  <button id="rest-overlay-skip" onclick="cancelRestTimer()">Skip Rest</button>
 </div>
 <div id="workout-pill" onclick="Maps('workout')">
   <div class="pill-dot"></div>
@@ -4561,6 +4491,7 @@ function playSound(type) {
 function startRestTimer(seconds, exName, nextText, afterText, isLast) {
   const endTime = Date.now() + seconds * 1000;
   ST.restActive    = true;
+  ST.restExpired   = false;
   ST.restDuration  = seconds;   // full duration for ring progress
   ST.restEndTime   = endTime;
   ST.restExName    = exName;
@@ -4569,6 +4500,7 @@ function startRestTimer(seconds, exName, nextText, afterText, isLast) {
   ST.restIsLast    = !!isLast;
   document.body.classList.add('rest-active');
   LS.set('dcrgym_rest_end',  endTime);
+  LS.set('dcrgym_rest_dur',  seconds);
   LS.set('dcrgym_rest_next', nextText || '');
 
   if (ST.swReg && ST.notifEnabled && navigator.serviceWorker.controller) {
@@ -4580,9 +4512,7 @@ function startRestTimer(seconds, exName, nextText, afterText, isLast) {
   if (ST.restTicker) clearInterval(ST.restTicker);
   ST.restTicker = setInterval(tickRest, 200);
 
-  renderRestBanner();
-  // renderRestOverlay() — replaced by non-blocking HUD; overlay disabled.
-  initRestHudRing();
+  renderRestIsland();
 }
 
 function addRestTime(secs) {
@@ -4592,54 +4522,61 @@ function addRestTime(secs) {
   const remaining = Math.ceil((ST.restEndTime - Date.now()) / 1000);
   const el = document.getElementById('rest-countdown');
   if (el) el.textContent = formatDuration(remaining);
-  updateRestOverlayUI(remaining);
 }
 
 function cancelRestTimer() {
   ST.restActive = false;
+  ST.restExpired = false;
   document.body.classList.remove('rest-active');
   LS.remove('dcrgym_rest_end');
   if (ST.restTicker) { clearInterval(ST.restTicker); ST.restTicker = null; }
+  if (ST.restGoTimeout) { clearTimeout(ST.restGoTimeout); ST.restGoTimeout = null; }
   if (navigator.serviceWorker.controller) {
     navigator.serviceWorker.controller.postMessage({ type: 'CANCEL_NOTIFICATION' });
   }
-
-  // Hide floating pill
-  const banner = document.getElementById('rest-banner');
-  if (banner) {
-    banner.classList.remove('visible');
-    setTimeout(() => { banner.style.display = 'none'; }, 350);
-  }
-
-  // Dismiss ambient overlay
-  const ov = document.getElementById('rest-overlay');
-  if (ov) {
-    ov.classList.remove('visible');
-    // Focus first non-logged input in active exercise after overlay fades
-    setTimeout(() => {
-      const inp = document.querySelector('.set-input:not(.logged)');
-      if (inp) inp.focus();
-    }, 340);
-  }
+  const island = document.getElementById('rest-island');
+  if (island) island.classList.remove('visible', 'expanded', 'go');
 }
 
 function tickRest() {
   const remaining = Math.ceil((ST.restEndTime - Date.now()) / 1000);
-  if (remaining <= 0) {
-    playSound('chime');
-    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-    cancelRestTimer();
-    return;
-  }
+  if (remaining <= 0) { restExpire(); return; }
   const el = document.getElementById('rest-countdown');
   if (el) el.textContent = formatDuration(remaining);
   updateRestHudRing(remaining);
-  updateRestOverlayUI(remaining); // kept for backward compat (overlay is hidden)
+}
+
+// Expiry — the capsule morphs to the green GO state instead of vanishing,
+// auto-expanding to show what's next, then dismisses itself.
+function restExpire() {
+  if (ST.restExpired) return;
+  ST.restExpired = true;
+  if (ST.restTicker) { clearInterval(ST.restTicker); ST.restTicker = null; }
+  LS.remove('dcrgym_rest_end');
+  playSound('chime');
+  haptic('restDone');
+  const island = document.getElementById('rest-island');
+  const cd = document.getElementById('rest-countdown');
+  const nx = document.getElementById('ri-next');
+  if (cd) cd.textContent = 'GO';
+  if (nx && !nx.textContent) nx.textContent = ST.restNextText || '';
+  if (island) { island.classList.add('go'); island.classList.remove('expanded'); }
+  const fill = document.getElementById('rest-hud-fill');
+  if (fill) fill.style.strokeDashoffset = '0';
+  ST.restGoTimeout = setTimeout(() => cancelRestTimer(), 7000);
+}
+
+function toggleRestIsland(e) {
+  const island = document.getElementById('rest-island');
+  if (!island) return;
+  if (island.classList.contains('go')) { cancelRestTimer(); return; }
+  haptic('tick');
+  island.classList.toggle('expanded');
 }
 
 function initRestHudRing() {
-  // Pre-compute strokeDasharray for the HUD ring (r=19, circ = 2πr)
-  const r = 19, circ = 2 * Math.PI * r;
+  // Pre-compute strokeDasharray for the capsule ring (r=15, circ = 2πr)
+  const r = 15, circ = 2 * Math.PI * r;
   const fill = document.getElementById('rest-hud-fill');
   if (fill) {
     fill.style.strokeDasharray  = circ.toFixed(2);
@@ -4647,70 +4584,47 @@ function initRestHudRing() {
   }
 }
 
-function renderRestBanner() {
-  const banner = document.getElementById('rest-banner');
-  if (!banner) return;
+function renderRestIsland() {
+  const island = document.getElementById('rest-island');
+  if (!island) return;
   const remaining = Math.ceil((ST.restEndTime - Date.now()) / 1000);
-  if (remaining <= 0) { banner.style.display = 'none'; banner.classList.remove('visible'); return; }
-  if (!banner.classList.contains('visible')) {
-    banner.style.display = 'flex';
-    requestAnimationFrame(() => banner.classList.add('visible'));
+  if (remaining <= 0) { island.classList.remove('visible', 'expanded', 'go'); return; }
+  ST.restExpired = false;
+  island.classList.remove('go', 'expanded');
+  const nx = document.getElementById('ri-next');
+  if (nx) nx.textContent = ST.restNextText || '';
+  if (!island.classList.contains('visible')) {
+    requestAnimationFrame(() => island.classList.add('visible'));
   }
   const cd = document.getElementById('rest-countdown');
   if (cd) cd.textContent = formatDuration(remaining);
+  initRestHudRing();
   updateRestHudRing(remaining);
 }
+// Legacy name — some render paths still call this
+function renderRestBanner() { renderRestIsland(); }
 
 function updateRestHudRing(remaining) {
-  // Update mini SVG ring in HUD
-  const fill  = document.getElementById('rest-hud-fill');
-  const digit = document.getElementById('rest-hud-digit');
-  const r = 19, circ = 2 * Math.PI * r;
+  const fill = document.getElementById('rest-hud-fill');
+  const r = 15, circ = 2 * Math.PI * r;
   if (fill && ST.restDuration > 0) {
     const pct = Math.max(0, Math.min(1, remaining / ST.restDuration));
     fill.style.strokeDashoffset = (circ * (1 - pct)).toFixed(2);
   }
-  if (digit) {
-    // Show seconds only if ≤99s, else formatted
-    digit.textContent = remaining > 99 ? formatDuration(remaining) : remaining + 's';
-  }
 }
 
-// ── Ambient fullscreen rest overlay ─────────────────────────────────────────
-function renderRestOverlay() {
-  const ov = document.getElementById('rest-overlay');
-  if (!ov) return;
-
-  // Pre-compute ring geometry
-  const r = 88;
-  const circ = 2 * Math.PI * r;
-  const fill = document.getElementById('rest-ring-fill');
-  if (fill) {
-    fill.style.strokeDasharray  = circ;
-    fill.style.strokeDashoffset = 0;   // starts full
-  }
-
-  // Populate next-text
-  const nxEl = document.getElementById('rest-overlay-next');
-  if (nxEl) nxEl.textContent = ST.restNextText || '';
-
-  // Animate in
-  requestAnimationFrame(() => ov.classList.add('visible'));
-  updateRestOverlayUI(Math.ceil((ST.restEndTime - Date.now()) / 1000));
-}
-
-function updateRestOverlayUI(remaining) {
-  const digits = document.getElementById('rest-overlay-digits');
-  if (digits) digits.textContent = formatDuration(Math.max(0, remaining));
-
-  // Ring fill: strokeDashoffset from 0 (full) → circ (empty)
-  const fill = document.getElementById('rest-ring-fill');
-  if (fill && ST.restDuration > 0) {
-    const r    = 88;
-    const circ = 2 * Math.PI * r;
-    const pct  = Math.max(0, Math.min(1, remaining / ST.restDuration));
-    fill.style.strokeDashoffset = circ * (1 - pct);
-  }
+// ── Haptic vocabulary — the hand learns the language without looking ────────
+function haptic(type) {
+  if (!navigator.vibrate) return;
+  const P = {
+    tick:      8,                              // feather: taps, toggles
+    set:       [14, 40, 22],                   // crisp double-pulse: set logged
+    exercise:  [16, 50, 16, 50, 32],           // rising triple: exercise complete
+    restDone:  [60, 70, 60, 70, 110],          // insistent: rest expired
+    finish:    [24, 60, 24, 60, 24, 60, 90],   // celebration wave
+    milestone: [30, 70, 30, 70, 30, 70, 150],  // long milestone wave
+  };
+  try { navigator.vibrate(P[type] !== undefined ? P[type] : 10); } catch(e) {}
 }
 
 // ── Navigation ────────────────────────────────────────────────────────────────
@@ -4733,14 +4647,25 @@ function Maps(to, data={}) {
   else if (to === 'workouts-browser') renderWorkoutsBrowser();
   else if (to === 'analysis')    renderAnalysis();
 
-  // Nav visibility: hidden only during active training session
+  // Nav stays visible during workouts — browse history/weights mid-rest freely.
+  // The live session keeps running; the workout pill brings you back.
   const nav = document.getElementById('bottom-nav');
-  if (nav) nav.style.display = (to === 'workout') ? 'none' : 'flex';
+  if (nav) nav.style.display = 'flex';
   document.querySelectorAll('.nav-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.nav === to);
   });
 
   updateWorkoutPill();
+
+  // History API — Android's system back gesture navigates the app instead of
+  // killing it. Overlays are handled in the popstate listener.
+  if (!window.__navFromPop) {
+    try {
+      if (!(history.state && history.state.screen === to && !history.state.overlay)) {
+        history.pushState({ screen: to }, '', '#' + to);
+      }
+    } catch(e) {}
+  }
 
   // ── Kinetic transition engine ───────────────────────────────────────────────
   const fromEl = from ? document.getElementById('screen-' + from) : null;
@@ -5955,7 +5880,7 @@ function renderWorkout() {
     </div>` : ''}
   </div>
   <div class="exercise-list">${exCards}</div>
-  <div style="padding:16px">
+  <div style="padding:16px 16px calc(var(--nav-h) + 28px)">
     <button class="btn btn-primary" onclick="shimmerBtn(this);setTimeout(()=>finishWorkout(),220)">Finish Workout</button>
   </div>`;
 
@@ -6155,7 +6080,7 @@ function logSet(key, si, exIdx) {
   saveNow();
 
   // Haptic
-  if (navigator.vibrate) navigator.vibrate(20);
+  haptic('set');
   playSound('set');
 
   // Update UI for this set row
@@ -6185,6 +6110,7 @@ function logSet(key, si, exIdx) {
   if (doneCount >= totalSets) {
     // Auto-collapse with delay
     ST.completedCards.add(key);
+    haptic('exercise');
     setTimeout(() => {
       ST.expandedCards.delete(key);
       const card = document.getElementById('excard-' + key);
@@ -6192,7 +6118,7 @@ function logSet(key, si, exIdx) {
         card.classList.remove('expanded');
         card.classList.add('completed');
         const nameEl = card.querySelector('.ex-name');
-        if (nameEl) nameEl.innerHTML = stripSuperset(ex.name) + ' <span class="ex-check">✓</span>';
+        if (nameEl) nameEl.innerHTML = liveExName(key, ex) + ' <span class="ex-check">✓</span>';
       }
       // Update progress bar + badge
       const segs = document.querySelectorAll('.wh-seg');
@@ -6244,7 +6170,7 @@ function logSet(key, si, exIdx) {
       const nextExIdx = exIdx + 1;
       if (nextExIdx < sess.exercises.length) {
         const nextEx = sess.exercises[nextExIdx];
-        const nextName = stripSuperset(nextEx.name);
+        const nextName = liveExName(`${sess.id}_${nextExIdx}`, nextEx);
         const nextLast = getLastPerformance(nextName);
         const nextW = nextLast && nextLast[0] ? nextLast[0].w + 'kg' : '?';
         nextText = 'Exercise done ✓  Up next: ' + nextName + ' · ' + nextW;
@@ -6282,7 +6208,7 @@ function logWarmup(key) {
   ST.workoutSets[wuKey][0] = { w, r, ts: Date.now() };
   if (ST.workoutDrafts) delete ST.workoutDrafts[key + '-wu'];
   saveNow();
-  if (navigator.vibrate) navigator.vibrate(15);
+  haptic('tick');
   // Visual confirmation — briefly tint the row
   const row = document.getElementById('wurow-' + key);
   if (row) {
@@ -6522,9 +6448,19 @@ function openSheet(html) {
   document.getElementById('sheet-overlay').classList.add('visible');
   document.getElementById('bottom-sheet').classList.add('visible');
   document.body.style.overflow = 'hidden';
+  // Back gesture closes the sheet, not the app
+  try { history.pushState({ screen: ST.screen, overlay: 'sheet' }, '', '#sheet'); } catch(e) {}
 }
 
 function closeSheet() {
+  // If our overlay state is on the stack, unwind via back so history stays clean
+  if (history.state && history.state.overlay === 'sheet') {
+    try { history.back(); return; } catch(e) {}
+  }
+  __closeSheetDom();
+}
+
+function __closeSheetDom() {
   document.getElementById('sheet-overlay').classList.remove('visible');
   document.getElementById('bottom-sheet').classList.remove('visible');
   document.body.style.overflow = '';
@@ -6631,14 +6567,18 @@ function resumeWorkout() {
     if (pd) pd.textContent = formatDuration(ST.durationSecs);
   }, 1000);
   if (navigator.wakeLock) navigator.wakeLock.request('screen').then(wl => ST.wakeLock = wl).catch(()=>{});
-  // Restore rest timer
+  // Restore rest timer — island reappears with correct ring progress
   const savedEnd = LS.get('dcrgym_rest_end');
   if (savedEnd && savedEnd > Date.now()) {
     ST.restActive = true;
+    ST.restExpired = false;
     ST.restEndTime = savedEnd;
+    ST.restDuration = LS.get('dcrgym_rest_dur', 0) || 0;
     ST.restNextText = LS.get('dcrgym_rest_next') || '';
+    document.body.classList.add('rest-active');
     if (ST.restTicker) clearInterval(ST.restTicker);
     ST.restTicker = setInterval(tickRest, 250);
+    renderRestIsland();
   }
   Maps('workout');
 }
@@ -8294,8 +8234,8 @@ function selectProgram(id) {
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && ST.restActive) {
     const remaining = Math.ceil((ST.restEndTime - Date.now()) / 1000);
-    if (remaining <= 0) { cancelRestTimer(); }
-    else { renderRestBanner(); }
+    if (remaining <= 0) { restExpire(); }   // GO morph greets the return
+    else { renderRestIsland(); }
   }
 });
 
@@ -8529,6 +8469,25 @@ function bootstrapApp() {
     if (document.visibilityState === 'hidden') saveNow();
   });
   window.addEventListener('pagehide', () => saveNow());
+
+  // ── System back gesture → in-app navigation (never kills the app) ─────────
+  // Overlays unwind first, then screens. Maps() pushes screen states.
+  try { history.replaceState({ screen: 'home' }, '', '#home'); } catch(e) {}
+  window.addEventListener('popstate', (e) => {
+    // 1. An open layer always absorbs the back gesture
+    const sheet = document.getElementById('bottom-sheet');
+    if (sheet && sheet.classList.contains('visible')) { __closeSheetDom(); return; }
+    const mg = document.getElementById('muscle-graph-overlay');
+    if (mg && mg.classList.contains('visible')) { closeMuscleGraph(); return; }
+    const gb = document.getElementById('graph-backdrop');
+    if (gb && gb.style.display === 'flex') { closeProgressGraph(); return; }
+    // 2. Then navigate to the state's screen
+    const target = (e.state && e.state.screen) || 'home';
+    if (target !== ST.screen) {
+      window.__navFromPop = true;
+      try { Maps(target); } finally { window.__navFromPop = false; }
+    }
+  });
 
   // State hydration — fully wrapped, LS proxy handles any storage exceptions
   try {
