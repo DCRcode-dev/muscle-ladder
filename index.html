@@ -34,7 +34,7 @@
   /* ── Typography ── */
   --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-hero: 'Cormorant Garamond', 'Didot', 'Bodoni MT', Georgia, serif;
-  --font-mono: 'Courier New', 'Courier', monospace;
+  --font-mono: ui-monospace, 'SF Mono', 'Roboto Mono', 'JetBrains Mono', Menlo, monospace;
 
   /* ── Golden Ratio Spatial Scale (×8 / ×13 / ×21 / ×34 / ×55) ── */
   --space-xs:  8px;
@@ -70,6 +70,34 @@
   /* ── Layout ── */
   --nav-h:    72px;
   --header-h: 64px;
+
+  /* ── Status palette (single source — no rogue inline hex) ── */
+  --amber:        oklch(76% 0.130 85);          /* flat-2-sessions amber */
+  --terracotta:   oklch(48% 0.130 35);          /* deep burnt attention */
+
+  /* ── Motion DNA — iOS-restrained ──
+     ease-out-expo for ALL functional motion; spring reserved exclusively
+     for celebratory moments (finish, milestone, week-complete). */
+  --ease:        cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast:    180ms;
+  --dur-med:     250ms;
+  --dur-slow:    340ms;
+}
+
+/* ── Native-feel guards ── */
+button, .nav-btn, .ex-card-header, .hist-tab, .set-log-btn, .sub-card-header,
+.stat-card, .finish-row, label, h1, h2, h3, .ex-name, .ex-meta {
+  user-select: none; -webkit-user-select: none;
+}
+input, textarea { user-select: text; -webkit-user-select: text; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* ── Global resets ── */
@@ -122,7 +150,8 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 
 /* ── Bottom nav ── */
 #bottom-nav {
-  position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+  position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+  left: 50%; transform: translateX(-50%);
   width: calc(100% - 32px); max-width: 400px;
   background: rgba(250,247,242,0.82);
   backdrop-filter: blur(20px) saturate(1.4);
@@ -429,7 +458,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 .ob-dot {
   width: 5px; height: 5px; border-radius: 3px;
   background: var(--border);
-  transition: all 380ms cubic-bezier(0.34,1.56,0.64,1);
+  transition: all var(--dur-slow) var(--ease);
 }
 .ob-dot.active { background: var(--accent); width: 22px; }
 .ob-pill-grid {
@@ -477,7 +506,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
   display: block; width: 100%; padding: 16px 24px;
   border-radius: 16px; border: none;
   font-family: var(--font-body); font-size: 16px; font-weight: 600;
-  cursor: pointer; transition: all 0.2s cubic-bezier(0.25,1,0.5,1);
+  cursor: pointer; transition: all var(--dur-fast) var(--ease);
   min-height: 52px;
 }
 .btn:active { transform: scale(0.97); opacity: 0.9; }
@@ -502,6 +531,15 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
   font-size: 11.5px; color: var(--muted); font-style: italic;
   margin: 1px 0 3px; letter-spacing: 0.01em;
 }
+
+/* ── Checkmark stroke-draw ── */
+.check-draw { display: block; }
+.check-draw path {
+  stroke-dasharray: 30; stroke-dashoffset: 30;
+  animation: checkDraw 340ms var(--ease) 50ms forwards;
+}
+@keyframes checkDraw { to { stroke-dashoffset: 0; } }
+.set-log-btn { display: inline-flex; align-items: center; justify-content: center; }
 
 /* ── HOME SCREEN — Premium 3-Zone Layout ── */
 #screen-home {
@@ -701,34 +739,37 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 
 /* ── Workout header ── */
 #workout-header {
-  background: rgba(250,247,242,0.72);
-  backdrop-filter: blur(12px) saturate(1.3);
-  -webkit-backdrop-filter: blur(12px) saturate(1.3);
-  border-bottom: 1px solid rgba(42,36,33,0.06);
-  color: var(--charcoal);
+  /* The cockpit — the only dark element in the app. Signals: in session. */
+  background: rgba(26,26,26,0.97);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  border-bottom: 1px solid rgba(250,247,242,0.06);
+  color: #FAF7F2;
   position: sticky; top: 0; z-index: 50;
-  padding: 32px 20px 10px;
+  padding: 32px 20px 12px;
 }
 .wh-session {
   font-family: var(--font-hero) !important; font-style: italic !important;
   font-size: 1.5rem !important; text-align: center !important;
-  color: var(--charcoal) !important; flex: 1; margin-bottom: 0 !important;
+  color: rgba(250,247,242,0.62) !important; flex: 1; margin-bottom: 0 !important;
 }
 .wh-top { display: flex; align-items: center; justify-content: space-between; }
 .wh-duration {
-  font-size: 28px; font-weight: 700; color: var(--charcoal); line-height: 1;
+  /* Light & airy display numeral — huge but weightless */
+  font-size: 36px; font-weight: 300; color: #FAF7F2; line-height: 1;
   font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.01em;
 }
 .wh-progress { display: flex; gap: 4px; margin-top: 12px; }
 .wh-seg {
-  flex: 1; height: 3px; background: rgba(42,36,33,0.12);
+  flex: 1; height: 3px; background: rgba(250,247,242,0.16);
   border-radius: 2px; transition: background 300ms;
 }
 .wh-seg.done { background: var(--accent); }
 .wh-seg.active { background: rgba(240,78,35,0.5); }
 .wh-pct-badge {
   width: 54px; height: 54px; border-radius: 50%;
-  background: rgba(42,36,33,0.05); border: 1.5px solid rgba(42,36,33,0.12);
+  background: rgba(250,247,242,0.05); border: 1.5px solid rgba(250,247,242,0.18);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   transition: all 450ms ease; flex-shrink: 0;
 }
@@ -737,12 +778,12 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
   box-shadow: 0 0 16px rgba(240,78,35,0.45);
 }
 .wh-pct-num {
-  font-size: 15px; font-weight: 700; color: var(--charcoal);
+  font-size: 15px; font-weight: 600; color: #FAF7F2;
   line-height: 1; letter-spacing: -0.5px;
   font-variant-numeric: tabular-nums;
 }
 .wh-pct-unit {
-  font-size: 9px; color: rgba(42,36,33,0.45);
+  font-size: 9px; color: rgba(250,247,242,0.45);
   letter-spacing: 0.08em; margin-top: 2px; text-transform: uppercase;
 }
 .wh-pct-badge.complete .wh-pct-num,
@@ -752,9 +793,9 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 .travel-toggle-row {
   display: flex; align-items: center; justify-content: space-between;
   margin: 12px 0 0; padding-top: 10px;
-  border-top: 1px solid rgba(42,36,33,0.08);
+  border-top: 1px solid rgba(250,247,242,0.08);
 }
-.travel-toggle-lbl { font-size: 12px; color: rgba(42,36,33,0.5); }
+.travel-toggle-lbl { font-size: 12px; color: rgba(250,247,242,0.5); }
 .toggle-switch { position: relative; width: 40px; height: 22px; }
 .toggle-switch input { opacity: 0; width: 0; height: 0; }
 .toggle-slider {
@@ -875,7 +916,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
   padding: 14px 16px 14px 20px;
   display: none; align-items: center; gap: 14px;
   transform: translateY(20px); opacity: 0;
-  transition: transform 350ms cubic-bezier(0.34,1.56,0.64,1), opacity 250ms ease;
+  transition: transform var(--dur-slow) var(--ease), opacity var(--dur-med) var(--ease);
   cursor: pointer;
 }
 #workout-pill.visible { display: flex; transform: translateY(0); opacity: 1; }
@@ -1038,7 +1079,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
   border-radius: 10px; text-align: center;
   font-size: 16px; font-weight: 600; font-family: var(--font-body);
   background: var(--bg); color: var(--text); outline: none; box-sizing: border-box;
-  transition: all 0.2s cubic-bezier(0.25,1,0.5,1);
+  transition: all var(--dur-fast) var(--ease);
   -webkit-appearance: none;
   font-variant-numeric: tabular-nums;
 }
@@ -1200,17 +1241,30 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 .milestone-quote { font-family: var(--font-hero); font-style: italic; font-size: 20px; color: var(--text-secondary); margin-bottom: 40px; line-height: 1.5; }
 
 /* ── HISTORY SCREEN ── */
+/* ── True iOS segmented control — one sliding raised thumb ── */
 .history-tabs {
   display: flex; gap: 0; margin: 16px 24px;
-  background: var(--border); border-radius: 12px; padding: 3px;
+  background: var(--border); border-radius: 13px; padding: 3px;
+  position: relative; isolation: isolate;
 }
+.history-tabs::before {
+  content: ''; position: absolute; z-index: 0;
+  top: 3px; bottom: 3px; left: 3px;
+  width: calc(50% - 3px);
+  background: var(--card); border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(42,36,33,0.10), 0 3px 8px rgba(42,36,33,0.06);
+  transition: transform var(--dur-med) var(--ease);
+}
+.history-tabs:has(.hist-tab:nth-child(2).active)::before { transform: translateX(100%); }
 .hist-tab {
   flex: 1; padding: 8px; text-align: center;
   font-size: 13px; font-weight: 500; border-radius: 10px;
-  cursor: pointer; transition: background 200ms, color 200ms;
+  cursor: pointer; transition: color var(--dur-med) var(--ease);
   color: var(--muted); border: none; background: none;
+  position: relative; z-index: 1;
+  -webkit-tap-highlight-color: transparent;
 }
-.hist-tab.active { background: var(--card); color: var(--text); box-shadow: var(--shadow); }
+.hist-tab.active { color: var(--text); font-weight: 600; }
 
 /* ── Bio-Data Matrix Grid (Progress tab) ── */
 .progress-grid-wrap {
@@ -1333,7 +1387,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
               inset 0 -1px 0 rgba(255,255,255,0.12);
   padding: 28px 24px 32px;
   transform: translateY(24px) scale(0.95);
-  transition: transform 380ms cubic-bezier(0.34,1.56,0.64,1);
+  transition: transform var(--dur-slow) var(--ease);
   position: relative;
 }
 #cal-popup.visible #cal-popup-panel { transform: translateY(0) scale(1); }
@@ -1391,7 +1445,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
               inset 0 -1px 0 rgba(255,255,255,0.12);
   padding: 28px 24px 32px;
   transform: translateY(24px) scale(0.96);
-  transition: transform 380ms cubic-bezier(0.34,1.56,0.64,1);
+  transition: transform var(--dur-slow) var(--ease);
   position: relative; overflow: hidden;
 }
 #graph-backdrop.visible #graph-panel { transform: translateY(0) scale(1); }
@@ -1462,7 +1516,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
               inset 0 -1px 0 rgba(255,255,255,0.12);
   padding: 28px 24px 32px; position: relative;
   transform: scale(0.82); transform-origin: center center;
-  transition: transform 400ms cubic-bezier(0.34,1.56,0.64,1);
+  transition: transform var(--dur-slow) var(--ease);
 }
 #muscle-graph-overlay.visible #muscle-graph-panel { transform: scale(1); }
 .mg-close {
@@ -1554,9 +1608,11 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 .back-btn { display: flex; align-items: center; gap: 6px; background: none; border: none; color: var(--muted); font-size: 15px; cursor: pointer; padding: 8px 0; margin-bottom: 8px; }
 
 /* ── Settings ── */
-.settings-section { margin: 16px; background: var(--card); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); }
-.settings-section-title { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; padding: 14px 16px 8px; }
-.settings-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-top: 1px solid var(--border); min-height: 52px; }
+.settings-section { margin: 20px 16px; background: var(--card); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); }
+.settings-section-title { font-size: 11.5px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.09em; padding: 16px 16px 10px; }
+.settings-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; min-height: 52px; position: relative; }
+.settings-row + .settings-row::before { content: ''; position: absolute; top: 0; left: 16px; right: 0; height: 0.5px; background: var(--border); }
+.settings-row:active { background: rgba(42,36,33,0.025); }
 .settings-row:first-of-type { border-top: none; }
 .settings-row label { font-size: 14px; color: var(--text); }
 .settings-row input[type=text], .settings-row input[type=url] { border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 13px; width: 160px; font-family: var(--font-body); outline: none; }
@@ -1600,7 +1656,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 .stats-row { display: flex; gap: 0; margin: 0 24px 20px; background: var(--card); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden; }
 .stat-item { flex: 1; padding: 14px 10px; text-align: center; border-right: 1px solid var(--border); }
 .stat-item:last-child { border-right: none; }
-.stat-val { font-size: 22px; font-weight: 700; color: var(--charcoal); font-variant-numeric: tabular-nums lining-nums; }
+.stat-val { font-size: 25px; font-weight: 300; color: var(--charcoal); font-variant-numeric: tabular-nums lining-nums; letter-spacing: -0.01em; }
 .stat-lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
 
 /* Tabular lining for all numeric metrics globally */
@@ -4364,12 +4420,18 @@ function getWeeklyVolumeByMuscle(programId) {
     const ws = wp.sessions.find(s => s.id === w.sessionId);
     if (!ws) continue;
     for (const [key, sets] of Object.entries(w.sets)) {
+      if (key.endsWith('_wu')) continue;   // warm-ups never count toward volume
       const exIdx = parseInt(key.split('_').pop());
       const ex = ws.exercises[exIdx];
-      if (!ex) continue;
-      const muscle = getMuscle(stripSuperset(ex.name));
-      if (!actuals[muscle]) actuals[muscle] = 0;
-      actuals[muscle] += sets.length;
+      for (const set of sets) {
+        if (!set || !set.r) continue;
+        // Stamped _name wins — substituted/travel sets credit the RIGHT muscle
+        const nm = set._name || (ex && stripSuperset(ex.name));
+        if (!nm) continue;
+        const muscle = getMuscle(nm);
+        if (!actuals[muscle]) actuals[muscle] = 0;
+        actuals[muscle] += 1;
+      }
     }
   }
   return { targets, actuals };
@@ -4391,11 +4453,13 @@ function getMuscleProgress() {
       const sess = prog.sessions.find(s => s.id === w.sessionId);
       if (!sess) continue;
       for (const [key, sets] of Object.entries(w.sets)) {
+        if (key.endsWith('_wu')) continue;
         const exIdx = parseInt(key.split('_').pop());
         const ex = sess.exercises[exIdx];
-        if (!ex) continue;
-        if (getMuscle(stripSuperset(ex.name)) !== muscle) continue;
         for (const set of sets) {
+          if (!set || !set.r) continue;
+          const nm = set._name || (ex && stripSuperset(ex.name));
+          if (!nm || getMuscle(nm) !== muscle) continue;
           const rm = epley1RM(set.w||0, set.r||0);
           if (!weekData[weekKey] || rm > weekData[weekKey]) weekData[weekKey] = rm;
         }
@@ -4411,9 +4475,11 @@ function getMuscleProgress() {
       if (!w.sets) return false;
       const p=PROGRAMS.find(pp=>pp.id===w.programId); if(!p) return false;
       const s=p.sessions.find(ss=>ss.id===w.sessionId); if(!s) return false;
-      return Object.entries(w.sets).some(([key])=>{
+      return Object.entries(w.sets).some(([key, sets])=>{
+        if (key.endsWith('_wu')) return false;
         const i=parseInt(key.split('_').pop()); const ex=s.exercises[i];
-        return ex && getMuscle(stripSuperset(ex.name))===muscle;
+        const nm = (Array.isArray(sets) && (sets.find(x=>x&&x._name)||{})._name) || (ex && stripSuperset(ex.name));
+        return nm && getMuscle(nm)===muscle;
       });
     }).sort((a,b)=>b.endTime-a.endTime)[0];
     const daysSince = lastWorked ? Math.floor((Date.now()-lastWorked.endTime)/(24*3600*1000)) : 99;
@@ -4452,37 +4518,46 @@ function checkMilestone() {
 
 
 // ── Sound ─────────────────────────────────────────────────────────────────────
+// ── Designed sound — Apple-quiet synthesis, zero file weight ─────────────────
+// One shared voice helper: filtered sine/triangle partials with soft attack and
+// natural exponential decay. No sawtooth, no square, no distortion — ever.
+function _voice(ctx, { freq, type = 'sine', vol = 0.1, at = 0, attack = 0.004, decay = 0.22, cutoff = 4200, detune = 0 }) {
+  const t0 = ctx.currentTime + at;
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  const f = ctx.createBiquadFilter();
+  f.type = 'lowpass'; f.frequency.setValueAtTime(cutoff, t0); f.Q.value = 0.4;
+  o.type = type; o.frequency.setValueAtTime(freq, t0); o.detune.value = detune;
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(vol, t0 + attack);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + attack + decay);
+  o.connect(f); f.connect(g); g.connect(ctx.destination);
+  o.start(t0); o.stop(t0 + attack + decay + 0.05);
+}
+
 function playSound(type) {
   const s = getSettings();
   if (!s.sound) return;
   try {
     if (!ST.audioCtx) ST.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const ctx = ST.audioCtx;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain); gain.connect(ctx.destination);
+    if (ctx.state === 'suspended') ctx.resume().catch(()=>{});
+
     if (type === 'set') {
-      osc.frequency.setValueAtTime(880, ctx.currentTime);
-      gain.gain.setValueAtTime(0.1, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
-      osc.start(); osc.stop(ctx.currentTime + 0.15);
+      // Soft glass tick — a fingernail on crystal
+      _voice(ctx, { freq: 1320, vol: 0.055, decay: 0.085, cutoff: 5200 });
+      _voice(ctx, { freq: 2640, vol: 0.018, decay: 0.055, cutoff: 6000 });
     } else if (type === 'chime') {
-      // High-impact commanding buzzer — three layered oscillators
-      const now = ctx.currentTime;
-      [[220,'sawtooth',0.38],[440,'square',0.22],[880,'sine',0.18]].forEach(([freq, waveType, vol]) => {
-        const o = ctx.createOscillator();
-        const g = ctx.createGain();
-        const dist = ctx.createWaveShaper();
-        const curve = new Float32Array(256);
-        for (let k = 0; k < 256; k++) { const x = (k * 2) / 256 - 1; curve[k] = (Math.PI + 200) * x / (Math.PI + 200 * Math.abs(x)); }
-        dist.curve = curve;
-        o.type = waveType; o.frequency.setValueAtTime(freq, now);
-        g.gain.setValueAtTime(vol, now);
-        g.gain.setValueAtTime(vol * 1.2, now + 0.04);
-        g.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
-        o.connect(dist); dist.connect(g); g.connect(ctx.destination);
-        o.start(now); o.stop(now + 0.65);
-      });
+      // Warm two-note marimba — E5 → A5, felt mallet
+      _voice(ctx, { freq: 659.3,  type: 'triangle', vol: 0.085, decay: 0.34, cutoff: 2600 });
+      _voice(ctx, { freq: 1318.5, vol: 0.022, decay: 0.20, cutoff: 3400 });
+      _voice(ctx, { freq: 880,    type: 'triangle', vol: 0.095, at: 0.17, decay: 0.46, cutoff: 2600 });
+      _voice(ctx, { freq: 1760,   vol: 0.024, at: 0.17, decay: 0.26, cutoff: 3400 });
+    } else if (type === 'finish') {
+      // Muted swell — three stacked warm partials, slow bloom
+      _voice(ctx, { freq: 440,  type: 'triangle', vol: 0.075, attack: 0.10, decay: 0.70, cutoff: 1900 });
+      _voice(ctx, { freq: 554.4, type: 'triangle', vol: 0.055, at: 0.06, attack: 0.10, decay: 0.66, cutoff: 2100 });
+      _voice(ctx, { freq: 659.3, type: 'sine',     vol: 0.045, at: 0.12, attack: 0.10, decay: 0.62, cutoff: 2300 });
     }
   } catch(e){}
 }
@@ -4613,6 +4688,46 @@ function updateRestHudRing(remaining) {
   }
 }
 
+// ── Count-up ticker — numbers feel alive, never jumpy ────────────────────────
+function countUp(el, target, opts = {}) {
+  if (!el) return;
+  const dur = opts.dur || 600;
+  const decimals = opts.decimals || 0;
+  const prefix = opts.prefix || '';
+  const suffix = opts.suffix || '';
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    el.textContent = prefix + target.toFixed(decimals) + suffix;
+    return;
+  }
+  const t0 = performance.now();
+  function frame(t) {
+    const p = Math.min(1, (t - t0) / dur);
+    const eased = 1 - Math.pow(1 - p, 4);
+    el.textContent = prefix + (target * eased).toFixed(decimals) + suffix;
+    if (p < 1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+// Run count-up on every [data-count] element inside a container
+function tickStats(container) {
+  (container || document).querySelectorAll('[data-count]').forEach(el => {
+    const raw = el.getAttribute('data-count');
+    const target = parseFloat(raw);
+    if (isNaN(target)) return;
+    const suffix = el.getAttribute('data-suffix') || '';
+    const decimals = raw.includes('.') ? 1 : 0;
+    countUp(el, target, { suffix, decimals });
+  });
+}
+
+// ── Checkmark stroke-draw — the ✓ draws itself on completion ────────────────
+function checkSVG() {
+  return `<svg class="check-draw" viewBox="0 0 24 24" width="15" height="15" fill="none"
+    stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 12.5 L9.5 18 L20 6.5"/></svg>`;
+}
+
 // ── Haptic vocabulary — the hand learns the language without looking ────────
 function haptic(type) {
   if (!navigator.vibrate) return;
@@ -4646,6 +4761,10 @@ function Maps(to, data={}) {
   else if (to === 'settings')    renderSettings();
   else if (to === 'workouts-browser') renderWorkoutsBrowser();
   else if (to === 'analysis')    renderAnalysis();
+
+  // Status bar melts into the screen — charcoal cockpit in workout, cream elsewhere
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
+  if (themeMeta) themeMeta.setAttribute('content', to === 'workout' ? '#1A1A1A' : '#FAF7F2');
 
   // Nav stays visible during workouts — browse history/weights mid-rest freely.
   // The live session keeps running; the workout pill brings you back.
@@ -5365,12 +5484,12 @@ function renderHome() {
       <div class="premium-metrics-grid">
         <div class="metric-item">
           <svg viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
-          streak <span>${streak}</span>
+          streak <span data-count="${streak}">${streak}</span>
         </div>
         <span style="opacity:0.15;font-style:normal;">│</span>
         <div class="metric-item">
           <svg viewBox="0 0 24 24"><path d="M6.5 6.5A2.5 2.5 0 0 1 9 4h0a2.5 2.5 0 0 1 2.5 2.5V8"/><path d="M14.5 8V6.5A2.5 2.5 0 0 1 17 4h0a2.5 2.5 0 0 1 2.5 2.5v4A8.5 8.5 0 0 1 11 19h-1a8 8 0 0 1-8-8v-1.5A2.5 2.5 0 0 1 4.5 7H5a2.5 2.5 0 0 1 2.5 2.5V11"/><path d="M11.5 8H14"/></svg>
-          complete <span>${volPct}%</span>
+          complete <span data-count="${volPct}" data-suffix="%">${volPct}%</span>
         </div>
       </div>
     </div>
@@ -5421,6 +5540,12 @@ function renderHome() {
       if (!muscleEl) _lastHapticEl = null;
     }, { passive: true });
   });
+
+  // Stat tickers — once per app launch, not on every re-render
+  if (!ST._homeTicked) {
+    ST._homeTicked = true;
+    requestAnimationFrame(() => tickStats(container));
+  }
 }
 
 function renderProg(data={}) {
@@ -5766,7 +5891,7 @@ function renderWorkout() {
           oninput="markDraft('${key}',${si})"
           onkeydown="if(event.key==='Enter'){event.preventDefault();logSet('${key}',${si},${i});}">
         <button class="set-log-btn${isLogged?' logged':''}" onclick="${isLogged ? `unlogSet('${key}',${si},${i})` : `logSet('${key}',${si},${i})`}"
-          >${isLogged ? '✓' : '→'}</button>
+          >${isLogged ? checkSVG() : '→'}</button>
       </div>
       ${trendHtml}
       ${tech ? `<div style="padding-left:30px;margin-bottom:6px">${tech}</div>` : ''}
@@ -6087,7 +6212,7 @@ function logSet(key, si, exIdx) {
   wi.classList.add('logged');
   ri.classList.add('logged');
   const btn = wi.closest('.set-row') && wi.closest('.set-row').querySelector('.set-log-btn');
-  if (btn) { btn.classList.add('logged'); btn.textContent = '✓'; }
+  if (btn) { btn.classList.add('logged'); btn.innerHTML = checkSVG(); }
 
   // Ripple
   const row = document.getElementById('setrow-' + key + '-' + si);
@@ -6467,6 +6592,39 @@ function __closeSheetDom() {
   ST.openSubCard = null;
 }
 
+// ── Sheet drag-to-dismiss — iOS physics: follow the finger, rubber-band up,
+//    release past threshold dismisses, otherwise springs home. ──────────────
+(function initSheetDrag() {
+  const sheet = document.getElementById('bottom-sheet');
+  if (!sheet) return;
+  let startY = 0, curY = 0, dragging = false;
+  sheet.addEventListener('touchstart', (e) => {
+    const content = document.getElementById('sheet-content');
+    // Drag starts from the handle zone, or anywhere once content is at scroll top
+    if (content && content.scrollTop > 2 && !e.target.closest('.bs-handle')) return;
+    if (e.target.closest('input, textarea, button')) return;
+    dragging = true; startY = curY = e.touches[0].clientY;
+    sheet.style.transition = 'none';
+  }, { passive: true });
+  sheet.addEventListener('touchmove', (e) => {
+    if (!dragging) return;
+    curY = e.touches[0].clientY;
+    let dy = curY - startY;
+    if (dy < 0) dy = -Math.pow(-dy, 0.72);   // rubber-band resistance upward
+    sheet.style.transform = `translateY(${Math.max(dy, -26)}px)`;
+  }, { passive: true });
+  const release = () => {
+    if (!dragging) return;
+    dragging = false;
+    const dy = curY - startY;
+    sheet.style.transition = '';
+    sheet.style.transform = '';
+    if (dy > 88) { haptic('tick'); closeSheet(); }
+  };
+  sheet.addEventListener('touchend', release);
+  sheet.addEventListener('touchcancel', release);
+})();
+
 // ── Workout flow ──────────────────────────────────────────────────────────────
 // Three-way guard. The old code silently clobbered an in-progress workout when
 // you tapped the SAME session card — total loss of logged sets. Never again:
@@ -6838,6 +6996,8 @@ function commitWorkout() {
 
 // ── Finish screen ─────────────────────────────────────────────────────────────
 function showFinish() {
+  playSound('finish');
+  haptic('finish');
   const s = ST.lastSummary || {};
   const prog = PROGRAMS.find(p => p.id === ST.currentProgram);
   const sess = prog && prog.sessions.find(ss => ss.id === ST.currentSession);
@@ -6909,11 +7069,11 @@ function showFinish() {
     const up = s.e1rmDelta >= 0;
     e1rmBadgeHTML = `
       <div style="margin:0 auto 18px;padding:12px 20px;border-radius:14px;
-        background:${up ? 'oklch(52% 0.18 145 / 0.08)' : 'oklch(55% 0.20 28 / 0.08)'};
-        border:1px solid ${up ? 'oklch(52% 0.18 145 / 0.25)' : 'oklch(55% 0.20 28 / 0.25)'};
+        background:${up ? 'oklch(72.3% 0.190 145 / 0.08)' : 'oklch(48% 0.130 35 / 0.08)'};
+        border:1px solid ${up ? 'oklch(72.3% 0.190 145 / 0.25)' : 'oklch(48% 0.130 35 / 0.25)'};
         text-align:center;max-width:320px">
-        <div style="font-family:'Courier New',monospace;font-size:26px;font-weight:700;
-          color:${up ? 'oklch(52% 0.18 145)' : 'oklch(55% 0.20 28)'};letter-spacing:-0.5px">
+        <div style="font-family:var(--font-body);font-size:26px;font-weight:300;font-variant-numeric:tabular-nums lining-nums;
+          color:${up ? 'var(--green)' : 'var(--terracotta)'};letter-spacing:-0.5px">
           ${up ? '▲' : '▼'} ${up ? '+' : ''}${s.e1rmDelta}%
         </div>
         <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:12px;
@@ -6937,13 +7097,14 @@ function showFinish() {
     ${e1rmBadgeHTML}
     <div class="finish-stats-row">
       <div class="finish-stat"><div class="finish-stat-val">${durText}</div><div class="finish-stat-lbl">Duration</div></div>
-      <div class="finish-stat"><div class="finish-stat-val">${compliancePct}</div><div class="finish-stat-lbl">Compliance</div></div>
+      <div class="finish-stat"><div class="finish-stat-val" ${compliancePct !== '—' ? `data-count="${parseInt(compliancePct)}" data-suffix="%"` : ''}>${compliancePct}</div><div class="finish-stat-lbl">Compliance</div></div>
       <div class="finish-stat"><div class="finish-stat-val" style="font-size:14px;line-height:1.2">${gainText}</div><div class="finish-stat-lbl">${gainLabel.split(' ')[0]}</div></div>
     </div>
     ${prog ? `<div class="finish-plan-table">${tableRows}</div>` : ''}
     <button class="btn btn-primary" style="max-width:360px;width:100%" onclick="dismissFinish()">Back to Home</button>
   `;
   document.body.appendChild(el);
+  requestAnimationFrame(() => tickStats(el));
   launchConfetti(false);
 }
 
@@ -6964,6 +7125,8 @@ const MILESTONE_QUOTES = {
 };
 
 function showMilestone() {
+  playSound('finish');
+  haptic('milestone');
   const n = ST.milestoneN;
   const el = document.createElement('div');
   el.id = 'milestone-screen';
@@ -7304,7 +7467,7 @@ function renderProgressGauges() {
         const filled = arc.dataset.filled;
         if (!filled) return;
         setTimeout(() => {
-          arc.style.transition = 'stroke-dasharray 0.85s cubic-bezier(0.4,0,0.2,1)';
+          arc.style.transition = 'stroke-dasharray 0.85s cubic-bezier(0.16,1,0.3,1)';
           arc.setAttribute('stroke-dasharray', filled + ' ' + BM_CIRC);
         }, 60 + i * 28);
       });
@@ -7560,7 +7723,7 @@ function renderAnalysis() {
               fill="none" stroke="${arcColor}" stroke-width="7.5" stroke-linecap="round"
               stroke-dasharray="${fillDash} ${CIRC.toFixed(2)}"
               transform="rotate(-90 ${CX} ${CY})"
-              style="transition:stroke-dasharray 900ms cubic-bezier(0.34,1.1,0.64,1);
+              style="transition:stroke-dasharray 900ms cubic-bezier(0.16,1,0.3,1);
                      filter:drop-shadow(0 0 7px ${arcColor}88)"/>
           </svg>
           <div class="ana-dial-inner">
@@ -7960,11 +8123,20 @@ function saveSetting(key, val) {
 }
 
 function clearHistoryConfirm() {
-  if (confirm('Delete all workout history? This cannot be undone.')) {
-    saveHistory([]);
-    renderSettings();
-    alert('History cleared.');
-  }
+  confirmSheet({
+    title: 'Delete all workout history?',
+    body: 'A local backup snapshot is kept and your Sheets copy is untouched — but the in-app history list will be emptied.',
+    confirmLabel: 'Delete history',
+    destructive: true,
+    onConfirm: () => {
+      // Last-good snapshot before the wipe — recoverable, never a true loss
+      const hist = getHistory();
+      if (hist.length > 0) LS.set('dcrgym_history_backup', { at: Date.now(), reason: 'manual-clear', history: hist });
+      saveHistory([]);
+      renderSettings();
+      noticeSheet('History cleared', 'A backup snapshot was saved locally. Use Recover from Settings if you change your mind.');
+    },
+  });
 }
 
 function exportCSV() {
@@ -7999,7 +8171,7 @@ function importStrongCSV(input) {
   reader.onload = e => {
     const text = e.target.result;
     const lines = text.split('\n').filter(l => l.trim());
-    if (lines.length < 2) { alert('No data found in CSV.'); return; }
+    if (lines.length < 2) { noticeSheet('Import failed', 'No data found in that CSV.'); return; }
 
     // Auto-detect separator
     const sep = lines[0].includes(';') ? ';' : ',';
@@ -8015,7 +8187,7 @@ function importStrongCSV(input) {
     const colReps     = col('reps');
 
     if (colDate === -1 || colExName === -1 || colReps === -1) {
-      alert('Could not detect required columns (Date, Exercise Name, Reps). Is this a Strong CSV export?');
+      noticeSheet('Import failed', 'Could not detect the required columns (Date, Exercise Name, Reps). Is this a Strong CSV export?');
       return;
     }
 
@@ -8052,14 +8224,14 @@ function importStrongCSV(input) {
 
     if (currentWorkout) hist.push(currentWorkout);
     saveHistory(hist);
-    alert('Imported ' + parsed + ' workouts from Strong.');
+    noticeSheet('Import complete', 'Imported ' + parsed + ' workouts from Strong.');
     input.value = '';
   };
   reader.readAsText(file);
 }
 
 function requestNotif() {
-  if (!('Notification' in window)) { alert('Notifications not supported in this browser.'); return; }
+  if (!('Notification' in window)) { noticeSheet('Not supported', 'Notifications are not supported in this browser.'); return; }
   Notification.requestPermission().then(perm => {
     ST.notifEnabled = perm === 'granted';
     renderSettings();
@@ -8325,15 +8497,15 @@ function importJSON(input) {
     try {
       const data = JSON.parse(e.target.result);
       const incoming = Array.isArray(data) ? data : (data.history || []);
-      if (!incoming.length) { alert('No workout history found in this backup file.'); return; }
+      if (!incoming.length) { noticeSheet('Restore failed', 'No workout history found in this backup file.'); return; }
       const local  = getHistory();
       const merged = mergeHistories(local, incoming);
       const added  = merged.length - local.length;
       saveHistory(merged);
       bgSyncToSheets().catch(() => {});
-      alert(`Restored ${added} new workout${added !== 1 ? 's' : ''} from backup. Total: ${merged.length}.`);
+      noticeSheet('Backup restored', `Restored ${added} new workout${added !== 1 ? 's' : ''} from backup. Total: ${merged.length}.`);
     } catch(err) {
-      alert('Could not read backup file. Make sure it is a valid DCR Gym JSON export.');
+      noticeSheet('Restore failed', 'Could not read that backup file. Make sure it is a valid DCR Gym JSON export.');
     }
     input.value = '';
   };
