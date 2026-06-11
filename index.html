@@ -532,6 +532,75 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
   margin: 1px 0 3px; letter-spacing: 0.01em;
 }
 
+/* ── Long-press card menu ── */
+.ex-card.lifted { transform: scale(0.985); box-shadow: var(--shadow-deep); transition: transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease); }
+#card-menu {
+  position: fixed; left: 24px; z-index: 600;
+  background: var(--card); border-radius: 16px;
+  box-shadow: var(--shadow-deep); border: 0.5px solid var(--border);
+  min-width: 218px; overflow: hidden;
+  opacity: 0; transform: scale(0.94) translateY(-4px); transform-origin: top left;
+  transition: opacity var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+#card-menu.open { opacity: 1; transform: none; }
+#card-menu button {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  padding: 13px 16px; border: none; background: none; text-align: left;
+  font-family: var(--font-body); font-size: 14px; color: var(--text);
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+#card-menu button:active { background: rgba(42,36,33,0.04); }
+#card-menu button + button { border-top: 0.5px solid var(--border); }
+.cm-ic { width: 20px; text-align: center; color: var(--text-secondary); font-size: 15px; }
+
+/* ── Boarding-pass Next Session card ── */
+.boarding-card {
+  margin: 10px 20px 0; background: var(--card); border-radius: 22px;
+  box-shadow: var(--shadow); padding: 16px 18px 14px;
+  text-align: left;
+}
+.bc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.bc-label { font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+.bc-name { font-family: var(--font-hero); font-style: italic; font-size: 21px; font-weight: 600; color: var(--charcoal); line-height: 1.1; }
+.bc-chip {
+  flex-shrink: 0; font-size: 10px; padding: 5px 10px; border-radius: 11px;
+  background: var(--bg); border: 0.5px solid var(--border); color: var(--text-secondary);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.bc-chip.bc-ready-high { color: var(--green); border-color: oklch(72.3% 0.190 145 / 0.3); }
+.bc-chip.bc-ready-low  { color: var(--terracotta); border-color: oklch(48% 0.130 35 / 0.3); }
+.bc-manifest { margin: 10px 0 12px; }
+.bc-ex {
+  display: flex; align-items: baseline; justify-content: space-between;
+  font-size: 12px; color: var(--text-secondary); padding: 3.5px 0;
+}
+.bc-ex + .bc-ex { border-top: 0.5px solid var(--border); }
+.bc-ex .bc-sets { font-size: 10.5px; color: var(--muted); font-variant-numeric: tabular-nums; flex-shrink: 0; margin-left: 12px; }
+.bc-more { font-size: 10.5px; color: var(--muted); font-style: italic; padding-top: 5px; }
+.boarding-card .premium-action-pill { margin: 0 !important; width: 100% !important; }
+
+/* ── Launch awakening — once per boot, the app wakes rather than loads ── */
+.awaken .premium-masthead        { animation: awakenUp 520ms var(--ease) both; }
+.awaken .premium-totem-container { animation: awakenBloom 680ms var(--ease) 90ms both; }
+.awaken .totem-legend,
+.awaken .premium-metrics-strip   { animation: awakenUp 520ms var(--ease) 190ms both; }
+.awaken .premium-resume,
+.awaken .boarding-card,
+.awaken .premium-action-pill     { animation: awakenUp 560ms var(--ease) 280ms both; }
+@keyframes awakenUp    { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes awakenBloom { from { opacity: 0; transform: scale(0.975); }    to { opacity: 1; transform: scale(1); } }
+
+/* ── Chart scrub tooltip ── */
+.mg-scrub-tip {
+  position: absolute; top: -4px; transform: translateX(-50%);
+  background: var(--charcoal); color: #FAF7F2;
+  font-size: 10.5px; font-weight: 600; padding: 4px 9px; border-radius: 9px;
+  white-space: nowrap; pointer-events: none; opacity: 0;
+  font-variant-numeric: tabular-nums;
+  transition: opacity var(--dur-fast) var(--ease), left 90ms linear;
+}
+.mg-scrub-tip.on { opacity: 1; }
+
 /* ── Checkmark stroke-draw ── */
 .check-draw { display: block; }
 .check-draw path {
@@ -923,6 +992,65 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 }
 #rest-island.go { animation: islandGoPulse 1.6s cubic-bezier(0.16,1,0.3,1) infinite; }
 
+/* ── Custom number pad — designed input surface for sweaty thumbs ── */
+#numpad {
+  position: fixed; left: 0; right: 0;
+  bottom: 0; z-index: 500;
+  background: rgba(250,247,242,0.94);
+  backdrop-filter: blur(22px) saturate(1.4);
+  -webkit-backdrop-filter: blur(22px) saturate(1.4);
+  border-radius: 26px 26px 0 0;
+  box-shadow: 0 -2px 8px rgba(42,36,33,0.05), 0 -10px 40px rgba(42,36,33,0.12);
+  padding: 0 14px calc(env(safe-area-inset-bottom, 0px) + 12px);
+  transform: translateY(105%);
+  transition: transform var(--dur-slow) var(--ease);
+  touch-action: manipulation;
+}
+#numpad.open { transform: translateY(0); }
+.np-grab { padding: 8px 0 4px; display: flex; justify-content: center; cursor: pointer; }
+.np-grab-bar { width: 38px; height: 4px; border-radius: 2px; background: rgba(42,36,33,0.16); }
+.np-chips { display: flex; gap: 8px; padding: 4px 2px 10px; }
+.np-chip {
+  flex: 1; padding: 10px 0; border-radius: 13px;
+  border: 1px solid var(--border); background: var(--card);
+  font-family: var(--font-body); font-size: 14px; font-weight: 600;
+  color: var(--text-secondary); cursor: pointer;
+  font-variant-numeric: tabular-nums;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--dur-fast) var(--ease), background var(--dur-fast);
+}
+.np-chip:active { transform: scale(0.95); background: var(--bg); }
+.np-chip.np-up { color: var(--accent); border-color: rgba(240,78,35,0.25); }
+.np-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.np-key {
+  height: 52px; border-radius: 14px; border: none;
+  background: var(--card); box-shadow: 0 1px 2px rgba(42,36,33,0.06);
+  font-family: var(--font-body); font-size: 23px; font-weight: 300;
+  color: var(--text); cursor: pointer;
+  font-variant-numeric: tabular-nums lining-nums;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 120ms var(--ease), background 120ms;
+}
+.np-key:active { transform: scale(0.94); background: var(--bg); }
+.np-del { font-size: 18px; color: var(--text-secondary); }
+.np-action {
+  width: 100%; margin-top: 10px; padding: 15px;
+  border: none; border-radius: 16px;
+  background: var(--accent); color: #fff;
+  font-family: var(--font-body); font-size: 16px; font-weight: 600;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: transform var(--dur-fast) var(--ease), background var(--dur-fast);
+}
+.np-action:active { transform: scale(0.98); }
+.np-action.np-log { background: var(--green); }
+body.numpad-open .exercise-list { padding-bottom: 330px; }
+body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
+#bottom-nav { transition: transform var(--dur-slow) var(--ease); }
+.set-input.np-focus, .warmup-input.np-focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px rgba(240,78,35,0.12);
+}
+
 /* ── Active workout pill ── */
 #workout-pill {
   position: fixed; bottom: calc(var(--nav-h) + 12px);
@@ -1145,11 +1273,14 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 .trend-arrow-down { color: #C4876E; font-size: 11px; }
 
 /* Plate calculator */
-.plate-popover { background: var(--charcoal); color: #fff; border-radius: 12px; padding: 10px 14px; font-size: 12px; margin-top: 6px; }
-.plate-popover .plate-title { font-size: 10px; color: rgba(255,255,255,0.5); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-.plate-row { display: flex; flex-wrap: wrap; gap: 4px; }
-.plate-chip { background: rgba(255,255,255,0.1); border-radius: 6px; padding: 3px 8px; font-weight: 600; }
-.plate-chip.orange { background: rgba(240,78,35,0.4); }
+.plate-popover {
+  background: var(--card); color: var(--text);
+  border-radius: 14px; padding: 10px 14px 11px; font-size: 12px; margin-top: 6px;
+  box-shadow: var(--shadow-deep); border: 0.5px solid var(--border);
+}
+.plate-popover .plate-title { font-size: 9.5px; color: var(--muted); margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.09em; }
+.plate-total { font-size: 11.5px; color: var(--text-secondary); text-align: center; margin-top: 5px; font-variant-numeric: tabular-nums; }
+.plate-total strong { font-weight: 600; color: var(--text); }
 
 /* Overload nudge */
 .overload-nudge {
@@ -1778,6 +1909,26 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
     <button class="ri-btn ri-add"  onclick="event.stopPropagation();addRestTime(30)">+30s</button>
     <button class="ri-btn ri-skip" onclick="event.stopPropagation();cancelRestTimer()">skip</button>
   </div>
+</div>
+<!-- ── Custom number pad — the system keyboard never touches a set ── -->
+<div id="numpad">
+  <div class="np-grab" onclick="closeNumpad()"><div class="np-grab-bar"></div></div>
+  <div class="np-chips" id="np-chips"></div>
+  <div class="np-grid">
+    <button class="np-key" data-k="1">1</button>
+    <button class="np-key" data-k="2">2</button>
+    <button class="np-key" data-k="3">3</button>
+    <button class="np-key" data-k="4">4</button>
+    <button class="np-key" data-k="5">5</button>
+    <button class="np-key" data-k="6">6</button>
+    <button class="np-key" data-k="7">7</button>
+    <button class="np-key" data-k="8">8</button>
+    <button class="np-key" data-k="9">9</button>
+    <button class="np-key np-dot" data-k=".">.</button>
+    <button class="np-key" data-k="0">0</button>
+    <button class="np-key np-del" data-k="del">⌫</button>
+  </div>
+  <button class="np-action" id="np-action" onclick="numpadAction()">Next</button>
 </div>
 <div id="workout-pill" onclick="Maps('workout')">
   <div class="pill-dot"></div>
@@ -4299,6 +4450,168 @@ function markDraftWu(key) {
   _draftTimeout = setTimeout(saveNow, 300);
 }
 
+// ── Custom number pad engine — replaces the system keyboard for set entry ───
+let NP = { el: null, key: null, si: null, exIdx: null, field: 'w', isWu: false, fresh: true };
+
+function openNumpad(inputEl, key, si, exIdx, field, isWu = false) {
+  NP = { el: inputEl, key, si, exIdx, field, isWu, fresh: true };
+  document.querySelectorAll('.np-focus').forEach(e => e.classList.remove('np-focus'));
+  inputEl.classList.add('np-focus');
+  const chipsEl = document.getElementById('np-chips');
+  if (chipsEl) {
+    chipsEl.innerHTML = field === 'w'
+      ? `<button class="np-chip" onclick="npAdjust(-5)">−5</button>
+         <button class="np-chip" onclick="npAdjust(-2.5)">−2.5</button>
+         <button class="np-chip np-up" onclick="npAdjust(2.5)">+2.5</button>
+         <button class="np-chip np-up" onclick="npAdjust(5)">+5</button>`
+      : `<button class="np-chip" onclick="npAdjust(-1)">−1</button>
+         <button class="np-chip np-up" onclick="npAdjust(1)">+1</button>`;
+  }
+  const action = document.getElementById('np-action');
+  if (action) {
+    action.textContent = field === 'w' ? 'Next · reps' : '✓ Log set';
+    action.classList.toggle('np-log', field === 'r');
+  }
+  document.getElementById('numpad').classList.add('open');
+  document.body.classList.add('numpad-open');
+  setTimeout(() => { try { inputEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(e) {} }, 140);
+  haptic('tick');
+}
+
+function closeNumpad() {
+  const np = document.getElementById('numpad');
+  if (np) np.classList.remove('open');
+  document.body.classList.remove('numpad-open');
+  document.querySelectorAll('.np-focus').forEach(e => e.classList.remove('np-focus'));
+  NP.el = null;
+}
+
+function _npCommitDraft() {
+  if (!NP.key) return;
+  if (NP.isWu) markDraftWu(NP.key); else markDraft(NP.key, NP.si);
+}
+
+function npAdjust(delta) {
+  if (!NP.el) return;
+  const cur = parseFloat(NP.el.value) || 0;
+  let v = Math.max(0, cur + delta);
+  v = NP.field === 'r' ? Math.round(v) : Math.round(v * 2) / 2;
+  NP.el.value = Number.isInteger(v) ? String(v) : v.toFixed(1);
+  NP.fresh = false;
+  haptic('tick');
+  _npCommitDraft();
+}
+
+function npKey(k) {
+  if (!NP.el) return;
+  let v = String(NP.el.value || '');
+  if (k === 'del')      v = NP.fresh ? '' : v.slice(0, -1);
+  else if (k === '.') {
+    if (NP.field === 'r') return;                  // no decimals on reps
+    if (NP.fresh) v = '0.';
+    else if (!v.includes('.')) v += '.';
+  } else {
+    v = NP.fresh ? k : (v + k);                    // first key replaces — select-all semantics
+  }
+  if (v.length > 6) return;
+  NP.fresh = false;
+  NP.el.value = v;
+  haptic('tick');
+  _npCommitDraft();
+}
+
+function numpadAction() {
+  if (!NP.el) return;
+  const { key, si, exIdx, field, isWu } = NP;
+  if (isWu) {
+    if (field === 'w') {
+      const ri = document.getElementById('wuri-' + key);
+      if (ri) openNumpad(ri, key, 0, exIdx, 'r', true);
+    } else { closeNumpad(); logWarmup(key); }
+    return;
+  }
+  if (field === 'w') {
+    const ri = document.getElementById('ri-' + key + '-' + si);
+    if (ri) openNumpad(ri, key, si, exIdx, 'r', false);
+  } else { closeNumpad(); logSet(key, si, exIdx); }
+}
+
+// Digit keys (delegated) + tap-away dismissal
+(function initNumpad() {
+  document.addEventListener('click', (e) => {
+    const np = document.getElementById('numpad');
+    if (!np) return;
+    const k = e.target.closest('.np-key');
+    if (k && np.contains(k)) { npKey(k.dataset.k); return; }
+    if (!np.classList.contains('open')) return;
+    if (np.contains(e.target)) return;
+    if (e.target.closest('.set-input, .warmup-input, .set-log-btn, .warmup-row')) return;
+    closeNumpad();
+  });
+})();
+
+// ── Long-press exercise card → floating quick-action menu ───────────────────
+(function initLongPress() {
+  let timer = null, sx = 0, sy = 0;
+  document.addEventListener('touchstart', (e) => {
+    const hdr = e.target.closest('.ex-card-header');
+    if (!hdr || ST.screen !== 'workout' || e.target.closest('button')) return;
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+    timer = setTimeout(() => { timer = null; showCardMenu(hdr); }, 480);
+  }, { passive: true });
+  document.addEventListener('touchmove', (e) => {
+    if (!timer) return;
+    const dx = e.touches[0].clientX - sx, dy = e.touches[0].clientY - sy;
+    if (dx * dx + dy * dy > 110) { clearTimeout(timer); timer = null; }
+  }, { passive: true });
+  ['touchend', 'touchcancel'].forEach(ev =>
+    document.addEventListener(ev, () => { if (timer) { clearTimeout(timer); timer = null; } }));
+})();
+
+function showCardMenu(hdr) {
+  const card = hdr.closest('.ex-card');
+  if (!card) return;
+  closeCardMenu();
+  haptic('set');
+  const key = card.id.replace('excard-', '');
+  const exIdx = parseInt(key.split('_').pop());
+  card.classList.add('lifted');
+  const rect = card.getBoundingClientRect();
+  const menu = document.createElement('div');
+  menu.id = 'card-menu';
+  menu.innerHTML = [
+    { ic: '⇄', lbl: 'Substitute',        fn: `showSubs(event,'${key}',${exIdx})` },
+    { ic: '↗', lbl: 'Exercise history',  fn: `showProgressGraphFromMenu('${key}',${exIdx})` },
+    { ic: '◷', lbl: 'Edit rest time',    fn: `editRestFromMenu('${key}',${exIdx})` },
+    { ic: '?', lbl: 'Form cues',         fn: `showCue(event,'${key}',${exIdx})` },
+  ].map(i => `<button onclick="closeCardMenu();${i.fn}"><span class="cm-ic">${i.ic}</span>${i.lbl}</button>`).join('');
+  menu.style.top = Math.min(rect.bottom + 8, window.innerHeight - 250) + 'px';
+  document.body.appendChild(menu);
+  requestAnimationFrame(() => menu.classList.add('open'));
+  setTimeout(() => document.addEventListener('click', closeCardMenu, { once: true }), 0);
+}
+
+function closeCardMenu() {
+  const m = document.getElementById('card-menu');
+  if (m) { m.classList.remove('open'); setTimeout(() => m.remove(), 180); }
+  document.querySelectorAll('.ex-card.lifted').forEach(c => c.classList.remove('lifted'));
+}
+
+function showProgressGraphFromMenu(key, exIdx) {
+  const prog = PROGRAMS.find(p => p.id === ST.currentProgram);
+  const sess = prog && prog.sessions.find(s => s.id === ST.currentSession);
+  const ex = sess && sess.exercises[exIdx];
+  if (ex) showProgressGraph(null, liveExName(key, ex));
+}
+
+function editRestFromMenu(key, exIdx) {
+  if (!ST.expandedCards.has(key)) { toggleCard(key); }
+  setTimeout(() => {
+    const lbl = document.getElementById('rest-lbl-' + key);
+    if (lbl) editRestTime(key, exIdx, lbl);
+  }, 320);
+}
+
 // Archive a live/abandoned workout's logged sets into history — nothing with
 // reps in it is ever silently dropped.
 function archiveWorkoutToHistory(snapshot) {
@@ -4353,6 +4666,11 @@ function noticeSheet(title, body) {
 }
 
 function getLastPerformance(exName) {
+  const found = getLastPerformanceFull(exName);
+  return found ? found.sets : null;
+}
+
+function getLastPerformanceFull(exName) {
   // Lookup engine — scans ALL history indiscriminately by name alone.
   // Three resolution paths tried in order for every entry; no programId branching.
   // History sorted newest-to-oldest by endTime so we always return the most
@@ -4397,11 +4715,22 @@ function getLastPerformance(exName) {
       // ── Match: fuzzy name comparison with alias resolution + parenthetical strip
       if (exercisesMatch(exName, storedName)) {
         const ws = sets.filter(s => s && s.r > 0);
-        if (ws.length > 0) return ws;
+        if (ws.length > 0) return { sets: ws, endTime: w.endTime || 0 };
       }
     }
   }
   return null;
+}
+
+// "last Tue" / "3d ago" — quiet relative date for the card memory chip
+function relDay(ts) {
+  if (!ts) return '';
+  const days = Math.floor((Date.now() - ts) / 86400000);
+  if (days <= 0) return 'today';
+  if (days === 1) return 'yesterday';
+  if (days < 7) return 'last ' + new Date(ts).toLocaleDateString('en-GB', { weekday: 'short' });
+  if (days < 30) return Math.floor(days / 7) + 'w ago';
+  return new Date(ts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 }
 
 function getStats() {
@@ -4797,6 +5126,7 @@ const SCREEN_ORDER = ['home', 'workouts-browser', 'history', 'analysis'];
 function Maps(to, data={}) {
   const from = ST.screen;
   ST.screen = to;
+  if (typeof closeNumpad === 'function') closeNumpad();
 
   // Render content into the destination screen BEFORE transition fires
   if (to === 'home')             renderHome();
@@ -5485,6 +5815,38 @@ function renderMuscleGraphContent() {
       </div>
       <div class="mg-now">${thisWk > 0 ? `now <strong>${thisWk}kg</strong>` : ''}${peak > 0 && peak !== thisWk ? ` · peak <strong>${peak}kg</strong>` : ''}</div>
     </div>`;
+
+  // ── Scrubbing — drag a finger across the chart, the data follows ──────────
+  if (hasData) {
+    const wrap = document.querySelector('#muscle-graph-content .mg-chart-wrap');
+    if (wrap) {
+      wrap.style.position = 'relative';
+      const tip = document.createElement('div');
+      tip.className = 'mg-scrub-tip';
+      wrap.appendChild(tip);
+      let lastIdx = -1;
+      const onMove = (clientX) => {
+        const r = wrap.getBoundingClientRect();
+        const relX = (clientX - r.left) / r.width * W;
+        let best = -1, bd = 1e9;
+        xs.forEach((x, i) => {
+          if (vals[i] > 0) { const d = Math.abs(x - relX); if (d < bd) { bd = d; best = i; } }
+        });
+        if (best >= 0 && best !== lastIdx) {
+          lastIdx = best;
+          haptic('tick');
+          tip.textContent = `${weeks[best].dateLabel} · ${vals[best]}kg`;
+          tip.style.left = Math.min(Math.max((xs[best] / W) * 100, 15), 85) + '%';
+          tip.classList.add('on');
+        }
+      };
+      wrap.addEventListener('touchstart', e => onMove(e.touches[0].clientX), { passive: true });
+      wrap.addEventListener('touchmove',  e => onMove(e.touches[0].clientX), { passive: true });
+      const end = () => { tip.classList.remove('on'); lastIdx = -1; };
+      wrap.addEventListener('touchend', end);
+      wrap.addEventListener('touchcancel', end);
+    }
+  }
 }
 
 
@@ -5644,9 +6006,34 @@ function renderHome() {
 
     ${resumeHTML}
 
-    <button class="premium-action-pill" onclick="${ctaOnclick}">
-      START ${nextSessionName}
-    </button>`;
+    ${ns && ns.session ? (() => {
+      // Boarding pass — one glance answers "what am I walking into"
+      const manifest = ns.session.exercises.slice(0, 4).map(ex =>
+        `<div class="bc-ex"><span>${stripSuperset(ex.name)}</span><span class="bc-sets">${ex.workingSets || 3} sets</span></div>`).join('');
+      const more = ns.session.exercises.length > 4
+        ? `<div class="bc-more">+ ${ns.session.exercises.length - 4} more</div>` : '';
+      const fb = ST.fitbit;
+      let chip = '';
+      if (fb && fb.connected && fb.readinessScore !== null && fb.readinessScore !== undefined) {
+        const r = fb.readinessScore;
+        const cls = r >= 80 ? ' bc-ready-high' : (r < 65 ? ' bc-ready-low' : '');
+        const word = r >= 80 ? 'primed' : (r < 65 ? 'go lighter' : 'steady');
+        chip = `<div class="bc-chip${cls}">readiness ${r} · ${word}</div>`;
+      } else if (ns.avgDur) {
+        chip = `<div class="bc-chip">~${Math.round(ns.avgDur / 60)} min avg</div>`;
+      }
+      return `<div class="boarding-card">
+        <div class="bc-top">
+          <div>
+            <div class="bc-label">Next Session</div>
+            <div class="bc-name">${ns.session.name}</div>
+          </div>
+          ${chip}
+        </div>
+        <div class="bc-manifest">${manifest}${more}</div>
+        <button class="premium-action-pill" onclick="${ctaOnclick}">START ${nextSessionName}</button>
+      </div>`;
+    })() : `<button class="premium-action-pill" onclick="${ctaOnclick}">CHOOSE A PROGRAM</button>`}`;
 
   // ── Silhouette interactive layer ─────────────────────────────────────────────
   requestAnimationFrame(() => {
@@ -5689,9 +6076,11 @@ function renderHome() {
     }, { passive: true });
   });
 
-  // Stat tickers — once per app launch, not on every re-render
+  // Launch awakening + stat tickers — once per app launch, never on re-render
   if (!ST._homeTicked) {
     ST._homeTicked = true;
+    container.classList.add('awaken');
+    setTimeout(() => container.classList.remove('awaken'), 1100);
     requestAnimationFrame(() => tickStats(container));
   }
 }
@@ -5967,7 +6356,8 @@ function renderWorkout() {
     // Last performance (pre-fill) — looked up by the EFFECTIVE exercise
     // identity so substituted/travel exercises pull THEIR history, not the
     // original slot's.
-    const lastPerf = getLastPerformance(displayName);
+    const lastPerfFull = getLastPerformanceFull(displayName);
+    const lastPerf = lastPerfFull ? lastPerfFull.sets : null;
 
     // Weight suggestion for new exercises
     let suggestion = null;
@@ -6024,20 +6414,16 @@ function renderWorkout() {
       setRows += `
       <div class="set-row" id="setrow-${key}-${si}">
         <div class="set-num">${si+1}</div>
-        <input class="set-input${isLogged?' logged':''}" id="wi-${key}-${si}" type="number" inputmode="decimal"
-          value="${preW}" placeholder="kg" min="0" step="0.5"
-          enterkeyhint="next"
-          onclick="this.select()"
+        <input class="set-input${isLogged?' logged':''}" id="wi-${key}-${si}" type="text" inputmode="none"
+          value="${preW}" placeholder="kg" autocomplete="off"
+          onclick="openNumpad(this,'${key}',${si},${i},'w')"
           oninput="markDraft('${key}',${si})"
-          onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('ri-${key}-${si}').focus();document.getElementById('ri-${key}-${si}').select();}"
           ${barbell?`onfocus="showPlate('${key}',${si})" onblur="hidePlate('${key}',${si})"`:''}>
         <div class="set-sep">×</div>
-        <input class="set-input${isLogged?' logged':''}" id="ri-${key}-${si}" type="number" inputmode="numeric"
-          value="${preR}" placeholder="reps" min="0"
-          enterkeyhint="done"
-          onclick="this.select()"
-          oninput="markDraft('${key}',${si})"
-          onkeydown="if(event.key==='Enter'){event.preventDefault();logSet('${key}',${si},${i});}">
+        <input class="set-input${isLogged?' logged':''}" id="ri-${key}-${si}" type="text" inputmode="none"
+          value="${preR}" placeholder="reps" autocomplete="off"
+          onclick="openNumpad(this,'${key}',${si},${i},'r')"
+          oninput="markDraft('${key}',${si})">
         <button class="set-log-btn${isLogged?' logged':''}" onclick="${isLogged ? `unlogSet('${key}',${si},${i})` : `logSet('${key}',${si},${i})`}"
           >${isLogged ? checkSVG() : '→'}</button>
       </div>
@@ -6056,12 +6442,13 @@ function renderWorkout() {
     const warmupRowHtml = (!wuDismissed) ? `
       <div class="warmup-row" id="wurow-${key}">
         <span class="warmup-label">warm-up</span>
-        <input class="warmup-input" id="wuwi-${key}" type="number" inputmode="decimal"
-          value="${wuPreW}" placeholder="kg" min="0" step="0.5" onclick="this.select()" oninput="markDraftWu('${key}')">
+        <input class="warmup-input" id="wuwi-${key}" type="text" inputmode="none"
+          value="${wuPreW}" placeholder="kg" autocomplete="off"
+          onclick="openNumpad(this,'${key}',0,${i},'w',true)" oninput="markDraftWu('${key}')">
         <span class="warmup-sep">×</span>
-        <input class="warmup-input" id="wuri-${key}" type="number" inputmode="numeric"
-          value="${wuPreR}" placeholder="reps" min="0" onclick="this.select()" oninput="markDraftWu('${key}')"
-          onkeydown="if(event.key==='Enter'){event.preventDefault();logWarmup('${key}');}">
+        <input class="warmup-input" id="wuri-${key}" type="text" inputmode="none"
+          value="${wuPreR}" placeholder="reps" autocomplete="off"
+          onclick="openNumpad(this,'${key}',0,${i},'r',true)" oninput="markDraftWu('${key}')">
         <button class="warmup-dismiss" onclick="dismissWarmup(event,'${key}','${normalizeEx(name)}')" title="Remove warm-up">✕</button>
       </div>` : '';
     const warmupText = '';
@@ -6078,7 +6465,7 @@ function renderWorkout() {
           <div class="ex-name">${displayName} ${isCompleted ? '<span class="ex-check">✓</span>' : ''}</div>
           ${subbed ? `<div class="ex-sub-note">⇄ swapped from ${name}</div>` : ''}
           ${muscleBadgeHtml(muscle)}
-          ${lastPerf ? `<div class="ex-last-perf">Last: ${lastPerf.slice(0,3).map((s,idx)=>`${idx+1}×${s.r}@${s.w}kg`).join(' · ')}</div>` : ''}
+          ${lastPerf ? `<div class="ex-last-perf">${lastPerf[lastPerf.length-1].w}kg × ${lastPerf[lastPerf.length-1].r} · ${relDay(lastPerfFull.endTime)}</div>` : ''}
           <div class="ex-meta">${totalSets} × ${travel ? travel.reps : reps} · ${formatDuration(restSec)} rest</div>
         </div>
         <div class="ex-card-actions">
@@ -6182,13 +6569,38 @@ function renderWorkout() {
 
 function renderPlatePopover(totalKg) {
   const plates = plateCalc(parseFloat(totalKg) || 0);
-  if (!plates || plates.length === 0) return `<div class="plate-popover"><div class="plate-title">Plate Calculator · Bar only</div></div>`;
-  const counts = {};
-  for (const p of plates) counts[p] = (counts[p]||0) + 1;
-  const chips = Object.entries(counts).map(([p,n]) =>
-    `<div class="plate-chip${p==25||p==20?' orange':''}">${n>1?n+'×':''}${p}kg</div>`
-  ).join('');
-  return `<div class="plate-popover"><div class="plate-title">Each side · 20kg bar</div><div class="plate-row">${chips}</div></div>`;
+  if (!plates || plates.length === 0) return `<div class="plate-popover"><div class="plate-title">20kg bar · no plates</div></div>`;
+  // Drawn to scale — height & width proportional to the real iron
+  const GEO = {
+    25:   [46, 9,  'oklch(58.5% 0.210 32)'],
+    20:   [42, 9,  'oklch(28% 0.018 45)'],
+    15:   [36, 8,  'oklch(42% 0.025 55)'],
+    10:   [30, 7,  'oklch(54% 0.030 60)'],
+    5:    [24, 6,  'oklch(64% 0.030 60)'],
+    2.5:  [18, 5,  'oklch(71% 0.030 60)'],
+    1.25: [14, 4,  'oklch(77% 0.025 65)'],
+  };
+  const H = 60, midY = H / 2;
+  let x = 16;
+  let svgPlates = '';
+  for (const p of plates) {
+    const [ph, pw, col] = GEO[p] || [16, 5, 'oklch(72% 0.03 60)'];
+    svgPlates += `<rect x="${x}" y="${(midY - ph / 2).toFixed(1)}" width="${pw}" height="${ph}" rx="2.2" fill="${col}"/>
+      <rect x="${x + 1.2}" y="${(midY - ph / 2 + 2).toFixed(1)}" width="1.6" height="${ph - 4}" rx="0.8" fill="rgba(255,255,255,0.14)"/>`;
+    x += pw + 2.5;
+  }
+  const W = Math.max(x + 16, 132);
+  const perSide = plates.reduce((a, b) => a + b, 0);
+  const labels = plates.map(p => Number.isInteger(p) ? p : p.toFixed(2).replace(/0+$/,'').replace(/\.$/,'')).join(' · ');
+  return `<div class="plate-popover">
+    <div class="plate-title">Each side · 20kg bar</div>
+    <svg viewBox="0 0 ${W} ${H}" style="width:${W}px;max-width:100%;height:${H}px;display:block;margin:4px auto 0" aria-hidden="true">
+      <rect x="0" y="${midY - 3}" width="${W}" height="6" rx="3" fill="oklch(82% 0.012 70)"/>
+      <rect x="8" y="${midY - 7}" width="5" height="14" rx="2" fill="oklch(68% 0.02 70)"/>
+      ${svgPlates}
+    </svg>
+    <div class="plate-total"><strong>${Number.isInteger(perSide) ? perSide : perSide.toFixed(1)}kg</strong> per side · ${labels}</div>
+  </div>`;
 }
 
 function calcVolume() {
@@ -7584,8 +7996,8 @@ function renderProgressGauges() {
       ${activeArc}
       <text x="50" y="53"
         text-anchor="middle" dominant-baseline="middle"
-        font-family="'Courier New',Courier,monospace"
-        font-size="${fontSize}" font-weight="900"
+        font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+        font-size="${fontSize}" font-weight="300"
         fill="${pctColor}"
         font-variant-numeric="tabular-nums lining-nums"
         letter-spacing="-0.5">${pct}%</text>
