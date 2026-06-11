@@ -682,8 +682,24 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 }
 .muscle-group { cursor: pointer; transition: filter 350ms cubic-bezier(0.16,1,0.3,1); }
 .muscle-group:active { filter: brightness(1.18); }
-@keyframes musclePulse { 0%,100%{opacity:1} 50%{opacity:0.52} }
-.muscle-pulse { animation: musclePulse 2.2s ease-in-out infinite; }
+@keyframes musclePulse { 0%,100%{opacity:1} 50%{opacity:0.58} }
+.muscle-pulse { animation: musclePulse 2.8s ease-in-out infinite; }
+
+/* Hairline region outlines — shapes stay identifiable at a glance */
+.muscle-group path, .muscle-group ellipse, .muscle-group circle, .muscle-group rect {
+  stroke: oklch(35% 0.02 45 / 0.10); stroke-width: 0.5;
+}
+
+/* Micro-legend beneath the figure */
+.totem-legend {
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  margin: 2px 0 0; font-size: 9px; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--muted);
+}
+.tl-dot { width: 7px; height: 7px; border-radius: 4px; display: inline-block; margin-right: 5px; vertical-align: 0; }
+.tl-behind { background: oklch(48% 0.130 35 / 0.85); }
+.tl-track  { background: oklch(70% 0.110 82 / 0.86); }
+.tl-done   { background: oklch(76% 0.130 85); box-shadow: 0 0 6px oklch(76% 0.130 85 / 0.55); }
 
 /* ── Pearl ripple celebration ── */
 @keyframes pearlRippleA {
@@ -1507,58 +1523,88 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 .mg-ring-label { font-size: 9.5px; color: rgba(255,255,255,0.42); font-family: var(--font-mono); letter-spacing: 0.06em; margin-left: 4px; }
 .mg-ghost-trace { opacity: 0.25; }
 #muscle-graph-panel {
-  width: 100%; max-width: 340px;
-  background: linear-gradient(145deg, rgba(255,255,255,0.32) 0%, rgba(255,255,255,0.15) 100%);
-  border: 1px solid rgba(255,255,255,0.55);
+  /* Solid white instrument card — the grey frost is dead */
+  width: 100%; max-width: 344px;
+  background: var(--card);
   border-radius: 28px;
-  box-shadow: 0 40px 100px oklch(0% 0 0 / 0.44),
-              inset 0 1.5px 0 rgba(255,255,255,0.75),
-              inset 0 -1px 0 rgba(255,255,255,0.12);
-  padding: 28px 24px 32px; position: relative;
+  box-shadow: var(--shadow-deep);
+  padding: 24px 22px 20px; position: relative;
   transform: scale(0.82); transform-origin: center center;
   transition: transform var(--dur-slow) var(--ease);
 }
 #muscle-graph-overlay.visible #muscle-graph-panel { transform: scale(1); }
 .mg-close {
-  position: absolute; top: 18px; right: 18px;
-  width: 30px; height: 30px; border-radius: 50%;
-  background: rgba(42,36,33,0.10); border: 1px solid rgba(42,36,33,0.08);
-  cursor: pointer; font-size: 14px; color: var(--charcoal);
+  position: absolute; top: 16px; right: 16px;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(42,36,33,0.05); border: none;
+  cursor: pointer; font-size: 14px; color: var(--text-secondary);
   display: flex; align-items: center; justify-content: center;
+  z-index: 2; -webkit-tap-highlight-color: transparent;
+  transition: transform var(--dur-fast) var(--ease);
 }
+.mg-close:active { transform: scale(0.92); }
+.mg-head { display: flex; align-items: flex-start; justify-content: space-between; padding-right: 36px; margin-bottom: 12px; }
 .mg-muscle-title {
   font-family: var(--font-hero); font-style: italic;
-  font-size: 26px; font-weight: 700; color: var(--charcoal); margin-bottom: 2px;
+  font-size: 27px; font-weight: 600; color: var(--charcoal); line-height: 1.05;
 }
 .mg-meta {
-  font-size: 10px; color: rgba(42,36,33,0.45);
-  text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 18px;
+  font-size: 9.5px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px;
 }
-.mg-stat-row { display: flex; gap: 10px; margin-top: 18px; }
-.mg-stat {
-  flex: 1; background: rgba(255,255,255,0.38);
-  border-radius: 14px; padding: 12px;
-  border: 1px solid rgba(255,255,255,0.55);
+.mg-delta {
+  font-size: 21px; font-weight: 300; letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums lining-nums; white-space: nowrap; padding-top: 4px;
 }
-.mg-stat-val { font-size: 18px; font-weight: 700; color: var(--charcoal); font-variant-numeric: tabular-nums; }
-.mg-stat-lbl { font-size: 9px; color: rgba(42,36,33,0.45); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px; }
-.mg-insight {
-  margin-top: 12px; padding: 10px 12px;
-  background: rgba(240,78,35,0.07);
-  border-radius: 10px; font-size: 11.5px;
-  color: rgba(42,36,33,0.72); line-height: 1.5;
-  border-left: 2px solid rgba(240,78,35,0.3);
-  position: relative;
+.mg-delta-up   { color: var(--green); }
+.mg-delta-down { color: var(--terracotta); }
+.mg-delta-none { font-family: var(--font-hero); font-style: italic; font-size: 14px; color: var(--muted); }
+.mg-switcher {
+  display: flex; gap: 6px; overflow-x: auto; margin: 0 -22px 14px; padding: 2px 22px 6px;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
 }
-.mg-train-btn {
-  display: inline-block; margin-top: 14px; padding: 9px 18px;
-  background: var(--charcoal); color: #fff;
-  border-radius: 16px; font-size: 12px; font-weight: 600;
-  letter-spacing: 0.08em; cursor: pointer; border: none;
-  font-family: var(--font-body);
-  transition: transform 150ms, opacity 150ms;
+.mg-switcher::-webkit-scrollbar { display: none; }
+.mg-chip {
+  flex-shrink: 0; padding: 6px 13px; border-radius: 15px;
+  border: 1px solid var(--border); background: var(--card);
+  font-size: 11.5px; font-weight: 500; color: var(--text-secondary);
+  font-family: var(--font-body); cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: all var(--dur-fast) var(--ease);
 }
-.mg-train-btn:active { transform: scale(0.96); opacity: 0.9; }
+.mg-chip:active { transform: scale(0.95); }
+.mg-chip.active { background: var(--charcoal); border-color: var(--charcoal); color: #FAF7F2; font-weight: 600; }
+.mg-chart-wrap { margin-bottom: 4px; }
+.mg-empty {
+  font-family: var(--font-hero); font-style: italic; font-size: 14px;
+  color: var(--muted); margin: 26px 0; text-align: center;
+}
+.mg-line-draw {
+  stroke-dasharray: 1; stroke-dashoffset: 1;
+  animation: mgLineDraw 720ms var(--ease) 80ms forwards;
+}
+.mg-area-draw { opacity: 0; animation: mgAreaIn 540ms var(--ease) 420ms forwards; }
+@keyframes mgLineDraw { to { stroke-dashoffset: 0; } }
+@keyframes mgAreaIn   { to { opacity: 1; } }
+.mg-driver {
+  font-size: 12px; color: var(--text-secondary); line-height: 1.5;
+  padding: 9px 12px; margin-top: 6px;
+  background: rgba(240,78,35,0.055); border-radius: 11px;
+}
+.mg-driver strong { font-weight: 600; color: var(--text); }
+.mg-driver-up   { color: var(--green); font-weight: 600; }
+.mg-driver-down { color: var(--terracotta); font-weight: 600; }
+.mg-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; }
+.mg-range { display: flex; background: var(--border); border-radius: 10px; padding: 2px; gap: 0; }
+.mg-range-btn {
+  border: none; background: none; padding: 5px 12px; border-radius: 8px;
+  font-size: 11px; font-weight: 600; color: var(--muted); cursor: pointer;
+  font-family: var(--font-body); -webkit-tap-highlight-color: transparent;
+  transition: all var(--dur-fast) var(--ease);
+}
+.mg-range-btn.active { background: var(--card); color: var(--text); box-shadow: 0 1px 3px rgba(42,36,33,0.10); }
+.mg-now { font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.mg-now strong { color: var(--text-secondary); font-weight: 600; }
 
 /* ── Program picker ── */
 .prog-picker-header { padding: 56px 24px 16px; }
@@ -4862,30 +4908,39 @@ function updateWorkoutPill() {
 // ── Command Center helpers ────────────────────────────────────────────────────
 
 function buildSilhouetteSVG(targets, actuals, weekComplete) {
-  // ── 4-state chromatic fill: none / coral / gold / sage ───────────────────
-  function col(muscle) {
+  // ── 4 unmistakable states ─────────────────────────────────────────────────
+  //  dormant   (no sets)   flat warm-grey ink — clearly asleep
+  //  behind    (<50%)      DEEP TERRACOTTA — attention, not reward
+  //  on-track  (50–99%)    warm peach-gold
+  //  complete  (≥100%)     full gold bloom
+  // The old encoding returned the SAME gold for 50% and 95% — never again.
+  function pct(muscle) {
     const t = targets[muscle] || 0, a = actuals[muscle] || 0;
-    if (!t || !a) return 'oklch(79% 0.018 55 / 0.22)';   // 0% — neutral warm ghost
-    const p = a / t;
-    if (p > 0.90) return 'oklch(56% 0.100 145 / 0.82)';  // >90% — sage #7A9A72
-    if (p > 0.50) return 'oklch(70% 0.110 82 / 0.84)';   // 50–90% — gold #C9A84C
-    return 'oklch(58.5% 0.210 32 / 0.65)';               // 1–49% — terracotta coral
+    if (!t || !a) return null;             // dormant
+    return a / t;
+  }
+  function col(muscle) {
+    const p = pct(muscle);
+    if (p === null)  return 'oklch(76% 0.014 60 / 0.30)';  // dormant ink
+    if (p < 0.50)    return 'oklch(48% 0.130 35 / 0.85)';  // behind — deep terracotta
+    if (p < 1.00)    return 'oklch(70% 0.110 82 / 0.86)';  // on-track — peach-gold
+    return 'oklch(76% 0.130 85 / 0.92)';                   // complete — bright gold
   }
   function isActive(muscle) {
     const t = targets[muscle] || 0, a = actuals[muscle] || 0;
     return t > 0 && a > 0;
   }
   function glowFilter(muscle) {
-    if (!isActive(muscle)) return 'none';
-    const t = targets[muscle] || 0, a = actuals[muscle] || 0;
-    const p = a / t;
-    if (p > 0.90) return 'url(#glowGold)';   // >90% sage — reuse gold bloom
-    if (p > 0.50) return 'url(#glowGold)';   // 50–90% gold bloom
-    return 'url(#glowLight)';                 // coral halo
+    const p = pct(muscle);
+    if (p === null) return 'none';
+    if (p >= 1.00)  return 'url(#glowGold)';   // bloom is EARNED, only at 100%
+    if (p >= 0.50)  return 'url(#glowLight)';  // soft halo on the way up
+    return 'none';                             // behind = flat urgency, no reward glow
   }
   function pulse(muscle) {
-    const t = targets[muscle] || 0, a = actuals[muscle] || 0;
-    return t > 0 && a > 0 && (a / t) < 1;
+    // Only neglected muscles breathe — the eye goes where the work is owed
+    const p = pct(muscle);
+    return p !== null && p < 0.50;
   }
   function g(m) {
     return `class="muscle-group${pulse(m) ? ' muscle-pulse' : ''}" data-muscle="${m}"`;
@@ -5180,32 +5235,48 @@ function getPrevSessionEntry(sessionId, excludeId) {
   return hist[0] || null;
 }
 
-function getEpleyOverloadByMuscle(muscle) {
+function getEpleyOverloadByMuscle(muscle, numWeeks = 5) {
   const hist = getHistory();
   const now = Date.now();
   const msW = 7 * 24 * 3600 * 1000;
-  return Array.from({ length: 5 }, (_, i) => {
-    const wStart = now - (5 - i) * msW;
-    const wEnd   = now - (4 - i) * msW;
+  const exPeaks = {};      // latest-week per-exercise e1RM peaks (driver insight)
+  const prevExPeaks = {};  // prior-week peaks for the delta
+  const weeks = Array.from({ length: numWeeks }, (_, i) => {
+    const wStart = now - (numWeeks - i) * msW;
+    const wEnd   = now - (numWeeks - 1 - i) * msW;
     let peakE1RM = 0;
     for (const w of hist) {
       if (w.endTime < wStart || w.endTime >= wEnd || !w.sets) continue;
       const prog = PROGRAMS.find(p => p.id === w.programId);
-      if (!prog) continue;
-      const sess = prog.sessions.find(s => s.id === w.sessionId);
-      if (!sess) continue;
+      const sess = prog && prog.sessions.find(s => s.id === w.sessionId);
       for (const [key, sets] of Object.entries(w.sets)) {
-        if (key.endsWith('_wu')) continue;
+        if (key.endsWith('_wu') || !Array.isArray(sets)) continue;
         const exIdx = parseInt(key.split('_').pop());
-        const ex = sess.exercises[exIdx];
-        if (!ex) continue;
-        if (getMuscle(stripSuperset(ex.name)) !== muscle) continue;
+        const ex = sess && sess.exercises[exIdx];
+        // Stamped _name wins — substituted sets feed the right muscle's curve
+        const nm = ((sets.find(x => x && x._name) || {})._name) || (ex && stripSuperset(ex.name));
+        if (!nm || getMuscle(nm) !== muscle) continue;
         const e = getTopSetE1RM(sets);
         if (e > peakE1RM) peakE1RM = e;
+        if (i === numWeeks - 1 && e > (exPeaks[nm] || 0)) exPeaks[nm] = e;
+        if (i === numWeeks - 2 && e > (prevExPeaks[nm] || 0)) prevExPeaks[nm] = e;
       }
     }
-    return { label: `w${i + 1}`, value: peakE1RM };
+    const d = new Date(wStart + msW / 2);
+    return {
+      label: `w${i + 1}`,
+      dateLabel: d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
+      value: peakE1RM,
+    };
   });
+  // Driver — which lift is moving this muscle's index
+  let driver = null;
+  const top = Object.entries(exPeaks).sort((a, b) => b[1] - a[1])[0];
+  if (top) {
+    const prev = prevExPeaks[top[0]] || 0;
+    driver = { name: top[0], e1rm: top[1], delta: prev > 0 ? Math.round((top[1] - prev) * 10) / 10 : null };
+  }
+  return { weeks, driver };
 }
 
 function openQuickLogModal(muscle) {
@@ -5265,134 +5336,206 @@ function openMuscleGraph(eOrMuscle, muscleOpt) {
     panel.style.transformOrigin = 'center center';
   }
 
-  // ── e1RM weekly data ──────────────────────────────────────────────────────
-  const weeks  = getEpleyOverloadByMuscle(muscle);
-  const vals   = weeks.map(w => w.value);
-  const labels = weeks.map(w => w.label);
-  const peak   = Math.max(...vals, 1);
-  const thisWk = vals[4] || 0;
-  const prevWk = vals[3] || 0;
-  const hasData = vals.filter(v => v > 0).length >= 2;
-
-  // Delta % vs previous week
-  let deltaBadge;
-  if (!hasData || (thisWk === 0 && prevWk === 0)) {
-    deltaBadge = `<span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:oklch(60% 0.018 55);letter-spacing:0.04em">Baseline Established</span>`;
-  } else if (prevWk === 0) {
-    deltaBadge = `<span style="color:oklch(52% 0.18 145);font-family:'Courier New',monospace;font-size:20px;font-weight:700;letter-spacing:-0.5px">▲ New</span>`;
-  } else {
-    const pct = Math.round(((thisWk - prevWk) / prevWk) * 100);
-    const up  = pct >= 0;
-    deltaBadge = `<span style="color:${up ? 'oklch(52% 0.18 145)' : 'oklch(55% 0.20 28)'};font-family:'Courier New',monospace;font-size:22px;font-weight:700;letter-spacing:-0.5px">${up ? '▲' : '▼'} ${up ? '+' : ''}${pct}%</span>`;
-  }
-
-  // ── Premium SVG line chart (dark charcoal on frosted glass) ──────────────
-  const W = 288, H = 92;
-  const pad = { l: 10, r: 10, t: 14, b: 24 };
-  const cW = W - pad.l - pad.r, cH = H - pad.t - pad.b;
-  const minV = Math.min(...vals.filter(v => v > 0)) * 0.92 || 0;
-  const maxV = peak * 1.05 || 1;
-  const range = maxV - minV || 1;
-
-  const xs = vals.map((_, i) => pad.l + (i / (vals.length - 1)) * cW);
-  const ys = vals.map(v  => v > 0
-    ? pad.t + cH - ((v - minV) / range) * cH
-    : pad.t + cH);
-
-  const linePts  = vals.map((v, i) => v > 0 ? `${xs[i].toFixed(1)},${ys[i].toFixed(1)}` : null).filter(Boolean).join(' ');
-  const areaPath = `M${xs[0].toFixed(1)},${(pad.t + cH).toFixed(1)} `
-    + vals.map((v, i) => v > 0 ? `L${xs[i].toFixed(1)},${ys[i].toFixed(1)}` : '').join(' ')
-    + ` L${xs[xs.length-1].toFixed(1)},${(pad.t + cH).toFixed(1)} Z`;
-
-  const dots = xs.map((x, i) => {
-    if (!vals[i]) return '';
-    const isNow = i === vals.length - 1;
-    const fill  = isNow ? 'oklch(58.5% 0.210 32)' : 'oklch(58.5% 0.210 32 / 0.40)';
-    return `<circle cx="${x.toFixed(1)}" cy="${ys[i].toFixed(1)}"
-      r="${isNow ? 4 : 2.5}" fill="${fill}" stroke="${isNow ? 'oklch(97.8% 0.008 72)' : 'none'}" stroke-width="${isNow ? 1.5 : 0}">
-      ${isNow ? `<animate attributeName="r" values="4;5;4" dur="2.4s" repeatCount="indefinite"/>` : ''}
-    </circle>`;
-  }).join('');
-
-  const lbls = labels.map((lbl, i) =>
-    `<text x="${xs[i].toFixed(1)}" y="${H - 4}" text-anchor="middle"
-      font-size="8.5" fill="oklch(44% 0.025 55)"
-      font-family="'Cormorant Garamond',serif" font-style="italic">${lbl}</text>`
-  ).join('');
-
-  const valLabels = vals.map((v, i) => v > 0
-    ? `<text x="${xs[i].toFixed(1)}" y="${(ys[i] - 5).toFixed(1)}" text-anchor="middle"
-        font-size="7" fill="oklch(44% 0.025 55 / 0.55)"
-        font-family="'Courier New',monospace">${v}</text>` : '').join('');
-
-  const chartSVG = hasData
-    ? `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px;display:block;overflow:visible">
-        <defs>
-          <linearGradient id="e1rmAreaGrad${muscle.replace(/\s/g,'')}" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%"   stop-color="oklch(58.5% 0.210 32 / 0.12)"/>
-            <stop offset="100%" stop-color="oklch(58.5% 0.210 32 / 0.01)"/>
-          </linearGradient>
-        </defs>
-        <line x1="${pad.l}" y1="${(pad.t+cH).toFixed(1)}" x2="${(W-pad.r).toFixed(1)}" y2="${(pad.t+cH).toFixed(1)}"
-          stroke="oklch(72% 0.030 60 / 0.25)" stroke-width="0.75"/>
-        <path d="${areaPath}" fill="url(#e1rmAreaGrad${muscle.replace(/\s/g,'')})"/>
-        <polyline points="${linePts}" fill="none" stroke="oklch(58.5% 0.210 32 / 0.70)"
-          stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-        ${dots}${lbls}${valLabels}
-      </svg>`
-    : `<p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:oklch(60% 0.018 55);margin:20px 0;text-align:center">Log two weeks to see your strength curve.</p>`;
-
-  document.getElementById('muscle-graph-content').innerHTML = `
-    <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;
-      font-size:22px;color:oklch(22.8% 0.018 42);letter-spacing:0.04em;
-      text-transform:uppercase;margin-bottom:2px">${muscle}</div>
-    <div style="font-family:'Courier New',monospace;font-size:8px;letter-spacing:0.18em;
-      text-transform:uppercase;color:oklch(60% 0.018 55);margin-bottom:14px">
-      e1RM · Epley Formula · 5 Week Trail</div>
-    <div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid oklch(91.2% 0.012 72)">
-      ${deltaBadge}
-    </div>
-    <div style="margin:0 0 6px">${chartSVG}</div>
-    <div style="display:flex;gap:0;margin-top:12px;border-top:1px solid oklch(91.2% 0.012 72);padding-top:10px">
-      <div style="flex:1;text-align:center">
-        <div style="font-family:'Courier New',monospace;font-size:17px;font-weight:700;
-          color:oklch(22.8% 0.018 42);font-variant-numeric:tabular-nums">${thisWk > 0 ? thisWk + '<span style="font-size:10px;font-weight:400;color:oklch(60% 0.018 55)">kg</span>' : '—'}</div>
-        <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:10px;
-          color:oklch(60% 0.018 55);margin-top:2px">this week</div>
-      </div>
-      <div style="width:1px;background:oklch(91.2% 0.012 72)"></div>
-      <div style="flex:1;text-align:center">
-        <div style="font-family:'Courier New',monospace;font-size:17px;font-weight:700;
-          color:oklch(22.8% 0.018 42);font-variant-numeric:tabular-nums">${prevWk > 0 ? prevWk + '<span style="font-size:10px;font-weight:400;color:oklch(60% 0.018 55)">kg</span>' : '—'}</div>
-        <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:10px;
-          color:oklch(60% 0.018 55);margin-top:2px">prev week</div>
-      </div>
-      <div style="width:1px;background:oklch(91.2% 0.012 72)"></div>
-      <div style="flex:1;text-align:center">
-        <div style="font-family:'Courier New',monospace;font-size:17px;font-weight:700;
-          color:oklch(22.8% 0.018 42);font-variant-numeric:tabular-nums">${peak > 0 ? peak + '<span style="font-size:10px;font-weight:400;color:oklch(60% 0.018 55)">kg</span>' : '—'}</div>
-        <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:10px;
-          color:oklch(60% 0.018 55);margin-top:2px">peak</div>
-      </div>
-    </div>`;
+  // Render + show
+  ST.mgMuscle = muscle;
+  if (!ST.mgRange) ST.mgRange = 5;
+  renderMuscleGraphContent();
 
   const ov = document.getElementById('muscle-graph-overlay');
   ov.style.display = 'flex';
   requestAnimationFrame(() => ov.classList.add('visible'));
+  // Back gesture closes the panel, not the app
+  try { history.pushState({ screen: ST.screen, overlay: 'muscle' }, '', '#muscle'); } catch(e) {}
+}
+
+// Switch muscle inside the open panel — no close-reopen-retap loop
+function switchMuscleGraph(muscle) {
+  ST.mgMuscle = muscle;
+  haptic('tick');
+  // Move the vignette focus with the selection
+  const totemEl = document.querySelector('.premium-totem-container');
+  if (totemEl) {
+    totemEl.querySelectorAll('.muscle-focused').forEach(el => el.classList.remove('muscle-focused'));
+    const focusedEl = totemEl.querySelector(`[data-muscle="${muscle}"]`);
+    if (focusedEl) focusedEl.classList.add('muscle-focused');
+  }
+  renderMuscleGraphContent();
+}
+
+function setMuscleGraphRange(weeks) {
+  ST.mgRange = weeks;
+  haptic('tick');
+  renderMuscleGraphContent();
+}
+
+const MG_MUSCLES = ['Chest','Back','Shoulders','Biceps','Triceps','Core','Glutes','Quads','Hamstrings','Calves','Traps'];
+
+function renderMuscleGraphContent() {
+  const muscle = ST.mgMuscle;
+  const numWeeks = ST.mgRange || 5;
+  const { weeks, driver } = getEpleyOverloadByMuscle(muscle, numWeeks);
+  const vals  = weeks.map(w => w.value);
+  const peak  = Math.max(...vals, 1);
+  const thisWk = vals[vals.length - 1] || 0;
+  const prevWk = vals[vals.length - 2] || 0;
+  const hasData = vals.filter(v => v > 0).length >= 2;
+
+  // Delta badge — light & airy numerals, token colors
+  let deltaBadge;
+  if (!hasData || (thisWk === 0 && prevWk === 0)) {
+    deltaBadge = `<span class="mg-delta mg-delta-none">Baseline</span>`;
+  } else if (prevWk === 0) {
+    deltaBadge = `<span class="mg-delta mg-delta-up">▲ New</span>`;
+  } else {
+    const pct = Math.round(((thisWk - prevWk) / prevWk) * 100);
+    const up  = pct >= 0;
+    deltaBadge = `<span class="mg-delta ${up ? 'mg-delta-up' : 'mg-delta-down'}">${up ? '▲' : '▼'} ${up ? '+' : ''}${pct}%</span>`;
+  }
+
+  // ── Chart — full-width, dated axis, value chips, draw-in ──────────────────
+  const W = 292, H = 132;
+  const pad = { l: 12, r: 12, t: 22, b: 22 };
+  const cW = W - pad.l - pad.r, cH = H - pad.t - pad.b;
+  const minV = Math.min(...vals.filter(v => v > 0)) * 0.92 || 0;
+  const maxV = peak * 1.06 || 1;
+  const range = maxV - minV || 1;
+  const xs = vals.map((_, i) => pad.l + (i / Math.max(vals.length - 1, 1)) * cW);
+  const ys = vals.map(v => v > 0 ? pad.t + cH - ((v - minV) / range) * cH : pad.t + cH);
+
+  const linePts = vals.map((v, i) => v > 0 ? `${xs[i].toFixed(1)},${ys[i].toFixed(1)}` : null).filter(Boolean).join(' ');
+  const firstIdx = vals.findIndex(v => v > 0);
+  const lastIdx  = vals.length - 1 - [...vals].reverse().findIndex(v => v > 0);
+  const peakIdx  = vals.indexOf(Math.max(...vals));
+  const areaPath = `M${xs[0].toFixed(1)},${(pad.t + cH).toFixed(1)} `
+    + vals.map((v, i) => v > 0 ? `L${xs[i].toFixed(1)},${ys[i].toFixed(1)}` : '').join(' ')
+    + ` L${xs[xs.length - 1].toFixed(1)},${(pad.t + cH).toFixed(1)} Z`;
+
+  const dots = xs.map((x, i) => {
+    if (!vals[i]) return '';
+    const isNow = i === lastIdx;
+    return `<circle cx="${x.toFixed(1)}" cy="${ys[i].toFixed(1)}" r="${isNow ? 4 : 2.5}"
+      fill="${isNow ? 'oklch(58.5% 0.210 32)' : 'oklch(58.5% 0.210 32 / 0.38)'}"
+      stroke="${isNow ? '#fff' : 'none'}" stroke-width="${isNow ? 1.5 : 0}"/>`;
+  }).join('');
+
+  // Value chips on first / peak / last (deduped)
+  const chipIdxs = [...new Set([firstIdx, peakIdx, lastIdx])].filter(i => i >= 0 && vals[i] > 0);
+  const chips = chipIdxs.map(i => {
+    const cx = Math.min(Math.max(xs[i], pad.l + 14), W - pad.r - 14);
+    return `<g>
+      <rect x="${(cx - 16).toFixed(1)}" y="${(ys[i] - 18).toFixed(1)}" width="32" height="13" rx="6.5"
+        fill="#fff" stroke="oklch(91.2% 0.012 72)" stroke-width="0.5"/>
+      <text x="${cx.toFixed(1)}" y="${(ys[i] - 8.4).toFixed(1)}" text-anchor="middle"
+        font-size="8" font-weight="600" fill="oklch(22.8% 0.018 42)"
+        font-family="var(--font-body)" style="font-variant-numeric:tabular-nums">${vals[i]}kg</text>
+    </g>`;
+  }).join('');
+
+  // Dated x-axis — first, middle, last
+  const axisIdxs = [...new Set([0, Math.floor((weeks.length - 1) / 2), weeks.length - 1])];
+  const axis = axisIdxs.map(i =>
+    `<text x="${xs[i].toFixed(1)}" y="${H - 5}" text-anchor="middle" font-size="8.5"
+      fill="oklch(60% 0.018 55)" font-family="var(--font-body)">${weeks[i].dateLabel}</text>`).join('');
+
+  const chartSVG = hasData
+    ? `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px;display:block;overflow:visible">
+        <defs>
+          <linearGradient id="mgArea" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="oklch(58.5% 0.210 32 / 0.13)"/>
+            <stop offset="100%" stop-color="oklch(58.5% 0.210 32 / 0.01)"/>
+          </linearGradient>
+        </defs>
+        <line x1="${pad.l}" y1="${(pad.t + cH).toFixed(1)}" x2="${(W - pad.r).toFixed(1)}" y2="${(pad.t + cH).toFixed(1)}"
+          stroke="oklch(72% 0.030 60 / 0.25)" stroke-width="0.75"/>
+        <path class="mg-area-draw" d="${areaPath}" fill="url(#mgArea)"/>
+        <polyline class="mg-line-draw" pathLength="1" points="${linePts}" fill="none"
+          stroke="oklch(58.5% 0.210 32 / 0.75)" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round"/>
+        ${dots}${chips}${axis}
+      </svg>`
+    : `<p class="mg-empty">Log two weeks of training to see this curve.</p>`;
+
+  // Driver insight — which lift is moving this index
+  const driverHTML = driver
+    ? `<div class="mg-driver">Driven by <strong>${driver.name}</strong>${
+        driver.delta !== null ? ` <span class="${driver.delta >= 0 ? 'mg-driver-up' : 'mg-driver-down'}">${driver.delta >= 0 ? '+' : ''}${driver.delta}kg e1RM</span>` : ''
+      }</div>`
+    : '';
+
+  // Muscle switcher chips — jump between muscles without closing
+  const switcher = `<div class="mg-switcher">${MG_MUSCLES.map(m =>
+    `<button class="mg-chip${m === muscle ? ' active' : ''}" onclick="switchMuscleGraph('${m}')">${m}</button>`
+  ).join('')}</div>`;
+
+  document.getElementById('muscle-graph-content').innerHTML = `
+    <div class="mg-head">
+      <div>
+        <div class="mg-muscle-title">${muscle}</div>
+        <div class="mg-meta">e1RM · Epley · ${numWeeks} weeks</div>
+      </div>
+      ${deltaBadge}
+    </div>
+    ${switcher}
+    <div class="mg-chart-wrap">${chartSVG}</div>
+    ${driverHTML}
+    <div class="mg-foot">
+      <div class="mg-range">
+        <button class="mg-range-btn${numWeeks === 5 ? ' active' : ''}"  onclick="setMuscleGraphRange(5)">5W</button>
+        <button class="mg-range-btn${numWeeks === 12 ? ' active' : ''}" onclick="setMuscleGraphRange(12)">12W</button>
+      </div>
+      <div class="mg-now">${thisWk > 0 ? `now <strong>${thisWk}kg</strong>` : ''}${peak > 0 && peak !== thisWk ? ` · peak <strong>${peak}kg</strong>` : ''}</div>
+    </div>`;
 }
 
 
-// ── Dedicated muscle overlay close — fixes guard bug (was delegating to graph-backdrop check) ──
+// ── Dedicated muscle overlay close — back-gesture aware ──────────────────────
 function closeMuscleGraph(e) {
   const ov = document.getElementById('muscle-graph-overlay');
   // Allow close from: the ✕ button (no event), or tap directly on the overlay backdrop
   if (e && e.target !== ov) return;
+  if (history.state && history.state.overlay === 'muscle') {
+    try { history.back(); return; } catch(err) {}
+  }
+  _closeMuscleGraphDom();
+}
+
+function _closeMuscleGraphDom() {
+  const ov = document.getElementById('muscle-graph-overlay');
   if (ov) {
     ov.classList.remove('visible');
     setTimeout(() => { ov.style.display = 'none'; }, 320);
   }
   _clearSilhouetteFocus();
 }
+
+// Swipe-down dismisses the muscle panel — same physics as the sheets
+(function initMusclePanelDrag() {
+  const panel = document.getElementById('muscle-graph-panel');
+  if (!panel) return;
+  let sy = 0, cy = 0, drag = false;
+  panel.addEventListener('touchstart', (e) => {
+    if (e.target.closest('button')) return;
+    drag = true; sy = cy = e.touches[0].clientY;
+    panel.style.transition = 'none';
+  }, { passive: true });
+  panel.addEventListener('touchmove', (e) => {
+    if (!drag) return;
+    cy = e.touches[0].clientY;
+    let dy = cy - sy;
+    if (dy < 0) dy = -Math.pow(-dy, 0.7);
+    panel.style.transform = `translateY(${Math.max(dy, -20)}px)`;
+  }, { passive: true });
+  const end = () => {
+    if (!drag) return;
+    drag = false;
+    const dy = cy - sy;
+    panel.style.transition = '';
+    panel.style.transform = '';
+    if (dy > 90) { haptic('tick'); closeMuscleGraph(); }
+  };
+  panel.addEventListener('touchend', end);
+  panel.addEventListener('touchcancel', end);
+})();
 
 function _clearSilhouetteFocus() {
   const totemEl = document.querySelector('.premium-totem-container');
@@ -5478,6 +5621,11 @@ function renderHome() {
 
     <div class="premium-totem-container">
       ${typeof buildSilhouetteSVG === 'function' ? buildSilhouetteSVG(targets, actuals, checkWeekComplete()) : ''}
+    </div>
+    <div class="totem-legend">
+      <span><span class="tl-dot tl-behind"></span>behind</span>
+      <span><span class="tl-dot tl-track"></span>on track</span>
+      <span><span class="tl-dot tl-done"></span>complete</span>
     </div>
 
     <div class="premium-metrics-strip">
@@ -8650,7 +8798,7 @@ function bootstrapApp() {
     const sheet = document.getElementById('bottom-sheet');
     if (sheet && sheet.classList.contains('visible')) { __closeSheetDom(); return; }
     const mg = document.getElementById('muscle-graph-overlay');
-    if (mg && mg.classList.contains('visible')) { closeMuscleGraph(); return; }
+    if (mg && mg.classList.contains('visible')) { _closeMuscleGraphDom(); return; }
     const gb = document.getElementById('graph-backdrop');
     if (gb && gb.style.display === 'flex') { closeProgressGraph(); return; }
     // 2. Then navigate to the state's screen
