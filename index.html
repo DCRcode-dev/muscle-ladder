@@ -481,6 +481,24 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
 .btn-secondary { background: var(--border); color: var(--text-secondary); }
 .btn-ghost { background: none; color: var(--muted); border: 1px solid var(--border); }
 
+/* ── Themed confirm / notice sheets — system dialogs are banned ── */
+.confirm-body {
+  font-size: 14.5px; line-height: 1.55; color: var(--text-secondary);
+  margin: 4px 0 18px;
+}
+.confirm-actions { display: flex; flex-direction: column; gap: 10px; padding-bottom: 4px; }
+.confirm-actions .btn { margin: 0; }
+.btn-destructive { background: #C0432A; color: #fff; }
+.btn-sheet-secondary {
+  background: #fff; color: var(--text);
+  border: 1px solid var(--border); font-weight: 600;
+}
+.btn-sheet-ghost { background: none; border: none; color: var(--muted); font-weight: 500; min-height: 44px; }
+.ex-sub-note {
+  font-size: 11.5px; color: var(--muted); font-style: italic;
+  margin: 1px 0 3px; letter-spacing: 0.01em;
+}
+
 /* ── HOME SCREEN — Premium 3-Zone Layout ── */
 #screen-home {
   overflow: hidden !important;
@@ -4092,8 +4110,10 @@ let ST = {
   currentSession: null,
   travelMode: false,
   travelLocked: false,
-  workoutSets: {},      // key: `${sessionId}_${exIdx}` → [{w,r,ts}]  |  `${key}_wu` for warm-up
+  workoutSets: {},      // key: `${sessionId}_${exIdx}` → [{w,r,ts,_name}]  |  `${key}_wu` for warm-up
   workoutNotes: {},     // key: `${sessionId}_${exIdx}` → session-scoped note string
+  workoutDrafts: {},    // key: `${key}-${si}` | `${key}-wu` → {w,r} typed-but-unlogged values
+  workoutSubs: {},      // key: `${sessionId}_${exIdx}` → substituted exercise name (session-scoped)
   dismissedWarmups: new Set(),  // in-memory: normalised exercise names with warm-up dismissed
   syncQueue: [],        // pending Sheets pushes — drained on 'online' or next boot
   audioCtx: null,
@@ -4148,6 +4168,157 @@ function getRestTimes() { return LS.get('dcrgym_rest', {}); }
 function saveRestTimes(r) { LS.set('dcrgym_rest', r); }
 function getSettings() { return LS.get('dcrgym_settings', {sound:true,sheets:'https://script.google.com/macros/s/AKfycbxcAKZDYOzbSJ1a5OjqYRo9OyL9OIhEhoos8a4aQE5MB68atj7XAWQeyTuulmB6UFUt/exec',weightUnit:'kg'}); }
 function saveSettings(s) { LS.set('dcrgym_settings', s); }
+
+// ── Bulletproof persistence core ─────────────────────────────────────────────
+// Schema-versioned, non-destructive, with rolling last-good backup.
+// History must survive every app update. Period.
+const SCHEMA_VERSION = 2;
+
+function migrateStorage() {
+  const v = LS.get('dcrgym_schema_version', 1);
+  if (v >= SCHEMA_VERSION) return;
+
+  // Rolling last-good backup BEFORE any mutation — recoverable from Settings
+  const hist = getHistory();
+  if (hist.length > 0) {
+    LS.set('dcrgym_history_backup', { at: Date.now(), fromVersion: v, history: hist });
+  }
+
+  // v1 → v2: backfill _name onto every working set so exercise identity is a
+  // stored fact, never a derived guess. Resolves via program structure (the
+  // only correct source for legacy entries). Unknown keys are left untouched —
+  // non-destructive by design.
+  if (v < 2) {
+    let stamped = 0;
+    for (const w of hist) {
+      if (!w || !w.sets || !w.programId || w.programId === 'import') continue;
+      const prog = PROGRAMS.find(p => p.id === w.programId);
+      if (!prog) continue;
+      const sess = prog.sessions.find(s => s.id === w.sessionId);
+      if (!sess) continue;
+      for (const [key, sets] of Object.entries(w.sets)) {
+        if (!Array.isArray(sets) || key.endsWith('_wu')) continue;
+        if (sets.some(s => s && s._name)) continue;
+        const exIdx = parseInt(key.split('_').pop());
+        if (isNaN(exIdx) || !sess.exercises[exIdx]) continue;
+        const nm = stripSuperset(sess.exercises[exIdx].name);
+        for (const s of sets) { if (s && s.r > 0) { s._name = nm; stamped++; } }
+      }
+    }
+    if (stamped > 0) saveHistory(hist);
+  }
+
+  LS.set('dcrgym_schema_version', SCHEMA_VERSION);
+}
+
+// Live exercise identity — travel swap and session substitution aware.
+// THE name that gets stamped on sets and used for history lookup.
+function liveExName(key, ex) {
+  const name = stripSuperset(ex.name);
+  const travel = ST.travelMode && TRAVEL_MAP[normalizeEx(name)];
+  if (travel) return travel.name;
+  if (ST.workoutSubs && ST.workoutSubs[key]) return ST.workoutSubs[key];
+  return name;
+}
+
+// Single source of truth for the live-workout snapshot
+function buildWorkoutPayload() {
+  return {
+    v: SCHEMA_VERSION,
+    programId: ST.currentProgram,
+    sessionId: ST.currentSession,
+    sessionName: (() => { const p=PROGRAMS.find(pp=>pp.id===ST.currentProgram); const s=p&&p.sessions.find(ss=>ss.id===ST.currentSession); return s?s.name:''; })(),
+    sets: ST.workoutSets,
+    drafts: ST.workoutDrafts || {},
+    subs: ST.workoutSubs || {},
+    notes: ST.workoutNotes || {},
+    travelMode: ST.travelMode,
+    travelLocked: ST.travelLocked,
+    durationSecs: ST.durationSecs,
+    expandedCards: [...ST.expandedCards],
+    completedCards: [...ST.completedCards],
+    startTime: ST.workoutStart,
+  };
+}
+
+// Synchronous, un-debounced write — called on every set checkmark and on
+// visibilitychange. A logged set is on disk before the ripple finishes.
+function saveNow() {
+  if (!ST.currentSession || !ST.workoutStart) return;
+  LS.set('dcrgym_current_workout', buildWorkoutPayload());
+}
+
+// Draft persistence — values typed but not yet checkmarked survive any reload.
+let _draftTimeout = null;
+function markDraft(key, si) {
+  const wi = document.getElementById('wi-' + key + '-' + si);
+  const ri = document.getElementById('ri-' + key + '-' + si);
+  if (!ST.workoutDrafts) ST.workoutDrafts = {};
+  ST.workoutDrafts[key + '-' + si] = { w: wi ? wi.value : '', r: ri ? ri.value : '' };
+  clearTimeout(_draftTimeout);
+  _draftTimeout = setTimeout(saveNow, 300);
+}
+function markDraftWu(key) {
+  const wi = document.getElementById('wuwi-' + key);
+  const ri = document.getElementById('wuri-' + key);
+  if (!ST.workoutDrafts) ST.workoutDrafts = {};
+  ST.workoutDrafts[key + '-wu'] = { w: wi ? wi.value : '', r: ri ? ri.value : '' };
+  clearTimeout(_draftTimeout);
+  _draftTimeout = setTimeout(saveNow, 300);
+}
+
+// Archive a live/abandoned workout's logged sets into history — nothing with
+// reps in it is ever silently dropped.
+function archiveWorkoutToHistory(snapshot) {
+  if (!snapshot || !snapshot.sets) return false;
+  const hasSets = Object.values(snapshot.sets).some(arr => Array.isArray(arr) && arr.some(s => s && s.r > 0));
+  if (!hasSets) return false;
+  const hist = getHistory();
+  hist.push({
+    id: (snapshot.startTime || Date.now()).toString(),
+    programId: snapshot.programId,
+    sessionId: snapshot.sessionId,
+    sessionName: snapshot.sessionName || '',
+    startTime: snapshot.startTime || Date.now(),
+    endTime: Date.now(),
+    duration: snapshot.durationSecs || 0,
+    travelMode: snapshot.travelMode || false,
+    sets: snapshot.sets,
+    notes: snapshot.notes || {},
+    partial: true,
+  });
+  saveHistory(hist);
+  return true;
+}
+
+// ── Themed confirm/notice sheets — native confirm()/alert() are banned ──────
+let _sheetCb = {};
+function _sheetGo(which) {
+  const fn = _sheetCb[which];
+  _sheetCb = {};
+  closeSheet();
+  if (fn) setTimeout(fn, 90);
+}
+function confirmSheet(opts) {
+  _sheetCb = { confirm: opts.onConfirm || null, secondary: opts.onSecondary || null };
+  openSheet(`
+    <div class="bs-title">${opts.title}</div>
+    ${opts.body ? `<div class="confirm-body">${opts.body}</div>` : ''}
+    <div class="confirm-actions">
+      <button class="btn btn-primary${opts.destructive ? ' btn-destructive' : ''}" onclick="_sheetGo('confirm')">${opts.confirmLabel || 'Confirm'}</button>
+      ${opts.secondaryLabel ? `<button class="btn btn-sheet-secondary" onclick="_sheetGo('secondary')">${opts.secondaryLabel}</button>` : ''}
+      <button class="btn btn-sheet-ghost" onclick="_sheetGo('cancel')">${opts.cancelLabel || 'Cancel'}</button>
+    </div>`);
+}
+function noticeSheet(title, body) {
+  _sheetCb = {};
+  openSheet(`
+    <div class="bs-title">${title}</div>
+    ${body ? `<div class="confirm-body">${body}</div>` : ''}
+    <div class="confirm-actions">
+      <button class="btn btn-primary" onclick="closeSheet()">OK</button>
+    </div>`);
+}
 
 function getLastPerformance(exName) {
   // Lookup engine — scans ALL history indiscriminately by name alone.
@@ -5587,15 +5758,18 @@ function renderWorkout() {
     const barbell = isBarbell(name);
     const cueAvail = !!FORM_CUES[normalizeEx(name)];
     const travel = ST.travelMode && TRAVEL_MAP[normalizeEx(name)];
-    const displayName = travel ? travel.name : name;
+    const displayName = liveExName(key, ex);
+    const subbed = !travel && ST.workoutSubs && ST.workoutSubs[key];
     const loggedSets = ST.workoutSets[key] || [];
 
     // Sets count for this exercise
     const totalSets = ex.workingSets || 3;
     const reps = ex.reps || '8–10';
 
-    // Last performance (pre-fill)
-    const lastPerf = getLastPerformance(name);
+    // Last performance (pre-fill) — looked up by the EFFECTIVE exercise
+    // identity so substituted/travel exercises pull THEIR history, not the
+    // original slot's.
+    const lastPerf = getLastPerformance(displayName);
 
     // Weight suggestion for new exercises
     let suggestion = null;
@@ -5624,8 +5798,10 @@ function renderWorkout() {
     for (let si = 0; si < totalSets; si++) {
       const logged = loggedSets[si];
       const lastSet = lastPerf && (lastPerf[si] != null ? lastPerf[si] : lastPerf[lastPerf.length - 1]);
-      const preW = logged ? logged.w : (lastSet != null ? lastSet.w : '');
-      const preR = logged ? logged.r : (lastSet != null ? lastSet.r : '');
+      // Draft values (typed but not checkmarked) outrank prefill — zero loss on reload
+      const draft = !logged && ST.workoutDrafts && ST.workoutDrafts[key + '-' + si];
+      const preW = logged ? logged.w : (draft && draft.w !== '' ? draft.w : (lastSet != null ? lastSet.w : ''));
+      const preR = logged ? logged.r : (draft && draft.r !== '' ? draft.r : (lastSet != null ? lastSet.r : ''));
       const isLastSet = si === totalSets - 1;
       const tech = isLastSet && ex.lastSetTechnique ? `<span class="technique-badge">${ex.lastSetTechnique}</span>` : '';
       const isLogged = !!logged;
@@ -5654,6 +5830,7 @@ function renderWorkout() {
           value="${preW}" placeholder="kg" min="0" step="0.5"
           enterkeyhint="next"
           onclick="this.select()"
+          oninput="markDraft('${key}',${si})"
           onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('ri-${key}-${si}').focus();document.getElementById('ri-${key}-${si}').select();}"
           ${barbell?`onfocus="showPlate('${key}',${si})" onblur="hidePlate('${key}',${si})"`:''}>
         <div class="set-sep">×</div>
@@ -5661,6 +5838,7 @@ function renderWorkout() {
           value="${preR}" placeholder="reps" min="0"
           enterkeyhint="done"
           onclick="this.select()"
+          oninput="markDraft('${key}',${si})"
           onkeydown="if(event.key==='Enter'){event.preventDefault();logSet('${key}',${si},${i});}">
         <button class="set-log-btn${isLogged?' logged':''}" onclick="${isLogged ? `unlogSet('${key}',${si},${i})` : `logSet('${key}',${si},${i})`}"
           >${isLogged ? '✓' : '→'}</button>
@@ -5674,15 +5852,17 @@ function renderWorkout() {
     const wuKey = `${key}_wu`;
     const wuDismissed = ST.dismissedWarmups.has(normalizeEx(name));
     const wuLogged = ST.workoutSets[wuKey] && ST.workoutSets[wuKey][0];
-    const wuPreW = wuLogged ? wuLogged.w : (lastPerf && lastPerf[0] ? Math.round((lastPerf[0].w || 0) * 0.5) : '');
+    const wuDraft = !wuLogged && ST.workoutDrafts && ST.workoutDrafts[key + '-wu'];
+    const wuPreW = wuLogged ? wuLogged.w : (wuDraft && wuDraft.w !== '' ? wuDraft.w : (lastPerf && lastPerf[0] ? Math.round((lastPerf[0].w || 0) * 0.5) : ''));
+    const wuPreR = wuLogged ? wuLogged.r : (wuDraft && wuDraft.r !== '' ? wuDraft.r : '');
     const warmupRowHtml = (!wuDismissed) ? `
       <div class="warmup-row" id="wurow-${key}">
         <span class="warmup-label">warm-up</span>
         <input class="warmup-input" id="wuwi-${key}" type="number" inputmode="decimal"
-          value="${wuPreW}" placeholder="kg" min="0" step="0.5" onclick="this.select()">
+          value="${wuPreW}" placeholder="kg" min="0" step="0.5" onclick="this.select()" oninput="markDraftWu('${key}')">
         <span class="warmup-sep">×</span>
         <input class="warmup-input" id="wuri-${key}" type="number" inputmode="numeric"
-          value="${wuLogged ? wuLogged.r : ''}" placeholder="reps" min="0" onclick="this.select()"
+          value="${wuPreR}" placeholder="reps" min="0" onclick="this.select()" oninput="markDraftWu('${key}')"
           onkeydown="if(event.key==='Enter'){event.preventDefault();logWarmup('${key}');}">
         <button class="warmup-dismiss" onclick="dismissWarmup(event,'${key}','${normalizeEx(name)}')" title="Remove warm-up">✕</button>
       </div>` : '';
@@ -5698,6 +5878,7 @@ function renderWorkout() {
       <div class="ex-card-header" onclick="toggleCard('${key}')">
         <div class="ex-card-header-left">
           <div class="ex-name">${displayName} ${isCompleted ? '<span class="ex-check">✓</span>' : ''}</div>
+          ${subbed ? `<div class="ex-sub-note">⇄ swapped from ${name}</div>` : ''}
           ${muscleBadgeHtml(muscle)}
           ${lastPerf ? `<div class="ex-last-perf">Last: ${lastPerf.slice(0,3).map((s,idx)=>`${idx+1}×${s.r}@${s.w}kg`).join(' · ')}</div>` : ''}
           <div class="ex-meta">${totalSets} × ${travel ? travel.reps : reps} · ${formatDuration(restSec)} rest</div>
@@ -5963,10 +6144,15 @@ function logSet(key, si, exIdx) {
   }
 
   if (!ST.workoutSets[key]) ST.workoutSets[key] = [];
-  ST.workoutSets[key][si] = { w, r, ts: Date.now() };
+  // _name stamped at write time — exercise identity is a stored fact, never a
+  // derived guess. Travel-swap and substitution aware.
+  ST.workoutSets[key][si] = { w, r, ts: Date.now(), _name: liveExName(key, ex) };
 
-  // Auto-save
-  autoSave();
+  // Draft for this set is now committed — clear it
+  if (ST.workoutDrafts) delete ST.workoutDrafts[key + '-' + si];
+
+  // Synchronous save — on disk before the ripple finishes
+  saveNow();
 
   // Haptic
   if (navigator.vibrate) navigator.vibrate(20);
@@ -6092,8 +6278,10 @@ function logWarmup(key) {
   if (!r) { wuri.focus(); return; }
   const wuKey = key + '_wu';
   if (!ST.workoutSets[wuKey]) ST.workoutSets[wuKey] = [];
+  // No _name on warm-ups — they must stay invisible to the prefill engine
   ST.workoutSets[wuKey][0] = { w, r, ts: Date.now() };
-  autoSave();
+  if (ST.workoutDrafts) delete ST.workoutDrafts[key + '-wu'];
+  saveNow();
   if (navigator.vibrate) navigator.vibrate(15);
   // Visual confirmation — briefly tint the row
   const row = document.getElementById('wurow-' + key);
@@ -6109,7 +6297,8 @@ function dismissWarmup(e, key, exNameNorm) {
   e.stopPropagation();
   ST.dismissedWarmups.add(exNameNorm);
   delete ST.workoutSets[key + '_wu'];
-  autoSave();
+  if (ST.workoutDrafts) delete ST.workoutDrafts[key + '-wu'];
+  saveNow();
   const row = document.getElementById('wurow-' + key);
   if (row) { row.style.opacity = '0'; row.style.maxHeight = '0'; row.style.margin = '0'; row.style.padding = '0'; setTimeout(() => row.remove(), 260); }
 }
@@ -6117,7 +6306,7 @@ function dismissWarmup(e, key, exNameNorm) {
 function unlogSet(key, si, exIdx) {
   if (!ST.workoutSets[key]) return;
   ST.workoutSets[key][si] = null;
-  autoSave();
+  saveNow();
 
   // Update UI
   const wi = document.getElementById('wi-' + key + '-' + si);
@@ -6225,6 +6414,7 @@ function saveSessionNote(key, nameKey, text) {
   const notes = getNotes();
   notes[nameKey] = text.trim();
   saveNotes(notes);
+  autoSave(); // notes ride the live snapshot too — survive any reload
   // Update icon state
   const btn = document.getElementById('notebtn-' + key);
   if (btn) btn.classList.toggle('has-note', text.trim().length > 0);
@@ -6261,8 +6451,10 @@ function showSubs(e, key, exIdx) {
   let nippardHtml = nippardSubs.map(s => buildSubCard(s, 'Gym', key, exIdx)).join('');
   let libHtml = libSubs.slice(0, 8).map(s => buildSubCard(s.name, s.tag, key, exIdx)).join('');
 
+  const activeSub = ST.workoutSubs && ST.workoutSubs[key];
   openSheet(`
     <div class="bs-title">Substitutions for ${name}</div>
+    ${activeSub ? `<button class="btn btn-sheet-secondary" style="margin-bottom:14px" onclick="revertSubstitution('${key}')">↩ Back to ${name}</button>` : ''}
     ${nippardSubs.length ? `<div class="bs-section-lbl">Nippard Recommends</div>
     <div style="margin-bottom:12px">${nippardHtml}</div>` : ''}
     <div class="bs-section-lbl">More Options</div>
@@ -6302,14 +6494,25 @@ function toggleSubCard(id) {
 }
 
 function useSubstitution(key, exIdx, subName) {
-  // Record this substitution in notes
+  // Session-scoped swap — the card, prefill, and _name stamping all follow.
+  // Recorded in notes for the permanent record too.
   const prog = PROGRAMS.find(p => p.id === ST.currentProgram);
   const sess = prog && prog.sessions.find(s => s.id === ST.currentSession);
   if (!sess) return;
   const ex = sess.exercises[exIdx];
+  if (!ST.workoutSubs) ST.workoutSubs = {};
+  ST.workoutSubs[key] = subName;
   const notes = getNotes();
   notes[normalizeEx(stripSuperset(ex.name))] = 'Using: ' + subName;
   saveNotes(notes);
+  saveNow();
+  closeSheet();
+  renderWorkout();
+}
+
+function revertSubstitution(key) {
+  if (ST.workoutSubs) delete ST.workoutSubs[key];
+  saveNow();
   closeSheet();
   renderWorkout();
 }
@@ -6329,35 +6532,61 @@ function closeSheet() {
 }
 
 // ── Workout flow ──────────────────────────────────────────────────────────────
+// Three-way guard. The old code silently clobbered an in-progress workout when
+// you tapped the SAME session card — total loss of logged sets. Never again:
+//  · no unfinished workout            → start fresh
+//  · unfinished, same session         → Resume / Restart sheet (no silent reset)
+//  · unfinished, different session    → themed confirm; archives sets first
 function startWorkoutFromHome(progId, sessId) {
   const existing = LS.get('dcrgym_current_workout');
-  if (existing && (existing.programId !== progId || existing.sessionId !== sessId)) {
-    if (!confirm('You have an unfinished workout. Start a new one?')) return;
-    // Save any logged sets from the abandoned workout to history so pre-fill works next time
-    const hasSets = existing.sets && Object.values(existing.sets).some(arr => Array.isArray(arr) && arr.some(s => s && s.r > 0));
-    if (hasSets) {
-      const hist = getHistory();
-      hist.push({
-        id: (existing.startTime || Date.now()).toString(),
-        programId: existing.programId,
-        sessionId: existing.sessionId,
-        sessionName: existing.sessionName || '',
-        startTime: existing.startTime || Date.now(),
-        endTime: Date.now(),
-        duration: existing.durationSecs || 0,
-        travelMode: existing.travelMode || false,
-        sets: existing.sets,
-      });
-      saveHistory(hist);
-    }
-    LS.remove('dcrgym_current_workout');
+  const hasLogged = existing && existing.sets &&
+    Object.values(existing.sets).some(arr => Array.isArray(arr) && arr.some(s => s && s.r > 0));
+
+  if (existing && existing.programId === progId && existing.sessionId === sessId && hasLogged) {
+    confirmSheet({
+      title: 'Workout in progress',
+      body: `You have an unfinished <strong>${existing.sessionName || 'session'}</strong> with logged sets. Pick up where you left off?`,
+      confirmLabel: 'Resume workout',
+      secondaryLabel: 'Restart from zero',
+      cancelLabel: 'Not now',
+      onConfirm: () => resumeWorkout(),
+      onSecondary: () => {
+        archiveWorkoutToHistory(existing);
+        LS.remove('dcrgym_current_workout');
+        beginWorkout(progId, sessId);
+      },
+    });
+    return;
   }
+
+  if (existing && (existing.programId !== progId || existing.sessionId !== sessId) && hasLogged) {
+    confirmSheet({
+      title: 'Unfinished workout',
+      body: `Your logged sets from <strong>${existing.sessionName || 'the previous session'}</strong> will be saved to history before starting fresh.`,
+      confirmLabel: 'Start new workout',
+      cancelLabel: 'Keep current',
+      onConfirm: () => {
+        archiveWorkoutToHistory(existing);
+        LS.remove('dcrgym_current_workout');
+        beginWorkout(progId, sessId);
+      },
+    });
+    return;
+  }
+
+  if (existing) LS.remove('dcrgym_current_workout'); // empty shell — nothing to lose
+  beginWorkout(progId, sessId);
+}
+
+function beginWorkout(progId, sessId) {
   ST.currentProgram = progId;
   ST.currentSession = sessId;
   ST.travelMode = false;
   ST.travelLocked = false;
   ST.workoutSets   = {};
   ST.workoutNotes  = {};   // reset session-scoped notes for fresh workout
+  ST.workoutDrafts = {};
+  ST.workoutSubs   = {};
   ST.expandedCards = new Set();
   ST.completedCards = new Set();
   ST.durationSecs = 0;
@@ -6374,7 +6603,7 @@ function startWorkoutFromHome(progId, sessId) {
   if (navigator.wakeLock) {
     navigator.wakeLock.request('screen').then(wl => { ST.wakeLock = wl; }).catch(() => {});
   }
-  autoSave();
+  saveNow();
   Maps('workout');
 }
 
@@ -6384,6 +6613,9 @@ function resumeWorkout() {
   ST.currentProgram = saved.programId;
   ST.currentSession = saved.sessionId;
   ST.workoutSets = saved.sets || {};
+  ST.workoutDrafts = saved.drafts || {};   // typed-but-unlogged values come back
+  ST.workoutSubs   = saved.subs   || {};   // session substitutions come back
+  ST.workoutNotes  = saved.notes  || {};   // session notes come back
   ST.travelMode = saved.travelMode || false;
   ST.travelLocked = saved.travelLocked || false;
   ST.workoutStart = Date.now() - (saved.durationSecs || 0) * 1000;
@@ -6412,47 +6644,66 @@ function resumeWorkout() {
 }
 
 function discardWorkout() {
-  LS.remove('dcrgym_current_workout');
-  renderHome();
+  const saved = LS.get('dcrgym_current_workout');
+  const hasLogged = saved && saved.sets &&
+    Object.values(saved.sets).some(arr => Array.isArray(arr) && arr.some(s => s && s.r > 0));
+  if (!hasLogged) {
+    LS.remove('dcrgym_current_workout');
+    renderHome();
+    return;
+  }
+  confirmSheet({
+    title: 'Discard workout?',
+    body: 'Your logged sets will be archived to history first — nothing is thrown away.',
+    confirmLabel: 'Discard',
+    destructive: true,
+    onConfirm: () => {
+      archiveWorkoutToHistory(saved);
+      LS.remove('dcrgym_current_workout');
+      renderHome();
+    },
+  });
 }
 
 let _saveTimeout = null;
 function autoSave() {
+  // Debounced variant — high-frequency callers only. Checkmarks use saveNow().
   clearTimeout(_saveTimeout);
-  _saveTimeout = setTimeout(() => {
-    LS.set('dcrgym_current_workout', {
-      programId: ST.currentProgram,
-      sessionId: ST.currentSession,
-      sessionName: (() => { const p=PROGRAMS.find(pp=>pp.id===ST.currentProgram); const s=p&&p.sessions.find(ss=>ss.id===ST.currentSession); return s?s.name:''; })(),
-      sets: ST.workoutSets,
-      travelMode: ST.travelMode,
-      travelLocked: ST.travelLocked,
-      durationSecs: ST.durationSecs,
-      expandedCards: [...ST.expandedCards],
-      completedCards: [...ST.completedCards],
-      startTime: ST.workoutStart,
-    });
-  }, 500);
+  _saveTimeout = setTimeout(saveNow, 400);
 }
 
 function abandonPrompt() {
   // Leave workout without discarding — timer keeps running, pill appears
-  autoSave();
+  saveNow();
   Maps('home');
 }
 
 function cancelWorkout() {
-  if (!confirm('Cancel this workout? All logged sets will be lost.')) return;
-  if (ST.durationTimer) clearInterval(ST.durationTimer);
-  ST.durationTimer = null;
-  if (ST.wakeLock) ST.wakeLock.release().catch(()=>{});
-  cancelRestTimer();
-  LS.remove('dcrgym_current_workout');
-  ST.currentProgram = null; ST.currentSession = null;
-  ST.workoutSets = {}; ST.workoutStart = null; ST.durationSecs = 0;
-  ST.expandedCards = new Set(); ST.completedCards = new Set();
-  ST.travelMode = false; ST.travelLocked = false;
-  Maps('home');
+  const hasLogged = Object.values(ST.workoutSets || {})
+    .some(arr => Array.isArray(arr) && arr.some(s => s && s.r > 0));
+  confirmSheet({
+    title: 'Cancel this workout?',
+    body: hasLogged
+      ? 'Your logged sets will be archived to history first — nothing is thrown away.'
+      : 'Nothing logged yet — the session will simply close.',
+    confirmLabel: 'Cancel workout',
+    cancelLabel: 'Keep training',
+    destructive: true,
+    onConfirm: () => {
+      if (hasLogged) archiveWorkoutToHistory(buildWorkoutPayload());
+      if (ST.durationTimer) clearInterval(ST.durationTimer);
+      ST.durationTimer = null;
+      if (ST.wakeLock) ST.wakeLock.release().catch(()=>{});
+      cancelRestTimer();
+      LS.remove('dcrgym_current_workout');
+      ST.currentProgram = null; ST.currentSession = null;
+      ST.workoutSets = {}; ST.workoutStart = null; ST.durationSecs = 0;
+      ST.workoutDrafts = {}; ST.workoutSubs = {}; ST.workoutNotes = {};
+      ST.expandedCards = new Set(); ST.completedCards = new Set();
+      ST.travelMode = false; ST.travelLocked = false;
+      Maps('home');
+    },
+  });
 }
 
 // ── Post-workout insight engine ───────────────────────────────────────────────
@@ -6552,18 +6803,29 @@ function renderInsightCardHTML(card) {
 }
 
 function finishWorkout() {
-  // Guard: warn if exercises incomplete
+  // Guard: warn if exercises incomplete — themed sheet, not a system dialog
   const prog = PROGRAMS.find(p => p.id === ST.currentProgram);
   const sess = prog && prog.sessions.find(s => s.id === ST.currentSession);
   if (sess) {
     const total = sess.exercises.length;
     const done = sess.exercises.filter((_, i) => ST.completedCards.has(`${sess.id}_${i}`)).length;
     if (done < total) {
-      const remaining = total - done;
-      const msg = `You've only done ${done} of ${total} exercise${total>1?'s':''}. Finish anyway?`;
-      if (!confirm(msg)) return;
+      confirmSheet({
+        title: 'Finish early?',
+        body: `You've completed <strong>${done} of ${total}</strong> exercises. Everything logged so far will be saved.`,
+        confirmLabel: 'Finish workout',
+        cancelLabel: 'Keep training',
+        onConfirm: () => commitWorkout(),
+      });
+      return;
     }
   }
+  commitWorkout();
+}
+
+function commitWorkout() {
+  const prog = PROGRAMS.find(p => p.id === ST.currentProgram);
+  const sess = prog && prog.sessions.find(s => s.id === ST.currentSession);
   if (ST.durationTimer) clearInterval(ST.durationTimer);
   if (ST.wakeLock) ST.wakeLock.release().catch(()=>{});
   cancelRestTimer();
@@ -6586,7 +6848,8 @@ function finishWorkout() {
       const prevSets = prevSame.sets[key] || [];
       const curMax = sets.reduce((m,s)=>Math.max(m,s.w||0),0);
       const prevMax = prevSets.reduce((m,s)=>Math.max(m,s.w||0),0);
-      if (curMax - prevMax > maxGain) { maxGain = curMax - prevMax; biggestGain = { name: stripSuperset(ex.name), gain: maxGain }; }
+      const gainName = (sets.find(s => s && s._name) || {})._name || stripSuperset(ex.name);
+      if (curMax - prevMax > maxGain) { maxGain = curMax - prevMax; biggestGain = { name: gainName, gain: maxGain }; }
     }
   }
 
@@ -6605,6 +6868,8 @@ function finishWorkout() {
   hist.push(entry);
   saveHistory(hist);
   LS.remove('dcrgym_current_workout');
+  ST.workoutDrafts = {};
+  ST.workoutSubs   = {};
   bgSyncToSheets();
 
   // e1RM delta vs previous same session
@@ -8253,6 +8518,17 @@ function bootstrapApp() {
   const splash = document.getElementById('splash');
   const home   = document.getElementById('screen-home');
   const nav    = document.getElementById('bottom-nav');
+
+  // Schema migration — versioned, non-destructive, backs up before touching
+  // anything. History survives every app update.
+  try { migrateStorage(); } catch(e) { console.warn('[DCR Gym Shell] Migration deferred:', e); }
+
+  // Background-flush — the instant the app is backgrounded or killed, the live
+  // workout snapshot is written synchronously. Zero-loss guarantee.
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') saveNow();
+  });
+  window.addEventListener('pagehide', () => saveNow());
 
   // State hydration — fully wrapped, LS proxy handles any storage exceptions
   try {
