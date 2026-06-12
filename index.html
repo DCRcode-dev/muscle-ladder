@@ -34,7 +34,7 @@
   /* ── Typography ── */
   --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-hero: 'Cormorant Garamond', 'Didot', 'Bodoni MT', Georgia, serif;
-  --font-mono: 'Courier New', 'Courier', monospace;
+  --font-mono: ui-monospace, 'SF Mono', 'Roboto Mono', 'JetBrains Mono', Menlo, monospace;
 
   /* ── Golden Ratio Spatial Scale (×8 / ×13 / ×21 / ×34 / ×55) ── */
   --space-xs:  8px;
@@ -70,6 +70,34 @@
   /* ── Layout ── */
   --nav-h:    72px;
   --header-h: 64px;
+
+  /* ── Status palette (single source — no rogue inline hex) ── */
+  --amber:        oklch(76% 0.130 85);          /* flat-2-sessions amber */
+  --terracotta:   oklch(48% 0.130 35);          /* deep burnt attention */
+
+  /* ── Motion DNA — iOS-restrained ──
+     ease-out-expo for ALL functional motion; spring reserved exclusively
+     for celebratory moments (finish, milestone, week-complete). */
+  --ease:        cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast:    180ms;
+  --dur-med:     250ms;
+  --dur-slow:    340ms;
+}
+
+/* ── Native-feel guards ── */
+button, .nav-btn, .ex-card-header, .hist-tab, .set-log-btn, .sub-card-header,
+.stat-card, .finish-row, label, h1, h2, h3, .ex-name, .ex-meta {
+  user-select: none; -webkit-user-select: none;
+}
+input, textarea { user-select: text; -webkit-user-select: text; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* ── Global resets ── */
@@ -114,11 +142,16 @@ html, body {
 .screen.slide-in-right  { transform: translateX(30%);  opacity: 0; pointer-events: none; }
 .screen.slide-in-left   { transform: translateX(-30%); opacity: 0; pointer-events: none; }
 .screen-content { padding-bottom: calc(var(--nav-h) + 24px); }
-body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
+/* Island non-occlusion: every screen glides down beneath the rest capsule */
+.screen { transition: transform 350ms cubic-bezier(0.16,1,0.3,1),
+                      opacity  350ms cubic-bezier(0.16,1,0.3,1),
+                      padding-top 340ms cubic-bezier(0.16,1,0.3,1); }
+body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58px); }
 
 /* ── Bottom nav ── */
 #bottom-nav {
-  position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+  position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+  left: 50%; transform: translateX(-50%);
   width: calc(100% - 32px); max-width: 400px;
   background: rgba(250,247,242,0.82);
   backdrop-filter: blur(20px) saturate(1.4);
@@ -189,6 +222,18 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
 @keyframes ana-pulse-g {
   0%,100% { box-shadow: 0 0 0 0 rgba(40,167,69,0.5); }
   55%      { box-shadow: 0 0 0 4px rgba(40,167,69,0); }
+}
+/* Skeleton shimmer while biometrics fetch — never dead dashes */
+@keyframes anaSkel { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.ana-loading .ana-pod-num, .ana-loading .gauge-pct-label {
+  position: relative; color: transparent !important;
+}
+.ana-loading .ana-pod-num::after {
+  content: ''; position: absolute; inset: 12% 14%;
+  border-radius: 7px;
+  background: linear-gradient(90deg, rgba(42,36,33,0.05) 25%, rgba(42,36,33,0.11) 50%, rgba(42,36,33,0.05) 75%);
+  background-size: 200% 100%;
+  animation: anaSkel 1.2s linear infinite;
 }
 .ana-refresh-btn {
   font-size: 12px; color: #1A1714; opacity: 0.25;
@@ -425,7 +470,7 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
 .ob-dot {
   width: 5px; height: 5px; border-radius: 3px;
   background: var(--border);
-  transition: all 380ms cubic-bezier(0.34,1.56,0.64,1);
+  transition: all var(--dur-slow) var(--ease);
 }
 .ob-dot.active { background: var(--accent); width: 22px; }
 .ob-pill-grid {
@@ -473,13 +518,109 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
   display: block; width: 100%; padding: 16px 24px;
   border-radius: 16px; border: none;
   font-family: var(--font-body); font-size: 16px; font-weight: 600;
-  cursor: pointer; transition: all 0.2s cubic-bezier(0.25,1,0.5,1);
+  cursor: pointer; transition: all var(--dur-fast) var(--ease);
   min-height: 52px;
 }
 .btn:active { transform: scale(0.97); opacity: 0.9; }
 .btn-primary { background: var(--accent); color: #fff; }
 .btn-secondary { background: var(--border); color: var(--text-secondary); }
 .btn-ghost { background: none; color: var(--muted); border: 1px solid var(--border); }
+
+/* ── Themed confirm / notice sheets — system dialogs are banned ── */
+.confirm-body {
+  font-size: 14.5px; line-height: 1.55; color: var(--text-secondary);
+  margin: 4px 0 18px;
+}
+.confirm-actions { display: flex; flex-direction: column; gap: 10px; padding-bottom: 4px; }
+.confirm-actions .btn { margin: 0; }
+.btn-destructive { background: #C0432A; color: #fff; }
+.btn-sheet-secondary {
+  background: #fff; color: var(--text);
+  border: 1px solid var(--border); font-weight: 600;
+}
+.btn-sheet-ghost { background: none; border: none; color: var(--muted); font-weight: 500; min-height: 44px; }
+.ex-sub-note {
+  font-size: 11.5px; color: var(--muted); font-style: italic;
+  margin: 1px 0 3px; letter-spacing: 0.01em;
+}
+
+/* ── Long-press card menu ── */
+.ex-card.lifted { transform: scale(0.985); box-shadow: var(--shadow-deep); transition: transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease); }
+#card-menu {
+  position: fixed; left: 24px; z-index: 600;
+  background: var(--card); border-radius: 16px;
+  box-shadow: var(--shadow-deep); border: 0.5px solid var(--border);
+  min-width: 218px; overflow: hidden;
+  opacity: 0; transform: scale(0.94) translateY(-4px); transform-origin: top left;
+  transition: opacity var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+#card-menu.open { opacity: 1; transform: none; }
+#card-menu button {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  padding: 13px 16px; border: none; background: none; text-align: left;
+  font-family: var(--font-body); font-size: 14px; color: var(--text);
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+#card-menu button:active { background: rgba(42,36,33,0.04); }
+#card-menu button + button { border-top: 0.5px solid var(--border); }
+.cm-ic { width: 20px; text-align: center; color: var(--text-secondary); font-size: 15px; }
+
+/* ── Boarding-pass Next Session card ── */
+.boarding-card {
+  margin: 10px 20px 0; background: var(--card); border-radius: 22px;
+  box-shadow: var(--shadow); padding: 16px 18px 14px;
+  text-align: left;
+}
+.bc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.bc-label { font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+.bc-name { font-family: var(--font-hero); font-style: italic; font-size: 21px; font-weight: 600; color: var(--charcoal); line-height: 1.1; }
+.bc-chip {
+  flex-shrink: 0; font-size: 10px; padding: 5px 10px; border-radius: 11px;
+  background: var(--bg); border: 0.5px solid var(--border); color: var(--text-secondary);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.bc-chip.bc-ready-high { color: var(--green); border-color: oklch(72.3% 0.190 145 / 0.3); }
+.bc-chip.bc-ready-low  { color: var(--terracotta); border-color: oklch(48% 0.130 35 / 0.3); }
+.bc-manifest { margin: 10px 0 12px; }
+.bc-ex {
+  display: flex; align-items: baseline; justify-content: space-between;
+  font-size: 12px; color: var(--text-secondary); padding: 3.5px 0;
+}
+.bc-ex + .bc-ex { border-top: 0.5px solid var(--border); }
+.bc-ex .bc-sets { font-size: 10.5px; color: var(--muted); font-variant-numeric: tabular-nums; flex-shrink: 0; margin-left: 12px; }
+.bc-more { font-size: 10.5px; color: var(--muted); font-style: italic; padding-top: 5px; }
+.boarding-card .premium-action-pill { margin: 0 !important; width: 100% !important; }
+
+/* ── Launch awakening — once per boot, the app wakes rather than loads ── */
+.awaken .premium-masthead        { animation: awakenUp 520ms var(--ease) both; }
+.awaken .premium-totem-container { animation: awakenBloom 680ms var(--ease) 90ms both; }
+.awaken .totem-legend,
+.awaken .premium-metrics-strip   { animation: awakenUp 520ms var(--ease) 190ms both; }
+.awaken .premium-resume,
+.awaken .boarding-card,
+.awaken .premium-action-pill     { animation: awakenUp 560ms var(--ease) 280ms both; }
+@keyframes awakenUp    { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes awakenBloom { from { opacity: 0; transform: scale(0.975); }    to { opacity: 1; transform: scale(1); } }
+
+/* ── Chart scrub tooltip ── */
+.mg-scrub-tip {
+  position: absolute; top: -4px; transform: translateX(-50%);
+  background: var(--charcoal); color: #FAF7F2;
+  font-size: 10.5px; font-weight: 600; padding: 4px 9px; border-radius: 9px;
+  white-space: nowrap; pointer-events: none; opacity: 0;
+  font-variant-numeric: tabular-nums;
+  transition: opacity var(--dur-fast) var(--ease), left 90ms linear;
+}
+.mg-scrub-tip.on { opacity: 1; }
+
+/* ── Checkmark stroke-draw ── */
+.check-draw { display: block; }
+.check-draw path {
+  stroke-dasharray: 30; stroke-dashoffset: 30;
+  animation: checkDraw 340ms var(--ease) 50ms forwards;
+}
+@keyframes checkDraw { to { stroke-dashoffset: 0; } }
+.set-log-btn { display: inline-flex; align-items: center; justify-content: center; }
 
 /* ── HOME SCREEN — Premium 3-Zone Layout ── */
 #screen-home {
@@ -622,8 +763,24 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
 }
 .muscle-group { cursor: pointer; transition: filter 350ms cubic-bezier(0.16,1,0.3,1); }
 .muscle-group:active { filter: brightness(1.18); }
-@keyframes musclePulse { 0%,100%{opacity:1} 50%{opacity:0.52} }
-.muscle-pulse { animation: musclePulse 2.2s ease-in-out infinite; }
+@keyframes musclePulse { 0%,100%{opacity:1} 50%{opacity:0.58} }
+.muscle-pulse { animation: musclePulse 2.8s ease-in-out infinite; }
+
+/* Hairline region outlines — shapes stay identifiable at a glance */
+.muscle-group path, .muscle-group ellipse, .muscle-group circle, .muscle-group rect {
+  stroke: oklch(35% 0.02 45 / 0.10); stroke-width: 0.5;
+}
+
+/* Micro-legend beneath the figure */
+.totem-legend {
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  margin: 2px 0 0; font-size: 9px; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--muted);
+}
+.tl-dot { width: 7px; height: 7px; border-radius: 4px; display: inline-block; margin-right: 5px; vertical-align: 0; }
+.tl-behind { background: oklch(48% 0.130 35 / 0.85); }
+.tl-track  { background: oklch(70% 0.110 82 / 0.86); }
+.tl-done   { background: oklch(76% 0.130 85); box-shadow: 0 0 6px oklch(76% 0.130 85 / 0.55); }
 
 /* ── Pearl ripple celebration ── */
 @keyframes pearlRippleA {
@@ -679,34 +836,37 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
 
 /* ── Workout header ── */
 #workout-header {
-  background: rgba(250,247,242,0.72);
-  backdrop-filter: blur(12px) saturate(1.3);
-  -webkit-backdrop-filter: blur(12px) saturate(1.3);
-  border-bottom: 1px solid rgba(42,36,33,0.06);
-  color: var(--charcoal);
+  /* The cockpit — the only dark element in the app. Signals: in session. */
+  background: rgba(26,26,26,0.97);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  border-bottom: 1px solid rgba(250,247,242,0.06);
+  color: #FAF7F2;
   position: sticky; top: 0; z-index: 50;
-  padding: 32px 20px 10px;
+  padding: 32px 20px 12px;
 }
 .wh-session {
   font-family: var(--font-hero) !important; font-style: italic !important;
   font-size: 1.5rem !important; text-align: center !important;
-  color: var(--charcoal) !important; flex: 1; margin-bottom: 0 !important;
+  color: rgba(250,247,242,0.62) !important; flex: 1; margin-bottom: 0 !important;
 }
 .wh-top { display: flex; align-items: center; justify-content: space-between; }
 .wh-duration {
-  font-size: 28px; font-weight: 700; color: var(--charcoal); line-height: 1;
+  /* Light & airy display numeral — huge but weightless */
+  font-size: 36px; font-weight: 300; color: #FAF7F2; line-height: 1;
   font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.01em;
 }
 .wh-progress { display: flex; gap: 4px; margin-top: 12px; }
 .wh-seg {
-  flex: 1; height: 3px; background: rgba(42,36,33,0.12);
+  flex: 1; height: 3px; background: rgba(250,247,242,0.16);
   border-radius: 2px; transition: background 300ms;
 }
 .wh-seg.done { background: var(--accent); }
 .wh-seg.active { background: rgba(240,78,35,0.5); }
 .wh-pct-badge {
   width: 54px; height: 54px; border-radius: 50%;
-  background: rgba(42,36,33,0.05); border: 1.5px solid rgba(42,36,33,0.12);
+  background: rgba(250,247,242,0.05); border: 1.5px solid rgba(250,247,242,0.18);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   transition: all 450ms ease; flex-shrink: 0;
 }
@@ -715,12 +875,12 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
   box-shadow: 0 0 16px rgba(240,78,35,0.45);
 }
 .wh-pct-num {
-  font-size: 15px; font-weight: 700; color: var(--charcoal);
+  font-size: 15px; font-weight: 600; color: #FAF7F2;
   line-height: 1; letter-spacing: -0.5px;
   font-variant-numeric: tabular-nums;
 }
 .wh-pct-unit {
-  font-size: 9px; color: rgba(42,36,33,0.45);
+  font-size: 9px; color: rgba(250,247,242,0.45);
   letter-spacing: 0.08em; margin-top: 2px; text-transform: uppercase;
 }
 .wh-pct-badge.complete .wh-pct-num,
@@ -730,9 +890,9 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
 .travel-toggle-row {
   display: flex; align-items: center; justify-content: space-between;
   margin: 12px 0 0; padding-top: 10px;
-  border-top: 1px solid rgba(42,36,33,0.08);
+  border-top: 1px solid rgba(250,247,242,0.08);
 }
-.travel-toggle-lbl { font-size: 12px; color: rgba(42,36,33,0.5); }
+.travel-toggle-lbl { font-size: 12px; color: rgba(250,247,242,0.5); }
 .toggle-switch { position: relative; width: 40px; height: 22px; }
 .toggle-switch input { opacity: 0; width: 0; height: 0; }
 .toggle-slider {
@@ -756,151 +916,152 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
 #workout-header.travel-locked { padding-bottom: 8px !important; }
 
 /* ── Rest timer HUD — non-blocking persistent ticker ── */
-#rest-banner {
+/* ── Rest Island — Dynamic-Island-style floating capsule, top-center ──
+   Global: lives outside the screen containers and follows every view.
+   Non-occlusion rule: screens pad down beneath it (body.rest-active),
+   it never covers interactive elements, and touches outside its bounds
+   pass straight through (it is a small fixed element, not an overlay). */
+#rest-island {
   position: fixed;
-  bottom: calc(var(--nav-h) + 16px);
-  left: 50%; transform: translateX(-50%) translateY(20px);
-  width: calc(100% - 32px); max-width: 400px;
-  z-index: 150;
-  /* Luxury glassmorphism */
-  background: rgba(250, 247, 242, 0.82);
-  backdrop-filter: blur(12px) saturate(1.5);
-  -webkit-backdrop-filter: blur(12px) saturate(1.5);
-  border: 1px solid rgba(240, 78, 35, 0.18);
-  border-radius: 22px;
+  top: calc(env(safe-area-inset-top, 0px) + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-76px) scale(0.92);
+  z-index: 400;
+  background: #1A1A1A;
+  border-radius: 27px;
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 18px 8px 10px;
+  max-width: 178px;
   box-shadow:
-    0 2px 8px  rgba(42,36,33,0.055),
-    0 8px 28px rgba(42,36,33,0.045),
-    0 0 0 1px rgba(255,255,255,0.55) inset;
-  padding: 12px 16px 12px 14px;
-  display: none; align-items: center; gap: 12px;
+    0 1px 2px  rgba(26,22,18,0.16),
+    0 4px 12px rgba(26,22,18,0.20),
+    0 14px 38px rgba(26,22,18,0.26);
   opacity: 0;
-  transition: transform 380ms cubic-bezier(0.34,1.56,0.64,1),
-              opacity 260ms cubic-bezier(0.16,1,0.3,1);
-  pointer-events: all;
+  pointer-events: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none; -webkit-user-select: none;
+  transition: transform 420ms cubic-bezier(0.16,1,0.3,1),
+              opacity   260ms cubic-bezier(0.16,1,0.3,1),
+              max-width 340ms cubic-bezier(0.16,1,0.3,1),
+              background 340ms cubic-bezier(0.16,1,0.3,1);
 }
-#rest-banner.visible {
-  display: flex;
-  transform: translateX(-50%) translateY(0);
+#rest-island.visible {
+  transform: translateX(-50%) translateY(0) scale(1);
   opacity: 1;
+  pointer-events: auto;
 }
-/* Accent pulse strip along top edge */
-#rest-banner::before {
-  content: ''; position: absolute; top: 0; left: 24px; right: 24px;
-  height: 1.5px; background: var(--accent); border-radius: 0 0 2px 2px; opacity: 0.55;
-}
-/* SVG ring container */
-#rest-hud-ring {
-  position: relative; width: 44px; height: 44px; flex-shrink: 0;
-}
-#rest-hud-ring svg {
-  width: 44px; height: 44px; transform: rotate(-90deg); display: block;
-}
+#rest-island.expanded { max-width: min(92vw, 390px); }
+#rest-island.go { background: #1E5631; }
+#rest-island:active { transform: translateX(-50%) translateY(0) scale(0.97); }
+#rest-hud-ring { position: relative; width: 36px; height: 36px; flex-shrink: 0; }
+#rest-hud-ring svg { width: 36px; height: 36px; transform: rotate(-90deg); display: block; }
 #rest-hud-track {
-  fill: none; stroke: oklch(22.8% 0.018 42 / 0.10); stroke-width: 2.5; stroke-linecap: round;
+  fill: none; stroke: rgba(250,247,242,0.16); stroke-width: 2.5; stroke-linecap: round;
 }
 #rest-hud-fill {
   fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linecap: round;
-  transition: stroke-dashoffset 200ms linear;
+  transition: stroke-dashoffset 200ms linear, stroke 340ms;
 }
-#rest-hud-digit-wrap {
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-}
-#rest-hud-digit {
-  font-family: var(--font-body); font-size: 9px; font-weight: 700;
-  color: var(--accent); line-height: 1;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.3px;
-}
-/* Label: RESTING · 01:45 */
-.rest-hud-label-wrap { flex: 1; overflow: hidden; }
-.rest-hud-word {
-  font-family: var(--font-body); font-size: 8.5px; letter-spacing: 0.18em;
-  text-transform: uppercase; color: var(--muted); opacity: 0.55; margin-bottom: 3px;
-}
+#rest-island.go #rest-hud-fill { stroke: #4ADE80; }
 #rest-countdown {
-  font-family: var(--font-hero); font-size: 28px; font-weight: 300;
-  font-style: italic; color: var(--charcoal); line-height: 1;
+  font-family: var(--font-hero); font-size: 23px; font-weight: 300;
+  font-style: italic; color: #FAF7F2; line-height: 1;
   font-variant-numeric: tabular-nums lining-nums;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em; flex-shrink: 0;
+  padding-bottom: 2px;
 }
+#rest-island.go #rest-countdown { color: #BBF7D0; font-style: normal; font-weight: 400; }
+#ri-detail {
+  display: flex; align-items: center; gap: 8px;
+  max-width: 0; opacity: 0; overflow: hidden;
+  transition: max-width 340ms cubic-bezier(0.16,1,0.3,1),
+              opacity   240ms cubic-bezier(0.16,1,0.3,1) 60ms;
+  white-space: nowrap;
+}
+#rest-island.expanded #ri-detail,
+#rest-island.go #ri-detail { max-width: 270px; opacity: 1; }
+#ri-next {
+  font-size: 11.5px; line-height: 1.35; color: rgba(250,247,242,0.78);
+  white-space: normal; max-width: 158px;
+  overflow: hidden; display: -webkit-box;
+  -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+.ri-btn {
+  border: none; border-radius: 13px; padding: 7px 11px;
+  font-family: var(--font-body); font-size: 11px; font-weight: 700;
+  cursor: pointer; flex-shrink: 0; letter-spacing: 0.02em;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 160ms cubic-bezier(0.16,1,0.3,1), background 160ms;
+}
+.ri-btn:active { transform: scale(0.94); }
+.ri-add  { background: rgba(240,78,35,0.22);  color: #FFB39E; }
+.ri-skip { background: rgba(250,247,242,0.12); color: rgba(250,247,242,0.72); }
 @keyframes restPulse { 0%,100%{opacity:1} 50%{opacity:0.65} }
-.rest-info { flex: 1; overflow: hidden; }
-.rest-next {
-  font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.9);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+@keyframes islandGoPulse {
+  0%,100% { box-shadow: 0 1px 2px rgba(26,22,18,0.16), 0 4px 12px rgba(26,22,18,0.20), 0 14px 38px rgba(26,22,18,0.26), 0 0 0 0 rgba(74,222,128,0.35); }
+  50%     { box-shadow: 0 1px 2px rgba(26,22,18,0.16), 0 4px 12px rgba(26,22,18,0.20), 0 14px 38px rgba(26,22,18,0.26), 0 0 0 9px rgba(74,222,128,0); }
 }
-.rest-after {
-  font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 3px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.rest-skip {
-  background: rgba(42,36,33,0.06); border: 1px solid rgba(42,36,33,0.10);
-  border-radius: 12px; padding: 8px 16px; font-size: 11px; font-weight: 600;
-  letter-spacing: 0.08em; text-transform: lowercase;
-  color: var(--text-secondary); cursor: pointer; flex-shrink: 0;
-  font-family: var(--font-body);
-  transition: background 150ms, border-color 150ms;
-}
-.rest-skip:active { background: rgba(42,36,33,0.12); }
-.rest-plus {
-  background: rgba(240,78,35,0.10); border: 1px solid rgba(240,78,35,0.20);
-  border-radius: 10px; padding: 6px 10px; font-size: 11px; font-weight: 700;
-  color: var(--accent); cursor: pointer; flex-shrink: 0;
-  transition: background 150ms; letter-spacing: 0.3px;
-  font-family: var(--font-body);
-}
-.rest-plus:active { background: rgba(240,78,35,0.22); }
+#rest-island.go { animation: islandGoPulse 1.6s cubic-bezier(0.16,1,0.3,1) infinite; }
 
-/* ── Ambient rest overlay — DISABLED: replaced by non-blocking HUD ── */
-#rest-overlay {
-  display: none !important;
-  pointer-events: none !important;
-  opacity: 0 !important;
-  visibility: hidden !important;
+/* ── Custom number pad — designed input surface for sweaty thumbs ── */
+#numpad {
+  position: fixed; left: 0; right: 0;
+  bottom: 0; z-index: 500;
+  background: rgba(250,247,242,0.94);
+  backdrop-filter: blur(22px) saturate(1.4);
+  -webkit-backdrop-filter: blur(22px) saturate(1.4);
+  border-radius: 26px 26px 0 0;
+  box-shadow: 0 -2px 8px rgba(42,36,33,0.05), 0 -10px 40px rgba(42,36,33,0.12);
+  padding: 0 14px calc(env(safe-area-inset-bottom, 0px) + 12px);
+  transform: translateY(105%);
+  transition: transform var(--dur-slow) var(--ease);
+  touch-action: manipulation;
 }
-#rest-overlay.visible { display: none !important; }
-#rest-ring-wrap { position: relative; width: 192px; height: 192px; }
-#rest-ring-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-#rest-ring-track { fill: none; stroke: rgba(255,255,255,0.07); stroke-width: 3; }
-#rest-ring-fill {
-  fill: none; stroke: rgba(240,78,35,0.72);
-  stroke-width: 3; stroke-linecap: round;
-  transition: stroke-dashoffset 240ms linear;
-}
-#rest-overlay-time {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-}
-#rest-overlay-digits {
-  font-family: var(--font-hero); font-size: 58px; font-weight: 700;
-  color: #fff; line-height: 1; letter-spacing: -2px;
+#numpad.open { transform: translateY(0); }
+.np-grab { padding: 8px 0 4px; display: flex; justify-content: center; cursor: pointer; }
+.np-grab-bar { width: 38px; height: 4px; border-radius: 2px; background: rgba(42,36,33,0.16); }
+.np-chips { display: flex; gap: 8px; padding: 4px 2px 10px; }
+.np-chip {
+  flex: 1; padding: 10px 0; border-radius: 13px;
+  border: 1px solid var(--border); background: var(--card);
+  font-family: var(--font-body); font-size: 14px; font-weight: 600;
+  color: var(--text-secondary); cursor: pointer;
   font-variant-numeric: tabular-nums;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--dur-fast) var(--ease), background var(--dur-fast);
 }
-#rest-overlay-label {
-  font-size: 0.62rem; text-transform: uppercase;
-  letter-spacing: 0.22em; color: rgba(255,255,255,0.38); margin-top: 4px;
+.np-chip:active { transform: scale(0.95); background: var(--bg); }
+.np-chip.np-up { color: var(--accent); border-color: rgba(240,78,35,0.25); }
+.np-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.np-key {
+  height: 52px; border-radius: 14px; border: none;
+  background: var(--card); box-shadow: 0 1px 2px rgba(42,36,33,0.06);
+  font-family: var(--font-body); font-size: 23px; font-weight: 300;
+  color: var(--text); cursor: pointer;
+  font-variant-numeric: tabular-nums lining-nums;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 120ms var(--ease), background 120ms;
 }
-#rest-overlay-next {
-  font-size: 13px; color: rgba(255,255,255,0.72);
-  text-align: center; max-width: 260px; line-height: 1.45; padding: 0 24px;
+.np-key:active { transform: scale(0.94); background: var(--bg); }
+.np-del { font-size: 18px; color: var(--text-secondary); }
+.np-action {
+  width: 100%; margin-top: 10px; padding: 15px;
+  border: none; border-radius: 16px;
+  background: var(--accent); color: #fff;
+  font-family: var(--font-body); font-size: 16px; font-weight: 600;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: transform var(--dur-fast) var(--ease), background var(--dur-fast);
 }
-#rest-overlay-skip {
-  background: rgba(255,255,255,0.09); border: 1px solid rgba(255,255,255,0.14);
-  border-radius: 24px; padding: 12px 32px; font-size: 13px; font-weight: 600;
-  color: rgba(255,255,255,0.5); cursor: pointer; font-family: var(--font-body);
-  transition: background 150ms; margin-top: 4px;
+.np-action:active { transform: scale(0.98); }
+.np-action.np-log { background: var(--green); }
+body.numpad-open .exercise-list { padding-bottom: 330px; }
+body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
+#bottom-nav { transition: transform var(--dur-slow) var(--ease); }
+.set-input.np-focus, .warmup-input.np-focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px rgba(240,78,35,0.12);
 }
-#rest-overlay-skip:active { background: rgba(255,255,255,0.18); }
-#rest-overlay-add {
-  background: rgba(240,78,35,0.18); border: 1px solid rgba(240,78,35,0.28);
-  border-radius: 24px; padding: 10px 28px; font-size: 12px; font-weight: 700;
-  color: var(--accent); cursor: pointer; font-family: var(--font-body);
-  letter-spacing: 0.04em; transition: background 150ms;
-}
-#rest-overlay-add:active { background: rgba(240,78,35,0.32); }
 
 /* ── Active workout pill ── */
 #workout-pill {
@@ -911,7 +1072,7 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
   padding: 14px 16px 14px 20px;
   display: none; align-items: center; gap: 14px;
   transform: translateY(20px); opacity: 0;
-  transition: transform 350ms cubic-bezier(0.34,1.56,0.64,1), opacity 250ms ease;
+  transition: transform var(--dur-slow) var(--ease), opacity var(--dur-med) var(--ease);
   cursor: pointer;
 }
 #workout-pill.visible { display: flex; transform: translateY(0); opacity: 1; }
@@ -1074,7 +1235,7 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
   border-radius: 10px; text-align: center;
   font-size: 16px; font-weight: 600; font-family: var(--font-body);
   background: var(--bg); color: var(--text); outline: none; box-sizing: border-box;
-  transition: all 0.2s cubic-bezier(0.25,1,0.5,1);
+  transition: all var(--dur-fast) var(--ease);
   -webkit-appearance: none;
   font-variant-numeric: tabular-nums;
 }
@@ -1124,11 +1285,14 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
 .trend-arrow-down { color: #C4876E; font-size: 11px; }
 
 /* Plate calculator */
-.plate-popover { background: var(--charcoal); color: #fff; border-radius: 12px; padding: 10px 14px; font-size: 12px; margin-top: 6px; }
-.plate-popover .plate-title { font-size: 10px; color: rgba(255,255,255,0.5); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-.plate-row { display: flex; flex-wrap: wrap; gap: 4px; }
-.plate-chip { background: rgba(255,255,255,0.1); border-radius: 6px; padding: 3px 8px; font-weight: 600; }
-.plate-chip.orange { background: rgba(240,78,35,0.4); }
+.plate-popover {
+  background: var(--card); color: var(--text);
+  border-radius: 14px; padding: 10px 14px 11px; font-size: 12px; margin-top: 6px;
+  box-shadow: var(--shadow-deep); border: 0.5px solid var(--border);
+}
+.plate-popover .plate-title { font-size: 9.5px; color: var(--muted); margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.09em; }
+.plate-total { font-size: 11.5px; color: var(--text-secondary); text-align: center; margin-top: 5px; font-variant-numeric: tabular-nums; }
+.plate-total strong { font-weight: 600; color: var(--text); }
 
 /* Overload nudge */
 .overload-nudge {
@@ -1236,17 +1400,30 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
 .milestone-quote { font-family: var(--font-hero); font-style: italic; font-size: 20px; color: var(--text-secondary); margin-bottom: 40px; line-height: 1.5; }
 
 /* ── HISTORY SCREEN ── */
+/* ── True iOS segmented control — one sliding raised thumb ── */
 .history-tabs {
   display: flex; gap: 0; margin: 16px 24px;
-  background: var(--border); border-radius: 12px; padding: 3px;
+  background: var(--border); border-radius: 13px; padding: 3px;
+  position: relative; isolation: isolate;
 }
+.history-tabs::before {
+  content: ''; position: absolute; z-index: 0;
+  top: 3px; bottom: 3px; left: 3px;
+  width: calc(50% - 3px);
+  background: var(--card); border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(42,36,33,0.10), 0 3px 8px rgba(42,36,33,0.06);
+  transition: transform var(--dur-med) var(--ease);
+}
+.history-tabs:has(.hist-tab:nth-child(2).active)::before { transform: translateX(100%); }
 .hist-tab {
   flex: 1; padding: 8px; text-align: center;
   font-size: 13px; font-weight: 500; border-radius: 10px;
-  cursor: pointer; transition: background 200ms, color 200ms;
+  cursor: pointer; transition: color var(--dur-med) var(--ease);
   color: var(--muted); border: none; background: none;
+  position: relative; z-index: 1;
+  -webkit-tap-highlight-color: transparent;
 }
-.hist-tab.active { background: var(--card); color: var(--text); box-shadow: var(--shadow); }
+.hist-tab.active { color: var(--text); font-weight: 600; }
 
 /* ── Bio-Data Matrix Grid (Progress tab) ── */
 .progress-grid-wrap {
@@ -1369,7 +1546,7 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
               inset 0 -1px 0 rgba(255,255,255,0.12);
   padding: 28px 24px 32px;
   transform: translateY(24px) scale(0.95);
-  transition: transform 380ms cubic-bezier(0.34,1.56,0.64,1);
+  transition: transform var(--dur-slow) var(--ease);
   position: relative;
 }
 #cal-popup.visible #cal-popup-panel { transform: translateY(0) scale(1); }
@@ -1427,7 +1604,7 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
               inset 0 -1px 0 rgba(255,255,255,0.12);
   padding: 28px 24px 32px;
   transform: translateY(24px) scale(0.96);
-  transition: transform 380ms cubic-bezier(0.34,1.56,0.64,1);
+  transition: transform var(--dur-slow) var(--ease);
   position: relative; overflow: hidden;
 }
 #graph-backdrop.visible #graph-panel { transform: translateY(0) scale(1); }
@@ -1489,58 +1666,88 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
 .mg-ring-label { font-size: 9.5px; color: rgba(255,255,255,0.42); font-family: var(--font-mono); letter-spacing: 0.06em; margin-left: 4px; }
 .mg-ghost-trace { opacity: 0.25; }
 #muscle-graph-panel {
-  width: 100%; max-width: 340px;
-  background: linear-gradient(145deg, rgba(255,255,255,0.32) 0%, rgba(255,255,255,0.15) 100%);
-  border: 1px solid rgba(255,255,255,0.55);
+  /* Solid white instrument card — the grey frost is dead */
+  width: 100%; max-width: 344px;
+  background: var(--card);
   border-radius: 28px;
-  box-shadow: 0 40px 100px oklch(0% 0 0 / 0.44),
-              inset 0 1.5px 0 rgba(255,255,255,0.75),
-              inset 0 -1px 0 rgba(255,255,255,0.12);
-  padding: 28px 24px 32px; position: relative;
+  box-shadow: var(--shadow-deep);
+  padding: 24px 22px 20px; position: relative;
   transform: scale(0.82); transform-origin: center center;
-  transition: transform 400ms cubic-bezier(0.34,1.56,0.64,1);
+  transition: transform var(--dur-slow) var(--ease);
 }
 #muscle-graph-overlay.visible #muscle-graph-panel { transform: scale(1); }
 .mg-close {
-  position: absolute; top: 18px; right: 18px;
-  width: 30px; height: 30px; border-radius: 50%;
-  background: rgba(42,36,33,0.10); border: 1px solid rgba(42,36,33,0.08);
-  cursor: pointer; font-size: 14px; color: var(--charcoal);
+  position: absolute; top: 16px; right: 16px;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(42,36,33,0.05); border: none;
+  cursor: pointer; font-size: 14px; color: var(--text-secondary);
   display: flex; align-items: center; justify-content: center;
+  z-index: 2; -webkit-tap-highlight-color: transparent;
+  transition: transform var(--dur-fast) var(--ease);
 }
+.mg-close:active { transform: scale(0.92); }
+.mg-head { display: flex; align-items: flex-start; justify-content: space-between; padding-right: 36px; margin-bottom: 12px; }
 .mg-muscle-title {
   font-family: var(--font-hero); font-style: italic;
-  font-size: 26px; font-weight: 700; color: var(--charcoal); margin-bottom: 2px;
+  font-size: 27px; font-weight: 600; color: var(--charcoal); line-height: 1.05;
 }
 .mg-meta {
-  font-size: 10px; color: rgba(42,36,33,0.45);
-  text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 18px;
+  font-size: 9.5px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px;
 }
-.mg-stat-row { display: flex; gap: 10px; margin-top: 18px; }
-.mg-stat {
-  flex: 1; background: rgba(255,255,255,0.38);
-  border-radius: 14px; padding: 12px;
-  border: 1px solid rgba(255,255,255,0.55);
+.mg-delta {
+  font-size: 21px; font-weight: 300; letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums lining-nums; white-space: nowrap; padding-top: 4px;
 }
-.mg-stat-val { font-size: 18px; font-weight: 700; color: var(--charcoal); font-variant-numeric: tabular-nums; }
-.mg-stat-lbl { font-size: 9px; color: rgba(42,36,33,0.45); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px; }
-.mg-insight {
-  margin-top: 12px; padding: 10px 12px;
-  background: rgba(240,78,35,0.07);
-  border-radius: 10px; font-size: 11.5px;
-  color: rgba(42,36,33,0.72); line-height: 1.5;
-  border-left: 2px solid rgba(240,78,35,0.3);
-  position: relative;
+.mg-delta-up   { color: var(--green); }
+.mg-delta-down { color: var(--terracotta); }
+.mg-delta-none { font-family: var(--font-hero); font-style: italic; font-size: 14px; color: var(--muted); }
+.mg-switcher {
+  display: flex; gap: 6px; overflow-x: auto; margin: 0 -22px 14px; padding: 2px 22px 6px;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
 }
-.mg-train-btn {
-  display: inline-block; margin-top: 14px; padding: 9px 18px;
-  background: var(--charcoal); color: #fff;
-  border-radius: 16px; font-size: 12px; font-weight: 600;
-  letter-spacing: 0.08em; cursor: pointer; border: none;
-  font-family: var(--font-body);
-  transition: transform 150ms, opacity 150ms;
+.mg-switcher::-webkit-scrollbar { display: none; }
+.mg-chip {
+  flex-shrink: 0; padding: 6px 13px; border-radius: 15px;
+  border: 1px solid var(--border); background: var(--card);
+  font-size: 11.5px; font-weight: 500; color: var(--text-secondary);
+  font-family: var(--font-body); cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: all var(--dur-fast) var(--ease);
 }
-.mg-train-btn:active { transform: scale(0.96); opacity: 0.9; }
+.mg-chip:active { transform: scale(0.95); }
+.mg-chip.active { background: var(--charcoal); border-color: var(--charcoal); color: #FAF7F2; font-weight: 600; }
+.mg-chart-wrap { margin-bottom: 4px; }
+.mg-empty {
+  font-family: var(--font-hero); font-style: italic; font-size: 14px;
+  color: var(--muted); margin: 26px 0; text-align: center;
+}
+.mg-line-draw {
+  stroke-dasharray: 1; stroke-dashoffset: 1;
+  animation: mgLineDraw 720ms var(--ease) 80ms forwards;
+}
+.mg-area-draw { opacity: 0; animation: mgAreaIn 540ms var(--ease) 420ms forwards; }
+@keyframes mgLineDraw { to { stroke-dashoffset: 0; } }
+@keyframes mgAreaIn   { to { opacity: 1; } }
+.mg-driver {
+  font-size: 12px; color: var(--text-secondary); line-height: 1.5;
+  padding: 9px 12px; margin-top: 6px;
+  background: rgba(240,78,35,0.055); border-radius: 11px;
+}
+.mg-driver strong { font-weight: 600; color: var(--text); }
+.mg-driver-up   { color: var(--green); font-weight: 600; }
+.mg-driver-down { color: var(--terracotta); font-weight: 600; }
+.mg-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; }
+.mg-range { display: flex; background: var(--border); border-radius: 10px; padding: 2px; gap: 0; }
+.mg-range-btn {
+  border: none; background: none; padding: 5px 12px; border-radius: 8px;
+  font-size: 11px; font-weight: 600; color: var(--muted); cursor: pointer;
+  font-family: var(--font-body); -webkit-tap-highlight-color: transparent;
+  transition: all var(--dur-fast) var(--ease);
+}
+.mg-range-btn.active { background: var(--card); color: var(--text); box-shadow: 0 1px 3px rgba(42,36,33,0.10); }
+.mg-now { font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.mg-now strong { color: var(--text-secondary); font-weight: 600; }
 
 /* ── Program picker ── */
 .prog-picker-header { padding: 56px 24px 16px; }
@@ -1590,9 +1797,11 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
 .back-btn { display: flex; align-items: center; gap: 6px; background: none; border: none; color: var(--muted); font-size: 15px; cursor: pointer; padding: 8px 0; margin-bottom: 8px; }
 
 /* ── Settings ── */
-.settings-section { margin: 16px; background: var(--card); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); }
-.settings-section-title { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; padding: 14px 16px 8px; }
-.settings-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-top: 1px solid var(--border); min-height: 52px; }
+.settings-section { margin: 20px 16px; background: var(--card); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); }
+.settings-section-title { font-size: 11.5px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.09em; padding: 16px 16px 10px; }
+.settings-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; min-height: 52px; position: relative; }
+.settings-row + .settings-row::before { content: ''; position: absolute; top: 0; left: 16px; right: 0; height: 0.5px; background: var(--border); }
+.settings-row:active { background: rgba(42,36,33,0.025); }
 .settings-row:first-of-type { border-top: none; }
 .settings-row label { font-size: 14px; color: var(--text); }
 .settings-row input[type=text], .settings-row input[type=url] { border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 13px; width: 160px; font-family: var(--font-body); outline: none; }
@@ -1636,11 +1845,11 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
 .stats-row { display: flex; gap: 0; margin: 0 24px 20px; background: var(--card); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden; }
 .stat-item { flex: 1; padding: 14px 10px; text-align: center; border-right: 1px solid var(--border); }
 .stat-item:last-child { border-right: none; }
-.stat-val { font-size: 22px; font-weight: 700; color: var(--charcoal); font-variant-numeric: tabular-nums lining-nums; }
+.stat-val { font-size: 25px; font-weight: 300; color: var(--charcoal); font-variant-numeric: tabular-nums lining-nums; letter-spacing: -0.01em; }
 .stat-lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
 
 /* Tabular lining for all numeric metrics globally */
-.stat-val, .wh-duration, .rest-countdown, #rest-overlay-digits,
+.stat-val, .wh-duration, #rest-countdown,
 .pill-dur, .mg-stat-val, .graph-stat-val, .cal-popup-stat-val,
 .gauge-pct-label, .finish-stat-val {
   font-variant-numeric: tabular-nums lining-nums;
@@ -1698,36 +1907,40 @@ body.rest-active .screen-content { padding-bottom: calc(var(--nav-h) + 88px); }
     AI
   </button>
 </nav>
-<div id="rest-banner">
-  <!-- SVG ring — no digit inside, ring only -->
+<!-- ── Rest Island — global floating capsule, follows you to every screen ── -->
+<div id="rest-island" onclick="toggleRestIsland(event)">
   <div id="rest-hud-ring">
-    <svg viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg">
-      <circle id="rest-hud-track" cx="22" cy="22" r="19"/>
-      <circle id="rest-hud-fill"  cx="22" cy="22" r="19"/>
+    <svg viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+      <circle id="rest-hud-track" cx="18" cy="18" r="15"/>
+      <circle id="rest-hud-fill"  cx="18" cy="18" r="15"/>
     </svg>
   </div>
-  <!-- Label + numeric readout -->
-  <div class="rest-hud-label-wrap">
-    <div class="rest-hud-word">Resting</div>
-    <div id="rest-countdown">0:00</div>
+  <div id="rest-countdown">0:00</div>
+  <div id="ri-detail">
+    <div id="ri-next"></div>
+    <button class="ri-btn ri-add"  onclick="event.stopPropagation();addRestTime(30)">+30s</button>
+    <button class="ri-btn ri-skip" onclick="event.stopPropagation();cancelRestTimer()">skip</button>
   </div>
-  <button class="rest-plus" onclick="addRestTime(30)">+30s</button>
-  <button class="rest-skip" onclick="cancelRestTimer()">skip</button>
 </div>
-<div id="rest-overlay">
-  <div id="rest-ring-wrap">
-    <svg id="rest-ring-svg" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg">
-      <circle id="rest-ring-track" cx="96" cy="96" r="88"/>
-      <circle id="rest-ring-fill"  cx="96" cy="96" r="88"/>
-    </svg>
-    <div id="rest-overlay-time">
-      <div id="rest-overlay-digits">0:00</div>
-      <div id="rest-overlay-label">Rest</div>
-    </div>
+<!-- ── Custom number pad — the system keyboard never touches a set ── -->
+<div id="numpad">
+  <div class="np-grab" onclick="closeNumpad()"><div class="np-grab-bar"></div></div>
+  <div class="np-chips" id="np-chips"></div>
+  <div class="np-grid">
+    <button class="np-key" data-k="1">1</button>
+    <button class="np-key" data-k="2">2</button>
+    <button class="np-key" data-k="3">3</button>
+    <button class="np-key" data-k="4">4</button>
+    <button class="np-key" data-k="5">5</button>
+    <button class="np-key" data-k="6">6</button>
+    <button class="np-key" data-k="7">7</button>
+    <button class="np-key" data-k="8">8</button>
+    <button class="np-key" data-k="9">9</button>
+    <button class="np-key np-dot" data-k=".">.</button>
+    <button class="np-key" data-k="0">0</button>
+    <button class="np-key np-del" data-k="del">⌫</button>
   </div>
-  <div id="rest-overlay-next"></div>
-  <button id="rest-overlay-add"  onclick="addRestTime(30)">+ 30 sec</button>
-  <button id="rest-overlay-skip" onclick="cancelRestTimer()">Skip Rest</button>
+  <button class="np-action" id="np-action" onclick="numpadAction()">Next</button>
 </div>
 <div id="workout-pill" onclick="Maps('workout')">
   <div class="pill-dot"></div>
@@ -4092,8 +4305,10 @@ let ST = {
   currentSession: null,
   travelMode: false,
   travelLocked: false,
-  workoutSets: {},      // key: `${sessionId}_${exIdx}` → [{w,r,ts}]  |  `${key}_wu` for warm-up
+  workoutSets: {},      // key: `${sessionId}_${exIdx}` → [{w,r,ts,_name}]  |  `${key}_wu` for warm-up
   workoutNotes: {},     // key: `${sessionId}_${exIdx}` → session-scoped note string
+  workoutDrafts: {},    // key: `${key}-${si}` | `${key}-wu` → {w,r} typed-but-unlogged values
+  workoutSubs: {},      // key: `${sessionId}_${exIdx}` → substituted exercise name (session-scoped)
   dismissedWarmups: new Set(),  // in-memory: normalised exercise names with warm-up dismissed
   syncQueue: [],        // pending Sheets pushes — drained on 'online' or next boot
   audioCtx: null,
@@ -4149,7 +4364,325 @@ function saveRestTimes(r) { LS.set('dcrgym_rest', r); }
 function getSettings() { return LS.get('dcrgym_settings', {sound:true,sheets:'https://script.google.com/macros/s/AKfycbxcAKZDYOzbSJ1a5OjqYRo9OyL9OIhEhoos8a4aQE5MB68atj7XAWQeyTuulmB6UFUt/exec',weightUnit:'kg'}); }
 function saveSettings(s) { LS.set('dcrgym_settings', s); }
 
+// ── Bulletproof persistence core ─────────────────────────────────────────────
+// Schema-versioned, non-destructive, with rolling last-good backup.
+// History must survive every app update. Period.
+const SCHEMA_VERSION = 2;
+
+function migrateStorage() {
+  const v = LS.get('dcrgym_schema_version', 1);
+  if (v >= SCHEMA_VERSION) return;
+
+  // Rolling last-good backup BEFORE any mutation — recoverable from Settings
+  const hist = getHistory();
+  if (hist.length > 0) {
+    LS.set('dcrgym_history_backup', { at: Date.now(), fromVersion: v, history: hist });
+  }
+
+  // v1 → v2: backfill _name onto every working set so exercise identity is a
+  // stored fact, never a derived guess. Resolves via program structure (the
+  // only correct source for legacy entries). Unknown keys are left untouched —
+  // non-destructive by design.
+  if (v < 2) {
+    let stamped = 0;
+    for (const w of hist) {
+      if (!w || !w.sets || !w.programId || w.programId === 'import') continue;
+      const prog = PROGRAMS.find(p => p.id === w.programId);
+      if (!prog) continue;
+      const sess = prog.sessions.find(s => s.id === w.sessionId);
+      if (!sess) continue;
+      for (const [key, sets] of Object.entries(w.sets)) {
+        if (!Array.isArray(sets) || key.endsWith('_wu')) continue;
+        if (sets.some(s => s && s._name)) continue;
+        const exIdx = parseInt(key.split('_').pop());
+        if (isNaN(exIdx) || !sess.exercises[exIdx]) continue;
+        const nm = stripSuperset(sess.exercises[exIdx].name);
+        for (const s of sets) { if (s && s.r > 0) { s._name = nm; stamped++; } }
+      }
+    }
+    if (stamped > 0) saveHistory(hist);
+  }
+
+  LS.set('dcrgym_schema_version', SCHEMA_VERSION);
+}
+
+// Live exercise identity — travel swap and session substitution aware.
+// THE name that gets stamped on sets and used for history lookup.
+function liveExName(key, ex) {
+  const name = stripSuperset(ex.name);
+  const travel = ST.travelMode && TRAVEL_MAP[normalizeEx(name)];
+  if (travel) return travel.name;
+  if (ST.workoutSubs && ST.workoutSubs[key]) return ST.workoutSubs[key];
+  return name;
+}
+
+// Single source of truth for the live-workout snapshot
+function buildWorkoutPayload() {
+  return {
+    v: SCHEMA_VERSION,
+    programId: ST.currentProgram,
+    sessionId: ST.currentSession,
+    sessionName: (() => { const p=PROGRAMS.find(pp=>pp.id===ST.currentProgram); const s=p&&p.sessions.find(ss=>ss.id===ST.currentSession); return s?s.name:''; })(),
+    sets: ST.workoutSets,
+    drafts: ST.workoutDrafts || {},
+    subs: ST.workoutSubs || {},
+    notes: ST.workoutNotes || {},
+    travelMode: ST.travelMode,
+    travelLocked: ST.travelLocked,
+    durationSecs: ST.durationSecs,
+    expandedCards: [...ST.expandedCards],
+    completedCards: [...ST.completedCards],
+    startTime: ST.workoutStart,
+  };
+}
+
+// Synchronous, un-debounced write — called on every set checkmark and on
+// visibilitychange. A logged set is on disk before the ripple finishes.
+function saveNow() {
+  if (!ST.currentSession || !ST.workoutStart) return;
+  LS.set('dcrgym_current_workout', buildWorkoutPayload());
+}
+
+// Draft persistence — values typed but not yet checkmarked survive any reload.
+let _draftTimeout = null;
+function markDraft(key, si) {
+  const wi = document.getElementById('wi-' + key + '-' + si);
+  const ri = document.getElementById('ri-' + key + '-' + si);
+  if (!ST.workoutDrafts) ST.workoutDrafts = {};
+  ST.workoutDrafts[key + '-' + si] = { w: wi ? wi.value : '', r: ri ? ri.value : '' };
+  clearTimeout(_draftTimeout);
+  _draftTimeout = setTimeout(saveNow, 300);
+}
+function markDraftWu(key) {
+  const wi = document.getElementById('wuwi-' + key);
+  const ri = document.getElementById('wuri-' + key);
+  if (!ST.workoutDrafts) ST.workoutDrafts = {};
+  ST.workoutDrafts[key + '-wu'] = { w: wi ? wi.value : '', r: ri ? ri.value : '' };
+  clearTimeout(_draftTimeout);
+  _draftTimeout = setTimeout(saveNow, 300);
+}
+
+// ── Custom number pad engine — replaces the system keyboard for set entry ───
+let NP = { el: null, key: null, si: null, exIdx: null, field: 'w', isWu: false, fresh: true };
+
+function openNumpad(inputEl, key, si, exIdx, field, isWu = false) {
+  NP = { el: inputEl, key, si, exIdx, field, isWu, fresh: true };
+  document.querySelectorAll('.np-focus').forEach(e => e.classList.remove('np-focus'));
+  inputEl.classList.add('np-focus');
+  const chipsEl = document.getElementById('np-chips');
+  if (chipsEl) {
+    chipsEl.innerHTML = field === 'w'
+      ? `<button class="np-chip" onclick="npAdjust(-5)">−5</button>
+         <button class="np-chip" onclick="npAdjust(-2.5)">−2.5</button>
+         <button class="np-chip np-up" onclick="npAdjust(2.5)">+2.5</button>
+         <button class="np-chip np-up" onclick="npAdjust(5)">+5</button>`
+      : `<button class="np-chip" onclick="npAdjust(-1)">−1</button>
+         <button class="np-chip np-up" onclick="npAdjust(1)">+1</button>`;
+  }
+  const action = document.getElementById('np-action');
+  if (action) {
+    action.textContent = field === 'w' ? 'Next · reps' : '✓ Log set';
+    action.classList.toggle('np-log', field === 'r');
+  }
+  document.getElementById('numpad').classList.add('open');
+  document.body.classList.add('numpad-open');
+  setTimeout(() => { try { inputEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(e) {} }, 140);
+  haptic('tick');
+}
+
+function closeNumpad() {
+  const np = document.getElementById('numpad');
+  if (np) np.classList.remove('open');
+  document.body.classList.remove('numpad-open');
+  document.querySelectorAll('.np-focus').forEach(e => e.classList.remove('np-focus'));
+  NP.el = null;
+}
+
+function _npCommitDraft() {
+  if (!NP.key) return;
+  if (NP.isWu) markDraftWu(NP.key); else markDraft(NP.key, NP.si);
+}
+
+function npAdjust(delta) {
+  if (!NP.el) return;
+  const cur = parseFloat(NP.el.value) || 0;
+  let v = Math.max(0, cur + delta);
+  v = NP.field === 'r' ? Math.round(v) : Math.round(v * 2) / 2;
+  NP.el.value = Number.isInteger(v) ? String(v) : v.toFixed(1);
+  NP.fresh = false;
+  haptic('tick');
+  _npCommitDraft();
+}
+
+function npKey(k) {
+  if (!NP.el) return;
+  let v = String(NP.el.value || '');
+  if (k === 'del')      v = NP.fresh ? '' : v.slice(0, -1);
+  else if (k === '.') {
+    if (NP.field === 'r') return;                  // no decimals on reps
+    if (NP.fresh) v = '0.';
+    else if (!v.includes('.')) v += '.';
+  } else {
+    v = NP.fresh ? k : (v + k);                    // first key replaces — select-all semantics
+  }
+  if (v.length > 6) return;
+  NP.fresh = false;
+  NP.el.value = v;
+  haptic('tick');
+  _npCommitDraft();
+}
+
+function numpadAction() {
+  if (!NP.el) return;
+  const { key, si, exIdx, field, isWu } = NP;
+  if (isWu) {
+    if (field === 'w') {
+      const ri = document.getElementById('wuri-' + key);
+      if (ri) openNumpad(ri, key, 0, exIdx, 'r', true);
+    } else { closeNumpad(); logWarmup(key); }
+    return;
+  }
+  if (field === 'w') {
+    const ri = document.getElementById('ri-' + key + '-' + si);
+    if (ri) openNumpad(ri, key, si, exIdx, 'r', false);
+  } else { closeNumpad(); logSet(key, si, exIdx); }
+}
+
+// Digit keys (delegated) + tap-away dismissal
+(function initNumpad() {
+  document.addEventListener('click', (e) => {
+    const np = document.getElementById('numpad');
+    if (!np) return;
+    const k = e.target.closest('.np-key');
+    if (k && np.contains(k)) { npKey(k.dataset.k); return; }
+    if (!np.classList.contains('open')) return;
+    if (np.contains(e.target)) return;
+    if (e.target.closest('.set-input, .warmup-input, .set-log-btn, .warmup-row')) return;
+    closeNumpad();
+  });
+})();
+
+// ── Long-press exercise card → floating quick-action menu ───────────────────
+(function initLongPress() {
+  let timer = null, sx = 0, sy = 0;
+  document.addEventListener('touchstart', (e) => {
+    const hdr = e.target.closest('.ex-card-header');
+    if (!hdr || ST.screen !== 'workout' || e.target.closest('button')) return;
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+    timer = setTimeout(() => { timer = null; showCardMenu(hdr); }, 480);
+  }, { passive: true });
+  document.addEventListener('touchmove', (e) => {
+    if (!timer) return;
+    const dx = e.touches[0].clientX - sx, dy = e.touches[0].clientY - sy;
+    if (dx * dx + dy * dy > 110) { clearTimeout(timer); timer = null; }
+  }, { passive: true });
+  ['touchend', 'touchcancel'].forEach(ev =>
+    document.addEventListener(ev, () => { if (timer) { clearTimeout(timer); timer = null; } }));
+})();
+
+function showCardMenu(hdr) {
+  const card = hdr.closest('.ex-card');
+  if (!card) return;
+  closeCardMenu();
+  haptic('set');
+  const key = card.id.replace('excard-', '');
+  const exIdx = parseInt(key.split('_').pop());
+  card.classList.add('lifted');
+  const rect = card.getBoundingClientRect();
+  const menu = document.createElement('div');
+  menu.id = 'card-menu';
+  menu.innerHTML = [
+    { ic: '⇄', lbl: 'Substitute',        fn: `showSubs(event,'${key}',${exIdx})` },
+    { ic: '↗', lbl: 'Exercise history',  fn: `showProgressGraphFromMenu('${key}',${exIdx})` },
+    { ic: '◷', lbl: 'Edit rest time',    fn: `editRestFromMenu('${key}',${exIdx})` },
+    { ic: '?', lbl: 'Form cues',         fn: `showCue(event,'${key}',${exIdx})` },
+  ].map(i => `<button onclick="closeCardMenu();${i.fn}"><span class="cm-ic">${i.ic}</span>${i.lbl}</button>`).join('');
+  menu.style.top = Math.min(rect.bottom + 8, window.innerHeight - 250) + 'px';
+  document.body.appendChild(menu);
+  requestAnimationFrame(() => menu.classList.add('open'));
+  setTimeout(() => document.addEventListener('click', closeCardMenu, { once: true }), 0);
+}
+
+function closeCardMenu() {
+  const m = document.getElementById('card-menu');
+  if (m) { m.classList.remove('open'); setTimeout(() => m.remove(), 180); }
+  document.querySelectorAll('.ex-card.lifted').forEach(c => c.classList.remove('lifted'));
+}
+
+function showProgressGraphFromMenu(key, exIdx) {
+  const prog = PROGRAMS.find(p => p.id === ST.currentProgram);
+  const sess = prog && prog.sessions.find(s => s.id === ST.currentSession);
+  const ex = sess && sess.exercises[exIdx];
+  if (ex) showProgressGraph(null, liveExName(key, ex));
+}
+
+function editRestFromMenu(key, exIdx) {
+  if (!ST.expandedCards.has(key)) { toggleCard(key); }
+  setTimeout(() => {
+    const lbl = document.getElementById('rest-lbl-' + key);
+    if (lbl) editRestTime(key, exIdx, lbl);
+  }, 320);
+}
+
+// Archive a live/abandoned workout's logged sets into history — nothing with
+// reps in it is ever silently dropped.
+function archiveWorkoutToHistory(snapshot) {
+  if (!snapshot || !snapshot.sets) return false;
+  const hasSets = Object.values(snapshot.sets).some(arr => Array.isArray(arr) && arr.some(s => s && s.r > 0));
+  if (!hasSets) return false;
+  const hist = getHistory();
+  hist.push({
+    id: (snapshot.startTime || Date.now()).toString(),
+    programId: snapshot.programId,
+    sessionId: snapshot.sessionId,
+    sessionName: snapshot.sessionName || '',
+    startTime: snapshot.startTime || Date.now(),
+    endTime: Date.now(),
+    duration: snapshot.durationSecs || 0,
+    travelMode: snapshot.travelMode || false,
+    sets: snapshot.sets,
+    notes: snapshot.notes || {},
+    partial: true,
+  });
+  saveHistory(hist);
+  return true;
+}
+
+// ── Themed confirm/notice sheets — native confirm()/alert() are banned ──────
+let _sheetCb = {};
+function _sheetGo(which) {
+  const fn = _sheetCb[which];
+  _sheetCb = {};
+  closeSheet();
+  if (fn) setTimeout(fn, 90);
+}
+function confirmSheet(opts) {
+  _sheetCb = { confirm: opts.onConfirm || null, secondary: opts.onSecondary || null };
+  openSheet(`
+    <div class="bs-title">${opts.title}</div>
+    ${opts.body ? `<div class="confirm-body">${opts.body}</div>` : ''}
+    <div class="confirm-actions">
+      <button class="btn btn-primary${opts.destructive ? ' btn-destructive' : ''}" onclick="_sheetGo('confirm')">${opts.confirmLabel || 'Confirm'}</button>
+      ${opts.secondaryLabel ? `<button class="btn btn-sheet-secondary" onclick="_sheetGo('secondary')">${opts.secondaryLabel}</button>` : ''}
+      <button class="btn btn-sheet-ghost" onclick="_sheetGo('cancel')">${opts.cancelLabel || 'Cancel'}</button>
+    </div>`);
+}
+function noticeSheet(title, body) {
+  _sheetCb = {};
+  openSheet(`
+    <div class="bs-title">${title}</div>
+    ${body ? `<div class="confirm-body">${body}</div>` : ''}
+    <div class="confirm-actions">
+      <button class="btn btn-primary" onclick="closeSheet()">OK</button>
+    </div>`);
+}
+
 function getLastPerformance(exName) {
+  const found = getLastPerformanceFull(exName);
+  return found ? found.sets : null;
+}
+
+function getLastPerformanceFull(exName) {
   // Lookup engine — scans ALL history indiscriminately by name alone.
   // Three resolution paths tried in order for every entry; no programId branching.
   // History sorted newest-to-oldest by endTime so we always return the most
@@ -4194,11 +4727,22 @@ function getLastPerformance(exName) {
       // ── Match: fuzzy name comparison with alias resolution + parenthetical strip
       if (exercisesMatch(exName, storedName)) {
         const ws = sets.filter(s => s && s.r > 0);
-        if (ws.length > 0) return ws;
+        if (ws.length > 0) return { sets: ws, endTime: w.endTime || 0 };
       }
     }
   }
   return null;
+}
+
+// "last Tue" / "3d ago" — quiet relative date for the card memory chip
+function relDay(ts) {
+  if (!ts) return '';
+  const days = Math.floor((Date.now() - ts) / 86400000);
+  if (days <= 0) return 'today';
+  if (days === 1) return 'yesterday';
+  if (days < 7) return 'last ' + new Date(ts).toLocaleDateString('en-GB', { weekday: 'short' });
+  if (days < 30) return Math.floor(days / 7) + 'w ago';
+  return new Date(ts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 }
 
 function getStats() {
@@ -4263,12 +4807,18 @@ function getWeeklyVolumeByMuscle(programId) {
     const ws = wp.sessions.find(s => s.id === w.sessionId);
     if (!ws) continue;
     for (const [key, sets] of Object.entries(w.sets)) {
+      if (key.endsWith('_wu')) continue;   // warm-ups never count toward volume
       const exIdx = parseInt(key.split('_').pop());
       const ex = ws.exercises[exIdx];
-      if (!ex) continue;
-      const muscle = getMuscle(stripSuperset(ex.name));
-      if (!actuals[muscle]) actuals[muscle] = 0;
-      actuals[muscle] += sets.length;
+      for (const set of sets) {
+        if (!set || !set.r) continue;
+        // Stamped _name wins — substituted/travel sets credit the RIGHT muscle
+        const nm = set._name || (ex && stripSuperset(ex.name));
+        if (!nm) continue;
+        const muscle = getMuscle(nm);
+        if (!actuals[muscle]) actuals[muscle] = 0;
+        actuals[muscle] += 1;
+      }
     }
   }
   return { targets, actuals };
@@ -4290,11 +4840,13 @@ function getMuscleProgress() {
       const sess = prog.sessions.find(s => s.id === w.sessionId);
       if (!sess) continue;
       for (const [key, sets] of Object.entries(w.sets)) {
+        if (key.endsWith('_wu')) continue;
         const exIdx = parseInt(key.split('_').pop());
         const ex = sess.exercises[exIdx];
-        if (!ex) continue;
-        if (getMuscle(stripSuperset(ex.name)) !== muscle) continue;
         for (const set of sets) {
+          if (!set || !set.r) continue;
+          const nm = set._name || (ex && stripSuperset(ex.name));
+          if (!nm || getMuscle(nm) !== muscle) continue;
           const rm = epley1RM(set.w||0, set.r||0);
           if (!weekData[weekKey] || rm > weekData[weekKey]) weekData[weekKey] = rm;
         }
@@ -4310,9 +4862,11 @@ function getMuscleProgress() {
       if (!w.sets) return false;
       const p=PROGRAMS.find(pp=>pp.id===w.programId); if(!p) return false;
       const s=p.sessions.find(ss=>ss.id===w.sessionId); if(!s) return false;
-      return Object.entries(w.sets).some(([key])=>{
+      return Object.entries(w.sets).some(([key, sets])=>{
+        if (key.endsWith('_wu')) return false;
         const i=parseInt(key.split('_').pop()); const ex=s.exercises[i];
-        return ex && getMuscle(stripSuperset(ex.name))===muscle;
+        const nm = (Array.isArray(sets) && (sets.find(x=>x&&x._name)||{})._name) || (ex && stripSuperset(ex.name));
+        return nm && getMuscle(nm)===muscle;
       });
     }).sort((a,b)=>b.endTime-a.endTime)[0];
     const daysSince = lastWorked ? Math.floor((Date.now()-lastWorked.endTime)/(24*3600*1000)) : 99;
@@ -4351,37 +4905,46 @@ function checkMilestone() {
 
 
 // ── Sound ─────────────────────────────────────────────────────────────────────
+// ── Designed sound — Apple-quiet synthesis, zero file weight ─────────────────
+// One shared voice helper: filtered sine/triangle partials with soft attack and
+// natural exponential decay. No sawtooth, no square, no distortion — ever.
+function _voice(ctx, { freq, type = 'sine', vol = 0.1, at = 0, attack = 0.004, decay = 0.22, cutoff = 4200, detune = 0 }) {
+  const t0 = ctx.currentTime + at;
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  const f = ctx.createBiquadFilter();
+  f.type = 'lowpass'; f.frequency.setValueAtTime(cutoff, t0); f.Q.value = 0.4;
+  o.type = type; o.frequency.setValueAtTime(freq, t0); o.detune.value = detune;
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(vol, t0 + attack);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + attack + decay);
+  o.connect(f); f.connect(g); g.connect(ctx.destination);
+  o.start(t0); o.stop(t0 + attack + decay + 0.05);
+}
+
 function playSound(type) {
   const s = getSettings();
   if (!s.sound) return;
   try {
     if (!ST.audioCtx) ST.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const ctx = ST.audioCtx;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain); gain.connect(ctx.destination);
+    if (ctx.state === 'suspended') ctx.resume().catch(()=>{});
+
     if (type === 'set') {
-      osc.frequency.setValueAtTime(880, ctx.currentTime);
-      gain.gain.setValueAtTime(0.1, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
-      osc.start(); osc.stop(ctx.currentTime + 0.15);
+      // Soft glass tick — a fingernail on crystal
+      _voice(ctx, { freq: 1320, vol: 0.055, decay: 0.085, cutoff: 5200 });
+      _voice(ctx, { freq: 2640, vol: 0.018, decay: 0.055, cutoff: 6000 });
     } else if (type === 'chime') {
-      // High-impact commanding buzzer — three layered oscillators
-      const now = ctx.currentTime;
-      [[220,'sawtooth',0.38],[440,'square',0.22],[880,'sine',0.18]].forEach(([freq, waveType, vol]) => {
-        const o = ctx.createOscillator();
-        const g = ctx.createGain();
-        const dist = ctx.createWaveShaper();
-        const curve = new Float32Array(256);
-        for (let k = 0; k < 256; k++) { const x = (k * 2) / 256 - 1; curve[k] = (Math.PI + 200) * x / (Math.PI + 200 * Math.abs(x)); }
-        dist.curve = curve;
-        o.type = waveType; o.frequency.setValueAtTime(freq, now);
-        g.gain.setValueAtTime(vol, now);
-        g.gain.setValueAtTime(vol * 1.2, now + 0.04);
-        g.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
-        o.connect(dist); dist.connect(g); g.connect(ctx.destination);
-        o.start(now); o.stop(now + 0.65);
-      });
+      // Warm two-note marimba — E5 → A5, felt mallet
+      _voice(ctx, { freq: 659.3,  type: 'triangle', vol: 0.085, decay: 0.34, cutoff: 2600 });
+      _voice(ctx, { freq: 1318.5, vol: 0.022, decay: 0.20, cutoff: 3400 });
+      _voice(ctx, { freq: 880,    type: 'triangle', vol: 0.095, at: 0.17, decay: 0.46, cutoff: 2600 });
+      _voice(ctx, { freq: 1760,   vol: 0.024, at: 0.17, decay: 0.26, cutoff: 3400 });
+    } else if (type === 'finish') {
+      // Muted swell — three stacked warm partials, slow bloom
+      _voice(ctx, { freq: 440,  type: 'triangle', vol: 0.075, attack: 0.10, decay: 0.70, cutoff: 1900 });
+      _voice(ctx, { freq: 554.4, type: 'triangle', vol: 0.055, at: 0.06, attack: 0.10, decay: 0.66, cutoff: 2100 });
+      _voice(ctx, { freq: 659.3, type: 'sine',     vol: 0.045, at: 0.12, attack: 0.10, decay: 0.62, cutoff: 2300 });
     }
   } catch(e){}
 }
@@ -4390,6 +4953,7 @@ function playSound(type) {
 function startRestTimer(seconds, exName, nextText, afterText, isLast) {
   const endTime = Date.now() + seconds * 1000;
   ST.restActive    = true;
+  ST.restExpired   = false;
   ST.restDuration  = seconds;   // full duration for ring progress
   ST.restEndTime   = endTime;
   ST.restExName    = exName;
@@ -4398,6 +4962,7 @@ function startRestTimer(seconds, exName, nextText, afterText, isLast) {
   ST.restIsLast    = !!isLast;
   document.body.classList.add('rest-active');
   LS.set('dcrgym_rest_end',  endTime);
+  LS.set('dcrgym_rest_dur',  seconds);
   LS.set('dcrgym_rest_next', nextText || '');
 
   if (ST.swReg && ST.notifEnabled && navigator.serviceWorker.controller) {
@@ -4409,9 +4974,7 @@ function startRestTimer(seconds, exName, nextText, afterText, isLast) {
   if (ST.restTicker) clearInterval(ST.restTicker);
   ST.restTicker = setInterval(tickRest, 200);
 
-  renderRestBanner();
-  // renderRestOverlay() — replaced by non-blocking HUD; overlay disabled.
-  initRestHudRing();
+  renderRestIsland();
 }
 
 function addRestTime(secs) {
@@ -4421,54 +4984,61 @@ function addRestTime(secs) {
   const remaining = Math.ceil((ST.restEndTime - Date.now()) / 1000);
   const el = document.getElementById('rest-countdown');
   if (el) el.textContent = formatDuration(remaining);
-  updateRestOverlayUI(remaining);
 }
 
 function cancelRestTimer() {
   ST.restActive = false;
+  ST.restExpired = false;
   document.body.classList.remove('rest-active');
   LS.remove('dcrgym_rest_end');
   if (ST.restTicker) { clearInterval(ST.restTicker); ST.restTicker = null; }
+  if (ST.restGoTimeout) { clearTimeout(ST.restGoTimeout); ST.restGoTimeout = null; }
   if (navigator.serviceWorker.controller) {
     navigator.serviceWorker.controller.postMessage({ type: 'CANCEL_NOTIFICATION' });
   }
-
-  // Hide floating pill
-  const banner = document.getElementById('rest-banner');
-  if (banner) {
-    banner.classList.remove('visible');
-    setTimeout(() => { banner.style.display = 'none'; }, 350);
-  }
-
-  // Dismiss ambient overlay
-  const ov = document.getElementById('rest-overlay');
-  if (ov) {
-    ov.classList.remove('visible');
-    // Focus first non-logged input in active exercise after overlay fades
-    setTimeout(() => {
-      const inp = document.querySelector('.set-input:not(.logged)');
-      if (inp) inp.focus();
-    }, 340);
-  }
+  const island = document.getElementById('rest-island');
+  if (island) island.classList.remove('visible', 'expanded', 'go');
 }
 
 function tickRest() {
   const remaining = Math.ceil((ST.restEndTime - Date.now()) / 1000);
-  if (remaining <= 0) {
-    playSound('chime');
-    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-    cancelRestTimer();
-    return;
-  }
+  if (remaining <= 0) { restExpire(); return; }
   const el = document.getElementById('rest-countdown');
   if (el) el.textContent = formatDuration(remaining);
   updateRestHudRing(remaining);
-  updateRestOverlayUI(remaining); // kept for backward compat (overlay is hidden)
+}
+
+// Expiry — the capsule morphs to the green GO state instead of vanishing,
+// auto-expanding to show what's next, then dismisses itself.
+function restExpire() {
+  if (ST.restExpired) return;
+  ST.restExpired = true;
+  if (ST.restTicker) { clearInterval(ST.restTicker); ST.restTicker = null; }
+  LS.remove('dcrgym_rest_end');
+  playSound('chime');
+  haptic('restDone');
+  const island = document.getElementById('rest-island');
+  const cd = document.getElementById('rest-countdown');
+  const nx = document.getElementById('ri-next');
+  if (cd) cd.textContent = 'GO';
+  if (nx && !nx.textContent) nx.textContent = ST.restNextText || '';
+  if (island) { island.classList.add('go'); island.classList.remove('expanded'); }
+  const fill = document.getElementById('rest-hud-fill');
+  if (fill) fill.style.strokeDashoffset = '0';
+  ST.restGoTimeout = setTimeout(() => cancelRestTimer(), 7000);
+}
+
+function toggleRestIsland(e) {
+  const island = document.getElementById('rest-island');
+  if (!island) return;
+  if (island.classList.contains('go')) { cancelRestTimer(); return; }
+  haptic('tick');
+  island.classList.toggle('expanded');
 }
 
 function initRestHudRing() {
-  // Pre-compute strokeDasharray for the HUD ring (r=19, circ = 2πr)
-  const r = 19, circ = 2 * Math.PI * r;
+  // Pre-compute strokeDasharray for the capsule ring (r=15, circ = 2πr)
+  const r = 15, circ = 2 * Math.PI * r;
   const fill = document.getElementById('rest-hud-fill');
   if (fill) {
     fill.style.strokeDasharray  = circ.toFixed(2);
@@ -4476,70 +5046,87 @@ function initRestHudRing() {
   }
 }
 
-function renderRestBanner() {
-  const banner = document.getElementById('rest-banner');
-  if (!banner) return;
+function renderRestIsland() {
+  const island = document.getElementById('rest-island');
+  if (!island) return;
   const remaining = Math.ceil((ST.restEndTime - Date.now()) / 1000);
-  if (remaining <= 0) { banner.style.display = 'none'; banner.classList.remove('visible'); return; }
-  if (!banner.classList.contains('visible')) {
-    banner.style.display = 'flex';
-    requestAnimationFrame(() => banner.classList.add('visible'));
+  if (remaining <= 0) { island.classList.remove('visible', 'expanded', 'go'); return; }
+  ST.restExpired = false;
+  island.classList.remove('go', 'expanded');
+  const nx = document.getElementById('ri-next');
+  if (nx) nx.textContent = ST.restNextText || '';
+  if (!island.classList.contains('visible')) {
+    requestAnimationFrame(() => island.classList.add('visible'));
   }
   const cd = document.getElementById('rest-countdown');
   if (cd) cd.textContent = formatDuration(remaining);
+  initRestHudRing();
   updateRestHudRing(remaining);
 }
+// Legacy name — some render paths still call this
+function renderRestBanner() { renderRestIsland(); }
 
 function updateRestHudRing(remaining) {
-  // Update mini SVG ring in HUD
-  const fill  = document.getElementById('rest-hud-fill');
-  const digit = document.getElementById('rest-hud-digit');
-  const r = 19, circ = 2 * Math.PI * r;
+  const fill = document.getElementById('rest-hud-fill');
+  const r = 15, circ = 2 * Math.PI * r;
   if (fill && ST.restDuration > 0) {
     const pct = Math.max(0, Math.min(1, remaining / ST.restDuration));
     fill.style.strokeDashoffset = (circ * (1 - pct)).toFixed(2);
   }
-  if (digit) {
-    // Show seconds only if ≤99s, else formatted
-    digit.textContent = remaining > 99 ? formatDuration(remaining) : remaining + 's';
-  }
 }
 
-// ── Ambient fullscreen rest overlay ─────────────────────────────────────────
-function renderRestOverlay() {
-  const ov = document.getElementById('rest-overlay');
-  if (!ov) return;
-
-  // Pre-compute ring geometry
-  const r = 88;
-  const circ = 2 * Math.PI * r;
-  const fill = document.getElementById('rest-ring-fill');
-  if (fill) {
-    fill.style.strokeDasharray  = circ;
-    fill.style.strokeDashoffset = 0;   // starts full
+// ── Count-up ticker — numbers feel alive, never jumpy ────────────────────────
+function countUp(el, target, opts = {}) {
+  if (!el) return;
+  const dur = opts.dur || 600;
+  const decimals = opts.decimals || 0;
+  const prefix = opts.prefix || '';
+  const suffix = opts.suffix || '';
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    el.textContent = prefix + target.toFixed(decimals) + suffix;
+    return;
   }
-
-  // Populate next-text
-  const nxEl = document.getElementById('rest-overlay-next');
-  if (nxEl) nxEl.textContent = ST.restNextText || '';
-
-  // Animate in
-  requestAnimationFrame(() => ov.classList.add('visible'));
-  updateRestOverlayUI(Math.ceil((ST.restEndTime - Date.now()) / 1000));
+  const t0 = performance.now();
+  function frame(t) {
+    const p = Math.min(1, (t - t0) / dur);
+    const eased = 1 - Math.pow(1 - p, 4);
+    el.textContent = prefix + (target * eased).toFixed(decimals) + suffix;
+    if (p < 1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
 }
 
-function updateRestOverlayUI(remaining) {
-  const digits = document.getElementById('rest-overlay-digits');
-  if (digits) digits.textContent = formatDuration(Math.max(0, remaining));
+// Run count-up on every [data-count] element inside a container
+function tickStats(container) {
+  (container || document).querySelectorAll('[data-count]').forEach(el => {
+    const raw = el.getAttribute('data-count');
+    const target = parseFloat(raw);
+    if (isNaN(target)) return;
+    const suffix = el.getAttribute('data-suffix') || '';
+    const decimals = raw.includes('.') ? 1 : 0;
+    countUp(el, target, { suffix, decimals });
+  });
+}
 
-  // Ring fill: strokeDashoffset from 0 (full) → circ (empty)
-  const fill = document.getElementById('rest-ring-fill');
-  if (fill && ST.restDuration > 0) {
-    const r    = 88;
-    const circ = 2 * Math.PI * r;
-    const pct  = Math.max(0, Math.min(1, remaining / ST.restDuration));
-    fill.style.strokeDashoffset = circ * (1 - pct);
-  }
+// ── Checkmark stroke-draw — the ✓ draws itself on completion ────────────────
+function checkSVG() {
+  return `<svg class="check-draw" viewBox="0 0 24 24" width="15" height="15" fill="none"
+    stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 12.5 L9.5 18 L20 6.5"/></svg>`;
+}
+
+// ── Haptic vocabulary — the hand learns the language without looking ────────
+function haptic(type) {
+  if (!navigator.vibrate) return;
+  const P = {
+    tick:      8,                              // feather: taps, toggles
+    set:       [14, 40, 22],                   // crisp double-pulse: set logged
+    exercise:  [16, 50, 16, 50, 32],           // rising triple: exercise complete
+    restDone:  [60, 70, 60, 70, 110],          // insistent: rest expired
+    finish:    [24, 60, 24, 60, 24, 60, 90],   // celebration wave
+    milestone: [30, 70, 30, 70, 30, 70, 150],  // long milestone wave
+  };
+  try { navigator.vibrate(P[type] !== undefined ? P[type] : 10); } catch(e) {}
 }
 
 // ── Navigation ────────────────────────────────────────────────────────────────
@@ -4551,6 +5138,7 @@ const SCREEN_ORDER = ['home', 'workouts-browser', 'history', 'analysis'];
 function Maps(to, data={}) {
   const from = ST.screen;
   ST.screen = to;
+  if (typeof closeNumpad === 'function') closeNumpad();
 
   // Render content into the destination screen BEFORE transition fires
   if (to === 'home')             renderHome();
@@ -4562,14 +5150,29 @@ function Maps(to, data={}) {
   else if (to === 'workouts-browser') renderWorkoutsBrowser();
   else if (to === 'analysis')    renderAnalysis();
 
-  // Nav visibility: hidden only during active training session
+  // Status bar melts into the screen — charcoal cockpit in workout, cream elsewhere
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
+  if (themeMeta) themeMeta.setAttribute('content', to === 'workout' ? '#1A1A1A' : '#FAF7F2');
+
+  // Nav stays visible during workouts — browse history/weights mid-rest freely.
+  // The live session keeps running; the workout pill brings you back.
   const nav = document.getElementById('bottom-nav');
-  if (nav) nav.style.display = (to === 'workout') ? 'none' : 'flex';
+  if (nav) nav.style.display = 'flex';
   document.querySelectorAll('.nav-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.nav === to);
   });
 
   updateWorkoutPill();
+
+  // History API — Android's system back gesture navigates the app instead of
+  // killing it. Overlays are handled in the popstate listener.
+  if (!window.__navFromPop) {
+    try {
+      if (!(history.state && history.state.screen === to && !history.state.overlay)) {
+        history.pushState({ screen: to }, '', '#' + to);
+      }
+    } catch(e) {}
+  }
 
   // ── Kinetic transition engine ───────────────────────────────────────────────
   const fromEl = from ? document.getElementById('screen-' + from) : null;
@@ -4647,30 +5250,39 @@ function updateWorkoutPill() {
 // ── Command Center helpers ────────────────────────────────────────────────────
 
 function buildSilhouetteSVG(targets, actuals, weekComplete) {
-  // ── 4-state chromatic fill: none / coral / gold / sage ───────────────────
-  function col(muscle) {
+  // ── 4 unmistakable states ─────────────────────────────────────────────────
+  //  dormant   (no sets)   flat warm-grey ink — clearly asleep
+  //  behind    (<50%)      DEEP TERRACOTTA — attention, not reward
+  //  on-track  (50–99%)    warm peach-gold
+  //  complete  (≥100%)     full gold bloom
+  // The old encoding returned the SAME gold for 50% and 95% — never again.
+  function pct(muscle) {
     const t = targets[muscle] || 0, a = actuals[muscle] || 0;
-    if (!t || !a) return 'oklch(79% 0.018 55 / 0.22)';   // 0% — neutral warm ghost
-    const p = a / t;
-    if (p > 0.90) return 'oklch(56% 0.100 145 / 0.82)';  // >90% — sage #7A9A72
-    if (p > 0.50) return 'oklch(70% 0.110 82 / 0.84)';   // 50–90% — gold #C9A84C
-    return 'oklch(58.5% 0.210 32 / 0.65)';               // 1–49% — terracotta coral
+    if (!t || !a) return null;             // dormant
+    return a / t;
+  }
+  function col(muscle) {
+    const p = pct(muscle);
+    if (p === null)  return 'oklch(76% 0.014 60 / 0.30)';  // dormant ink
+    if (p < 0.50)    return 'oklch(48% 0.130 35 / 0.85)';  // behind — deep terracotta
+    if (p < 1.00)    return 'oklch(70% 0.110 82 / 0.86)';  // on-track — peach-gold
+    return 'oklch(76% 0.130 85 / 0.92)';                   // complete — bright gold
   }
   function isActive(muscle) {
     const t = targets[muscle] || 0, a = actuals[muscle] || 0;
     return t > 0 && a > 0;
   }
   function glowFilter(muscle) {
-    if (!isActive(muscle)) return 'none';
-    const t = targets[muscle] || 0, a = actuals[muscle] || 0;
-    const p = a / t;
-    if (p > 0.90) return 'url(#glowGold)';   // >90% sage — reuse gold bloom
-    if (p > 0.50) return 'url(#glowGold)';   // 50–90% gold bloom
-    return 'url(#glowLight)';                 // coral halo
+    const p = pct(muscle);
+    if (p === null) return 'none';
+    if (p >= 1.00)  return 'url(#glowGold)';   // bloom is EARNED, only at 100%
+    if (p >= 0.50)  return 'url(#glowLight)';  // soft halo on the way up
+    return 'none';                             // behind = flat urgency, no reward glow
   }
   function pulse(muscle) {
-    const t = targets[muscle] || 0, a = actuals[muscle] || 0;
-    return t > 0 && a > 0 && (a / t) < 1;
+    // Only neglected muscles breathe — the eye goes where the work is owed
+    const p = pct(muscle);
+    return p !== null && p < 0.50;
   }
   function g(m) {
     return `class="muscle-group${pulse(m) ? ' muscle-pulse' : ''}" data-muscle="${m}"`;
@@ -4965,32 +5577,48 @@ function getPrevSessionEntry(sessionId, excludeId) {
   return hist[0] || null;
 }
 
-function getEpleyOverloadByMuscle(muscle) {
+function getEpleyOverloadByMuscle(muscle, numWeeks = 5) {
   const hist = getHistory();
   const now = Date.now();
   const msW = 7 * 24 * 3600 * 1000;
-  return Array.from({ length: 5 }, (_, i) => {
-    const wStart = now - (5 - i) * msW;
-    const wEnd   = now - (4 - i) * msW;
+  const exPeaks = {};      // latest-week per-exercise e1RM peaks (driver insight)
+  const prevExPeaks = {};  // prior-week peaks for the delta
+  const weeks = Array.from({ length: numWeeks }, (_, i) => {
+    const wStart = now - (numWeeks - i) * msW;
+    const wEnd   = now - (numWeeks - 1 - i) * msW;
     let peakE1RM = 0;
     for (const w of hist) {
       if (w.endTime < wStart || w.endTime >= wEnd || !w.sets) continue;
       const prog = PROGRAMS.find(p => p.id === w.programId);
-      if (!prog) continue;
-      const sess = prog.sessions.find(s => s.id === w.sessionId);
-      if (!sess) continue;
+      const sess = prog && prog.sessions.find(s => s.id === w.sessionId);
       for (const [key, sets] of Object.entries(w.sets)) {
-        if (key.endsWith('_wu')) continue;
+        if (key.endsWith('_wu') || !Array.isArray(sets)) continue;
         const exIdx = parseInt(key.split('_').pop());
-        const ex = sess.exercises[exIdx];
-        if (!ex) continue;
-        if (getMuscle(stripSuperset(ex.name)) !== muscle) continue;
+        const ex = sess && sess.exercises[exIdx];
+        // Stamped _name wins — substituted sets feed the right muscle's curve
+        const nm = ((sets.find(x => x && x._name) || {})._name) || (ex && stripSuperset(ex.name));
+        if (!nm || getMuscle(nm) !== muscle) continue;
         const e = getTopSetE1RM(sets);
         if (e > peakE1RM) peakE1RM = e;
+        if (i === numWeeks - 1 && e > (exPeaks[nm] || 0)) exPeaks[nm] = e;
+        if (i === numWeeks - 2 && e > (prevExPeaks[nm] || 0)) prevExPeaks[nm] = e;
       }
     }
-    return { label: `w${i + 1}`, value: peakE1RM };
+    const d = new Date(wStart + msW / 2);
+    return {
+      label: `w${i + 1}`,
+      dateLabel: d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
+      value: peakE1RM,
+    };
   });
+  // Driver — which lift is moving this muscle's index
+  let driver = null;
+  const top = Object.entries(exPeaks).sort((a, b) => b[1] - a[1])[0];
+  if (top) {
+    const prev = prevExPeaks[top[0]] || 0;
+    driver = { name: top[0], e1rm: top[1], delta: prev > 0 ? Math.round((top[1] - prev) * 10) / 10 : null };
+  }
+  return { weeks, driver };
 }
 
 function openQuickLogModal(muscle) {
@@ -5050,134 +5678,238 @@ function openMuscleGraph(eOrMuscle, muscleOpt) {
     panel.style.transformOrigin = 'center center';
   }
 
-  // ── e1RM weekly data ──────────────────────────────────────────────────────
-  const weeks  = getEpleyOverloadByMuscle(muscle);
-  const vals   = weeks.map(w => w.value);
-  const labels = weeks.map(w => w.label);
-  const peak   = Math.max(...vals, 1);
-  const thisWk = vals[4] || 0;
-  const prevWk = vals[3] || 0;
-  const hasData = vals.filter(v => v > 0).length >= 2;
-
-  // Delta % vs previous week
-  let deltaBadge;
-  if (!hasData || (thisWk === 0 && prevWk === 0)) {
-    deltaBadge = `<span style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:oklch(60% 0.018 55);letter-spacing:0.04em">Baseline Established</span>`;
-  } else if (prevWk === 0) {
-    deltaBadge = `<span style="color:oklch(52% 0.18 145);font-family:'Courier New',monospace;font-size:20px;font-weight:700;letter-spacing:-0.5px">▲ New</span>`;
-  } else {
-    const pct = Math.round(((thisWk - prevWk) / prevWk) * 100);
-    const up  = pct >= 0;
-    deltaBadge = `<span style="color:${up ? 'oklch(52% 0.18 145)' : 'oklch(55% 0.20 28)'};font-family:'Courier New',monospace;font-size:22px;font-weight:700;letter-spacing:-0.5px">${up ? '▲' : '▼'} ${up ? '+' : ''}${pct}%</span>`;
-  }
-
-  // ── Premium SVG line chart (dark charcoal on frosted glass) ──────────────
-  const W = 288, H = 92;
-  const pad = { l: 10, r: 10, t: 14, b: 24 };
-  const cW = W - pad.l - pad.r, cH = H - pad.t - pad.b;
-  const minV = Math.min(...vals.filter(v => v > 0)) * 0.92 || 0;
-  const maxV = peak * 1.05 || 1;
-  const range = maxV - minV || 1;
-
-  const xs = vals.map((_, i) => pad.l + (i / (vals.length - 1)) * cW);
-  const ys = vals.map(v  => v > 0
-    ? pad.t + cH - ((v - minV) / range) * cH
-    : pad.t + cH);
-
-  const linePts  = vals.map((v, i) => v > 0 ? `${xs[i].toFixed(1)},${ys[i].toFixed(1)}` : null).filter(Boolean).join(' ');
-  const areaPath = `M${xs[0].toFixed(1)},${(pad.t + cH).toFixed(1)} `
-    + vals.map((v, i) => v > 0 ? `L${xs[i].toFixed(1)},${ys[i].toFixed(1)}` : '').join(' ')
-    + ` L${xs[xs.length-1].toFixed(1)},${(pad.t + cH).toFixed(1)} Z`;
-
-  const dots = xs.map((x, i) => {
-    if (!vals[i]) return '';
-    const isNow = i === vals.length - 1;
-    const fill  = isNow ? 'oklch(58.5% 0.210 32)' : 'oklch(58.5% 0.210 32 / 0.40)';
-    return `<circle cx="${x.toFixed(1)}" cy="${ys[i].toFixed(1)}"
-      r="${isNow ? 4 : 2.5}" fill="${fill}" stroke="${isNow ? 'oklch(97.8% 0.008 72)' : 'none'}" stroke-width="${isNow ? 1.5 : 0}">
-      ${isNow ? `<animate attributeName="r" values="4;5;4" dur="2.4s" repeatCount="indefinite"/>` : ''}
-    </circle>`;
-  }).join('');
-
-  const lbls = labels.map((lbl, i) =>
-    `<text x="${xs[i].toFixed(1)}" y="${H - 4}" text-anchor="middle"
-      font-size="8.5" fill="oklch(44% 0.025 55)"
-      font-family="'Cormorant Garamond',serif" font-style="italic">${lbl}</text>`
-  ).join('');
-
-  const valLabels = vals.map((v, i) => v > 0
-    ? `<text x="${xs[i].toFixed(1)}" y="${(ys[i] - 5).toFixed(1)}" text-anchor="middle"
-        font-size="7" fill="oklch(44% 0.025 55 / 0.55)"
-        font-family="'Courier New',monospace">${v}</text>` : '').join('');
-
-  const chartSVG = hasData
-    ? `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px;display:block;overflow:visible">
-        <defs>
-          <linearGradient id="e1rmAreaGrad${muscle.replace(/\s/g,'')}" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%"   stop-color="oklch(58.5% 0.210 32 / 0.12)"/>
-            <stop offset="100%" stop-color="oklch(58.5% 0.210 32 / 0.01)"/>
-          </linearGradient>
-        </defs>
-        <line x1="${pad.l}" y1="${(pad.t+cH).toFixed(1)}" x2="${(W-pad.r).toFixed(1)}" y2="${(pad.t+cH).toFixed(1)}"
-          stroke="oklch(72% 0.030 60 / 0.25)" stroke-width="0.75"/>
-        <path d="${areaPath}" fill="url(#e1rmAreaGrad${muscle.replace(/\s/g,'')})"/>
-        <polyline points="${linePts}" fill="none" stroke="oklch(58.5% 0.210 32 / 0.70)"
-          stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-        ${dots}${lbls}${valLabels}
-      </svg>`
-    : `<p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:oklch(60% 0.018 55);margin:20px 0;text-align:center">Log two weeks to see your strength curve.</p>`;
-
-  document.getElementById('muscle-graph-content').innerHTML = `
-    <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;
-      font-size:22px;color:oklch(22.8% 0.018 42);letter-spacing:0.04em;
-      text-transform:uppercase;margin-bottom:2px">${muscle}</div>
-    <div style="font-family:'Courier New',monospace;font-size:8px;letter-spacing:0.18em;
-      text-transform:uppercase;color:oklch(60% 0.018 55);margin-bottom:14px">
-      e1RM · Epley Formula · 5 Week Trail</div>
-    <div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid oklch(91.2% 0.012 72)">
-      ${deltaBadge}
-    </div>
-    <div style="margin:0 0 6px">${chartSVG}</div>
-    <div style="display:flex;gap:0;margin-top:12px;border-top:1px solid oklch(91.2% 0.012 72);padding-top:10px">
-      <div style="flex:1;text-align:center">
-        <div style="font-family:'Courier New',monospace;font-size:17px;font-weight:700;
-          color:oklch(22.8% 0.018 42);font-variant-numeric:tabular-nums">${thisWk > 0 ? thisWk + '<span style="font-size:10px;font-weight:400;color:oklch(60% 0.018 55)">kg</span>' : '—'}</div>
-        <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:10px;
-          color:oklch(60% 0.018 55);margin-top:2px">this week</div>
-      </div>
-      <div style="width:1px;background:oklch(91.2% 0.012 72)"></div>
-      <div style="flex:1;text-align:center">
-        <div style="font-family:'Courier New',monospace;font-size:17px;font-weight:700;
-          color:oklch(22.8% 0.018 42);font-variant-numeric:tabular-nums">${prevWk > 0 ? prevWk + '<span style="font-size:10px;font-weight:400;color:oklch(60% 0.018 55)">kg</span>' : '—'}</div>
-        <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:10px;
-          color:oklch(60% 0.018 55);margin-top:2px">prev week</div>
-      </div>
-      <div style="width:1px;background:oklch(91.2% 0.012 72)"></div>
-      <div style="flex:1;text-align:center">
-        <div style="font-family:'Courier New',monospace;font-size:17px;font-weight:700;
-          color:oklch(22.8% 0.018 42);font-variant-numeric:tabular-nums">${peak > 0 ? peak + '<span style="font-size:10px;font-weight:400;color:oklch(60% 0.018 55)">kg</span>' : '—'}</div>
-        <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:10px;
-          color:oklch(60% 0.018 55);margin-top:2px">peak</div>
-      </div>
-    </div>`;
+  // Render + show
+  ST.mgMuscle = muscle;
+  if (!ST.mgRange) ST.mgRange = 5;
+  renderMuscleGraphContent();
 
   const ov = document.getElementById('muscle-graph-overlay');
   ov.style.display = 'flex';
   requestAnimationFrame(() => ov.classList.add('visible'));
+  // Back gesture closes the panel, not the app
+  try { history.pushState({ screen: ST.screen, overlay: 'muscle' }, '', '#muscle'); } catch(e) {}
+}
+
+// Switch muscle inside the open panel — no close-reopen-retap loop
+function switchMuscleGraph(muscle) {
+  ST.mgMuscle = muscle;
+  haptic('tick');
+  // Move the vignette focus with the selection
+  const totemEl = document.querySelector('.premium-totem-container');
+  if (totemEl) {
+    totemEl.querySelectorAll('.muscle-focused').forEach(el => el.classList.remove('muscle-focused'));
+    const focusedEl = totemEl.querySelector(`[data-muscle="${muscle}"]`);
+    if (focusedEl) focusedEl.classList.add('muscle-focused');
+  }
+  renderMuscleGraphContent();
+}
+
+function setMuscleGraphRange(weeks) {
+  ST.mgRange = weeks;
+  haptic('tick');
+  renderMuscleGraphContent();
+}
+
+const MG_MUSCLES = ['Chest','Back','Shoulders','Biceps','Triceps','Core','Glutes','Quads','Hamstrings','Calves','Traps'];
+
+function renderMuscleGraphContent() {
+  const muscle = ST.mgMuscle;
+  const numWeeks = ST.mgRange || 5;
+  const { weeks, driver } = getEpleyOverloadByMuscle(muscle, numWeeks);
+  const vals  = weeks.map(w => w.value);
+  const peak  = Math.max(...vals, 1);
+  const thisWk = vals[vals.length - 1] || 0;
+  const prevWk = vals[vals.length - 2] || 0;
+  const hasData = vals.filter(v => v > 0).length >= 2;
+
+  // Delta badge — light & airy numerals, token colors
+  let deltaBadge;
+  if (!hasData || (thisWk === 0 && prevWk === 0)) {
+    deltaBadge = `<span class="mg-delta mg-delta-none">Baseline</span>`;
+  } else if (prevWk === 0) {
+    deltaBadge = `<span class="mg-delta mg-delta-up">▲ New</span>`;
+  } else {
+    const pct = Math.round(((thisWk - prevWk) / prevWk) * 100);
+    const up  = pct >= 0;
+    deltaBadge = `<span class="mg-delta ${up ? 'mg-delta-up' : 'mg-delta-down'}">${up ? '▲' : '▼'} ${up ? '+' : ''}${pct}%</span>`;
+  }
+
+  // ── Chart — full-width, dated axis, value chips, draw-in ──────────────────
+  const W = 292, H = 132;
+  const pad = { l: 12, r: 12, t: 22, b: 22 };
+  const cW = W - pad.l - pad.r, cH = H - pad.t - pad.b;
+  const minV = Math.min(...vals.filter(v => v > 0)) * 0.92 || 0;
+  const maxV = peak * 1.06 || 1;
+  const range = maxV - minV || 1;
+  const xs = vals.map((_, i) => pad.l + (i / Math.max(vals.length - 1, 1)) * cW);
+  const ys = vals.map(v => v > 0 ? pad.t + cH - ((v - minV) / range) * cH : pad.t + cH);
+
+  const linePts = vals.map((v, i) => v > 0 ? `${xs[i].toFixed(1)},${ys[i].toFixed(1)}` : null).filter(Boolean).join(' ');
+  const firstIdx = vals.findIndex(v => v > 0);
+  const lastIdx  = vals.length - 1 - [...vals].reverse().findIndex(v => v > 0);
+  const peakIdx  = vals.indexOf(Math.max(...vals));
+  const areaPath = `M${xs[0].toFixed(1)},${(pad.t + cH).toFixed(1)} `
+    + vals.map((v, i) => v > 0 ? `L${xs[i].toFixed(1)},${ys[i].toFixed(1)}` : '').join(' ')
+    + ` L${xs[xs.length - 1].toFixed(1)},${(pad.t + cH).toFixed(1)} Z`;
+
+  const dots = xs.map((x, i) => {
+    if (!vals[i]) return '';
+    const isNow = i === lastIdx;
+    return `<circle cx="${x.toFixed(1)}" cy="${ys[i].toFixed(1)}" r="${isNow ? 4 : 2.5}"
+      fill="${isNow ? 'oklch(58.5% 0.210 32)' : 'oklch(58.5% 0.210 32 / 0.38)'}"
+      stroke="${isNow ? '#fff' : 'none'}" stroke-width="${isNow ? 1.5 : 0}"/>`;
+  }).join('');
+
+  // Value chips on first / peak / last (deduped)
+  const chipIdxs = [...new Set([firstIdx, peakIdx, lastIdx])].filter(i => i >= 0 && vals[i] > 0);
+  const chips = chipIdxs.map(i => {
+    const cx = Math.min(Math.max(xs[i], pad.l + 14), W - pad.r - 14);
+    return `<g>
+      <rect x="${(cx - 16).toFixed(1)}" y="${(ys[i] - 18).toFixed(1)}" width="32" height="13" rx="6.5"
+        fill="#fff" stroke="oklch(91.2% 0.012 72)" stroke-width="0.5"/>
+      <text x="${cx.toFixed(1)}" y="${(ys[i] - 8.4).toFixed(1)}" text-anchor="middle"
+        font-size="8" font-weight="600" fill="oklch(22.8% 0.018 42)"
+        font-family="var(--font-body)" style="font-variant-numeric:tabular-nums">${vals[i]}kg</text>
+    </g>`;
+  }).join('');
+
+  // Dated x-axis — first, middle, last
+  const axisIdxs = [...new Set([0, Math.floor((weeks.length - 1) / 2), weeks.length - 1])];
+  const axis = axisIdxs.map(i =>
+    `<text x="${xs[i].toFixed(1)}" y="${H - 5}" text-anchor="middle" font-size="8.5"
+      fill="oklch(60% 0.018 55)" font-family="var(--font-body)">${weeks[i].dateLabel}</text>`).join('');
+
+  const chartSVG = hasData
+    ? `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px;display:block;overflow:visible">
+        <defs>
+          <linearGradient id="mgArea" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="oklch(58.5% 0.210 32 / 0.13)"/>
+            <stop offset="100%" stop-color="oklch(58.5% 0.210 32 / 0.01)"/>
+          </linearGradient>
+        </defs>
+        <line x1="${pad.l}" y1="${(pad.t + cH).toFixed(1)}" x2="${(W - pad.r).toFixed(1)}" y2="${(pad.t + cH).toFixed(1)}"
+          stroke="oklch(72% 0.030 60 / 0.25)" stroke-width="0.75"/>
+        <path class="mg-area-draw" d="${areaPath}" fill="url(#mgArea)"/>
+        <polyline class="mg-line-draw" pathLength="1" points="${linePts}" fill="none"
+          stroke="oklch(58.5% 0.210 32 / 0.75)" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round"/>
+        ${dots}${chips}${axis}
+      </svg>`
+    : `<p class="mg-empty">Log two weeks of training to see this curve.</p>`;
+
+  // Driver insight — which lift is moving this index
+  const driverHTML = driver
+    ? `<div class="mg-driver">Driven by <strong>${driver.name}</strong>${
+        driver.delta !== null ? ` <span class="${driver.delta >= 0 ? 'mg-driver-up' : 'mg-driver-down'}">${driver.delta >= 0 ? '+' : ''}${driver.delta}kg e1RM</span>` : ''
+      }</div>`
+    : '';
+
+  // Muscle switcher chips — jump between muscles without closing
+  const switcher = `<div class="mg-switcher">${MG_MUSCLES.map(m =>
+    `<button class="mg-chip${m === muscle ? ' active' : ''}" onclick="switchMuscleGraph('${m}')">${m}</button>`
+  ).join('')}</div>`;
+
+  document.getElementById('muscle-graph-content').innerHTML = `
+    <div class="mg-head">
+      <div>
+        <div class="mg-muscle-title">${muscle}</div>
+        <div class="mg-meta">e1RM · Epley · ${numWeeks} weeks</div>
+      </div>
+      ${deltaBadge}
+    </div>
+    ${switcher}
+    <div class="mg-chart-wrap">${chartSVG}</div>
+    ${driverHTML}
+    <div class="mg-foot">
+      <div class="mg-range">
+        <button class="mg-range-btn${numWeeks === 5 ? ' active' : ''}"  onclick="setMuscleGraphRange(5)">5W</button>
+        <button class="mg-range-btn${numWeeks === 12 ? ' active' : ''}" onclick="setMuscleGraphRange(12)">12W</button>
+      </div>
+      <div class="mg-now">${thisWk > 0 ? `now <strong>${thisWk}kg</strong>` : ''}${peak > 0 && peak !== thisWk ? ` · peak <strong>${peak}kg</strong>` : ''}</div>
+    </div>`;
+
+  // ── Scrubbing — drag a finger across the chart, the data follows ──────────
+  if (hasData) {
+    const wrap = document.querySelector('#muscle-graph-content .mg-chart-wrap');
+    if (wrap) {
+      wrap.style.position = 'relative';
+      const tip = document.createElement('div');
+      tip.className = 'mg-scrub-tip';
+      wrap.appendChild(tip);
+      let lastIdx = -1;
+      const onMove = (clientX) => {
+        const r = wrap.getBoundingClientRect();
+        const relX = (clientX - r.left) / r.width * W;
+        let best = -1, bd = 1e9;
+        xs.forEach((x, i) => {
+          if (vals[i] > 0) { const d = Math.abs(x - relX); if (d < bd) { bd = d; best = i; } }
+        });
+        if (best >= 0 && best !== lastIdx) {
+          lastIdx = best;
+          haptic('tick');
+          tip.textContent = `${weeks[best].dateLabel} · ${vals[best]}kg`;
+          tip.style.left = Math.min(Math.max((xs[best] / W) * 100, 15), 85) + '%';
+          tip.classList.add('on');
+        }
+      };
+      wrap.addEventListener('touchstart', e => onMove(e.touches[0].clientX), { passive: true });
+      wrap.addEventListener('touchmove',  e => onMove(e.touches[0].clientX), { passive: true });
+      const end = () => { tip.classList.remove('on'); lastIdx = -1; };
+      wrap.addEventListener('touchend', end);
+      wrap.addEventListener('touchcancel', end);
+    }
+  }
 }
 
 
-// ── Dedicated muscle overlay close — fixes guard bug (was delegating to graph-backdrop check) ──
+// ── Dedicated muscle overlay close — back-gesture aware ──────────────────────
 function closeMuscleGraph(e) {
   const ov = document.getElementById('muscle-graph-overlay');
   // Allow close from: the ✕ button (no event), or tap directly on the overlay backdrop
   if (e && e.target !== ov) return;
+  if (history.state && history.state.overlay === 'muscle') {
+    try { history.back(); return; } catch(err) {}
+  }
+  _closeMuscleGraphDom();
+}
+
+function _closeMuscleGraphDom() {
+  const ov = document.getElementById('muscle-graph-overlay');
   if (ov) {
     ov.classList.remove('visible');
     setTimeout(() => { ov.style.display = 'none'; }, 320);
   }
   _clearSilhouetteFocus();
 }
+
+// Swipe-down dismisses the muscle panel — same physics as the sheets
+(function initMusclePanelDrag() {
+  const panel = document.getElementById('muscle-graph-panel');
+  if (!panel) return;
+  let sy = 0, cy = 0, drag = false;
+  panel.addEventListener('touchstart', (e) => {
+    if (e.target.closest('button')) return;
+    drag = true; sy = cy = e.touches[0].clientY;
+    panel.style.transition = 'none';
+  }, { passive: true });
+  panel.addEventListener('touchmove', (e) => {
+    if (!drag) return;
+    cy = e.touches[0].clientY;
+    let dy = cy - sy;
+    if (dy < 0) dy = -Math.pow(-dy, 0.7);
+    panel.style.transform = `translateY(${Math.max(dy, -20)}px)`;
+  }, { passive: true });
+  const end = () => {
+    if (!drag) return;
+    drag = false;
+    const dy = cy - sy;
+    panel.style.transition = '';
+    panel.style.transform = '';
+    if (dy > 90) { haptic('tick'); closeMuscleGraph(); }
+  };
+  panel.addEventListener('touchend', end);
+  panel.addEventListener('touchcancel', end);
+})();
 
 function _clearSilhouetteFocus() {
   const totemEl = document.querySelector('.premium-totem-container');
@@ -5264,26 +5996,56 @@ function renderHome() {
     <div class="premium-totem-container">
       ${typeof buildSilhouetteSVG === 'function' ? buildSilhouetteSVG(targets, actuals, checkWeekComplete()) : ''}
     </div>
+    <div class="totem-legend">
+      <span><span class="tl-dot tl-behind"></span>behind</span>
+      <span><span class="tl-dot tl-track"></span>on track</span>
+      <span><span class="tl-dot tl-done"></span>complete</span>
+    </div>
 
     <div class="premium-metrics-strip">
       <div class="premium-metrics-grid">
         <div class="metric-item">
           <svg viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
-          streak <span>${streak}</span>
+          streak <span data-count="${streak}">${streak}</span>
         </div>
         <span style="opacity:0.15;font-style:normal;">│</span>
         <div class="metric-item">
           <svg viewBox="0 0 24 24"><path d="M6.5 6.5A2.5 2.5 0 0 1 9 4h0a2.5 2.5 0 0 1 2.5 2.5V8"/><path d="M14.5 8V6.5A2.5 2.5 0 0 1 17 4h0a2.5 2.5 0 0 1 2.5 2.5v4A8.5 8.5 0 0 1 11 19h-1a8 8 0 0 1-8-8v-1.5A2.5 2.5 0 0 1 4.5 7H5a2.5 2.5 0 0 1 2.5 2.5V11"/><path d="M11.5 8H14"/></svg>
-          complete <span>${volPct}%</span>
+          complete <span data-count="${volPct}" data-suffix="%">${volPct}%</span>
         </div>
       </div>
     </div>
 
     ${resumeHTML}
 
-    <button class="premium-action-pill" onclick="${ctaOnclick}">
-      START ${nextSessionName}
-    </button>`;
+    ${ns && ns.session ? (() => {
+      // Boarding pass — one glance answers "what am I walking into"
+      const manifest = ns.session.exercises.slice(0, 4).map(ex =>
+        `<div class="bc-ex"><span>${stripSuperset(ex.name)}</span><span class="bc-sets">${ex.workingSets || 3} sets</span></div>`).join('');
+      const more = ns.session.exercises.length > 4
+        ? `<div class="bc-more">+ ${ns.session.exercises.length - 4} more</div>` : '';
+      const fb = ST.fitbit;
+      let chip = '';
+      if (fb && fb.connected && fb.readinessScore !== null && fb.readinessScore !== undefined) {
+        const r = fb.readinessScore;
+        const cls = r >= 80 ? ' bc-ready-high' : (r < 65 ? ' bc-ready-low' : '');
+        const word = r >= 80 ? 'primed' : (r < 65 ? 'go lighter' : 'steady');
+        chip = `<div class="bc-chip${cls}">readiness ${r} · ${word}</div>`;
+      } else if (ns.avgDur) {
+        chip = `<div class="bc-chip">~${Math.round(ns.avgDur / 60)} min avg</div>`;
+      }
+      return `<div class="boarding-card">
+        <div class="bc-top">
+          <div>
+            <div class="bc-label">Next Session</div>
+            <div class="bc-name">${ns.session.name}</div>
+          </div>
+          ${chip}
+        </div>
+        <div class="bc-manifest">${manifest}${more}</div>
+        <button class="premium-action-pill" onclick="${ctaOnclick}">START ${nextSessionName}</button>
+      </div>`;
+    })() : `<button class="premium-action-pill" onclick="${ctaOnclick}">CHOOSE A PROGRAM</button>`}`;
 
   // ── Silhouette interactive layer ─────────────────────────────────────────────
   requestAnimationFrame(() => {
@@ -5325,6 +6087,14 @@ function renderHome() {
       if (!muscleEl) _lastHapticEl = null;
     }, { passive: true });
   });
+
+  // Launch awakening + stat tickers — once per app launch, never on re-render
+  if (!ST._homeTicked) {
+    ST._homeTicked = true;
+    container.classList.add('awaken');
+    setTimeout(() => container.classList.remove('awaken'), 1100);
+    requestAnimationFrame(() => tickStats(container));
+  }
 }
 
 function renderProg(data={}) {
@@ -5587,15 +6357,19 @@ function renderWorkout() {
     const barbell = isBarbell(name);
     const cueAvail = !!FORM_CUES[normalizeEx(name)];
     const travel = ST.travelMode && TRAVEL_MAP[normalizeEx(name)];
-    const displayName = travel ? travel.name : name;
+    const displayName = liveExName(key, ex);
+    const subbed = !travel && ST.workoutSubs && ST.workoutSubs[key];
     const loggedSets = ST.workoutSets[key] || [];
 
     // Sets count for this exercise
     const totalSets = ex.workingSets || 3;
     const reps = ex.reps || '8–10';
 
-    // Last performance (pre-fill)
-    const lastPerf = getLastPerformance(name);
+    // Last performance (pre-fill) — looked up by the EFFECTIVE exercise
+    // identity so substituted/travel exercises pull THEIR history, not the
+    // original slot's.
+    const lastPerfFull = getLastPerformanceFull(displayName);
+    const lastPerf = lastPerfFull ? lastPerfFull.sets : null;
 
     // Weight suggestion for new exercises
     let suggestion = null;
@@ -5624,8 +6398,10 @@ function renderWorkout() {
     for (let si = 0; si < totalSets; si++) {
       const logged = loggedSets[si];
       const lastSet = lastPerf && (lastPerf[si] != null ? lastPerf[si] : lastPerf[lastPerf.length - 1]);
-      const preW = logged ? logged.w : (lastSet != null ? lastSet.w : '');
-      const preR = logged ? logged.r : (lastSet != null ? lastSet.r : '');
+      // Draft values (typed but not checkmarked) outrank prefill — zero loss on reload
+      const draft = !logged && ST.workoutDrafts && ST.workoutDrafts[key + '-' + si];
+      const preW = logged ? logged.w : (draft && draft.w !== '' ? draft.w : (lastSet != null ? lastSet.w : ''));
+      const preR = logged ? logged.r : (draft && draft.r !== '' ? draft.r : (lastSet != null ? lastSet.r : ''));
       const isLastSet = si === totalSets - 1;
       const tech = isLastSet && ex.lastSetTechnique ? `<span class="technique-badge">${ex.lastSetTechnique}</span>` : '';
       const isLogged = !!logged;
@@ -5650,20 +6426,18 @@ function renderWorkout() {
       setRows += `
       <div class="set-row" id="setrow-${key}-${si}">
         <div class="set-num">${si+1}</div>
-        <input class="set-input${isLogged?' logged':''}" id="wi-${key}-${si}" type="number" inputmode="decimal"
-          value="${preW}" placeholder="kg" min="0" step="0.5"
-          enterkeyhint="next"
-          onclick="this.select()"
-          onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('ri-${key}-${si}').focus();document.getElementById('ri-${key}-${si}').select();}"
+        <input class="set-input${isLogged?' logged':''}" id="wi-${key}-${si}" type="text" inputmode="none"
+          value="${preW}" placeholder="kg" autocomplete="off"
+          onclick="openNumpad(this,'${key}',${si},${i},'w')"
+          oninput="markDraft('${key}',${si})"
           ${barbell?`onfocus="showPlate('${key}',${si})" onblur="hidePlate('${key}',${si})"`:''}>
         <div class="set-sep">×</div>
-        <input class="set-input${isLogged?' logged':''}" id="ri-${key}-${si}" type="number" inputmode="numeric"
-          value="${preR}" placeholder="reps" min="0"
-          enterkeyhint="done"
-          onclick="this.select()"
-          onkeydown="if(event.key==='Enter'){event.preventDefault();logSet('${key}',${si},${i});}">
+        <input class="set-input${isLogged?' logged':''}" id="ri-${key}-${si}" type="text" inputmode="none"
+          value="${preR}" placeholder="reps" autocomplete="off"
+          onclick="openNumpad(this,'${key}',${si},${i},'r')"
+          oninput="markDraft('${key}',${si})">
         <button class="set-log-btn${isLogged?' logged':''}" onclick="${isLogged ? `unlogSet('${key}',${si},${i})` : `logSet('${key}',${si},${i})`}"
-          >${isLogged ? '✓' : '→'}</button>
+          >${isLogged ? checkSVG() : '→'}</button>
       </div>
       ${trendHtml}
       ${tech ? `<div style="padding-left:30px;margin-bottom:6px">${tech}</div>` : ''}
@@ -5674,16 +6448,19 @@ function renderWorkout() {
     const wuKey = `${key}_wu`;
     const wuDismissed = ST.dismissedWarmups.has(normalizeEx(name));
     const wuLogged = ST.workoutSets[wuKey] && ST.workoutSets[wuKey][0];
-    const wuPreW = wuLogged ? wuLogged.w : (lastPerf && lastPerf[0] ? Math.round((lastPerf[0].w || 0) * 0.5) : '');
+    const wuDraft = !wuLogged && ST.workoutDrafts && ST.workoutDrafts[key + '-wu'];
+    const wuPreW = wuLogged ? wuLogged.w : (wuDraft && wuDraft.w !== '' ? wuDraft.w : (lastPerf && lastPerf[0] ? Math.round((lastPerf[0].w || 0) * 0.5) : ''));
+    const wuPreR = wuLogged ? wuLogged.r : (wuDraft && wuDraft.r !== '' ? wuDraft.r : '');
     const warmupRowHtml = (!wuDismissed) ? `
       <div class="warmup-row" id="wurow-${key}">
         <span class="warmup-label">warm-up</span>
-        <input class="warmup-input" id="wuwi-${key}" type="number" inputmode="decimal"
-          value="${wuPreW}" placeholder="kg" min="0" step="0.5" onclick="this.select()">
+        <input class="warmup-input" id="wuwi-${key}" type="text" inputmode="none"
+          value="${wuPreW}" placeholder="kg" autocomplete="off"
+          onclick="openNumpad(this,'${key}',0,${i},'w',true)" oninput="markDraftWu('${key}')">
         <span class="warmup-sep">×</span>
-        <input class="warmup-input" id="wuri-${key}" type="number" inputmode="numeric"
-          value="${wuLogged ? wuLogged.r : ''}" placeholder="reps" min="0" onclick="this.select()"
-          onkeydown="if(event.key==='Enter'){event.preventDefault();logWarmup('${key}');}">
+        <input class="warmup-input" id="wuri-${key}" type="text" inputmode="none"
+          value="${wuPreR}" placeholder="reps" autocomplete="off"
+          onclick="openNumpad(this,'${key}',0,${i},'r',true)" oninput="markDraftWu('${key}')">
         <button class="warmup-dismiss" onclick="dismissWarmup(event,'${key}','${normalizeEx(name)}')" title="Remove warm-up">✕</button>
       </div>` : '';
     const warmupText = '';
@@ -5698,8 +6475,9 @@ function renderWorkout() {
       <div class="ex-card-header" onclick="toggleCard('${key}')">
         <div class="ex-card-header-left">
           <div class="ex-name">${displayName} ${isCompleted ? '<span class="ex-check">✓</span>' : ''}</div>
+          ${subbed ? `<div class="ex-sub-note">⇄ swapped from ${name}</div>` : ''}
           ${muscleBadgeHtml(muscle)}
-          ${lastPerf ? `<div class="ex-last-perf">Last: ${lastPerf.slice(0,3).map((s,idx)=>`${idx+1}×${s.r}@${s.w}kg`).join(' · ')}</div>` : ''}
+          ${lastPerf ? `<div class="ex-last-perf">${lastPerf[lastPerf.length-1].w}kg × ${lastPerf[lastPerf.length-1].r} · ${relDay(lastPerfFull.endTime)}</div>` : ''}
           <div class="ex-meta">${totalSets} × ${travel ? travel.reps : reps} · ${formatDuration(restSec)} rest</div>
         </div>
         <div class="ex-card-actions">
@@ -5774,7 +6552,7 @@ function renderWorkout() {
     </div>` : ''}
   </div>
   <div class="exercise-list">${exCards}</div>
-  <div style="padding:16px">
+  <div style="padding:16px 16px calc(var(--nav-h) + 28px)">
     <button class="btn btn-primary" onclick="shimmerBtn(this);setTimeout(()=>finishWorkout(),220)">Finish Workout</button>
   </div>`;
 
@@ -5803,13 +6581,38 @@ function renderWorkout() {
 
 function renderPlatePopover(totalKg) {
   const plates = plateCalc(parseFloat(totalKg) || 0);
-  if (!plates || plates.length === 0) return `<div class="plate-popover"><div class="plate-title">Plate Calculator · Bar only</div></div>`;
-  const counts = {};
-  for (const p of plates) counts[p] = (counts[p]||0) + 1;
-  const chips = Object.entries(counts).map(([p,n]) =>
-    `<div class="plate-chip${p==25||p==20?' orange':''}">${n>1?n+'×':''}${p}kg</div>`
-  ).join('');
-  return `<div class="plate-popover"><div class="plate-title">Each side · 20kg bar</div><div class="plate-row">${chips}</div></div>`;
+  if (!plates || plates.length === 0) return `<div class="plate-popover"><div class="plate-title">20kg bar · no plates</div></div>`;
+  // Drawn to scale — height & width proportional to the real iron
+  const GEO = {
+    25:   [46, 9,  'oklch(58.5% 0.210 32)'],
+    20:   [42, 9,  'oklch(28% 0.018 45)'],
+    15:   [36, 8,  'oklch(42% 0.025 55)'],
+    10:   [30, 7,  'oklch(54% 0.030 60)'],
+    5:    [24, 6,  'oklch(64% 0.030 60)'],
+    2.5:  [18, 5,  'oklch(71% 0.030 60)'],
+    1.25: [14, 4,  'oklch(77% 0.025 65)'],
+  };
+  const H = 60, midY = H / 2;
+  let x = 16;
+  let svgPlates = '';
+  for (const p of plates) {
+    const [ph, pw, col] = GEO[p] || [16, 5, 'oklch(72% 0.03 60)'];
+    svgPlates += `<rect x="${x}" y="${(midY - ph / 2).toFixed(1)}" width="${pw}" height="${ph}" rx="2.2" fill="${col}"/>
+      <rect x="${x + 1.2}" y="${(midY - ph / 2 + 2).toFixed(1)}" width="1.6" height="${ph - 4}" rx="0.8" fill="rgba(255,255,255,0.14)"/>`;
+    x += pw + 2.5;
+  }
+  const W = Math.max(x + 16, 132);
+  const perSide = plates.reduce((a, b) => a + b, 0);
+  const labels = plates.map(p => Number.isInteger(p) ? p : p.toFixed(2).replace(/0+$/,'').replace(/\.$/,'')).join(' · ');
+  return `<div class="plate-popover">
+    <div class="plate-title">Each side · 20kg bar</div>
+    <svg viewBox="0 0 ${W} ${H}" style="width:${W}px;max-width:100%;height:${H}px;display:block;margin:4px auto 0" aria-hidden="true">
+      <rect x="0" y="${midY - 3}" width="${W}" height="6" rx="3" fill="oklch(82% 0.012 70)"/>
+      <rect x="8" y="${midY - 7}" width="5" height="14" rx="2" fill="oklch(68% 0.02 70)"/>
+      ${svgPlates}
+    </svg>
+    <div class="plate-total"><strong>${Number.isInteger(perSide) ? perSide : perSide.toFixed(1)}kg</strong> per side · ${labels}</div>
+  </div>`;
 }
 
 function calcVolume() {
@@ -5963,20 +6766,25 @@ function logSet(key, si, exIdx) {
   }
 
   if (!ST.workoutSets[key]) ST.workoutSets[key] = [];
-  ST.workoutSets[key][si] = { w, r, ts: Date.now() };
+  // _name stamped at write time — exercise identity is a stored fact, never a
+  // derived guess. Travel-swap and substitution aware.
+  ST.workoutSets[key][si] = { w, r, ts: Date.now(), _name: liveExName(key, ex) };
 
-  // Auto-save
-  autoSave();
+  // Draft for this set is now committed — clear it
+  if (ST.workoutDrafts) delete ST.workoutDrafts[key + '-' + si];
+
+  // Synchronous save — on disk before the ripple finishes
+  saveNow();
 
   // Haptic
-  if (navigator.vibrate) navigator.vibrate(20);
+  haptic('set');
   playSound('set');
 
   // Update UI for this set row
   wi.classList.add('logged');
   ri.classList.add('logged');
   const btn = wi.closest('.set-row') && wi.closest('.set-row').querySelector('.set-log-btn');
-  if (btn) { btn.classList.add('logged'); btn.textContent = '✓'; }
+  if (btn) { btn.classList.add('logged'); btn.innerHTML = checkSVG(); }
 
   // Ripple
   const row = document.getElementById('setrow-' + key + '-' + si);
@@ -5999,6 +6807,7 @@ function logSet(key, si, exIdx) {
   if (doneCount >= totalSets) {
     // Auto-collapse with delay
     ST.completedCards.add(key);
+    haptic('exercise');
     setTimeout(() => {
       ST.expandedCards.delete(key);
       const card = document.getElementById('excard-' + key);
@@ -6006,7 +6815,7 @@ function logSet(key, si, exIdx) {
         card.classList.remove('expanded');
         card.classList.add('completed');
         const nameEl = card.querySelector('.ex-name');
-        if (nameEl) nameEl.innerHTML = stripSuperset(ex.name) + ' <span class="ex-check">✓</span>';
+        if (nameEl) nameEl.innerHTML = liveExName(key, ex) + ' <span class="ex-check">✓</span>';
       }
       // Update progress bar + badge
       const segs = document.querySelectorAll('.wh-seg');
@@ -6058,7 +6867,7 @@ function logSet(key, si, exIdx) {
       const nextExIdx = exIdx + 1;
       if (nextExIdx < sess.exercises.length) {
         const nextEx = sess.exercises[nextExIdx];
-        const nextName = stripSuperset(nextEx.name);
+        const nextName = liveExName(`${sess.id}_${nextExIdx}`, nextEx);
         const nextLast = getLastPerformance(nextName);
         const nextW = nextLast && nextLast[0] ? nextLast[0].w + 'kg' : '?';
         nextText = 'Exercise done ✓  Up next: ' + nextName + ' · ' + nextW;
@@ -6092,9 +6901,11 @@ function logWarmup(key) {
   if (!r) { wuri.focus(); return; }
   const wuKey = key + '_wu';
   if (!ST.workoutSets[wuKey]) ST.workoutSets[wuKey] = [];
+  // No _name on warm-ups — they must stay invisible to the prefill engine
   ST.workoutSets[wuKey][0] = { w, r, ts: Date.now() };
-  autoSave();
-  if (navigator.vibrate) navigator.vibrate(15);
+  if (ST.workoutDrafts) delete ST.workoutDrafts[key + '-wu'];
+  saveNow();
+  haptic('tick');
   // Visual confirmation — briefly tint the row
   const row = document.getElementById('wurow-' + key);
   if (row) {
@@ -6109,7 +6920,8 @@ function dismissWarmup(e, key, exNameNorm) {
   e.stopPropagation();
   ST.dismissedWarmups.add(exNameNorm);
   delete ST.workoutSets[key + '_wu'];
-  autoSave();
+  if (ST.workoutDrafts) delete ST.workoutDrafts[key + '-wu'];
+  saveNow();
   const row = document.getElementById('wurow-' + key);
   if (row) { row.style.opacity = '0'; row.style.maxHeight = '0'; row.style.margin = '0'; row.style.padding = '0'; setTimeout(() => row.remove(), 260); }
 }
@@ -6117,7 +6929,7 @@ function dismissWarmup(e, key, exNameNorm) {
 function unlogSet(key, si, exIdx) {
   if (!ST.workoutSets[key]) return;
   ST.workoutSets[key][si] = null;
-  autoSave();
+  saveNow();
 
   // Update UI
   const wi = document.getElementById('wi-' + key + '-' + si);
@@ -6225,6 +7037,7 @@ function saveSessionNote(key, nameKey, text) {
   const notes = getNotes();
   notes[nameKey] = text.trim();
   saveNotes(notes);
+  autoSave(); // notes ride the live snapshot too — survive any reload
   // Update icon state
   const btn = document.getElementById('notebtn-' + key);
   if (btn) btn.classList.toggle('has-note', text.trim().length > 0);
@@ -6261,8 +7074,10 @@ function showSubs(e, key, exIdx) {
   let nippardHtml = nippardSubs.map(s => buildSubCard(s, 'Gym', key, exIdx)).join('');
   let libHtml = libSubs.slice(0, 8).map(s => buildSubCard(s.name, s.tag, key, exIdx)).join('');
 
+  const activeSub = ST.workoutSubs && ST.workoutSubs[key];
   openSheet(`
     <div class="bs-title">Substitutions for ${name}</div>
+    ${activeSub ? `<button class="btn btn-sheet-secondary" style="margin-bottom:14px" onclick="revertSubstitution('${key}')">↩ Back to ${name}</button>` : ''}
     ${nippardSubs.length ? `<div class="bs-section-lbl">Nippard Recommends</div>
     <div style="margin-bottom:12px">${nippardHtml}</div>` : ''}
     <div class="bs-section-lbl">More Options</div>
@@ -6302,14 +7117,25 @@ function toggleSubCard(id) {
 }
 
 function useSubstitution(key, exIdx, subName) {
-  // Record this substitution in notes
+  // Session-scoped swap — the card, prefill, and _name stamping all follow.
+  // Recorded in notes for the permanent record too.
   const prog = PROGRAMS.find(p => p.id === ST.currentProgram);
   const sess = prog && prog.sessions.find(s => s.id === ST.currentSession);
   if (!sess) return;
   const ex = sess.exercises[exIdx];
+  if (!ST.workoutSubs) ST.workoutSubs = {};
+  ST.workoutSubs[key] = subName;
   const notes = getNotes();
   notes[normalizeEx(stripSuperset(ex.name))] = 'Using: ' + subName;
   saveNotes(notes);
+  saveNow();
+  closeSheet();
+  renderWorkout();
+}
+
+function revertSubstitution(key) {
+  if (ST.workoutSubs) delete ST.workoutSubs[key];
+  saveNow();
   closeSheet();
   renderWorkout();
 }
@@ -6319,45 +7145,114 @@ function openSheet(html) {
   document.getElementById('sheet-overlay').classList.add('visible');
   document.getElementById('bottom-sheet').classList.add('visible');
   document.body.style.overflow = 'hidden';
+  // Back gesture closes the sheet, not the app
+  try { history.pushState({ screen: ST.screen, overlay: 'sheet' }, '', '#sheet'); } catch(e) {}
 }
 
 function closeSheet() {
+  // If our overlay state is on the stack, unwind via back so history stays clean
+  if (history.state && history.state.overlay === 'sheet') {
+    try { history.back(); return; } catch(e) {}
+  }
+  __closeSheetDom();
+}
+
+function __closeSheetDom() {
   document.getElementById('sheet-overlay').classList.remove('visible');
   document.getElementById('bottom-sheet').classList.remove('visible');
   document.body.style.overflow = '';
   ST.openSubCard = null;
 }
 
+// ── Sheet drag-to-dismiss — iOS physics: follow the finger, rubber-band up,
+//    release past threshold dismisses, otherwise springs home. ──────────────
+(function initSheetDrag() {
+  const sheet = document.getElementById('bottom-sheet');
+  if (!sheet) return;
+  let startY = 0, curY = 0, dragging = false;
+  sheet.addEventListener('touchstart', (e) => {
+    const content = document.getElementById('sheet-content');
+    // Drag starts from the handle zone, or anywhere once content is at scroll top
+    if (content && content.scrollTop > 2 && !e.target.closest('.bs-handle')) return;
+    if (e.target.closest('input, textarea, button')) return;
+    dragging = true; startY = curY = e.touches[0].clientY;
+    sheet.style.transition = 'none';
+  }, { passive: true });
+  sheet.addEventListener('touchmove', (e) => {
+    if (!dragging) return;
+    curY = e.touches[0].clientY;
+    let dy = curY - startY;
+    if (dy < 0) dy = -Math.pow(-dy, 0.72);   // rubber-band resistance upward
+    sheet.style.transform = `translateY(${Math.max(dy, -26)}px)`;
+  }, { passive: true });
+  const release = () => {
+    if (!dragging) return;
+    dragging = false;
+    const dy = curY - startY;
+    sheet.style.transition = '';
+    sheet.style.transform = '';
+    if (dy > 88) { haptic('tick'); closeSheet(); }
+  };
+  sheet.addEventListener('touchend', release);
+  sheet.addEventListener('touchcancel', release);
+})();
+
 // ── Workout flow ──────────────────────────────────────────────────────────────
+// Three-way guard. The old code silently clobbered an in-progress workout when
+// you tapped the SAME session card — total loss of logged sets. Never again:
+//  · no unfinished workout            → start fresh
+//  · unfinished, same session         → Resume / Restart sheet (no silent reset)
+//  · unfinished, different session    → themed confirm; archives sets first
 function startWorkoutFromHome(progId, sessId) {
   const existing = LS.get('dcrgym_current_workout');
-  if (existing && (existing.programId !== progId || existing.sessionId !== sessId)) {
-    if (!confirm('You have an unfinished workout. Start a new one?')) return;
-    // Save any logged sets from the abandoned workout to history so pre-fill works next time
-    const hasSets = existing.sets && Object.values(existing.sets).some(arr => Array.isArray(arr) && arr.some(s => s && s.r > 0));
-    if (hasSets) {
-      const hist = getHistory();
-      hist.push({
-        id: (existing.startTime || Date.now()).toString(),
-        programId: existing.programId,
-        sessionId: existing.sessionId,
-        sessionName: existing.sessionName || '',
-        startTime: existing.startTime || Date.now(),
-        endTime: Date.now(),
-        duration: existing.durationSecs || 0,
-        travelMode: existing.travelMode || false,
-        sets: existing.sets,
-      });
-      saveHistory(hist);
-    }
-    LS.remove('dcrgym_current_workout');
+  const hasLogged = existing && existing.sets &&
+    Object.values(existing.sets).some(arr => Array.isArray(arr) && arr.some(s => s && s.r > 0));
+
+  if (existing && existing.programId === progId && existing.sessionId === sessId && hasLogged) {
+    confirmSheet({
+      title: 'Workout in progress',
+      body: `You have an unfinished <strong>${existing.sessionName || 'session'}</strong> with logged sets. Pick up where you left off?`,
+      confirmLabel: 'Resume workout',
+      secondaryLabel: 'Restart from zero',
+      cancelLabel: 'Not now',
+      onConfirm: () => resumeWorkout(),
+      onSecondary: () => {
+        archiveWorkoutToHistory(existing);
+        LS.remove('dcrgym_current_workout');
+        beginWorkout(progId, sessId);
+      },
+    });
+    return;
   }
+
+  if (existing && (existing.programId !== progId || existing.sessionId !== sessId) && hasLogged) {
+    confirmSheet({
+      title: 'Unfinished workout',
+      body: `Your logged sets from <strong>${existing.sessionName || 'the previous session'}</strong> will be saved to history before starting fresh.`,
+      confirmLabel: 'Start new workout',
+      cancelLabel: 'Keep current',
+      onConfirm: () => {
+        archiveWorkoutToHistory(existing);
+        LS.remove('dcrgym_current_workout');
+        beginWorkout(progId, sessId);
+      },
+    });
+    return;
+  }
+
+  if (existing) LS.remove('dcrgym_current_workout'); // empty shell — nothing to lose
+  beginWorkout(progId, sessId);
+}
+
+function beginWorkout(progId, sessId) {
   ST.currentProgram = progId;
   ST.currentSession = sessId;
   ST.travelMode = false;
   ST.travelLocked = false;
   ST.workoutSets   = {};
   ST.workoutNotes  = {};   // reset session-scoped notes for fresh workout
+  ST.workoutDrafts = {};
+  ST.workoutSubs   = {};
   ST.expandedCards = new Set();
   ST.completedCards = new Set();
   ST.durationSecs = 0;
@@ -6374,7 +7269,7 @@ function startWorkoutFromHome(progId, sessId) {
   if (navigator.wakeLock) {
     navigator.wakeLock.request('screen').then(wl => { ST.wakeLock = wl; }).catch(() => {});
   }
-  autoSave();
+  saveNow();
   Maps('workout');
 }
 
@@ -6384,6 +7279,9 @@ function resumeWorkout() {
   ST.currentProgram = saved.programId;
   ST.currentSession = saved.sessionId;
   ST.workoutSets = saved.sets || {};
+  ST.workoutDrafts = saved.drafts || {};   // typed-but-unlogged values come back
+  ST.workoutSubs   = saved.subs   || {};   // session substitutions come back
+  ST.workoutNotes  = saved.notes  || {};   // session notes come back
   ST.travelMode = saved.travelMode || false;
   ST.travelLocked = saved.travelLocked || false;
   ST.workoutStart = Date.now() - (saved.durationSecs || 0) * 1000;
@@ -6399,60 +7297,83 @@ function resumeWorkout() {
     if (pd) pd.textContent = formatDuration(ST.durationSecs);
   }, 1000);
   if (navigator.wakeLock) navigator.wakeLock.request('screen').then(wl => ST.wakeLock = wl).catch(()=>{});
-  // Restore rest timer
+  // Restore rest timer — island reappears with correct ring progress
   const savedEnd = LS.get('dcrgym_rest_end');
   if (savedEnd && savedEnd > Date.now()) {
     ST.restActive = true;
+    ST.restExpired = false;
     ST.restEndTime = savedEnd;
+    ST.restDuration = LS.get('dcrgym_rest_dur', 0) || 0;
     ST.restNextText = LS.get('dcrgym_rest_next') || '';
+    document.body.classList.add('rest-active');
     if (ST.restTicker) clearInterval(ST.restTicker);
     ST.restTicker = setInterval(tickRest, 250);
+    renderRestIsland();
   }
   Maps('workout');
 }
 
 function discardWorkout() {
-  LS.remove('dcrgym_current_workout');
-  renderHome();
+  const saved = LS.get('dcrgym_current_workout');
+  const hasLogged = saved && saved.sets &&
+    Object.values(saved.sets).some(arr => Array.isArray(arr) && arr.some(s => s && s.r > 0));
+  if (!hasLogged) {
+    LS.remove('dcrgym_current_workout');
+    renderHome();
+    return;
+  }
+  confirmSheet({
+    title: 'Discard workout?',
+    body: 'Your logged sets will be archived to history first — nothing is thrown away.',
+    confirmLabel: 'Discard',
+    destructive: true,
+    onConfirm: () => {
+      archiveWorkoutToHistory(saved);
+      LS.remove('dcrgym_current_workout');
+      renderHome();
+    },
+  });
 }
 
 let _saveTimeout = null;
 function autoSave() {
+  // Debounced variant — high-frequency callers only. Checkmarks use saveNow().
   clearTimeout(_saveTimeout);
-  _saveTimeout = setTimeout(() => {
-    LS.set('dcrgym_current_workout', {
-      programId: ST.currentProgram,
-      sessionId: ST.currentSession,
-      sessionName: (() => { const p=PROGRAMS.find(pp=>pp.id===ST.currentProgram); const s=p&&p.sessions.find(ss=>ss.id===ST.currentSession); return s?s.name:''; })(),
-      sets: ST.workoutSets,
-      travelMode: ST.travelMode,
-      travelLocked: ST.travelLocked,
-      durationSecs: ST.durationSecs,
-      expandedCards: [...ST.expandedCards],
-      completedCards: [...ST.completedCards],
-      startTime: ST.workoutStart,
-    });
-  }, 500);
+  _saveTimeout = setTimeout(saveNow, 400);
 }
 
 function abandonPrompt() {
   // Leave workout without discarding — timer keeps running, pill appears
-  autoSave();
+  saveNow();
   Maps('home');
 }
 
 function cancelWorkout() {
-  if (!confirm('Cancel this workout? All logged sets will be lost.')) return;
-  if (ST.durationTimer) clearInterval(ST.durationTimer);
-  ST.durationTimer = null;
-  if (ST.wakeLock) ST.wakeLock.release().catch(()=>{});
-  cancelRestTimer();
-  LS.remove('dcrgym_current_workout');
-  ST.currentProgram = null; ST.currentSession = null;
-  ST.workoutSets = {}; ST.workoutStart = null; ST.durationSecs = 0;
-  ST.expandedCards = new Set(); ST.completedCards = new Set();
-  ST.travelMode = false; ST.travelLocked = false;
-  Maps('home');
+  const hasLogged = Object.values(ST.workoutSets || {})
+    .some(arr => Array.isArray(arr) && arr.some(s => s && s.r > 0));
+  confirmSheet({
+    title: 'Cancel this workout?',
+    body: hasLogged
+      ? 'Your logged sets will be archived to history first — nothing is thrown away.'
+      : 'Nothing logged yet — the session will simply close.',
+    confirmLabel: 'Cancel workout',
+    cancelLabel: 'Keep training',
+    destructive: true,
+    onConfirm: () => {
+      if (hasLogged) archiveWorkoutToHistory(buildWorkoutPayload());
+      if (ST.durationTimer) clearInterval(ST.durationTimer);
+      ST.durationTimer = null;
+      if (ST.wakeLock) ST.wakeLock.release().catch(()=>{});
+      cancelRestTimer();
+      LS.remove('dcrgym_current_workout');
+      ST.currentProgram = null; ST.currentSession = null;
+      ST.workoutSets = {}; ST.workoutStart = null; ST.durationSecs = 0;
+      ST.workoutDrafts = {}; ST.workoutSubs = {}; ST.workoutNotes = {};
+      ST.expandedCards = new Set(); ST.completedCards = new Set();
+      ST.travelMode = false; ST.travelLocked = false;
+      Maps('home');
+    },
+  });
 }
 
 // ── Post-workout insight engine ───────────────────────────────────────────────
@@ -6552,18 +7473,29 @@ function renderInsightCardHTML(card) {
 }
 
 function finishWorkout() {
-  // Guard: warn if exercises incomplete
+  // Guard: warn if exercises incomplete — themed sheet, not a system dialog
   const prog = PROGRAMS.find(p => p.id === ST.currentProgram);
   const sess = prog && prog.sessions.find(s => s.id === ST.currentSession);
   if (sess) {
     const total = sess.exercises.length;
     const done = sess.exercises.filter((_, i) => ST.completedCards.has(`${sess.id}_${i}`)).length;
     if (done < total) {
-      const remaining = total - done;
-      const msg = `You've only done ${done} of ${total} exercise${total>1?'s':''}. Finish anyway?`;
-      if (!confirm(msg)) return;
+      confirmSheet({
+        title: 'Finish early?',
+        body: `You've completed <strong>${done} of ${total}</strong> exercises. Everything logged so far will be saved.`,
+        confirmLabel: 'Finish workout',
+        cancelLabel: 'Keep training',
+        onConfirm: () => commitWorkout(),
+      });
+      return;
     }
   }
+  commitWorkout();
+}
+
+function commitWorkout() {
+  const prog = PROGRAMS.find(p => p.id === ST.currentProgram);
+  const sess = prog && prog.sessions.find(s => s.id === ST.currentSession);
   if (ST.durationTimer) clearInterval(ST.durationTimer);
   if (ST.wakeLock) ST.wakeLock.release().catch(()=>{});
   cancelRestTimer();
@@ -6586,7 +7518,8 @@ function finishWorkout() {
       const prevSets = prevSame.sets[key] || [];
       const curMax = sets.reduce((m,s)=>Math.max(m,s.w||0),0);
       const prevMax = prevSets.reduce((m,s)=>Math.max(m,s.w||0),0);
-      if (curMax - prevMax > maxGain) { maxGain = curMax - prevMax; biggestGain = { name: stripSuperset(ex.name), gain: maxGain }; }
+      const gainName = (sets.find(s => s && s._name) || {})._name || stripSuperset(ex.name);
+      if (curMax - prevMax > maxGain) { maxGain = curMax - prevMax; biggestGain = { name: gainName, gain: maxGain }; }
     }
   }
 
@@ -6605,6 +7538,8 @@ function finishWorkout() {
   hist.push(entry);
   saveHistory(hist);
   LS.remove('dcrgym_current_workout');
+  ST.workoutDrafts = {};
+  ST.workoutSubs   = {};
   bgSyncToSheets();
 
   // e1RM delta vs previous same session
@@ -6633,6 +7568,8 @@ function finishWorkout() {
 
 // ── Finish screen ─────────────────────────────────────────────────────────────
 function showFinish() {
+  playSound('finish');
+  haptic('finish');
   const s = ST.lastSummary || {};
   const prog = PROGRAMS.find(p => p.id === ST.currentProgram);
   const sess = prog && prog.sessions.find(ss => ss.id === ST.currentSession);
@@ -6704,11 +7641,11 @@ function showFinish() {
     const up = s.e1rmDelta >= 0;
     e1rmBadgeHTML = `
       <div style="margin:0 auto 18px;padding:12px 20px;border-radius:14px;
-        background:${up ? 'oklch(52% 0.18 145 / 0.08)' : 'oklch(55% 0.20 28 / 0.08)'};
-        border:1px solid ${up ? 'oklch(52% 0.18 145 / 0.25)' : 'oklch(55% 0.20 28 / 0.25)'};
+        background:${up ? 'oklch(72.3% 0.190 145 / 0.08)' : 'oklch(48% 0.130 35 / 0.08)'};
+        border:1px solid ${up ? 'oklch(72.3% 0.190 145 / 0.25)' : 'oklch(48% 0.130 35 / 0.25)'};
         text-align:center;max-width:320px">
-        <div style="font-family:'Courier New',monospace;font-size:26px;font-weight:700;
-          color:${up ? 'oklch(52% 0.18 145)' : 'oklch(55% 0.20 28)'};letter-spacing:-0.5px">
+        <div style="font-family:var(--font-body);font-size:26px;font-weight:300;font-variant-numeric:tabular-nums lining-nums;
+          color:${up ? 'var(--green)' : 'var(--terracotta)'};letter-spacing:-0.5px">
           ${up ? '▲' : '▼'} ${up ? '+' : ''}${s.e1rmDelta}%
         </div>
         <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:12px;
@@ -6732,13 +7669,14 @@ function showFinish() {
     ${e1rmBadgeHTML}
     <div class="finish-stats-row">
       <div class="finish-stat"><div class="finish-stat-val">${durText}</div><div class="finish-stat-lbl">Duration</div></div>
-      <div class="finish-stat"><div class="finish-stat-val">${compliancePct}</div><div class="finish-stat-lbl">Compliance</div></div>
+      <div class="finish-stat"><div class="finish-stat-val" ${compliancePct !== '—' ? `data-count="${parseInt(compliancePct)}" data-suffix="%"` : ''}>${compliancePct}</div><div class="finish-stat-lbl">Compliance</div></div>
       <div class="finish-stat"><div class="finish-stat-val" style="font-size:14px;line-height:1.2">${gainText}</div><div class="finish-stat-lbl">${gainLabel.split(' ')[0]}</div></div>
     </div>
     ${prog ? `<div class="finish-plan-table">${tableRows}</div>` : ''}
     <button class="btn btn-primary" style="max-width:360px;width:100%" onclick="dismissFinish()">Back to Home</button>
   `;
   document.body.appendChild(el);
+  requestAnimationFrame(() => tickStats(el));
   launchConfetti(false);
 }
 
@@ -6759,6 +7697,8 @@ const MILESTONE_QUOTES = {
 };
 
 function showMilestone() {
+  playSound('finish');
+  haptic('milestone');
   const n = ST.milestoneN;
   const el = document.createElement('div');
   el.id = 'milestone-screen';
@@ -7068,8 +8008,8 @@ function renderProgressGauges() {
       ${activeArc}
       <text x="50" y="53"
         text-anchor="middle" dominant-baseline="middle"
-        font-family="'Courier New',Courier,monospace"
-        font-size="${fontSize}" font-weight="900"
+        font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+        font-size="${fontSize}" font-weight="300"
         fill="${pctColor}"
         font-variant-numeric="tabular-nums lining-nums"
         letter-spacing="-0.5">${pct}%</text>
@@ -7099,7 +8039,7 @@ function renderProgressGauges() {
         const filled = arc.dataset.filled;
         if (!filled) return;
         setTimeout(() => {
-          arc.style.transition = 'stroke-dasharray 0.85s cubic-bezier(0.4,0,0.2,1)';
+          arc.style.transition = 'stroke-dasharray 0.85s cubic-bezier(0.16,1,0.3,1)';
           arc.setAttribute('stroke-dasharray', filled + ' ' + BM_CIRC);
         }, 60 + i * 28);
       });
@@ -7241,11 +8181,27 @@ function showMuscleDetail(muscle) {
     : p.dot === 'red' ? `${muscle} has been flat for 3+ sessions. Consider pushing intensity or adding a set.`
     : p.dot === 'amber' ? `${muscle} has been flat for 2 sessions. Try adding 2.5kg next time.`
     : `${muscle} is progressing well. Keep it up.`;
+
+  // Recovery footnote — plateaus read differently when sleep/readiness is the culprit
+  let recoveryNote = '';
+  if (p.dot !== 'green' && ST.fitbit && ST.fitbit.connected) {
+    const tr = (ST.fitbit.trailingReadiness || []).filter(v => v !== null && v !== undefined);
+    const avgR = tr.length ? Math.round(tr.reduce((a, b) => a + b, 0) / tr.length) : null;
+    if (avgR !== null && avgR < 70) {
+      recoveryNote = `<div style="margin-top:8px;font-size:12px;color:var(--text-secondary);background:rgba(42,36,33,0.035);border-radius:10px;padding:10px 12px">
+        Recovery context: readiness has averaged <strong>${avgR}</strong> this week — this plateau may be recovery-limited, not effort-limited. Protect sleep before adding load.</div>`;
+    } else if (avgR !== null && avgR >= 80) {
+      recoveryNote = `<div style="margin-top:8px;font-size:12px;color:var(--text-secondary);background:rgba(42,36,33,0.035);border-radius:10px;padding:10px 12px">
+        Recovery context: readiness is averaging <strong>${avgR}</strong> — you're recovered. The plateau is a training signal: add load or a set.</div>`;
+    }
+  }
+
   openSheet(`
     <div class="bs-title">${muscle} Progress</div>
     <div style="font-size:13px;color:var(--muted)">Estimated 1RM (Epley) · 4 weeks</div>
     ${chartSvg}
-    <div style="background:#FFF7ED;border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:12px 14px;font-size:13px;color:#92400E;margin-top:8px">${insight}</div>
+    <div style="background:rgba(240,78,35,0.06);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:12px 14px;font-size:13px;color:var(--text-secondary);margin-top:8px">${insight}</div>
+    ${recoveryNote}
     <div style="margin-top:16px;font-size:13px;color:var(--text-secondary)">Current 1RM estimate: <b>${p.latest > 0 ? p.latest + 'kg' : 'No data'}</b></div>
   `);
 }
@@ -7312,10 +8268,10 @@ function renderAnalysis() {
   const syncTime  = fb.lastSync
     ? new Date(fb.lastSync).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})
     : 'never';
-  const footerTxt    = fb.connected ? `synced ${syncTime}` : '[ connect fitbit ]';
+  const footerTxt    = fb.connected ? `synced ${syncTime}` : '⟳ reconnect health sync';
   const footerAction = fb.connected
     ? `fetchFitbitData(true)`
-    : fb.authUrl ? `window.open('${fb.authUrl}','_blank')` : `Maps('settings')`;
+    : fb.authUrl ? `window.open('${fb.authUrl}','_blank')` : `fetchFitbitData(true)`;
 
   const factorLine = fb.readinessFactor
     ? `<div class="ana-factor-lbl">${fb.readinessFactor}</div>` : '';
@@ -7355,7 +8311,7 @@ function renderAnalysis() {
               fill="none" stroke="${arcColor}" stroke-width="7.5" stroke-linecap="round"
               stroke-dasharray="${fillDash} ${CIRC.toFixed(2)}"
               transform="rotate(-90 ${CX} ${CY})"
-              style="transition:stroke-dasharray 900ms cubic-bezier(0.34,1.1,0.64,1);
+              style="transition:stroke-dasharray 900ms cubic-bezier(0.16,1,0.3,1);
                      filter:drop-shadow(0 0 7px ${arcColor}88)"/>
           </svg>
           <div class="ana-dial-inner">
@@ -7647,13 +8603,15 @@ async function fetchFitbitData(force = false) {
     if (ST.fitbit.fetchedAt === today && ST.fitbit.connected) return;
   }
 
-  // Spin the refresh button
+  // Spin the refresh button + skeleton shimmer on the pods
   const btn = document.querySelector('.ana-refresh-btn') || document.querySelector('#ana-refresh');
   if (btn) {
     btn.style.animation = 'ana-spin 0.9s linear infinite';
     btn.style.opacity   = '0.65';
     btn.disabled        = true;
   }
+  const anaScr = document.getElementById('screen-analysis');
+  if (anaScr) anaScr.classList.add('ana-loading');
 
   console.log('[DCR Gym] Fetching biometrics from:', endpoint);
 
@@ -7662,10 +8620,10 @@ async function fetchFitbitData(force = false) {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     console.log('[DCR Gym] Biometric response:', data);
-    if (data && data.connected === false && data.authUrl) {
-      // Not yet authorized — store the auth URL and re-render so the Connect button appears
+    if (data && data.connected === false) {
+      // Not authorized / no data — surface the reconnect chip, never silent dashes
       ST.fitbit.connected = false;
-      ST.fitbit.authUrl   = data.authUrl;
+      ST.fitbit.authUrl   = data.authUrl || null;
       if (ST.screen === 'analysis') renderAnalysis();
       return;
     }
@@ -7674,6 +8632,8 @@ async function fetchFitbitData(force = false) {
       Object.assign(ST.fitbit, data.fitbit, { connected: true, lastSync: Date.now() });
       LS.set('dcrgym_fitbit', ST.fitbit);
       if (ST.screen === 'analysis') renderAnalysis();
+      // Home boarding-pass readiness chip stays current
+      if (ST.screen === 'home') renderHome();
     }
   } catch(e) {
     console.error('[DCR Gym] Biometric fetch failed:', e.message, endpoint);
@@ -7682,6 +8642,8 @@ async function fetchFitbitData(force = false) {
       btn.style.opacity   = '0.30';
       btn.disabled        = false;
     }
+  } finally {
+    if (anaScr) anaScr.classList.remove('ana-loading');
   }
 }
 
@@ -7755,11 +8717,20 @@ function saveSetting(key, val) {
 }
 
 function clearHistoryConfirm() {
-  if (confirm('Delete all workout history? This cannot be undone.')) {
-    saveHistory([]);
-    renderSettings();
-    alert('History cleared.');
-  }
+  confirmSheet({
+    title: 'Delete all workout history?',
+    body: 'A local backup snapshot is kept and your Sheets copy is untouched — but the in-app history list will be emptied.',
+    confirmLabel: 'Delete history',
+    destructive: true,
+    onConfirm: () => {
+      // Last-good snapshot before the wipe — recoverable, never a true loss
+      const hist = getHistory();
+      if (hist.length > 0) LS.set('dcrgym_history_backup', { at: Date.now(), reason: 'manual-clear', history: hist });
+      saveHistory([]);
+      renderSettings();
+      noticeSheet('History cleared', 'A backup snapshot was saved locally. Use Recover from Settings if you change your mind.');
+    },
+  });
 }
 
 function exportCSV() {
@@ -7794,7 +8765,7 @@ function importStrongCSV(input) {
   reader.onload = e => {
     const text = e.target.result;
     const lines = text.split('\n').filter(l => l.trim());
-    if (lines.length < 2) { alert('No data found in CSV.'); return; }
+    if (lines.length < 2) { noticeSheet('Import failed', 'No data found in that CSV.'); return; }
 
     // Auto-detect separator
     const sep = lines[0].includes(';') ? ';' : ',';
@@ -7810,7 +8781,7 @@ function importStrongCSV(input) {
     const colReps     = col('reps');
 
     if (colDate === -1 || colExName === -1 || colReps === -1) {
-      alert('Could not detect required columns (Date, Exercise Name, Reps). Is this a Strong CSV export?');
+      noticeSheet('Import failed', 'Could not detect the required columns (Date, Exercise Name, Reps). Is this a Strong CSV export?');
       return;
     }
 
@@ -7847,14 +8818,14 @@ function importStrongCSV(input) {
 
     if (currentWorkout) hist.push(currentWorkout);
     saveHistory(hist);
-    alert('Imported ' + parsed + ' workouts from Strong.');
+    noticeSheet('Import complete', 'Imported ' + parsed + ' workouts from Strong.');
     input.value = '';
   };
   reader.readAsText(file);
 }
 
 function requestNotif() {
-  if (!('Notification' in window)) { alert('Notifications not supported in this browser.'); return; }
+  if (!('Notification' in window)) { noticeSheet('Not supported', 'Notifications are not supported in this browser.'); return; }
   Notification.requestPermission().then(perm => {
     ST.notifEnabled = perm === 'granted';
     renderSettings();
@@ -8029,8 +9000,8 @@ function selectProgram(id) {
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && ST.restActive) {
     const remaining = Math.ceil((ST.restEndTime - Date.now()) / 1000);
-    if (remaining <= 0) { cancelRestTimer(); }
-    else { renderRestBanner(); }
+    if (remaining <= 0) { restExpire(); }   // GO morph greets the return
+    else { renderRestIsland(); }
   }
 });
 
@@ -8120,15 +9091,15 @@ function importJSON(input) {
     try {
       const data = JSON.parse(e.target.result);
       const incoming = Array.isArray(data) ? data : (data.history || []);
-      if (!incoming.length) { alert('No workout history found in this backup file.'); return; }
+      if (!incoming.length) { noticeSheet('Restore failed', 'No workout history found in this backup file.'); return; }
       const local  = getHistory();
       const merged = mergeHistories(local, incoming);
       const added  = merged.length - local.length;
       saveHistory(merged);
       bgSyncToSheets().catch(() => {});
-      alert(`Restored ${added} new workout${added !== 1 ? 's' : ''} from backup. Total: ${merged.length}.`);
+      noticeSheet('Backup restored', `Restored ${added} new workout${added !== 1 ? 's' : ''} from backup. Total: ${merged.length}.`);
     } catch(err) {
-      alert('Could not read backup file. Make sure it is a valid DCR Gym JSON export.');
+      noticeSheet('Restore failed', 'Could not read that backup file. Make sure it is a valid DCR Gym JSON export.');
     }
     input.value = '';
   };
@@ -8253,6 +9224,36 @@ function bootstrapApp() {
   const splash = document.getElementById('splash');
   const home   = document.getElementById('screen-home');
   const nav    = document.getElementById('bottom-nav');
+
+  // Schema migration — versioned, non-destructive, backs up before touching
+  // anything. History survives every app update.
+  try { migrateStorage(); } catch(e) { console.warn('[DCR Gym Shell] Migration deferred:', e); }
+
+  // Background-flush — the instant the app is backgrounded or killed, the live
+  // workout snapshot is written synchronously. Zero-loss guarantee.
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') saveNow();
+  });
+  window.addEventListener('pagehide', () => saveNow());
+
+  // ── System back gesture → in-app navigation (never kills the app) ─────────
+  // Overlays unwind first, then screens. Maps() pushes screen states.
+  try { history.replaceState({ screen: 'home' }, '', '#home'); } catch(e) {}
+  window.addEventListener('popstate', (e) => {
+    // 1. An open layer always absorbs the back gesture
+    const sheet = document.getElementById('bottom-sheet');
+    if (sheet && sheet.classList.contains('visible')) { __closeSheetDom(); return; }
+    const mg = document.getElementById('muscle-graph-overlay');
+    if (mg && mg.classList.contains('visible')) { _closeMuscleGraphDom(); return; }
+    const gb = document.getElementById('graph-backdrop');
+    if (gb && gb.style.display === 'flex') { closeProgressGraph(); return; }
+    // 2. Then navigate to the state's screen
+    const target = (e.state && e.state.screen) || 'home';
+    if (target !== ST.screen) {
+      window.__navFromPop = true;
+      try { Maps(target); } finally { window.__navFromPop = false; }
+    }
+  });
 
   // State hydration — fully wrapped, LS proxy handles any storage exceptions
   try {

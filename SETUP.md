@@ -192,3 +192,47 @@ The AI screen will always show fresh numbers when you open it each morning.
 - **"Error 403 Forbidden"** from Apps Script — the fitness scopes weren't authorized; redeploy and click Allow again (Step 5c)
 - **Sleep/HRV shows 0** — confirm Fitbit → Google Fit sync is ON (Step 5a) and that yesterday's sleep session has synced in the Google Fit app
 - **Workout HR is null** — only populates on days you wore your Fitbit during a session with sustained HR above 100 bpm
+
+---
+
+## Google Health API Migration (June 2026) — one-time setup, ~10 min
+
+The old Google Fit REST API is dead (sunset 2026). The backend now uses the
+**Google Health API v4** — the official successor that serves Fitbit Air +
+Google Health app data. Do this ONCE:
+
+1. **Google Cloud project**
+   - Go to console.cloud.google.com → New Project → name it `dcr-gym-health`.
+   - APIs & Services → Library → search **"Google Health API"** → Enable.
+   - APIs & Services → OAuth consent screen → External → fill app name
+     `DCR Gym` + your email → Save. Add **yourself** as a Test user.
+   - Note the **project number** (Dashboard, top card).
+
+2. **Link Apps Script to that project**
+   - Open the Apps Script editor for the Muscle Ladder backend.
+   - ⚙ Project Settings → Google Cloud Platform (GCP) Project → Change project
+     → paste the project **number** → Set.
+
+3. **Update the code**
+   - Replace `Code.gs` contents with the repo's `apps-script.gs`.
+   - ⚙ Project Settings → check "Show appsscript.json manifest" → replace its
+     contents with the repo's `appsscript.json` (new googlehealth scopes).
+
+4. **Authorize once**
+   - In the editor, select `authorizeHealthAPI` → Run → approve the consent
+     screen (it will warn the app is unverified — Continue; it's your own app).
+   - View → Logs: should print `Auth OK — Health API reachable`.
+
+5. **Redeploy (same URL)**
+   - Deploy → Manage deployments → ✏ Edit → Version: New version → Deploy.
+   - The web app URL does not change, so index.html needs no edits.
+
+6. **Verify on the phone**
+   - DCR Gym → AI tab → tap ↻. Readiness, sleep, RHR and HRV should populate.
+   - If it shows "reconnect health sync", repeat step 4 (token/consent issue).
+
+Notes
+- Apps Script manages its own OAuth grant — no weekly token expiry, no client
+  secret. "Recurring" sync = the app pulls on open (30-min server memo cache).
+- The server falls back to the last-good cached day (FitbitData sheet) if the
+  API hiccups, so the AI tab never goes blank.
