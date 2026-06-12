@@ -127,170 +127,262 @@ function getSpreadsheet_() {
 }
 
 // ╔══════════════════════════════════════════════════════════════════════════╗
-// ║              GOOGLE FIT API MODULE                                      ║
-// ║  Uses fitness.googleapis.com — valid consumer Google account scopes.   ║
-// ║  No CLIENT_ID/SECRET needed. ScriptApp.getOAuthToken() handles auth.   ║
+// ║              GOOGLE HEALTH API MODULE  (v4 — successor to Fitbit Web API)║
+// ║  Base: https://health.googleapis.com/v4/users/me                        ║
+// ║  Serves Fitbit Air + Google Health app data via Google OAuth.           ║
+// ║  ScriptApp.getOAuthToken() carries the googlehealth.* scopes declared   ║
+// ║  in appsscript.json — no client secret, no refresh-token dance.         ║
 // ║                                                                          ║
-// ║  ONE-TIME SETUP (do this ONCE from the Apps Script editor):             ║
-// ║   1. Run authorizeHealthAPI → approve the Google Fit access prompt      ║
-// ║   2. Deploy → New deployment (Execute as: Me, Anyone) → copy URL       ║
-// ║   3. Update BACKEND_URL in index.html with the new URL                  ║
+// ║  ONE-TIME SETUP (≈10 min, do ONCE):                                     ║
+// ║   1. console.cloud.google.com → create project "dcr-gym-health"         ║
+// ║      → APIs & Services → Enable "Google Health API"                     ║
+// ║      → OAuth consent screen → External → add yourself as test user      ║
+// ║   2. Apps Script editor → Project Settings → change GCP project to      ║
+// ║      that project's NUMBER                                              ║
+// ║   3. Paste this file + the updated appsscript.json (Show manifest)      ║
+// ║   4. Run authorizeHealthAPI → approve the consent prompt                ║
+// ║      → check the log says HTTP 200                                      ║
+// ║   5. Deploy → Manage deployments → Edit → New version                   ║
+// ║      (URL stays the same — the app keeps working untouched)             ║
 // ╚══════════════════════════════════════════════════════════════════════════╝
 
-const FIT_API         = 'https://www.googleapis.com/fitness/v1/users/me';
+const HEALTH_API        = 'https://health.googleapis.com/v4/users/me';
 const SHEET_NAME_FITBIT = 'FitbitData';
 
-// Run this ONCE from the editor to trigger the Google Fit scope authorization.
+// Run this ONCE from the editor to trigger the Google Health scope consent.
 function authorizeHealthAPI() {
-  const token = ScriptApp.getOAuthToken();
-  const now   = Date.now();
-  const url   = FIT_API + '/dataset:aggregate';
-  const body  = JSON.stringify({
-    aggregateBy: [{ dataTypeName: 'com.google.heart_rate.bpm' }],
-    bucketByTime: { durationMillis: 86400000 },
-    startTimeMillis: now - 86400000,
-    endTimeMillis:   now
+  const today = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  const data  = healthFetch_('/dataTypes/sleep/dataPoints:reconcile', {
+    dataSourceFamily: 'users/me/dataSourceFamilies/google-wearables',
+    filter: 'sleep.interval.civil_end_time >= "' + healthPrevDay_(today) + '"',
   });
-  const res = UrlFetchApp.fetch(url, {
-    method: 'post',
-    contentType: 'application/json',
-    headers: { Authorization: 'Bearer ' + token },
-    payload: body,
-    muteHttpExceptions: true
-  });
-  Logger.log('Auth test — HTTP ' + res.getResponseCode() + ': ' + res.getContentText().slice(0, 300));
+  Logger.log(data ? 'Auth OK — Health API reachable. Sample: ' + JSON.stringify(data).slice(0, 300)
+                  : 'Auth test FAILED — check GCP project link, API enablement, and scopes.');
 }
 
-// ── Main GET endpoint ─────────────────────────────────────────────────────────
+// ── Generic authenticated GET against the Health API ─────────────────────────
+function healthFetch_(path, params) {
+  const token = ScriptApp.getOAuthToken();
+  let url = HEALTH_API + path;
+  if (params) {
+    const qs = Object.keys(params)
+      .map(function(k) { return k + '=' + encodeURIComponent(params[k]); })
+      .join('&');
+    url += (url.indexOf('?') >= 0 ? '&' : '?') + qs;
+  }
+  const res = UrlFetchApp.fetch(url, {
+    headers: { Authorization: 'Bearer ' + token, Accept: 'application/json' },
+    muteHttpExceptions: true,
+  });
+  const code = res.getResponseCode();
+  if (code >= 200 && code < 300) {
+    try { return JSON.parse(res.getContentText() || '{}'); } catch(e) { return null; }
+  }
+  Logger.log('Health API ' + path + ' → HTTP ' + code + ': ' + res.getContentText().slice(0, 280));
+  return null;
+}
+
+// ── Main GET endpoint (action=getFitbit — name kept for client compat) ──────
 function fitbitGetLatestData() {
   const authUrl = ScriptApp.getService().getUrl() + '?action=fitbitAuth';
   try {
-    const token = ScriptApp.getOAuthToken();
+    // 30-min memo cache — app opens stay instant, API stays unhammered
+    const cache = CacheService.getScriptCache();
+    const memo  = cache.get('dcr_health_payload');
+    if (memo) return jsonResponse({ ok: true, connected: true, cached: 'memo', fitbit: JSON.parse(memo) });
+
     const tz    = Session.getScriptTimeZone();
     const today = Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd');
 
-    const rhr     = fitFetchRHR_(token, today);
-    const sleep   = fitFetchSleep_(token, today);
-    const trailing = fitBuildTrailing_(token, today, 7);
-    const readiness = computeReadiness_(rhr, null, sleep.score);
+    const sleep = healthSleepFor_(today);
+    const rhr   = healthDailyValue_('daily-resting-heart-rate', today);
+    const hrv   = healthDailyValue_('daily-heart-rate-variability', today);
+    const spo2  = healthDailyValue_('daily-oxygen-saturation', today);
+
+    // If every single signal is empty the account likely isn't authorized —
+    // fall through to the cached copy / reconnect path rather than serving voids.
+    const allEmpty = sleep.score === null && rhr === null && hrv === null;
+
+    const trailing  = healthBuildTrailing_(today, 7);
+    const readiness = computeReadiness_(rhr, hrv, sleep.score);
 
     const payload = {
       readinessScore:    readiness.score,
       readinessFactor:   readiness.factor,
       sleepScore:        sleep.score,
       restingHR:         rhr,
-      hrv:               null,
+      hrv:               hrv,
+      spo2:              spo2,
       deepSleepMinutes:  sleep.deepMinutes,
+      remSleepMinutes:   sleep.remMinutes,
+      lightSleepMinutes: sleep.lightMinutes,
       fetchedAt:         today,
       trailingReadiness: trailing.readiness,
       trailingSleep:     trailing.sleep,
-      trailingHRV:       trailing.hrv
+      trailingHRV:       trailing.hrv,
+      source:            'google-health-api',
     };
 
+    if (allEmpty) {
+      const cached = healthGetCached_();
+      if (cached) return jsonResponse({ ok: true, connected: true, cached: true, stale: true, fitbit: cached });
+      return jsonResponse({ ok: true, connected: false, authUrl: authUrl, reason: 'no-data' });
+    }
+
     healthCacheToSheet_(payload);
+    try { cache.put('dcr_health_payload', JSON.stringify(payload), 1800); } catch(e) {}
     return jsonResponse({ ok: true, connected: true, fitbit: payload });
 
   } catch(err) {
     Logger.log('fitbitGetLatestData error: ' + err.message);
     try {
       const cached = healthGetCached_();
-      if (cached) return jsonResponse({ ok: true, connected: true, cached: true, fitbit: cached });
+      if (cached) return jsonResponse({ ok: true, connected: true, cached: true, stale: true, fitbit: cached });
     } catch(e2) {}
-    return jsonResponse({ ok: true, connected: false, authUrl: authUrl });
+    return jsonResponse({ ok: true, connected: false, authUrl: authUrl, reason: 'error' });
   }
 }
 
 function fitbitStartAuth_() {
   return HtmlService.createHtmlOutput(
-    '<body style="font-family:-apple-system,sans-serif;padding:48px;text-align:center;background:#FAF7F2">' +
-    '<h2>✅ Google Fit API is active</h2>' +
-    '<p>Your health data is authorized via your Google account.<br>Return to DCR Gym and refresh the Analysis tab.</p>' +
+    '<body style="font-family:-apple-system,sans-serif;padding:48px;text-align:center;background:#FAF7F2;color:#2A2421">' +
+    '<h2>DCR Gym · Google Health API</h2>' +
+    '<p>Biometrics are authorized through the script owner\'s Google account.<br>' +
+    'If data is missing: open the Apps Script editor → run <b>authorizeHealthAPI</b> → approve → redeploy.<br><br>' +
+    'Then return to DCR Gym and pull down on the AI tab.</p>' +
     '</body>'
   );
 }
 
 function fitbitStatus_() {
-  return jsonResponse({ ok: true, connected: true });
+  const today = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  const rhr   = healthDailyValue_('daily-resting-heart-rate', today);
+  const sleep = healthSleepFor_(today);
+  return jsonResponse({ ok: true, connected: rhr !== null || sleep.score !== null, api: 'google-health-v4' });
 }
 
-// ── Google Fit API fetchers ───────────────────────────────────────────────────
-function fitAggregate_(token, dataTypeName, startMs, endMs) {
-  const body = JSON.stringify({
-    aggregateBy: [{ dataTypeName }],
-    bucketByTime: { durationMillis: endMs - startMs },
-    startTimeMillis: startMs,
-    endTimeMillis:   endMs
-  });
-  const res  = UrlFetchApp.fetch(FIT_API + '/dataset:aggregate', {
-    method: 'post',
-    contentType: 'application/json',
-    headers: { Authorization: 'Bearer ' + token },
-    payload: body,
-    muteHttpExceptions: true
-  });
-  const code = res.getResponseCode();
-  if (code !== 200) { Logger.log('fitAggregate_ ' + dataTypeName + ' HTTP ' + code + ': ' + res.getContentText().slice(0,200)); return null; }
-  return JSON.parse(res.getContentText());
-}
-
-function fitFetchRHR_(token, dateStr) {
+// ── Sleep — reconciled wearable stream, main sleep ending today ──────────────
+function healthSleepFor_(dateStr) {
+  const empty = { score: null, deepMinutes: null, remMinutes: null, lightMinutes: null, totalMinutes: null };
   try {
-    const d    = new Date(dateStr + 'T00:00:00');
-    const sMs  = d.getTime();
-    const eMs  = sMs + 86400000;
-    const data = fitAggregate_(token, 'com.google.heart_rate.bpm', sMs, eMs);
-    if (!data || !data.bucket || !data.bucket.length) return null;
-    const pts  = data.bucket[0].dataset && data.bucket[0].dataset[0] && data.bucket[0].dataset[0].point || [];
-    if (!pts.length) return null;
-    // Use minimum HR as RHR approximation
-    const vals = pts.map(p => p.value && p.value[0] && p.value[0].fpVal).filter(Boolean);
-    return vals.length ? Math.round(Math.min(...vals)) : null;
-  } catch(e) { Logger.log('fitFetchRHR_ error: ' + e.message); return null; }
-}
-
-function fitFetchSleep_(token, dateStr) {
-  try {
-    // Sleep session that ended on dateStr (started previous evening)
-    const d    = new Date(dateStr + 'T00:00:00');
-    const eMs  = d.getTime() + 14 * 3600000;      // up to 2pm today
-    const sMs  = d.getTime() - 8 * 3600000;        // from 4pm yesterday
-    const data = fitAggregate_(token, 'com.google.sleep.segment', sMs, eMs);
-    if (!data || !data.bucket || !data.bucket.length) return { score: null, deepMinutes: null };
-
-    const pts = data.bucket[0].dataset && data.bucket[0].dataset[0] && data.bucket[0].dataset[0].point || [];
-    if (!pts.length) return { score: null, deepMinutes: null };
-
-    let totalMs = 0, deepMs = 0, remMs = 0;
-    pts.forEach(p => {
-      const dur  = parseInt(p.endTimeNanos || 0) / 1e6 - parseInt(p.startTimeNanos || 0) / 1e6;
-      const type = p.value && p.value[0] && p.value[0].intVal;
-      totalMs += dur;
-      if (type === 4) deepMs += dur; // DEEP = 4
-      if (type === 5) remMs  += dur; // REM  = 5
+    const data = healthFetch_('/dataTypes/sleep/dataPoints:reconcile', {
+      dataSourceFamily: 'users/me/dataSourceFamilies/google-wearables',
+      filter: 'sleep.interval.civil_end_time >= "' + dateStr + '"',
     });
+    const pts = (data && data.dataPoints) || [];
+    if (!pts.length) return empty;
 
-    const totalMins = Math.round(totalMs / 60000);
-    const deepMins  = deepMs  ? Math.round(deepMs  / 60000) : null;
-    const remMins   = remMs   ? Math.round(remMs   / 60000) : null;
-    const score     = healthComputeSleepScore_(totalMins, deepMins, remMins, null);
-    return { score, deepMinutes: deepMins };
-  } catch(e) { Logger.log('fitFetchSleep_ error: ' + e.message); return { score: null, deepMinutes: null }; }
+    // Prefer the MAIN sleep whose end date == dateStr; else longest available
+    let best = null, bestMins = -1;
+    pts.forEach(function(p) {
+      const s = p.sleep || {};
+      const sum = s.summary || {};
+      const mins = parseInt(sum.minutesAsleep || 0, 10);
+      const endsToday = (s.interval && String(s.interval.endTime || '').slice(0, 10) === dateStr)
+        || (s.interval && s.interval.civilEndTime && s.interval.civilEndTime.date &&
+            Utilities.formatString('%04d-%02d-%02d',
+              s.interval.civilEndTime.date.year, s.interval.civilEndTime.date.month, s.interval.civilEndTime.date.day) === dateStr);
+      const main = s.metadata && s.metadata.main;
+      const rank = (endsToday ? 100000 : 0) + (main ? 10000 : 0) + mins;
+      if (rank > bestMins) { bestMins = rank; best = s; }
+    });
+    if (!best || !best.summary) return empty;
+
+    const sum   = best.summary;
+    const total = parseInt(sum.minutesAsleep || 0, 10) || null;
+    let deep = null, rem = null, light = null;
+    (sum.stagesSummary || []).forEach(function(st) {
+      const m = parseInt(st.minutes || 0, 10);
+      if (st.type === 'DEEP')  deep  = m;
+      if (st.type === 'REM')   rem   = m;
+      if (st.type === 'LIGHT') light = m;
+    });
+    const period = parseInt(sum.minutesInSleepPeriod || 0, 10);
+    const eff    = (total && period) ? Math.round((total / period) * 100) : null;
+    const score  = healthComputeSleepScore_(total, deep, rem, eff);
+    return { score: score, deepMinutes: deep, remMinutes: rem, lightMinutes: light, totalMinutes: total };
+  } catch(e) {
+    Logger.log('healthSleepFor_ error: ' + e.message);
+    return empty;
+  }
 }
 
-function fitBuildTrailing_(token, todayStr, days) {
+// ── Generic daily metric — tolerant numeric extraction ───────────────────────
+// Lists dataPoints for a daily-* data type around dateStr and deep-scans the
+// payload for the first plausible numeric reading. Survives shape drift in the
+// young API; logs misses instead of guessing.
+function healthDailyValue_(dataType, dateStr) {
+  try {
+    const snake = dataType.replace(/-/g, '_');
+    let data = healthFetch_('/dataTypes/' + dataType + '/dataPoints', {
+      filter: snake + '.sample_time.civil_time >= "' + dateStr + 'T00:00:00"',
+      page_size: 8,
+    });
+    if (!data || !(data.dataPoints || []).length) {
+      // Some daily types are interval-based — retry with interval filter
+      data = healthFetch_('/dataTypes/' + dataType + '/dataPoints', {
+        filter: snake + '.interval.civil_start_time >= "' + dateStr + 'T00:00:00"',
+        page_size: 8,
+      });
+    }
+    const pts = (data && data.dataPoints) || [];
+    if (!pts.length) return null;
+
+    const camel = dataType.replace(/-([a-z])/g, function(_, c) { return c.toUpperCase(); });
+    for (let i = 0; i < pts.length; i++) {
+      const node = pts[i][camel] || pts[i];
+      const v = healthFirstNumber_(node, 0);
+      if (v !== null) return Math.round(v * 10) / 10;
+    }
+    return null;
+  } catch(e) {
+    Logger.log('healthDailyValue_(' + dataType + ') error: ' + e.message);
+    return null;
+  }
+}
+
+const HEALTH_NUM_KEYS  = ['bpm', 'beatsPerMinute', 'rmssd', 'milliseconds', 'dailyRmssd', 'value', 'percentage', 'avg', 'average'];
+const HEALTH_SKIP_KEYS = { interval: 1, sampleTime: 1, civilTime: 1, civilStartTime: 1, civilEndTime: 1, date: 1, time: 1, dataSource: 1, name: 1, createTime: 1, updateTime: 1, metadata: 1 };
+
+function healthFirstNumber_(node, depth) {
+  if (node === null || node === undefined || depth > 4) return null;
+  if (typeof node === 'number' && isFinite(node)) return node;
+  if (typeof node === 'string' && node !== '' && isFinite(Number(node))) return Number(node);
+  if (typeof node !== 'object') return null;
+  // Preferred keys first
+  for (let i = 0; i < HEALTH_NUM_KEYS.length; i++) {
+    const k = HEALTH_NUM_KEYS[i];
+    if (node[k] !== undefined) {
+      const v = healthFirstNumber_(node[k], depth + 1);
+      if (v !== null) return v;
+    }
+  }
+  // Then any non-structural key
+  for (const k in node) {
+    if (HEALTH_SKIP_KEYS[k]) continue;
+    const v = healthFirstNumber_(node[k], depth + 1);
+    if (v !== null) return v;
+  }
+  return null;
+}
+
+// ── 7-day trailing arrays for the AI tab sparklines ──────────────────────────
+function healthBuildTrailing_(todayStr, days) {
   const readiness = [], sleep = [], hrv = [];
-  const end   = new Date(todayStr + 'T12:00:00');
+  const tz  = Session.getScriptTimeZone();
+  const end = new Date(todayStr + 'T12:00:00');
   for (let i = days - 1; i >= 0; i--) {
-    const d   = new Date(end); d.setDate(d.getDate() - i);
-    const ds  = Utilities.formatDate(d, Session.getScriptTimeZone(), 'yyyy-MM-dd');
-    const slp = fitFetchSleep_(token, ds);
-    const r   = fitFetchRHR_(token, ds);
-    const rd  = computeReadiness_(r, null, slp.score);
+    const d  = new Date(end); d.setDate(d.getDate() - i);
+    const ds = Utilities.formatDate(d, tz, 'yyyy-MM-dd');
+    const slp = healthSleepFor_(ds);
+    const r   = healthDailyValue_('daily-resting-heart-rate', ds);
+    const h   = healthDailyValue_('daily-heart-rate-variability', ds);
+    const rd  = computeReadiness_(r, h, slp.score);
     readiness.push(rd.score);
     sleep.push(slp.score);
-    hrv.push(null);
+    hrv.push(h);
   }
-  return { readiness, sleep, hrv };
+  return { readiness: readiness, sleep: sleep, hrv: hrv };
 }
 
 // ── Readiness score ───────────────────────────────────────────────────────────

@@ -223,6 +223,18 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
   0%,100% { box-shadow: 0 0 0 0 rgba(40,167,69,0.5); }
   55%      { box-shadow: 0 0 0 4px rgba(40,167,69,0); }
 }
+/* Skeleton shimmer while biometrics fetch — never dead dashes */
+@keyframes anaSkel { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.ana-loading .ana-pod-num, .ana-loading .gauge-pct-label {
+  position: relative; color: transparent !important;
+}
+.ana-loading .ana-pod-num::after {
+  content: ''; position: absolute; inset: 12% 14%;
+  border-radius: 7px;
+  background: linear-gradient(90deg, rgba(42,36,33,0.05) 25%, rgba(42,36,33,0.11) 50%, rgba(42,36,33,0.05) 75%);
+  background-size: 200% 100%;
+  animation: anaSkel 1.2s linear infinite;
+}
 .ana-refresh-btn {
   font-size: 12px; color: #1A1714; opacity: 0.25;
   background: none; border: none; cursor: pointer; padding: 0; line-height: 1;
@@ -8169,11 +8181,27 @@ function showMuscleDetail(muscle) {
     : p.dot === 'red' ? `${muscle} has been flat for 3+ sessions. Consider pushing intensity or adding a set.`
     : p.dot === 'amber' ? `${muscle} has been flat for 2 sessions. Try adding 2.5kg next time.`
     : `${muscle} is progressing well. Keep it up.`;
+
+  // Recovery footnote — plateaus read differently when sleep/readiness is the culprit
+  let recoveryNote = '';
+  if (p.dot !== 'green' && ST.fitbit && ST.fitbit.connected) {
+    const tr = (ST.fitbit.trailingReadiness || []).filter(v => v !== null && v !== undefined);
+    const avgR = tr.length ? Math.round(tr.reduce((a, b) => a + b, 0) / tr.length) : null;
+    if (avgR !== null && avgR < 70) {
+      recoveryNote = `<div style="margin-top:8px;font-size:12px;color:var(--text-secondary);background:rgba(42,36,33,0.035);border-radius:10px;padding:10px 12px">
+        Recovery context: readiness has averaged <strong>${avgR}</strong> this week — this plateau may be recovery-limited, not effort-limited. Protect sleep before adding load.</div>`;
+    } else if (avgR !== null && avgR >= 80) {
+      recoveryNote = `<div style="margin-top:8px;font-size:12px;color:var(--text-secondary);background:rgba(42,36,33,0.035);border-radius:10px;padding:10px 12px">
+        Recovery context: readiness is averaging <strong>${avgR}</strong> — you're recovered. The plateau is a training signal: add load or a set.</div>`;
+    }
+  }
+
   openSheet(`
     <div class="bs-title">${muscle} Progress</div>
     <div style="font-size:13px;color:var(--muted)">Estimated 1RM (Epley) · 4 weeks</div>
     ${chartSvg}
-    <div style="background:#FFF7ED;border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:12px 14px;font-size:13px;color:#92400E;margin-top:8px">${insight}</div>
+    <div style="background:rgba(240,78,35,0.06);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:12px 14px;font-size:13px;color:var(--text-secondary);margin-top:8px">${insight}</div>
+    ${recoveryNote}
     <div style="margin-top:16px;font-size:13px;color:var(--text-secondary)">Current 1RM estimate: <b>${p.latest > 0 ? p.latest + 'kg' : 'No data'}</b></div>
   `);
 }
@@ -8240,10 +8268,10 @@ function renderAnalysis() {
   const syncTime  = fb.lastSync
     ? new Date(fb.lastSync).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})
     : 'never';
-  const footerTxt    = fb.connected ? `synced ${syncTime}` : '[ connect fitbit ]';
+  const footerTxt    = fb.connected ? `synced ${syncTime}` : '⟳ reconnect health sync';
   const footerAction = fb.connected
     ? `fetchFitbitData(true)`
-    : fb.authUrl ? `window.open('${fb.authUrl}','_blank')` : `Maps('settings')`;
+    : fb.authUrl ? `window.open('${fb.authUrl}','_blank')` : `fetchFitbitData(true)`;
 
   const factorLine = fb.readinessFactor
     ? `<div class="ana-factor-lbl">${fb.readinessFactor}</div>` : '';
@@ -8575,13 +8603,15 @@ async function fetchFitbitData(force = false) {
     if (ST.fitbit.fetchedAt === today && ST.fitbit.connected) return;
   }
 
-  // Spin the refresh button
+  // Spin the refresh button + skeleton shimmer on the pods
   const btn = document.querySelector('.ana-refresh-btn') || document.querySelector('#ana-refresh');
   if (btn) {
     btn.style.animation = 'ana-spin 0.9s linear infinite';
     btn.style.opacity   = '0.65';
     btn.disabled        = true;
   }
+  const anaScr = document.getElementById('screen-analysis');
+  if (anaScr) anaScr.classList.add('ana-loading');
 
   console.log('[DCR Gym] Fetching biometrics from:', endpoint);
 
@@ -8590,10 +8620,10 @@ async function fetchFitbitData(force = false) {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     console.log('[DCR Gym] Biometric response:', data);
-    if (data && data.connected === false && data.authUrl) {
-      // Not yet authorized — store the auth URL and re-render so the Connect button appears
+    if (data && data.connected === false) {
+      // Not authorized / no data — surface the reconnect chip, never silent dashes
       ST.fitbit.connected = false;
-      ST.fitbit.authUrl   = data.authUrl;
+      ST.fitbit.authUrl   = data.authUrl || null;
       if (ST.screen === 'analysis') renderAnalysis();
       return;
     }
@@ -8602,6 +8632,8 @@ async function fetchFitbitData(force = false) {
       Object.assign(ST.fitbit, data.fitbit, { connected: true, lastSync: Date.now() });
       LS.set('dcrgym_fitbit', ST.fitbit);
       if (ST.screen === 'analysis') renderAnalysis();
+      // Home boarding-pass readiness chip stays current
+      if (ST.screen === 'home') renderHome();
     }
   } catch(e) {
     console.error('[DCR Gym] Biometric fetch failed:', e.message, endpoint);
@@ -8610,6 +8642,8 @@ async function fetchFitbitData(force = false) {
       btn.style.opacity   = '0.30';
       btn.disabled        = false;
     }
+  } finally {
+    if (anaScr) anaScr.classList.remove('ana-loading');
   }
 }
 
