@@ -613,6 +613,30 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 }
 .mg-scrub-tip.on { opacity: 1; }
 
+/* ── OTA update chip — quiet, charcoal, never blocking ── */
+#update-chip {
+  position: fixed;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + var(--nav-h) + 26px);
+  left: 50%; transform: translateX(-50%) translateY(16px);
+  z-index: 380;
+  display: flex; align-items: center; gap: 8px;
+  background: var(--charcoal); color: #FAF7F2;
+  border: none; border-radius: 19px;
+  padding: 10px 18px;
+  font-family: var(--font-body); font-size: 12.5px; font-weight: 600;
+  letter-spacing: 0.01em; cursor: pointer;
+  box-shadow: var(--shadow-deep);
+  opacity: 0;
+  transition: opacity var(--dur-med) var(--ease), transform var(--dur-slow) var(--ease);
+  -webkit-tap-highlight-color: transparent;
+}
+#update-chip.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+#update-chip:active { transform: translateX(-50%) scale(0.96); }
+.uc-dot {
+  width: 7px; height: 7px; border-radius: 4px; background: var(--green);
+  animation: pillPulse 1.6s ease-in-out infinite;
+}
+
 /* ── Checkmark stroke-draw ── */
 .check-draw { display: block; }
 .check-draw path {
@@ -4368,6 +4392,7 @@ function saveSettings(s) { LS.set('dcrgym_settings', s); }
 // Schema-versioned, non-destructive, with rolling last-good backup.
 // History must survive every app update. Period.
 const SCHEMA_VERSION = 2;
+const APP_BUILD = '2026.06.13 · ota-1';
 
 function migrateStorage() {
   const v = LS.get('dcrgym_schema_version', 1);
@@ -5073,6 +5098,77 @@ function updateRestHudRing(remaining) {
     const pct = Math.max(0, Math.min(1, remaining / ST.restDuration));
     fill.style.strokeDashoffset = (circ * (1 - pct)).toFixed(2);
   }
+}
+
+// ── OTA update watcher — no more uninstall/reinstall, ever ──────────────────
+// 1. Boot: if a new worker is already waiting, offer the restart chip.
+// 2. updatefound: a deploy landed while the app is open → chip when ready.
+// 3. Foregrounding the app re-checks for updates (throttled to 15 min).
+// 4. Chip tap → SKIP_WAITING → controllerchange → seamless reload.
+//    Never auto-reloads mid-workout — the user chooses the moment.
+let _updateAccepted = false;
+let _lastUpdateCheck = 0;
+
+function initUpdateWatcher(reg) {
+  if (reg.waiting && navigator.serviceWorker.controller) showUpdateChip();
+
+  reg.addEventListener('updatefound', () => {
+    const nw = reg.installing;
+    if (!nw) return;
+    nw.addEventListener('statechange', () => {
+      if (nw.state === 'installed' && navigator.serviceWorker.controller) showUpdateChip();
+    });
+  });
+
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (_updateAccepted) location.reload();
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') return;
+    if (Date.now() - _lastUpdateCheck < 15 * 60 * 1000) return;
+    _lastUpdateCheck = Date.now();
+    reg.update().catch(() => {});
+  });
+  _lastUpdateCheck = Date.now();
+}
+
+function showUpdateChip() {
+  if (document.getElementById('update-chip')) return;
+  const chip = document.createElement('button');
+  chip.id = 'update-chip';
+  chip.innerHTML = '<span class="uc-dot"></span>Update ready · tap to restart';
+  chip.onclick = acceptUpdate;
+  document.body.appendChild(chip);
+  requestAnimationFrame(() => chip.classList.add('on'));
+}
+
+function acceptUpdate() {
+  // Guard the live workout — everything is in localStorage already (saveNow),
+  // but don't yank the floor mid-set without saving one last time.
+  saveNow();
+  _updateAccepted = true;
+  haptic('tick');
+  const reg = ST.swReg;
+  if (reg && reg.waiting) {
+    reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+  } else {
+    location.reload();
+  }
+  const chip = document.getElementById('update-chip');
+  if (chip) { chip.textContent = 'Restarting…'; chip.disabled = true; }
+}
+
+function checkForUpdateManual() {
+  const reg = ST.swReg;
+  if (!reg) { noticeSheet('Updates', 'Service worker not ready yet — try again in a moment.'); return; }
+  _lastUpdateCheck = Date.now();
+  reg.update().then(() => {
+    setTimeout(() => {
+      if (reg.waiting || reg.installing) showUpdateChip();
+      else noticeSheet('Up to date', `You're on the latest build (${APP_BUILD}). New deploys also install themselves on the next launch.`);
+    }, 1200);
+  }).catch(() => noticeSheet('Updates', 'Could not reach the server — check your connection.'));
 }
 
 // ── Count-up ticker — numbers feel alive, never jumpy ────────────────────────
@@ -8921,6 +9017,10 @@ function renderSettings() {
           ${ST.notifEnabled ? 'Enabled ✓' : 'Enable'}
         </button>
       </div>
+      <div class="settings-row" onclick="checkForUpdateManual()" style="cursor:pointer">
+        <label style="pointer-events:none">Build</label>
+        <span style="font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums">${APP_BUILD} · tap to check</span>
+      </div>
     </div>
   </div>`;
 }
@@ -9497,9 +9597,14 @@ function bootstrapApp() {
     console.warn('[DCR Gym Shell] State hydration fault (non-fatal):', e);
   }
 
-  // Service worker — fire-and-forget
+  // Service worker — registered with a live OTA update watcher.
+  // Updates flow over the air: network-first navigations get new builds on
+  // launch; if a deploy lands while the app is OPEN, the chip appears.
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').then(r => { ST.swReg = r; }).catch(() => {});
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      ST.swReg = reg;
+      initUpdateWatcher(reg);
+    }).catch(() => {});
   }
 
   // ── Silent auto-pull from Sheets on every app open ────────────────────────
