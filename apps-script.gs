@@ -56,10 +56,30 @@ function saveState(history, ts) {
     stateSheet.setFrozenRows(1);
     stateSheet.getRange(1,1,1,3).setFontWeight('bold').setBackground('#1a1a1a').setFontColor('white');
   }
-  stateSheet.getRange(2, 1).setValue(JSON.stringify(history));
+  // ── Non-destructive union merge ───────────────────────────────────────────
+  // The cloud copy must never lose workouts to a smaller/older device push.
+  // Merge incoming with what is already stored, keyed by id (incoming wins on
+  // conflict so edits propagate). A wiped or partial device can never shrink
+  // the cloud history — it can only ever add to it.
+  let existing = [];
+  try { const j = stateSheet.getRange(2, 1).getValue(); existing = j ? JSON.parse(j) : []; }
+  catch(e) { existing = []; }
+
+  const map = {};
+  (existing || []).forEach(function(w) { if (w && w.id) map[w.id] = w; });
+  (history  || []).forEach(function(w) { if (w && w.id) map[w.id] = w; });
+  const merged = Object.keys(map).map(function(k) { return map[k]; })
+                       .sort(function(a, b) { return (a.endTime || 0) - (b.endTime || 0); });
+
+  // Guard: never overwrite a populated cloud copy with nothing.
+  if (merged.length === 0 && (existing || []).length > 0) {
+    return jsonResponse({ ok: true, skipped: 'empty-incoming', count: existing.length });
+  }
+
+  stateSheet.getRange(2, 1).setValue(JSON.stringify(merged));
   stateSheet.getRange(2, 2).setValue(ts || Date.now());
   stateSheet.getRange(2, 3).setValue(new Date().toLocaleString());
-  return jsonResponse({ ok: true });
+  return jsonResponse({ ok: true, count: merged.length });
 }
 
 // ── SYNC WORKOUTS ─────────────────────────────────────────────────────────────
