@@ -4392,7 +4392,7 @@ function saveSettings(s) { LS.set('dcrgym_settings', s); }
 // Schema-versioned, non-destructive, with rolling last-good backup.
 // History must survive every app update. Period.
 const SCHEMA_VERSION = 2;
-const APP_BUILD = '2026.06.13 · ota-1';
+const APP_BUILD = '2026.06.13 · ota-2 · sync-fix';
 
 function migrateStorage() {
   const v = LS.get('dcrgym_schema_version', 1);
@@ -8996,7 +8996,7 @@ function renderSettings() {
       <div class="settings-row"><label>Recover from cloud</label>
         <button id="recover-btn" onclick="recoverFromCloud()" style="background:oklch(25% 0.01 40);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:13px;cursor:pointer;font-family:var(--font-mono);letter-spacing:0.04em">Recover ↓</button>
       </div>
-      <div class="settings-row"><label>Cloud sync</label>
+      <div class="settings-row"><label>Cloud sync<br><span style="font-weight:normal;color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums">${cloudSyncStatus()}</span></label>
         <button id="sync-now-btn" onclick="manualSync()" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer">Sync Now</button>
       </div>
       <div class="settings-row" style="cursor:pointer" onclick="clearHistoryConfirm()">
@@ -9370,17 +9370,20 @@ async function drainSyncQueue() {
   const queue = LS.get('dcrgym_sync_queue', []);
   if (!queue.length) return;
   const failed = [];
+  let anyOk = false;
   for (const item of queue) {
     try {
       const resp = await fetch(s.sheets, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(item.payload)
       });
       if (!resp.ok) failed.push(item);
+      else anyOk = true;
       // success — item is NOT added to failed → effectively dequeued
     } catch(e) { failed.push(item); }
   }
   LS.set('dcrgym_sync_queue', failed);
+  if (anyOk) LS.set('dcrgym_last_sync', Date.now());
 }
 
 // Drain on connectivity restore AND on every boot (see bootstrapApp)
@@ -9421,55 +9424,112 @@ function importJSON(input) {
   reader.readAsText(file);
 }
 
+// ── Unified POST to Sheets ────────────────────────────────────────────────────
+// CRITICAL: text/plain is a CORS-safelisted content type, so the browser sends
+// NO preflight OPTIONS. application/json is NOT safelisted → it triggers a
+// preflight that Apps Script web apps cannot answer, so the POST silently dies
+// and nothing ever reaches the sheet. Apps Script's doPost reads
+// e.postData.contents and JSON.parses it regardless of the declared type, so
+// the body still arrives intact. Queue-first: enqueue as insurance, POST,
+// dequeue on success, stamp the last-sync time.
+async function postToSheets(payload) {
+  const s = getSettings();
+  if (!s.sheets) return false;
+  enqueueSyncPayload(payload);
+  try {
+    const r = await fetch(s.sheets, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload),
+    });
+    if (r.ok) {
+      dequeueSyncPayload(payload);
+      LS.set('dcrgym_last_sync', Date.now());
+      return true;
+    }
+  } catch(e) { /* stays queued — drains on next boot or reconnect */ }
+  return false;
+}
+
+// ── Map history records → human-readable WorkoutLog rows ─────────────────────
+// Exercise identity comes from the stored _name (schema v2); falls back to the
+// program structure for legacy/import entries. Only working sets with reps>0;
+// warm-ups excluded. Used for both the just-finished workout and the backfill.
+function historyToWorkoutRows(records) {
+  const out = [];
+  for (const w of records || []) {
+    if (!w || !w.sets) continue;
+    const prog = PROGRAMS.find(p => p.id === w.programId);
+    const sess = prog && prog.sessions.find(s => s.id === w.sessionId);
+    const exMap = new Map();
+    for (const [key, sets] of Object.entries(w.sets)) {
+      if (!Array.isArray(sets) || key.endsWith('_wu')) continue;
+      const exIdx = parseInt(key.split('_').pop());
+      for (const s of sets) {
+        if (!s || !(s.r > 0)) continue;
+        let name = s._name;
+        if (!name && sess && !isNaN(exIdx) && sess.exercises[exIdx]) name = stripSuperset(sess.exercises[exIdx].name);
+        if (!name) name = 'Exercise';
+        if (!exMap.has(name)) exMap.set(name, []);
+        exMap.get(name).push({ weight: s.w, reps: s.r });
+      }
+    }
+    const exercises = [...exMap.entries()].map(([name, sets]) => ({ name, sets }));
+    if (!exercises.length) continue;
+    out.push({
+      id: w.id,
+      date: w.endTime,
+      programName: prog ? prog.name : (w.programId === 'import' ? 'Strong Import' : ''),
+      sessionName: w.sessionName || (sess ? sess.name : ''),
+      duration: w.duration || '',
+      totalE1RM: prog ? getSessionE1RM(w, prog) : 0,
+      totalSets: exercises.reduce((n, e) => n + e.sets.length, 0),
+      exercises,
+    });
+  }
+  return out;
+}
+
+// ── One-time backfill — push EVERY past workout as readable rows. The server ──
+// dedups by row id, so retries are harmless; the flag just avoids re-sending.
+async function backfillAllRows() {
+  if (LS.get('dcrgym_rows_backfilled', false)) return;
+  const s = getSettings();
+  if (!s.sheets) return;
+  const rows = historyToWorkoutRows(getHistory());
+  if (!rows.length) return;
+  const ok = await postToSheets({ action: 'syncWorkouts', workouts: rows });
+  if (ok) LS.set('dcrgym_rows_backfilled', true);
+}
+
+// ── Cloud-sync status line for Settings ──────────────────────────────────────
+function syncRelTime(ts) {
+  if (!ts) return 'never';
+  const d = Date.now() - ts;
+  if (d < 60000)    return 'just now';
+  if (d < 3600000)  return Math.floor(d / 60000) + 'm ago';
+  if (d < 86400000) return Math.floor(d / 3600000) + 'h ago';
+  return Math.floor(d / 86400000) + 'd ago';
+}
+function cloudSyncStatus() {
+  const t = LS.get('dcrgym_last_sync', 0);
+  const q = (LS.get('dcrgym_sync_queue', []) || []).length;
+  return 'last synced ' + syncRelTime(t) + (q ? ' · ' + q + ' pending' : '');
+}
+
 async function bgSyncToSheets() {
   const s = getSettings();
   if (!s.sheets) return;
   const hist = getHistory();
+  if (!hist.length) return;   // never push an empty history over the cloud copy
 
-  // ── Full state blob ───────────────────────────────────────────────────────
-  // Queue-first: enqueue immediately as insurance, then attempt live fetch.
-  // If fetch succeeds, dequeue. If it fails for ANY reason (online or offline),
-  // the payload stays in the queue and will be drained on next boot or reconnect.
-  const statePayload = { action: 'saveState', history: hist, ts: Date.now() };
-  enqueueSyncPayload(statePayload);
-  try {
-    const r = await fetch(s.sheets, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(statePayload)
-    });
-    if (r.ok) dequeueSyncPayload(statePayload);
-  } catch(e) { /* stays queued — will drain on next boot */ }
+  // Full restorable state blob — this is what Recover / pullState reads back.
+  await postToSheets({ action: 'saveState', history: hist, ts: Date.now() });
 
-  // ── Human-readable workout rows ───────────────────────────────────────────
-  const prog = PROGRAMS.find(p => p.id === ST.currentProgram);
-  const sess = prog && prog.sessions.find(ss => ss.id === ST.currentSession);
-  if (prog && sess && hist.length > 0) {
-    const last = hist[hist.length - 1];
-    const exercises = sess.exercises.map((ex, i) => {
-      const key = `${sess.id}_${i}`;
-      const sets = (last.sets[key] || []).filter(s => s && s.r > 0 && !key.endsWith('_wu')).map(s => ({ weight: s.w, reps: s.r }));
-      return { name: stripSuperset(ex.name), sets };
-    }).filter(ex => ex.sets.length);
-    const rowPayload = {
-      action: 'syncWorkouts',
-      workouts: [{
-        id: last.id, date: last.endTime,
-        programName: prog.name, sessionName: sess.name,
-        duration: last.duration,
-        totalE1RM: getSessionE1RM(last, prog),
-        totalSets: exercises.reduce((n, e) => n + e.sets.length, 0),
-        exercises
-      }]
-    };
-    enqueueSyncPayload(rowPayload);
-    try {
-      const r2 = await fetch(s.sheets, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(rowPayload)
-      });
-      if (r2.ok) dequeueSyncPayload(rowPayload);
-    } catch(e) { /* stays queued */ }
-  }
+  // Readable rows for the just-finished workout. Built from the history record
+  // (not live ST), so it stays correct even if the user navigated away.
+  const rows = historyToWorkoutRows([hist[hist.length - 1]]);
+  if (rows.length) await postToSheets({ action: 'syncWorkouts', workouts: rows });
 }
 
 async function manualSync() {
@@ -9478,7 +9538,11 @@ async function manualSync() {
   const s = getSettings();
   if (!s.sheets) { if (btn) { btn.textContent = 'No URL set'; btn.disabled = false; } return; }
   try {
-    await Promise.all([pullFromSheets(), bgSyncToSheets()]);
+    // PULL BEFORE PUSH — merge cloud in first, then flush queue, backfill, push.
+    await pullFromSheets();
+    await drainSyncQueue();
+    await backfillAllRows();
+    await bgSyncToSheets();
     if (btn) { btn.textContent = 'Synced ✓'; setTimeout(()=>{ btn.textContent='Sync Now'; btn.disabled=false; }, 2000); }
   } catch(e) {
     if (btn) { btn.textContent = 'Error'; btn.disabled = false; }
@@ -9607,11 +9671,18 @@ function bootstrapApp() {
     }).catch(() => {});
   }
 
-  // ── Silent auto-pull from Sheets on every app open ────────────────────────
-  pullFromSheets().catch(() => {});
-
-  // ── Drain any pending sync queue items (offline → online recovery) ────────
-  drainSyncQueue();
+  // ── Cloud sync on every app open — PULL BEFORE PUSH (never clobber cloud) ──
+  // Merge cloud→local first (pull never shrinks local), then flush the queue,
+  // backfill readable rows once, and push the complete local history up. Fully
+  // non-blocking: any failure here can never break boot or the render path.
+  (async () => {
+    try {
+      await pullFromSheets();
+      await drainSyncQueue();
+      await backfillAllRows();
+      await bgSyncToSheets();
+    } catch (e) { /* silent — background op */ }
+  })();
 
   // Dismiss splash — belt-and-suspenders: remove active class, zero z-index
   if (splash) {
