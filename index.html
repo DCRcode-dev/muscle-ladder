@@ -186,7 +186,73 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 .masthead-gear svg { width: 18px; height: 18px; display: block; }
 
 /* ── Analysis screen — Luxe Biometric Dashboard ── */
-#screen-analysis { overflow: hidden; height: 100svh; background: #FAF7F2; }
+/* AI tab is the sanctioned exception to the 100svh no-scroll rule: a vertical
+   recovery dashboard. The rest of the app keeps its single-canvas discipline. */
+#screen-analysis { height: 100svh; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; background: #FAF7F2; }
+.ana2-scroll {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: max(44px, calc(env(safe-area-inset-top, 0px) + 18px)) 14px calc(var(--nav-h) + 24px + env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box; min-height: 100svh;
+}
+/* Today's directive */
+.ana2-directive { display: flex; gap: 12px; align-items: stretch; border-radius: 16px; padding: 13px 15px;
+  background: #fff; box-shadow: 7px 7px 18px #e0ddd4, -6px -6px 14px #fff; border-left: 4px solid #9A938A; }
+.ana2-directive.tone-high { border-left-color: #28A745; }
+.ana2-directive.tone-mid  { border-left-color: #C9921A; }
+.ana2-directive.tone-low  { border-left-color: #C04E2A; }
+.ana2-directive.tone-idle { border-left-color: #B0A898; }
+.ana2-dir-left { flex-shrink: 0; min-width: 92px; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+.ana2-dir-eyebrow { font-family: var(--font-body); font-size: 7px; letter-spacing: 0.2em; text-transform: uppercase; color: #1A1714; opacity: 0.4; }
+.ana2-dir-verb { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 700; font-size: 2rem; line-height: 0.95; color: #1A1714; text-transform: lowercase; letter-spacing: -0.01em; }
+.ana2-dir-sess { font-family: var(--font-body); font-size: 9px; letter-spacing: 0.04em; color: #1A1714; opacity: 0.5; }
+.ana2-dir-line { align-self: center; font-family: var(--font-body); font-size: 11px; line-height: 1.45; color: #1A1714; opacity: 0.78; }
+/* Honest status note */
+.ana2-note { display: flex; align-items: center; gap: 10px; justify-content: space-between; border-radius: 12px; padding: 9px 12px; font-family: var(--font-body); font-size: 10.5px; line-height: 1.4; }
+.ana2-note.warn { background: rgba(192,78,42,0.09); color: #8A3A20; }
+.ana2-note.info { background: rgba(42,36,33,0.05); color: #5A534A; }
+.ana2-note-btn { flex-shrink: 0; border: none; background: rgba(0,0,0,0.06); color: inherit; border-radius: 20px; font-family: var(--font-mono, monospace); font-size: 9px; letter-spacing: 0.05em; padding: 5px 11px; cursor: pointer; white-space: nowrap; }
+.ana2-note-btn:active { background: rgba(0,0,0,0.13); }
+/* Segmented toggle + legend */
+.ana2-seg { display: flex; gap: 2px; background: rgba(0,0,0,0.05); border-radius: 8px; padding: 2px; }
+.ana2-seg-btn { border: none; background: none; font-family: var(--font-mono, monospace); font-size: 8.5px; letter-spacing: 0.06em; color: #1A1714; opacity: 0.5; padding: 3px 9px; border-radius: 6px; cursor: pointer; }
+.ana2-seg-btn.on { background: #fff; opacity: 1; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
+.ana2-legend { display: flex; gap: 12px; padding: 0 2px; }
+.ana2-leg { display: flex; align-items: center; gap: 4px; font-family: var(--font-body); font-size: 7.5px; letter-spacing: 0.12em; text-transform: uppercase; color: #1A1714; opacity: 0.45; }
+.ana2-leg i { width: 8px; height: 2.5px; border-radius: 2px; }
+/* Trail panel sizing inside the scroll flow */
+.ana2-scroll .ana-chart-panel { flex: none; height: 172px; }
+.ana2-scroll .ana-chart-body { flex: 1; min-height: 0; position: relative; }
+.ana-popover { position: absolute; top: 2px; left: 50%; transform: translateX(-50%); pointer-events: none; opacity: 0; transition: opacity 0.12s; background: rgba(26,23,20,0.92); color: #FAF7F2; border-radius: 8px; padding: 4px 9px; z-index: 4; }
+.ana2-pop-d { font-family: var(--font-body); font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.7; text-align: center; }
+.ana2-pop-r { display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 13px; font-variant-numeric: tabular-nums; }
+.ana2-pop-r i { width: 6px; height: 6px; border-radius: 50%; margin-right: 3px; }
+/* Week-over-week deltas */
+.ana2-deltas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
+.ana2-delta { background: #fff; border-radius: 12px; padding: 9px 5px; text-align: center; box-shadow: 5px 5px 12px #e3e0d8, -4px -4px 10px #fff; }
+.ana2-delta-v { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600; font-size: 1.45rem; line-height: 1; color: #1A1714; font-variant-numeric: tabular-nums; }
+.ana2-delta-ar { font-family: var(--font-mono, monospace); font-size: 7.5px; font-style: normal; margin-left: 2px; vertical-align: middle; }
+.ana2-delta-l { font-family: var(--font-body); font-size: 6px; letter-spacing: 0.1em; text-transform: uppercase; color: #1A1714; opacity: 0.42; margin-top: 3px; }
+/* Generic card */
+.ana2-card { background: #fff; border-radius: 16px; padding: 12px 14px; box-shadow: 6px 6px 16px #e0ddd4, -5px -5px 12px #fff; display: flex; flex-direction: column; gap: 9px; }
+.ana2-card.ana2-muted { background: rgba(255,255,255,0.6); box-shadow: none; border: 0.75px solid rgba(210,207,200,0.6); }
+.ana2-card-eyebrow { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-family: var(--font-body); font-size: 8px; letter-spacing: 0.18em; text-transform: uppercase; color: #1A1714; opacity: 0.5; }
+.ana2-card-aside { font-size: 8px; letter-spacing: 0.06em; opacity: 0.85; text-transform: none; white-space: nowrap; }
+.ana2-card-empty { font-family: var(--font-body); font-size: 11px; line-height: 1.5; color: #1A1714; opacity: 0.6; }
+/* Sleep architecture */
+.ana2-arch-bar { display: flex; height: 14px; border-radius: 7px; overflow: hidden; gap: 1.5px; }
+.ana2-arch-seg { min-width: 2px; }
+.ana2-arch-key { display: flex; justify-content: space-between; gap: 6px; }
+.ana2-arch-key span { display: flex; align-items: center; gap: 4px; font-family: var(--font-body); font-size: 8.5px; color: #1A1714; opacity: 0.6; font-variant-numeric: tabular-nums; }
+.ana2-arch-key i { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+/* Correlation rows */
+.ana2-corr { display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; column-gap: 11px; align-items: center; padding: 8px 0; border-top: 0.75px solid rgba(0,0,0,0.06); }
+.ana2-corr:first-of-type { border-top: none; padding-top: 2px; }
+.ana2-corr-stat { grid-row: 1 / 3; font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 700; font-size: 1.7rem; line-height: 1; font-variant-numeric: tabular-nums; min-width: 52px; }
+.ana2-corr-body { font-family: var(--font-body); font-size: 10.5px; line-height: 1.4; color: #1A1714; opacity: 0.82; }
+.ana2-corr-body strong { font-weight: 600; opacity: 1; }
+.ana2-corr-r { opacity: 0.45; font-size: 9px; }
+.ana2-corr-n { grid-column: 2; font-family: var(--font-body); font-size: 7.5px; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.4; }
+@keyframes anaDraw { to { stroke-dashoffset: 0; } }
 .ana-wrap {
   height: 100svh;
   display: flex; flex-direction: column;
@@ -4373,8 +4439,17 @@ let ST = {
     trailingReadiness: [],
     trailingSleep:     [],
     trailingHRV:       [],
+    trailingRHR:       [],
+    trailingDates:     [],
+    sleepEfficiency: null,
+    asOf: null,
+    dataState: 'disconnected',
+    lastError: null,
     connected: false,
     lastSync: null,
+    _range: 7,
+    _fetching: false,
+    _failUntil: 0,
   },
 };
 
@@ -4392,7 +4467,7 @@ function saveSettings(s) { LS.set('dcrgym_settings', s); }
 // Schema-versioned, non-destructive, with rolling last-good backup.
 // History must survive every app update. Period.
 const SCHEMA_VERSION = 2;
-const APP_BUILD = '2026.06.13 · ota-2 · sync-fix';
+const APP_BUILD = '2026.06.13 · ota-3 · health-sync';
 
 function migrateStorage() {
   const v = LS.get('dcrgym_schema_version', 1);
@@ -5244,7 +5319,7 @@ function Maps(to, data={}) {
   else if (to === 'history')     renderHistory();
   else if (to === 'settings')    renderSettings();
   else if (to === 'workouts-browser') renderWorkoutsBrowser();
-  else if (to === 'analysis')    renderAnalysis();
+  else if (to === 'analysis')    { renderAnalysis(); fetchFitbitData(false); }
 
   // Status bar melts into the screen — charcoal cockpit in workout, cream elsewhere
   const themeMeta = document.querySelector('meta[name="theme-color"]');
@@ -8316,388 +8391,386 @@ function renderDetailChart(values) {
 }
 
 // ── Analysis screen — Luxe Biometric Dashboard ───────────────────────────────
+// ── Analysis screen — Luxe Biometric Dashboard (scrolling, comprehensive) ───
+// This tab is the sanctioned exception to the 100svh no-scroll rule: a vertical
+// multi-module recovery dashboard. renderAnalysis is PURE — it never fetches
+// (the nav handler + boot do that), which is what kills the old strobe loop.
+
+function anaFmtDay(iso, withYear) {
+  if (!iso) return '—';
+  const p = iso.split('-'); if (p.length < 3) return iso;
+  const d = new Date(+p[0], +p[1] - 1, +p[2]);
+  return d.toLocaleDateString('en-US', withYear ? { month: 'short', day: 'numeric', year: 'numeric' } : { month: 'short', day: 'numeric' });
+}
+function anaAvg(arr) { const v = (arr || []).filter(x => x != null); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; }
+
 function renderAnalysis() {
   const el = document.getElementById('screen-analysis');
   if (!el) return;
-
   const fb = ST.fitbit;
+  if (!fb._range) fb._range = 7;
 
-  // Status
-  const today   = new Date().toISOString().slice(0, 10);
-  const isFresh = fb.fetchedAt === today;
-  const dotCls  = isFresh ? 'live' : 'stale';
-  const statusLabel = isFresh ? 'Live' : (fb.fetchedAt ? 'Stale' : 'No Sync');
-  const statusIcon  = isFresh ? '●' : '○';
-
-  // Dial
-  const score    = fb.readinessScore ?? null;
-  const scoreVal = score !== null ? score : 0;
-  // Ring color: green for good, amber for moderate, terracotta for deficit
-  const arcColor = score === null ? '#B0A898'
-    : score >= 85 ? '#28A745'
-    : score >= 75 ? '#C9921A'
-    :               '#C04E2A';
-
-  const CX = 76, CY = 76, R = 62;
-  const CIRC     = 2 * Math.PI * R;
-  const fillDash = ((scoreVal / 100) * CIRC).toFixed(2);
-
-  // Pods data
-  const sleepVal = fb.sleepScore  ?? null;
-  const rhrVal   = fb.restingHR   ?? null;
-  const hrvVal   = fb.hrv         ?? null;
-  const deepVal  = fb.deepSleepMinutes > 0 ? Math.round(fb.deepSleepMinutes) : null;
-
-  function pod(icon, num, label, barColor, barPct) {
-    const display = num !== null ? num : '–';
-    const pct     = num !== null ? Math.min(100, barPct) : 0;
-    return `<div class="ana-pod">
-      <div class="ana-pod-icon">${icon}</div>
-      <div class="ana-pod-num">${display}</div>
-      <div class="ana-pod-label">${label}</div>
-      <div class="ana-pod-bar-track">
-        <div class="ana-pod-bar-fill" style="width:${pct}%;background:${barColor}"></div>
-      </div>
-    </div>`;
-  }
-
-  const syncTime  = fb.lastSync
-    ? new Date(fb.lastSync).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})
-    : 'never';
-  const footerTxt    = fb.connected ? `synced ${syncTime}` : '⟳ connect health sync';
-  const footerAction = fb.connected ? `fetchFitbitData(true)` : `ghConnect()`;
-
-  const factorLine = fb.readinessFactor
-    ? `<div class="ana-factor-lbl">${fb.readinessFactor}</div>` : '';
+  const today  = ghLocalDate();
+  const asOf   = fb.asOf || null;
+  const synced = fb.dataState === 'synced' && asOf === today;
+  const dotCls = synced ? 'live' : (asOf ? 'stale' : 'stale');
+  const ageTxt = !asOf ? 'no sync' : (asOf === today ? 'today' : 'as of ' + anaFmtDay(asOf));
 
   el.innerHTML = `
-  <div class="ana-wrap">
-
-    <!-- Header -->
+  <div class="ana2-scroll">
     <div class="ana-header">
       <span class="ana-header-title">// Analysis</span>
       <div class="ana-status-row">
-        <div class="ana-status-item">
-          <div class="ana-hud-dot ${dotCls}"></div>
-          ${statusLabel}
-        </div>
-        <div class="ana-status-item" onclick="Maps('settings')" style="cursor:pointer;text-decoration:underline;text-underline-offset:2px;">
-          Connect
-        </div>
-        <button class="ana-refresh-btn" id="ana-refresh" onclick="fetchFitbitData(true)" title="refresh">↻</button>
+        <div class="ana-status-item"><div class="ana-hud-dot ${dotCls}"></div>${ageTxt}</div>
+        <button class="ana-refresh-btn" id="ana-refresh" onclick="haptic&&haptic('tap');fetchFitbitData(true)" title="refresh">↻</button>
       </div>
     </div>
 
-    <!-- Summary pods + dial -->
-    <div class="ana-summary">
+    ${anaDirective(fb)}
+    ${anaSummary(fb)}
+    ${anaStatusNote(fb)}
+    ${anaTrailPanel(fb)}
+    ${anaDeltas(fb)}
+    ${anaSleepArch(fb)}
+    ${anaHrvBaseline(fb)}
+    ${anaCorrelations(fb)}
 
-      <div class="ana-pods-col">
-        ${pod('🌙', sleepVal, 'Sleep', '#B8860B', sleepVal)}
-        ${pod('⚡', hrvVal,   'HRV',   '#1A5276', Math.round((hrvVal ?? 0) / 120 * 100))}
-      </div>
-
-      <div class="ana-dial-zone">
-        <div class="ana-dial-outer">
-          <svg class="ana-dial-svg" viewBox="0 0 152 152" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="${CX}" cy="${CY}" r="${R}"
-              fill="none" stroke="#E0DDD6" stroke-width="7.5" stroke-linecap="round"/>
-            <circle cx="${CX}" cy="${CY}" r="${R}"
-              fill="none" stroke="${arcColor}" stroke-width="7.5" stroke-linecap="round"
-              stroke-dasharray="${fillDash} ${CIRC.toFixed(2)}"
-              transform="rotate(-90 ${CX} ${CY})"
-              style="transition:stroke-dasharray 900ms cubic-bezier(0.16,1,0.3,1);
-                     filter:drop-shadow(0 0 7px ${arcColor}88)"/>
-          </svg>
-          <div class="ana-dial-inner">
-            <div class="ana-dial-num">${score !== null ? score : '–'}</div>
-            <div class="ana-dial-lbl">Readiness</div>
-          </div>
-        </div>
-        ${factorLine}
-      </div>
-
-      <div class="ana-pods-col">
-        ${pod('♥', rhrVal,  'RHR',   '#8B1A1A', Math.round(100 - ((rhrVal ?? 60) - 40) / 60 * 100))}
-        ${pod('💤', deepVal, 'Deep', '#2E4053', Math.round((deepVal ?? 0) / 120 * 100))}
-      </div>
-
-    </div>
-
-    <!-- Chart panel -->
-    <div class="ana-chart-panel">
-      <div class="ana-chart-top">
-        <div class="ana-chart-title">7-Day Biometric Trail</div>
-        <div class="ana-legend">
-          <div class="ana-legend-item">
-            <div class="ana-legend-swatch" style="background:#28A745"></div>Readiness
-          </div>
-          <div class="ana-legend-item">
-            <div class="ana-legend-swatch" style="background:#B8860B"></div>Sleep
-          </div>
-          <div class="ana-legend-item">
-            <div class="ana-legend-swatch" style="background:#1A5276"></div>HRV
-          </div>
-        </div>
-      </div>
-      <div class="ana-chart-body" id="ana-chart-body">
-        ${buildBiometricChart(fb)}
-        <div class="ana-popover" id="ana-popover"></div>
-      </div>
-    </div>
-
-    <button class="ana-sync-footer" onclick="${footerAction}">${footerTxt}</button>
-
+    <button class="ana-sync-footer" onclick="${fb.connected ? 'fetchFitbitData(true)' : 'ghConnect()'}">
+      ${fb.connected ? (fb.lastSync ? 'synced ' + new Date(fb.lastSync).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : 'refresh') : '⟳ connect health sync'}
+    </button>
   </div>`;
 
-  // Always fetch on tab open — personal app, no reason to serve stale data
-  fetchFitbitData(false);
   requestAnimationFrame(() => initChartHover(fb));
+  // NOTE: no fetch here by design.
 }
 
-function buildBiometricChart(fb) {
-  const R  = fb.trailingReadiness || [];
-  const SL = fb.trailingSleep     || [];
-  const HV = fb.trailingHRV       || [];
-  const N  = Math.max(R.length, SL.length, HV.length, 0);
-
-  if (N < 2) {
-    return `<svg viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-      <text x="150" y="52" text-anchor="middle" font-family="'Cormorant Garamond',serif"
-        font-style="italic" font-size="13" fill="#8C8680" opacity="0.45">
-        complete more sessions to build your trail
-      </text></svg>`;
+// ── Module: Today's directive ───────────────────────────────────────────────
+function computeTodayDirective(readiness, trailingReadiness) {
+  if (readiness == null) return { verb: 'connect', tone: 'idle', line: 'Connect health sync for a readiness-based training call.' };
+  const v = (trailingReadiness || []).filter(x => x != null);
+  let trend = 0;
+  if (v.length >= 4) {
+    const recent = (v.slice(-2).reduce((a, b) => a + b, 0)) / 2;
+    const priorArr = v.slice(-4, -2);
+    const prior = priorArr.reduce((a, b) => a + b, 0) / (priorArr.length || 1);
+    trend = recent - prior;
   }
+  if (readiness >= 80 && trend >= -4)
+    return { verb: 'push', tone: 'high', line: 'Systemic readiness is high — progress load or reps on your primary compound today.' };
+  if (readiness < 62 || (readiness < 68 && trend <= -6))
+    return { verb: 'deload', tone: 'low', line: 'Readiness is suppressed' + (trend <= -6 ? ' and trending down' : '') + ' — pull load back 10–15%, keep volume light, protect sleep tonight.' };
+  return { verb: 'hold', tone: 'mid', line: "Readiness is steady — match last session's working weights with clean execution; don't force PRs." };
+}
+function anaDirective(fb) {
+  const dir = computeTodayDirective(fb.readinessScore, fb.trailingReadiness);
+  let sess = '';
+  try { const ns = (typeof getNextSession === 'function') ? getNextSession() : null; if (ns && ns.session) sess = ns.session.name || ''; } catch (e) {}
+  const click = dir.verb === 'connect' ? ' onclick="ghConnect()" style="cursor:pointer"' : '';
+  return `<div class="ana2-directive tone-${dir.tone}"${click}>
+    <div class="ana2-dir-left">
+      <div class="ana2-dir-eyebrow">today · training call</div>
+      <div class="ana2-dir-verb">${dir.verb}</div>
+      ${sess ? `<div class="ana2-dir-sess">${sess}</div>` : ''}
+    </div>
+    <div class="ana2-dir-line">${dir.line}</div>
+  </div>`;
+}
 
-  const DAYS_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const today      = new Date();
-  const labels     = [];
-  for (let i = N - 1; i >= 0; i--) {
-    const d = new Date(today); d.setDate(today.getDate() - i);
-    labels.push(DAYS_SHORT[d.getDay()]);
+// ── Module: Summary (neumorphic pods + readiness dial) ──────────────────────
+function anaSummary(fb) {
+  const score = fb.readinessScore ?? null;
+  const arcColor = score === null ? '#B0A898' : score >= 85 ? '#28A745' : score >= 75 ? '#C9921A' : '#C04E2A';
+  const CX = 76, CY = 76, R = 62, CIRC = 2 * Math.PI * R;
+  const fillDash = (((score ?? 0) / 100) * CIRC).toFixed(2);
+  const sleepVal = fb.sleepScore ?? null, rhrVal = fb.restingHR ?? null, hrvVal = fb.hrv ?? null;
+  const deepVal = fb.deepSleepMinutes > 0 ? Math.round(fb.deepSleepMinutes) : null;
+  function pod(icon, num, label, barColor, barPct) {
+    const display = num !== null && num !== undefined ? num : '–';
+    const pct = (num !== null && num !== undefined) ? Math.max(0, Math.min(100, barPct)) : 0;
+    return `<div class="ana-pod"><div class="ana-pod-icon">${icon}</div><div class="ana-pod-num">${display}</div>
+      <div class="ana-pod-label">${label}</div><div class="ana-pod-bar-track"><div class="ana-pod-bar-fill" style="width:${pct}%;background:${barColor}"></div></div></div>`;
   }
+  const factorLine = fb.readinessFactor ? `<div class="ana-factor-lbl">${fb.readinessFactor}</div>` : '';
+  return `<div class="ana-summary">
+    <div class="ana-pods-col">
+      ${pod('🌙', sleepVal, 'Sleep', '#B8860B', sleepVal ?? 0)}
+      ${pod('⚡', hrvVal, 'HRV', '#1A5276', Math.round((hrvVal ?? 0) / 120 * 100))}
+    </div>
+    <div class="ana-dial-zone">
+      <div class="ana-dial-outer">
+        <svg class="ana-dial-svg" viewBox="0 0 152 152" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="#E0DDD6" stroke-width="7.5" stroke-linecap="round"/>
+          <circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="${arcColor}" stroke-width="7.5" stroke-linecap="round"
+            stroke-dasharray="${fillDash} ${CIRC.toFixed(2)}" transform="rotate(-90 ${CX} ${CY})"
+            style="transition:stroke-dasharray 900ms cubic-bezier(0.16,1,0.3,1);filter:drop-shadow(0 0 7px ${arcColor}88)"/>
+        </svg>
+        <div class="ana-dial-inner"><div class="ana-dial-num">${score !== null ? score : '–'}</div><div class="ana-dial-lbl">Readiness</div></div>
+      </div>${factorLine}
+    </div>
+    <div class="ana-pods-col">
+      ${pod('♥', rhrVal, 'RHR', '#8B1A1A', Math.round(100 - ((rhrVal ?? 60) - 40) / 60 * 100))}
+      ${pod('💤', deepVal, 'Deep', '#2E4053', Math.round((deepVal ?? 0) / 120 * 100))}
+    </div>
+  </div>`;
+}
 
-  const W = 300, H = 100, PX = 16, PT = 8, LH = 14;
-  const chartH = H - PT - LH;
-  const uid = 'c' + Math.random().toString(36).slice(2, 6);
+// ── Module: honest status / reconnect note (only when not cleanly synced) ────
+function anaStatusNote(fb) {
+  const today = ghLocalDate();
+  if (fb.dataState === 'synced' && fb.asOf === today) return '';
+  let msg, action = '', cls = 'warn';
+  if (!fb.connected || fb.dataState === 'disconnected') {
+    const why = fb.lastError === 'token-expired' ? 'session expired' : fb.lastError === 'consent-cancelled' ? 'sign-in cancelled' : (fb.lastError && fb.lastError.indexOf('auth') === 0) ? 'access was declined' : 'not connected';
+    msg = 'Health sync ' + why + '.'; action = `<button class="ana2-note-btn" onclick="ghConnect()">⟳ reconnect</button>`;
+  } else if (fb.dataState === 'connected-no-data' || fb.lastError === 'no-data') {
+    msg = 'Connected, but Google Health returned no recent metrics. Open the Fitbit app to force a device sync.';
+    action = `<button class="ana2-note-btn" onclick="fetchFitbitData(true)">↻ retry</button>`;
+  } else if (fb.lastError === 'badreq-400') {
+    msg = 'A data request was rejected (contract). This was logged.'; action = `<button class="ana2-note-btn" onclick="fetchFitbitData(true)">↻ retry</button>`;
+  } else if (fb.lastError === 'network') {
+    msg = 'Offline — showing last-known values.'; cls = 'info';
+  } else if (fb.asOf && fb.asOf !== today) {
+    msg = 'Showing last-known biometrics from ' + anaFmtDay(fb.asOf) + '.'; cls = 'info';
+    action = `<button class="ana2-note-btn" onclick="fetchFitbitData(true)">↻ refresh</button>`;
+  } else { return ''; }
+  return `<div class="ana2-note ${cls}"><span>${msg}</span>${action}</div>`;
+}
 
-  function normSeries(arr) {
-    const sl = arr.slice(-N);
-    // Pad if shorter
-    while (sl.length < N) sl.unshift(sl[0] ?? 0);
-    const mn = Math.min(...sl), mx = Math.max(...sl);
-    const rng = mx - mn || 1;
-    return sl.map(v => (v - mn) / rng);
+// ── Module: biometric trail (7d / 30d) ──────────────────────────────────────
+function anaTrailPanel(fb) {
+  const range = fb._range || 7;
+  return `<div class="ana-chart-panel">
+    <div class="ana-chart-top">
+      <div class="ana-chart-title">${range}-day biometric trail</div>
+      <div class="ana2-seg">
+        <button class="ana2-seg-btn ${range === 7 ? 'on' : ''}" onclick="ST.fitbit._range=7;renderAnalysis()">7d</button>
+        <button class="ana2-seg-btn ${range === 30 ? 'on' : ''}" onclick="ST.fitbit._range=30;renderAnalysis()">30d</button>
+      </div>
+    </div>
+    <div class="ana2-legend">
+      <span class="ana2-leg"><i style="background:#28A745"></i>readiness</span>
+      <span class="ana2-leg"><i style="background:#B8860B"></i>sleep</span>
+      <span class="ana2-leg"><i style="background:#1A5276"></i>hrv</span>
+    </div>
+    <div class="ana-chart-body" id="ana-chart-body">
+      ${buildBiometricChart(fb, range)}
+      <div class="ana-popover" id="ana-popover"></div>
+    </div>
+  </div>`;
+}
+function buildBiometricChart(fb, range) {
+  range = range || 7;
+  const sliceN = a => (a || []).slice(-range);
+  const R = sliceN(fb.trailingReadiness), SL = sliceN(fb.trailingSleep), HV = sliceN(fb.trailingHRV);
+  const N = Math.max(R.length, SL.length, HV.length, 0);
+  if (N < 2 || (R.concat(SL, HV).every(v => v == null))) {
+    return `<svg viewBox="0 0 300 120" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+      <text x="150" y="60" text-anchor="middle" font-family="'Cormorant Garamond',serif" font-style="italic" font-size="15" fill="#1A1714" opacity="0.4">no trail yet — sync to begin</text></svg>`;
   }
-
-  function catmullRom(pts) {
-    if (pts.length < 2) return '';
-    let d = `M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
-    for (let i = 0; i < pts.length - 1; i++) {
-      const p0 = pts[Math.max(0, i - 1)];
-      const p1 = pts[i], p2 = pts[i + 1];
-      const p3 = pts[Math.min(pts.length - 1, i + 2)];
-      const cp1x = p1[0] + (p2[0] - p0[0]) / 6;
-      const cp1y = p1[1] + (p2[1] - p0[1]) / 6;
-      const cp2x = p2[0] - (p3[0] - p1[0]) / 6;
-      const cp2y = p2[1] - (p3[1] - p1[1]) / 6;
-      d += ` C${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
-    }
-    return d;
+  const W = 300, H = 120, padL = 6, padR = 6, padT = 10, padB = 16;
+  const innerW = W - padL - padR, innerH = H - padT - padB;
+  const x = i => padL + (N === 1 ? innerW / 2 : (i / (N - 1)) * innerW);
+  const y100 = v => padT + innerH - (Math.max(0, Math.min(100, v)) / 100) * innerH;
+  const hvVals = HV.filter(v => v != null);
+  const hvMin = hvVals.length ? Math.min(...hvVals) : 0, hvMax = hvVals.length ? Math.max(...hvVals) : 1;
+  const yHv = v => { if (hvMax === hvMin) return padT + innerH / 2; return padT + innerH - ((v - hvMin) / (hvMax - hvMin)) * innerH; };
+  function path(arr, yfn) {
+    let d = '', started = false, len = 0;
+    arr.forEach((v, i) => { if (v == null) { started = false; return; } const cmd = started ? 'L' : 'M'; d += `${cmd}${x(i).toFixed(1)} ${yfn(v).toFixed(1)} `; started = true; len += 1; });
+    return { d: d.trim(), len };
   }
-
-  function toPoints(norm) {
-    return norm.map((v, i) => [
-      PX + (i / (N - 1)) * (W - PX * 2),
-      PT + (1 - v) * chartH
-    ]);
-  }
-
-  function areaClose(path, pts) {
-    const lx = pts[pts.length - 1][0].toFixed(1);
-    const by = (PT + chartH).toFixed(1);
-    return `${path} L${lx},${by} L${pts[0][0].toFixed(1)},${by} Z`;
-  }
-
-  const rN  = normSeries(R);
-  const slN = normSeries(SL);
-  const hvN = normSeries(HV);
-  const rPts  = toPoints(rN);
-  const slPts = toPoints(slN);
-  const hvPts = toPoints(hvN);
-  const rPath  = catmullRom(rPts);
-  const slPath = catmullRom(slPts);
-  const hvPath = catmullRom(hvPts);
-
-  // Tick marks + labels
-  const ticks = labels.map((lbl, i) => {
-    const x = PX + (i / (N - 1)) * (W - PX * 2);
-    return `
-      <line x1="${x.toFixed(1)}" y1="${(PT + chartH + 1).toFixed(1)}"
-            x2="${x.toFixed(1)}" y2="${(PT + chartH + 3).toFixed(1)}"
-        stroke="#8C8680" stroke-width="0.75" opacity="0.35"/>
-      <text x="${x.toFixed(1)}" y="${H - 1}" text-anchor="middle"
-        font-family="var(--font-body,monospace)" font-size="7" letter-spacing="0.06em"
-        fill="#8C8680" opacity="0.50">${lbl}</text>`;
-  }).join('');
-
-  // Today vertical rule
-  const todayX = (W - PX).toFixed(1);
-
-  return `<svg id="ana-trail-svg-${uid}" data-uid="${uid}"
-      viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"
-      width="100%" height="100%" preserveAspectRatio="none">
-    <defs>
-      <linearGradient id="gr-r-${uid}" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#28A745" stop-opacity="0.22"/>
-        <stop offset="100%" stop-color="#28A745" stop-opacity="0"/>
-      </linearGradient>
-      <linearGradient id="gr-sl-${uid}" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#B8860B" stop-opacity="0.18"/>
-        <stop offset="100%" stop-color="#B8860B" stop-opacity="0"/>
-      </linearGradient>
-      <linearGradient id="gr-hv-${uid}" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#1A5276" stop-opacity="0.16"/>
-        <stop offset="100%" stop-color="#1A5276" stop-opacity="0"/>
-      </linearGradient>
-    </defs>
-
-    <!-- Today rule -->
-    <line x1="${todayX}" y1="${PT}" x2="${todayX}" y2="${(PT + chartH).toFixed(1)}"
-      stroke="#8C8680" stroke-width="0.6" opacity="0.18" stroke-dasharray="2.5,3"/>
-
-    <!-- HRV band -->
-    <path d="${areaClose(hvPath, hvPts)}" fill="url(#gr-hv-${uid})"/>
-    <path d="${hvPath}" fill="none" stroke="#1A5276"
-      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.70"/>
-
-    <!-- Sleep band -->
-    <path d="${areaClose(slPath, slPts)}" fill="url(#gr-sl-${uid})"/>
-    <path d="${slPath}" fill="none" stroke="#B8860B"
-      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.72"/>
-
-    <!-- Readiness band (topmost) -->
-    <path d="${areaClose(rPath, rPts)}" fill="url(#gr-r-${uid})"/>
-    <path d="${rPath}" fill="none" stroke="#28A745"
-      stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/>
-
-    <!-- Pointer (hidden by default) -->
-    <line id="ana-ptr-${uid}" x1="0" y1="${PT}" x2="0" y2="${(PT + chartH).toFixed(1)}"
-      stroke="#1A1714" stroke-width="0.75" opacity="0.22" stroke-dasharray="2,3"
-      display="none"/>
-
-    <!-- Data point dots at each day -->
-    ${rPts.map((p, i) => `
-      <circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2.2"
-        fill="#28A745" opacity="0.80"
-        style="filter:drop-shadow(0 0 2px #28A74580)"/>
-    `).join('')}
-
-    ${ticks}
+  const pR = path(R, y100), pS = path(SL, y100), pH = path(HV, yHv);
+  function poly(p, color, w) { if (!p.d) return ''; return `<path d="${p.d}" fill="none" stroke="${color}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" style="stroke-dasharray:600;stroke-dashoffset:600;animation:anaDraw 900ms cubic-bezier(0.16,1,0.3,1) forwards"/>`; }
+  function dots(arr, yfn, color) { return arr.map((v, i) => v == null ? '' : `<circle cx="${x(i).toFixed(1)}" cy="${yfn(v).toFixed(1)}" r="1.7" fill="${color}"/>`).join(''); }
+  // x labels: first / mid / last
+  const dts = sliceN(fb.trailingDates);
+  const lbl = i => dts[i] ? anaFmtDay(dts[i]) : '';
+  const xlabels = `<text x="${x(0)}" y="${H-4}" font-size="6.5" fill="#1A1714" opacity="0.4" font-family="var(--font-body)">${lbl(0)}</text>
+    <text x="${x(N-1)}" y="${H-4}" text-anchor="end" font-size="6.5" fill="#1A1714" opacity="0.4" font-family="var(--font-body)">${lbl(N-1)}</text>`;
+  return `<svg id="ana-trail-svg" viewBox="0 0 ${W} ${H}" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <line id="ana-scrub-line" x1="0" y1="${padT}" x2="0" y2="${padT+innerH}" stroke="#1A1714" stroke-width="0.6" opacity="0"/>
+    ${poly(pS, '#B8860B', 1.6)}${poly(pH, '#1A5276', 1.6)}${poly(pR, '#28A745', 2.1)}
+    ${dots(SL, y100, '#B8860B')}${dots(HV, yHv, '#1A5276')}${dots(R, y100, '#28A745')}
+    ${xlabels}
   </svg>`;
 }
-
 function initChartHover(fb) {
-  const body    = document.getElementById('ana-chart-body');
-  const popover = document.getElementById('ana-popover');
-  if (!body || !popover) return;
-
-  const svgEl = body.querySelector('svg');
-  if (!svgEl) return;
-
-  const R  = fb.trailingReadiness || [];
-  const SL = fb.trailingSleep     || [];
-  const HV = fb.trailingHRV       || [];
-  const N  = Math.max(R.length, SL.length, HV.length, 0);
+  const svg = document.getElementById('ana-trail-svg');
+  const pop = document.getElementById('ana-popover');
+  const line = document.getElementById('ana-scrub-line');
+  if (!svg || !pop) return;
+  const range = fb._range || 7;
+  const sliceN = a => (a || []).slice(-range);
+  const R = sliceN(fb.trailingReadiness), SL = sliceN(fb.trailingSleep), HV = sliceN(fb.trailingHRV), RH = sliceN(fb.trailingRHR), D = sliceN(fb.trailingDates);
+  const N = Math.max(R.length, SL.length, HV.length, 0);
   if (N < 2) return;
-
-  const uid    = svgEl.dataset.uid;
-  const ptr    = document.getElementById(`ana-ptr-${uid}`);
-  const W      = 300, PX = 16;
-  const chartW = W - PX * 2;
-
-  const DAYS_LONG = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  const today = new Date();
-
-  function getDayLabel(idxFromEnd) {
-    const d = new Date(today);
-    d.setDate(today.getDate() - idxFromEnd);
-    return DAYS_LONG[d.getDay()];
+  function at(clientX) {
+    const rect = svg.getBoundingClientRect();
+    const f = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    const i = Math.round(f * (N - 1));
+    if (line) { line.setAttribute('x1', (6 + (i / (N - 1)) * 288).toFixed(1)); line.setAttribute('x2', (6 + (i / (N - 1)) * 288).toFixed(1)); line.setAttribute('opacity', '0.25'); }
+    const rd = R[i], sl = SL[i], hv = HV[i], rh = RH[i];
+    pop.innerHTML = `<div class="ana2-pop-d">${D[i] ? anaFmtDay(D[i]) : ''}</div>
+      <div class="ana2-pop-r"><i style="background:#28A745"></i>${rd != null ? rd : '–'}<i style="background:#B8860B;margin-left:7px"></i>${sl != null ? sl : '–'}<i style="background:#1A5276;margin-left:7px"></i>${hv != null ? hv : '–'}${rh != null ? ' · ♥' + rh : ''}</div>`;
+    pop.style.opacity = '1';
+    try { if (typeof haptic === 'function') haptic('tick'); } catch (e) {}
   }
-
-  function onMove(clientX) {
-    const rect   = svgEl.getBoundingClientRect();
-    const relX   = (clientX - rect.left) / rect.width; // 0–1
-    const normX  = (relX * W - PX) / chartW;           // 0–1 within chart
-    const idx    = Math.round(Math.max(0, Math.min(1, normX)) * (N - 1));
-    const svgX   = PX + (idx / (N - 1)) * chartW;
-
-    if (ptr) {
-      ptr.setAttribute('x1', svgX.toFixed(1));
-      ptr.setAttribute('x2', svgX.toFixed(1));
-      ptr.setAttribute('display', 'block');
-    }
-
-    const rVal  = R[R.length  - N + idx]  ?? null;
-    const slVal = SL[SL.length - N + idx] ?? null;
-    const hvVal = HV[HV.length - N + idx] ?? null;
-    const dayName = getDayLabel(N - 1 - idx);
-
-    popover.innerHTML = `
-      <div class="ana-popover-day">${dayName}</div>
-      <div class="ana-popover-row">
-        <div class="ana-popover-dot" style="background:#28A745"></div>
-        Readiness
-        <span class="ana-popover-val">${rVal !== null ? rVal : '–'}</span>
-      </div>
-      <div class="ana-popover-row">
-        <div class="ana-popover-dot" style="background:#B8860B"></div>
-        Sleep
-        <span class="ana-popover-val">${slVal !== null ? slVal : '–'}</span>
-      </div>
-      <div class="ana-popover-row">
-        <div class="ana-popover-dot" style="background:#1A5276"></div>
-        HRV
-        <span class="ana-popover-val">${hvVal !== null ? hvVal : '–'}</span>
-      </div>`;
-
-    popover.classList.add('visible');
-
-    // Position popover: keep it inside bounds
-    const bodyRect = body.getBoundingClientRect();
-    const px = clientX - bodyRect.left + 10;
-    const py = 10;
-    const maxLeft = bodyRect.width - 148;
-    popover.style.left = `${Math.max(4, Math.min(px, maxLeft))}px`;
-    popover.style.top  = `${py}px`;
-  }
-
-  body.addEventListener('mousemove',  e => onMove(e.clientX));
-  body.addEventListener('touchmove',  e => { e.preventDefault(); onMove(e.touches[0].clientX); }, { passive: false });
-  body.addEventListener('mouseleave', () => {
-    popover.classList.remove('visible');
-    if (ptr) ptr.setAttribute('display','none');
-  });
-  body.addEventListener('touchend',   () => {
-    setTimeout(() => {
-      popover.classList.remove('visible');
-      if (ptr) ptr.setAttribute('display','none');
-    }, 1800);
-  });
+  function end() { pop.style.opacity = '0'; if (line) line.setAttribute('opacity', '0'); }
+  svg.ontouchstart = svg.ontouchmove = e => { if (e.touches && e.touches[0]) { at(e.touches[0].clientX); e.preventDefault(); } };
+  svg.ontouchend = end;
+  svg.onmousemove = e => at(e.clientX);
+  svg.onmouseleave = end;
 }
 
-// ╔══════════════════════════════════════════════════════════════════════════╗
-// ║  GOOGLE HEALTH API — DIRECT CLIENT (Google Identity Services)            ║
-// ║  The Health API rejects tokens that mix health scopes with broad scopes  ║
-// ║  (DISALLOWED_OAUTH_SCOPES), which kills any Apps Script proxy. So the    ║
-// ║  PWA talks to health.googleapis.com itself: GIS token client, public     ║
-// ║  client ID (no secret — by design), token carries ONLY health scopes.    ║
-// ║  Sheets sync stays on Apps Script, untouched.                            ║
-// ╚══════════════════════════════════════════════════════════════════════════╝
+// ── Module: week-over-week deltas ───────────────────────────────────────────
+function anaDeltas(fb) {
+  function delta(arr, lowerBetter) {
+    const last = anaAvg((arr || []).slice(-7)), prev = anaAvg((arr || []).slice(-14, -7));
+    if (last == null || prev == null) return null;
+    const d = Math.round((last - prev) * 10) / 10;
+    const good = lowerBetter ? d < 0 : d > 0;
+    return { d, good, neutral: d === 0, val: Math.round(last) };
+  }
+  const items = [['readiness', fb.trailingReadiness, false], ['sleep', fb.trailingSleep, false], ['hrv', fb.trailingHRV, false], ['rhr', fb.trailingRHR, true]];
+  const cells = items.map(([label, arr, lb]) => {
+    const r = delta(arr, lb);
+    if (!r) return `<div class="ana2-delta"><div class="ana2-delta-v">–</div><div class="ana2-delta-l">${label}</div></div>`;
+    const arrow = r.neutral ? '→' : (r.d > 0 ? '▲' : '▼');
+    const col = r.neutral ? '#9A938A' : (r.good ? '#22965A' : '#C04E2A');
+    return `<div class="ana2-delta"><div class="ana2-delta-v">${r.val}<span class="ana2-delta-ar" style="color:${col}">${arrow}${Math.abs(r.d)}</span></div><div class="ana2-delta-l">${label} · w/w</div></div>`;
+  }).join('');
+  return `<div class="ana2-deltas">${cells}</div>`;
+}
+
+// ── Module: sleep architecture ──────────────────────────────────────────────
+function anaSleepArch(fb) {
+  const deep = fb.deepSleepMinutes ?? null, rem = fb.remSleepMinutes ?? null, light = fb.lightSleepMinutes ?? null;
+  const total = (deep || 0) + (rem || 0) + (light || 0);
+  if (!total) return `<div class="ana2-card ana2-muted"><div class="ana2-card-eyebrow">sleep architecture</div><div class="ana2-card-empty">no staged sleep on record yet</div></div>`;
+  const seg = (m, c, lbl) => m ? `<div class="ana2-arch-seg" style="flex:${m};background:${c}" title="${lbl} ${m}m"></div>` : '';
+  const hm = m => m == null ? '–' : Math.floor(m / 60) + 'h ' + String(m % 60).padStart(2, '0') + 'm';
+  const eff = fb.sleepEfficiency ?? null;
+  return `<div class="ana2-card">
+    <div class="ana2-card-eyebrow">sleep architecture<span class="ana2-card-aside">${hm(total)} asleep${eff != null ? ' · ' + eff + '% eff' : ''}</span></div>
+    <div class="ana2-arch-bar">${seg(deep, '#2E4053', 'deep')}${seg(rem, '#4A6FA5', 'rem')}${seg(light, '#A9C0DE', 'light')}</div>
+    <div class="ana2-arch-key">
+      <span><i style="background:#2E4053"></i>deep ${hm(deep)}</span>
+      <span><i style="background:#4A6FA5"></i>rem ${hm(rem)}</span>
+      <span><i style="background:#A9C0DE"></i>light ${hm(light)}</span>
+    </div>
+  </div>`;
+}
+
+// ── Module: HRV vs personal baseline band ───────────────────────────────────
+function anaHrvBaseline(fb) {
+  const hv = (fb.trailingHRV || []).map((v, i) => ({ v, i })).filter(o => o.v != null);
+  if (hv.length < 3) return '';
+  const vals = hv.map(o => o.v);
+  const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
+  const sd = Math.sqrt(vals.reduce((a, b) => a + (b - mean) * (b - mean), 0) / vals.length) || 1;
+  const lo = mean - sd, hiB = mean + sd;
+  const cur = fb.hrv ?? vals[vals.length - 1];
+  const W = 300, H = 54, pad = 4;
+  const all = vals.concat([lo, hiB]); const mn = Math.min(...all), mx = Math.max(...all);
+  const y = v => pad + (H - 2 * pad) - ((v - mn) / ((mx - mn) || 1)) * (H - 2 * pad);
+  const n = (fb.trailingHRV || []).length;
+  const x = i => pad + (n <= 1 ? 0 : (i / (n - 1)) * (W - 2 * pad));
+  const bandTop = y(hiB), bandBot = y(lo);
+  let d = '', started = false;
+  (fb.trailingHRV || []).forEach((v, i) => { if (v == null) { started = false; return; } d += (started ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1) + ' '; started = true; });
+  const status = cur >= hiB ? ['above baseline', '#22965A'] : cur <= lo ? ['below baseline', '#C04E2A'] : ['within baseline', '#7A736A'];
+  return `<div class="ana2-card">
+    <div class="ana2-card-eyebrow">hrv vs your baseline<span class="ana2-card-aside" style="color:${status[1]}">${cur != null ? cur + 'ms · ' + status[0] : status[0]}</span></div>
+    <svg viewBox="0 0 ${W} ${H}" width="100%" height="46" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="${bandTop.toFixed(1)}" width="${W}" height="${Math.max(1,(bandBot-bandTop)).toFixed(1)}" fill="#1A5276" opacity="0.10"/>
+      <line x1="0" y1="${y(mean).toFixed(1)}" x2="${W}" y2="${y(mean).toFixed(1)}" stroke="#1A5276" stroke-width="0.5" stroke-dasharray="3 3" opacity="0.5"/>
+      <path d="${d.trim()}" fill="none" stroke="#1A5276" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>`;
+}
+
+// ── Module: biometric ↔ performance correlations (offline, vs training logs) ─
+function anaMedian(a) { if (!a.length) return null; const s = [...a].sort((x, y) => x - y); const m = Math.floor(s.length / 2); return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; }
+function anaPearson(xs, ys) {
+  const n = xs.length; if (n < 3) return null;
+  const mx = xs.reduce((a, b) => a + b, 0) / n, my = ys.reduce((a, b) => a + b, 0) / n;
+  let num = 0, dx = 0, dy = 0;
+  for (let i = 0; i < n; i++) { const a = xs[i] - mx, b = ys[i] - my; num += a * b; dx += a * a; dy += b * b; }
+  if (dx === 0 || dy === 0) return null;
+  return num / Math.sqrt(dx * dy);
+}
+function computeBioCorrelations(history, bioLog, MIN_N) {
+  MIN_N = MIN_N || 5;
+  const horizon = Date.now() - 60 * 86400000;
+  const rows = [];
+  (history || []).forEach(w => {
+    if (!w || !w.sets || !w.endTime || w.endTime < horizon) return;
+    const day = ghLocalDate(w.endTime);
+    const bio = bioLog && bioLog[day];
+    if (!bio) return;
+    let e1rm = 0, vol = 0;
+    for (const [key, sets] of Object.entries(w.sets)) {
+      if (key.endsWith('_wu') || !Array.isArray(sets)) continue;
+      e1rm += (typeof getTopSetE1RM === 'function') ? getTopSetE1RM(sets) : 0;
+      sets.forEach(s => { if (s && s.w > 0 && s.r > 0) vol += s.w * s.r; });
+    }
+    if (e1rm <= 0) return;
+    rows.push({ day, sid: w.sessionId, e1rm, vol, readiness: bio.readiness, sleep: bio.sleep, hrv: bio.hrv, rhr: bio.rhr });
+  });
+  const byS = {};
+  rows.forEach(r => { (byS[r.sid] = byS[r.sid] || []).push(r); });
+  const norm = [];
+  Object.values(byS).forEach(grp => {
+    if (grp.length < 2) return;
+    const mean = grp.reduce((a, r) => a + r.e1rm, 0) / grp.length;
+    if (mean <= 0) return;
+    grp.forEach(r => norm.push(Object.assign({ relPerf: (r.e1rm - mean) / mean }, r)));
+  });
+  function tierCard(metricKey, label, unit) {
+    const pts = norm.filter(r => r[metricKey] != null);
+    if (pts.length < MIN_N) return null;
+    const med = anaMedian(pts.map(r => r[metricKey]));
+    const hi = pts.filter(r => r[metricKey] >= med), lo = pts.filter(r => r[metricKey] < med);
+    if (hi.length < 2 || lo.length < 2) return null;
+    const avg = arr => arr.reduce((a, r) => a + r.relPerf, 0) / arr.length;
+    const deltaPct = Math.round((avg(hi) - avg(lo)) * 1000) / 10;
+    const r = anaPearson(pts.map(p => p[metricKey]), pts.map(p => p.relPerf));
+    return { metricKey, label, unit, med: Math.round(med), deltaPct, r: r == null ? null : Math.round(r * 100) / 100, n: pts.length };
+  }
+  const cards = [];
+  [tierCard('readiness', 'readiness', ''), tierCard('sleep', 'sleep', ''), tierCard('hrv', 'HRV', 'ms')].forEach(c => { if (c) cards.push(c); });
+  cards.sort((a, b) => Math.abs(b.deltaPct) - Math.abs(a.deltaPct));
+  return { ready: cards.length > 0, cards, n: norm.length, matched: rows.length };
+}
+function anaCorrelations(fb) {
+  let res;
+  try { res = computeBioCorrelations((typeof getHistory === 'function' ? getHistory() : []), ghGetBioLog(), 5); }
+  catch (e) { res = { ready: false, cards: [], matched: 0 }; }
+  if (!res.ready) {
+    const need = Math.max(0, 5 - res.matched);
+    return `<div class="ana2-card ana2-muted">
+      <div class="ana2-card-eyebrow">recovery ↔ performance</div>
+      <div class="ana2-card-empty">Building your baseline — ${res.matched} session${res.matched === 1 ? '' : 's'} logged with recovery data. Correlations unlock at 5 matched sessions${need ? ` (${need} to go)` : ''}. Keep training with sync on.</div>
+    </div>`;
+  }
+  const cardHtml = res.cards.slice(0, 3).map(c => {
+    const sign = c.deltaPct > 0 ? '+' : '';
+    const dir = c.deltaPct >= 0 ? 'higher' : 'lower';
+    const col = c.deltaPct >= 0 ? '#22965A' : '#C04E2A';
+    const verb = c.metricKey === 'hrv' ? `On high-HRV days (≥${c.med}${c.unit})` : `On high-${c.label} days (≥${c.med})`;
+    return `<div class="ana2-corr">
+      <div class="ana2-corr-stat" style="color:${col}">${sign}${c.deltaPct}%</div>
+      <div class="ana2-corr-body"><strong>${verb}</strong> your top-set e1RM runs ${dir} vs your low-${c.label} days.${c.r != null ? ` <span class="ana2-corr-r">r=${c.r}</span>` : ''}</div>
+      <div class="ana2-corr-n">${c.n} sessions</div>
+    </div>`;
+  }).join('');
+  return `<div class="ana2-card"><div class="ana2-card-eyebrow">recovery ↔ performance<span class="ana2-card-aside">offline · your logs</span></div>${cardHtml}</div>`;
+}
+
 const GH_CLIENT_ID = '811601427555-4a1afoo56tcdcd6ncocgegpnha2cjl4s.apps.googleusercontent.com';
 const GH_SCOPES = [
   'https://www.googleapis.com/auth/googlehealth.sleep.readonly',
   'https://www.googleapis.com/auth/googlehealth.health_metrics_and_measurements.readonly',
-  'https://www.googleapis.com/auth/googlehealth.activity_and_fitness.readonly',
 ].join(' ');
 const GH_API = 'https://health.googleapis.com/v4/users/me';
 
@@ -8735,55 +8808,73 @@ async function ghGetToken(interactive) {
             resolve(resp.access_token);
           } else resolve(null);
         },
-        error_callback: () => resolve(null),
+        error_callback: (err) => { try { if (ST.fitbit) ST.fitbit.lastError = 'gis-' + ((err && err.type) || 'error'); } catch(e){} resolve(null); },
       });
       tc.requestAccessToken({ prompt: interactive ? '' : 'none' });
     } catch(e) { resolve(null); }
   });
 }
 
-async function ghFetch(token, path, params) {
-  let url = GH_API + path;
-  if (params) {
-    url += (url.includes('?') ? '&' : '?') + Object.entries(params)
-      .map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&');
-  }
-  const res = await fetch(url, { headers: { Authorization: 'Bearer ' + token, Accept: 'application/json' } });
+async function ghFetch(token, url) {
+  let res;
+  try {
+    res = await fetch(url, { headers: { Authorization: 'Bearer ' + token, Accept: 'application/json' } });
+  } catch (e) { throw new Error('network'); }
   if (res.status === 401 || res.status === 403) { LS.set('dcrgym_gh_token', null); throw new Error('auth-' + res.status); }
-  if (!res.ok) throw new Error('HTTP ' + res.status);
+  if (res.status === 400) {
+    let t = ''; try { t = await res.text(); } catch (_) {}
+    console.warn('[DCR Gym] Health 400 (filter/contract):', t.slice(0, 280));
+    throw new Error('badreq-400');
+  }
+  if (!res.ok) throw new Error('http-' + res.status);
   return res.json();
 }
 
-const GH_NUM_KEYS  = ['bpm', 'beatsPerMinute', 'rmssd', 'milliseconds', 'dailyRmssd', 'value', 'percentage', 'avg', 'average'];
-const GH_SKIP_KEYS = { interval:1, sampleTime:1, civilTime:1, civilStartTime:1, civilEndTime:1, date:1, time:1, dataSource:1, name:1, createTime:1, updateTime:1, metadata:1 };
-
-function ghFirstNumber(node, depth = 0) {
-  if (node === null || node === undefined || depth > 4) return null;
-  if (typeof node === 'number' && isFinite(node)) return node;
-  if (typeof node === 'string' && node !== '' && isFinite(Number(node))) return Number(node);
-  if (typeof node !== 'object') return null;
-  for (const k of GH_NUM_KEYS) {
-    if (node[k] !== undefined) { const v = ghFirstNumber(node[k], depth + 1); if (v !== null) return v; }
-  }
-  for (const k in node) {
-    if (GH_SKIP_KEYS[k]) continue;
-    const v = ghFirstNumber(node[k], depth + 1);
-    if (v !== null) return v;
-  }
-  return null;
+// GET list method (developers.google.com/health …/dataPoints), following
+// nextPageToken up to maxPages. Returns a merged { dataPoints:[...] }.
+async function ghList(token, dataType, filter, pageSize, maxPages) {
+  maxPages = maxPages || 1;
+  let all = [], pageToken = '', pages = 0;
+  do {
+    let url = GH_API + '/dataTypes/' + dataType + '/dataPoints?pageSize=' + pageSize
+            + '&filter=' + encodeURIComponent(filter);
+    if (pageToken) url += '&pageToken=' + encodeURIComponent(pageToken);
+    const r = await ghFetch(token, url);
+    if (r && r.dataPoints) all = all.concat(r.dataPoints);
+    pageToken = (r && r.nextPageToken) || '';
+    pages++;
+  } while (pageToken && pages < maxPages);
+  return { dataPoints: all };
 }
 
 function ghLocalDate(d) {
   const dt = d ? new Date(d) : new Date();
   return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
 }
-
-function ghSleepEndDate(s) {
-  if (s.interval && s.interval.civilEndTime && s.interval.civilEndTime.date) {
-    const d = s.interval.civilEndTime.date;
-    return d.year + '-' + String(d.month).padStart(2, '0') + '-' + String(d.day).padStart(2, '0');
+// Accepts a google.type.Date {year,month,day} OR a CivilDateTime {date:{...},time:{...}}
+function ghDateKey(d) {
+  if (!d) return null;
+  const dd = d.date || d;
+  if (dd && dd.year) return dd.year + '-' + String(dd.month || 1).padStart(2, '0') + '-' + String(dd.day || 1).padStart(2, '0');
+  return null;
+}
+function ghNum(v) {
+  if (v === null || v === undefined) return null;
+  const n = typeof v === 'string' ? Number(v) : v;
+  return (typeof n === 'number' && isFinite(n)) ? n : null;
+}
+const GH_SKIP = { date: 1, sampleTime: 1, civilTime: 1, interval: 1, metadata: 1, dataSource: 1, name: 1, createTime: 1, updateTime: 1 };
+function ghFirstNumber(node, depth) {
+  depth = depth || 0;
+  if (node === null || node === undefined || depth > 4) return null;
+  if (typeof node === 'number' && isFinite(node)) return node;
+  if (typeof node === 'string' && node !== '' && isFinite(Number(node))) return Number(node);
+  if (typeof node !== 'object') return null;
+  for (const k in node) {
+    if (GH_SKIP[k]) continue;
+    const v = ghFirstNumber(node[k], depth + 1);
+    if (v !== null) return v;
   }
-  if (s.interval && s.interval.endTime) return ghLocalDate(s.interval.endTime);
   return null;
 }
 
@@ -8795,7 +8886,6 @@ function ghComputeSleepScore(totalMins, deepMins, remMins, efficiency) {
   const effScore  = efficiency ? Math.min(100, efficiency) : 80;
   return Math.max(0, Math.min(100, Math.round(Math.min(durScore,95)*0.35 + deepScore*0.30 + remScore*0.20 + effScore*0.15)));
 }
-
 function ghComputeReadiness(rhr, hrv, sleepScore) {
   const pillars = [];
   if (sleepScore !== null && sleepScore !== undefined) pillars.push(['sleep quality', sleepScore]);
@@ -8806,157 +8896,193 @@ function ghComputeReadiness(rhr, hrv, sleepScore) {
   return { score: Math.max(0, Math.min(100, avg)), factor: pillars.sort((a, b) => a[1] - b[1])[0][0] };
 }
 
-// Three requests total: sleep (7d reconciled), RHR (7d), HRV (7d) — bucketed
-// client-side into today's payload + trailing sparkline arrays.
-async function ghPullAll(token) {
-  const today = ghLocalDate();
-  const weekAgo = ghLocalDate(Date.now() - 7 * 86400000);
-
-  const [sleepData, rhrData, hrvData, spo2Data] = await Promise.all([
-    ghFetch(token, '/dataTypes/sleep/dataPoints:reconcile', {
-      dataSourceFamily: 'users/me/dataSourceFamilies/google-wearables',
-      filter: `sleep.interval.civil_end_time >= "${weekAgo}"`,
-    }).catch(e => { if (String(e.message).indexOf('auth') === 0) throw e; return null; }),
-    ghFetch(token, '/dataTypes/daily-resting-heart-rate/dataPoints', {
-      filter: `daily_resting_heart_rate.sample_time.civil_time >= "${weekAgo}T00:00:00"`, page_size: 31,
-    }).catch(e => { if (String(e.message).indexOf('auth') === 0) throw e; return null; }),
-    ghFetch(token, '/dataTypes/daily-heart-rate-variability/dataPoints', {
-      filter: `daily_heart_rate_variability.sample_time.civil_time >= "${weekAgo}T00:00:00"`, page_size: 31,
-    }).catch(e => { if (String(e.message).indexOf('auth') === 0) throw e; return null; }),
-    ghFetch(token, '/dataTypes/daily-oxygen-saturation/dataPoints', {
-      filter: `daily_oxygen_saturation.sample_time.civil_time >= "${weekAgo}T00:00:00"`, page_size: 31,
-    }).catch(() => null),
-  ]);
-
-  // Sleep by end-date — keep the best (main/longest) session per day
-  const sleepByDay = {};
-  ((sleepData && sleepData.dataPoints) || []).forEach(p => {
-    const s = p.sleep || {};
-    const day = ghSleepEndDate(s);
-    if (!day || !s.summary) return;
-    const mins = parseInt(s.summary.minutesAsleep || 0, 10);
-    const rank = ((s.metadata && s.metadata.main) ? 100000 : 0) + mins;
-    if (!sleepByDay[day] || rank > sleepByDay[day]._rank) {
-      let deep = null, rem = null, light = null;
-      (s.summary.stagesSummary || []).forEach(st => {
-        const m = parseInt(st.minutes || 0, 10);
-        if (st.type === 'DEEP') deep = m;
-        if (st.type === 'REM') rem = m;
-        if (st.type === 'LIGHT') light = m;
-      });
-      const total  = parseInt(s.summary.minutesAsleep || 0, 10) || null;
-      const period = parseInt(s.summary.minutesInSleepPeriod || 0, 10);
-      const eff    = (total && period) ? Math.round((total / period) * 100) : null;
-      sleepByDay[day] = { _rank: rank, score: ghComputeSleepScore(total, deep, rem, eff), deep, rem, light, total };
+// Sleep list → { 'YYYY-MM-DD'(end date): {score,deep,rem,light,total,efficiency} }
+function ghParseSleep(resp) {
+  const byDay = {};
+  ((resp && resp.dataPoints) || []).forEach(p => {
+    const s = p.sleep; if (!s) return;
+    const meta = s.metadata || {};
+    if (meta.nap) return;
+    const day = ghDateKey(s.interval && s.interval.civilEndTime) || (s.interval && s.interval.endTime ? ghLocalDate(s.interval.endTime) : null);
+    if (!day) return;
+    const sum = s.summary || {};
+    const total = ghNum(sum.minutesAsleep);
+    if (!total) return;
+    const period = ghNum(sum.minutesInSleepPeriod);
+    let deep = null, rem = null, light = null;
+    (sum.stagesSummary || []).forEach(st => {
+      const m = ghNum(st.minutes);
+      if (st.type === 'DEEP') deep = m;
+      else if (st.type === 'REM') rem = m;
+      else if (st.type === 'LIGHT') light = m;
+    });
+    const eff = (total && period) ? Math.round((total / period) * 100) : null;
+    if (!byDay[day] || total > byDay[day]._rank) {
+      byDay[day] = { _rank: total, score: ghComputeSleepScore(total, deep, rem, eff), deep, rem, light, total, efficiency: eff };
     }
   });
+  return byDay;
+}
+// Daily-summary list (RHR/HRV/SpO2) → { 'YYYY-MM-DD': number }
+function ghParseDaily(resp, field, valueFn) {
+  const byDay = {};
+  ((resp && resp.dataPoints) || []).forEach(p => {
+    const node = p[field]; if (!node) return;
+    const day = ghDateKey(node.date);
+    if (!day) return;
+    const v = valueFn(node);
+    if (v !== null && byDay[day] === undefined) byDay[day] = Math.round(v * 10) / 10;
+  });
+  return byDay;
+}
 
-  // Daily metrics by date
-  function byDay(data, camelKey) {
-    const out = {};
-    ((data && data.dataPoints) || []).forEach(p => {
-      const node = p[camelKey] || p;
-      let day = null;
-      const stp = node.sampleTime || (node[camelKey] && node[camelKey].sampleTime);
-      if (stp && stp.civilTime && stp.civilTime.date) {
-        const d = stp.civilTime.date;
-        day = d.year + '-' + String(d.month).padStart(2, '0') + '-' + String(d.day).padStart(2, '0');
-      } else if (stp && stp.physicalTime) day = ghLocalDate(stp.physicalTime);
-      else if (node.interval && node.interval.startTime) day = ghLocalDate(node.interval.startTime);
-      const v = ghFirstNumber(node);
-      if (day && v !== null && out[day] === undefined) out[day] = Math.round(v * 10) / 10;
-    });
-    return out;
-  }
-  const rhrByDay  = byDay(rhrData,  'dailyRestingHeartRate');
-  const hrvByDay  = byDay(hrvData,  'dailyHeartRateVariability');
-  const spo2ByDay = byDay(spo2Data, 'dailyOxygenSaturation');
+function ghAssemble(sleepResp, rhrResp, hrvResp, spo2Resp, DAYS) {
+  DAYS = DAYS || 30;
+  const sleepByDay = ghParseSleep(sleepResp);
+  const rhrByDay  = ghParseDaily(rhrResp,  'dailyRestingHeartRate',     n => ghNum(n.beatsPerMinute));
+  const hrvByDay  = ghParseDaily(hrvResp,  'dailyHeartRateVariability', n => ghNum(n.averageHeartRateVariabilityMilliseconds));
+  const spo2ByDay = ghParseDaily(spo2Resp, 'dailyOxygenSaturation',     n => ghFirstNumber(n));
 
-  // Trailing 7-day arrays (oldest → today)
-  const trailingReadiness = [], trailingSleep = [], trailingHRV = [];
-  for (let i = 6; i >= 0; i--) {
+  const trailingReadiness = [], trailingSleep = [], trailingHRV = [], trailingRHR = [], trailingDates = [];
+  const bioLog = {};
+  for (let i = DAYS - 1; i >= 0; i--) {
     const day = ghLocalDate(Date.now() - i * 86400000);
     const slp = sleepByDay[day] || {};
-    const rd  = ghComputeReadiness(rhrByDay[day] ?? null, hrvByDay[day] ?? null, slp.score ?? null);
+    const rhr = rhrByDay[day] ?? null;
+    const hrv = hrvByDay[day] ?? null;
+    const rd  = ghComputeReadiness(rhr, hrv, slp.score ?? null);
+    trailingDates.push(day);
     trailingReadiness.push(rd.score);
     trailingSleep.push(slp.score ?? null);
-    trailingHRV.push(hrvByDay[day] ?? null);
+    trailingHRV.push(hrv);
+    trailingRHR.push(rhr);
+    if (rd.score != null || slp.score != null || hrv != null || rhr != null) {
+      bioLog[day] = { readiness: rd.score, sleep: slp.score ?? null, hrv, rhr, deep: slp.deep ?? null, spo2: spo2ByDay[day] ?? null };
+    }
   }
-
-  const tSleep = sleepByDay[today] || {};
-  const tRhr = rhrByDay[today] ?? null;
-  const tHrv = hrvByDay[today] ?? null;
-  const readiness = ghComputeReadiness(tRhr, tHrv, tSleep.score ?? null);
-
+  // "Current" snapshot = most recent day that actually has data (last-known, dated)
+  let idx = -1;
+  for (let i = trailingDates.length - 1; i >= 0; i--) {
+    if (trailingReadiness[i] != null || trailingSleep[i] != null || trailingHRV[i] != null || trailingRHR[i] != null) { idx = i; break; }
+  }
+  const asOf = idx >= 0 ? trailingDates[idx] : null;
+  const cDay = asOf ? (sleepByDay[asOf] || {}) : {};
+  const cRhr = asOf ? (rhrByDay[asOf] ?? null) : null;
+  const cHrv = asOf ? (hrvByDay[asOf] ?? null) : null;
+  const readiness = ghComputeReadiness(cRhr, cHrv, cDay.score ?? null);
   return {
-    readinessScore:    readiness.score,
-    readinessFactor:   readiness.factor,
-    sleepScore:        tSleep.score ?? null,
-    restingHR:         tRhr,
-    hrv:               tHrv,
-    spo2:              spo2ByDay[today] ?? null,
-    deepSleepMinutes:  tSleep.deep ?? null,
-    remSleepMinutes:   tSleep.rem ?? null,
-    lightSleepMinutes: tSleep.light ?? null,
-    fetchedAt:         today,
-    trailingReadiness, trailingSleep, trailingHRV,
-    source: 'google-health-direct',
+    payload: {
+      readinessScore: readiness.score, readinessFactor: readiness.factor,
+      sleepScore: cDay.score ?? null, restingHR: cRhr, hrv: cHrv,
+      spo2: asOf ? (spo2ByDay[asOf] ?? null) : null,
+      deepSleepMinutes: cDay.deep ?? null, remSleepMinutes: cDay.rem ?? null, lightSleepMinutes: cDay.light ?? null,
+      sleepEfficiency: cDay.efficiency ?? null,
+      asOf: asOf, fetchedAt: ghLocalDate(),
+      trailingReadiness, trailingSleep, trailingHRV, trailingRHR, trailingDates,
+      source: 'google-health-direct',
+    },
+    bioLog: bioLog,
+    anyData: Object.keys(bioLog).length > 0,
   };
 }
 
-// User-gesture entry point — the reconnect chip calls this
-function ghConnect() { fetchFitbitData(true, true); }
+// Persistent daily biometric log — accumulates across syncs so the correlation
+// engine grows a real dataset over weeks. Pruned to a 120-day window.
+function ghGetBioLog() { const l = LS.get('dcrgym_bio_log', {}); return (l && typeof l === 'object') ? l : {}; }
+function ghMergeBioLog(fresh) {
+  const log = ghGetBioLog();
+  Object.keys(fresh || {}).forEach(day => {
+    const cur = log[day] || {}, nx = fresh[day];
+    log[day] = {
+      readiness: nx.readiness != null ? nx.readiness : (cur.readiness != null ? cur.readiness : null),
+      sleep:     nx.sleep     != null ? nx.sleep     : (cur.sleep     != null ? cur.sleep     : null),
+      hrv:       nx.hrv       != null ? nx.hrv       : (cur.hrv       != null ? cur.hrv       : null),
+      rhr:       nx.rhr       != null ? nx.rhr       : (cur.rhr       != null ? cur.rhr       : null),
+      deep:      nx.deep      != null ? nx.deep      : (cur.deep      != null ? cur.deep      : null),
+      spo2:      nx.spo2      != null ? nx.spo2      : (cur.spo2      != null ? cur.spo2      : null),
+    };
+  });
+  const cutoff = ghLocalDate(Date.now() - 120 * 86400000);
+  Object.keys(log).forEach(day => { if (day < cutoff) delete log[day]; });
+  LS.set('dcrgym_bio_log', log);
+  return log;
+}
 
-async function fetchFitbitData(force = false, interactive = false) {
-  // Cache-first: skip only if we have a fresh successful fetch from today AND not forced
-  if (!force) {
-    const today = ghLocalDate();
-    if (ST.fitbit.fetchedAt === today && ST.fitbit.connected) return;
-  }
+// Four parallel list calls (verified v4 contract). Graceful per-type degradation;
+// only auth failures propagate (they kill the whole sync).
+async function ghPullAll(token) {
+  const monthAgo = ghLocalDate(Date.now() - 31 * 86400000);
+  const swallow = e => { if (String(e.message).indexOf('auth') === 0) throw e; return null; };
+  const [sleepResp, rhrResp, hrvResp, spo2Resp] = await Promise.all([
+    ghList(token, 'sleep',                          'sleep.interval.civil_end_time >= "' + monthAgo + '"', 25, 2).catch(swallow),
+    ghList(token, 'daily-resting-heart-rate',       'dailyRestingHeartRate.date >= "'     + monthAgo + '"', 60, 1).catch(swallow),
+    ghList(token, 'daily-heart-rate-variability',   'dailyHeartRateVariability.date >= "' + monthAgo + '"', 60, 1).catch(swallow),
+    ghList(token, 'daily-oxygen-saturation',        'dailyOxygenSaturation.date >= "'     + monthAgo + '"', 60, 1).catch(() => null),
+  ]);
+  const out = ghAssemble(sleepResp, rhrResp, hrvResp, spo2Resp, 30);
+  if (out.anyData) ghMergeBioLog(out.bioLog);
+  return out;
+}
 
-  // Spin the refresh button + skeleton shimmer on the pods
-  const btn = document.querySelector('.ana-refresh-btn') || document.querySelector('#ana-refresh');
-  if (btn) {
-    btn.style.animation = 'ana-spin 0.9s linear infinite';
-    btn.style.opacity   = '0.65';
-    btn.disabled        = true;
-  }
-  const anaScr = document.getElementById('screen-analysis');
-  if (anaScr) anaScr.classList.add('ana-loading');
+// Strip transient (underscore-prefixed) keys before persisting.
+function ghPersistableFitbit(fb) { const o = {}; for (const k in fb) { if (k.charAt(0) !== '_') o[k] = fb[k]; } return o; }
 
+// Spin the refresh affordance + skeleton shimmer on the Analysis screen.
+function ghSetAnaBusy(on) {
+  const btn = document.getElementById('ana-refresh');
+  if (btn) { btn.style.animation = on ? 'ana-spin 0.9s linear infinite' : ''; btn.style.opacity = on ? '0.65' : ''; btn.disabled = !!on; }
+  const scr = document.getElementById('screen-analysis');
+  if (scr) scr.classList.toggle('ana-loading', !!on);
+}
+
+// User-gesture entry point — the reconnect chip taps this.
+function ghConnect() { if (ST.fitbit) ST.fitbit.lastError = null; fetchFitbitData(true, true); }
+
+// Single, re-entrancy-guarded sync. Render NEVER calls this in a way that can
+// recurse: the old renderAnalysis→fetch→renderAnalysis strobe loop is gone.
+// Triggered only by: nav into Analysis, the refresh/reconnect buttons, and boot.
+async function fetchFitbitData(force, interactive) {
+  force = !!force; interactive = !!interactive;
+  const fb = ST.fitbit;
+  if (fb._fetching) return;                                              // hard re-entrancy guard
+  if (!force && fb._failUntil && Date.now() < fb._failUntil) return;     // failure cooldown
+  if (!force && fb.fetchedAt === ghLocalDate() && fb.dataState === 'synced') return; // fresh today
+
+  fb._fetching = true;
+  ghSetAnaBusy(true);
+  const wasConnected = LS.get('dcrgym_gh_connected', false);
   try {
     let token = ghTokenValid();
+    if (!token && (interactive || wasConnected)) token = await ghGetToken(interactive);
     if (!token) {
-      // Silent attempt if previously connected; interactive only from the chip tap
-      const wasConnected = LS.get('dcrgym_gh_connected', false);
-      if (interactive || wasConnected) token = await ghGetToken(interactive);
-    }
-    if (!token) {
-      ST.fitbit.connected = false;
-      ST.fitbit.authUrl = null;
-      if (ST.screen === 'analysis') renderAnalysis();
+      fb.connected  = false;
+      fb.dataState  = 'disconnected';
+      fb.lastError  = interactive ? (fb.lastError || 'consent-cancelled') : (wasConnected ? 'token-expired' : null);
+      fb._failUntil = interactive ? 0 : Date.now() + 10 * 60 * 1000;     // silent: back off 10 min
       return;
     }
-    const payload = await ghPullAll(token);
-    Object.assign(ST.fitbit, payload, { connected: true, lastSync: Date.now() });
-    LS.set('dcrgym_fitbit', ST.fitbit);
-    if (ST.screen === 'analysis') renderAnalysis();
-    if (ST.screen === 'home') renderHome();   // boarding-pass readiness chip stays current
-  } catch(e) {
-    console.error('[DCR Gym] Health fetch failed:', e.message);
-    if (String(e.message).indexOf('auth') === 0) {
-      ST.fitbit.connected = false;
-      if (ST.screen === 'analysis') renderAnalysis();
-    }
-    if (btn) {
-      btn.style.animation = '';
-      btn.style.opacity   = '0.30';
-      btn.disabled        = false;
-    }
+    const out = await ghPullAll(token);
+    Object.assign(fb, out.payload);
+    fb.connected  = true;
+    fb.lastSync   = Date.now();
+    fb.lastError  = out.anyData ? null : 'no-data';
+    fb._failUntil = 0;
+    fb.dataState  = out.anyData ? 'synced' : 'connected-no-data';
+    LS.set('dcrgym_fitbit', ghPersistableFitbit(fb));
+  } catch (e) {
+    const code = String((e && e.message) || 'error');
+    fb.lastError = code;
+    if (code.indexOf('auth') === 0) { fb.connected = false; fb.dataState = 'disconnected'; LS.set('dcrgym_gh_connected', false); }
+    fb._failUntil = Date.now() + 10 * 60 * 1000;
+    console.error('[DCR Gym] Health fetch failed:', code);
   } finally {
-    if (anaScr) anaScr.classList.remove('ana-loading');
+    fb._fetching = false;
+    ghSetAnaBusy(false);
+    if (ST.screen === 'analysis') renderAnalysis();   // pure render — cannot re-trigger a fetch
+    if (ST.screen === 'home')     renderHome();        // boarding-pass readiness chip stays live
   }
 }
+
 
 // ── Settings screen ───────────────────────────────────────────────────────────
 function renderSettings() {
@@ -9648,17 +9774,20 @@ function bootstrapApp() {
     // Fitbit hydration — restore last known values; fetchFitbitData will overwrite on tab open
     const storedFitbit = LS.get('dcrgym_fitbit', null);
     if (storedFitbit && typeof storedFitbit === 'object') {
-      // Only restore if the stored data was from today — discard stale cached sessions
-      const today = new Date().toISOString().slice(0, 10);
-      if (storedFitbit.fetchedAt === today) {
-        Object.assign(ST.fitbit, storedFitbit);
-      } else {
-        // Stale cache — clear it so renderAnalysis shows dashes until live fetch completes
-        LS.set('dcrgym_fitbit', null);
-      }
+      // Last-known wins (DCR's call): always restore; the UI labels its age.
+      // Never wipe biometrics just because they aren't from today.
+      Object.assign(ST.fitbit, storedFitbit);
+      ST.fitbit._fetching = false; ST.fitbit._failUntil = 0;
     }
   } catch(e) {
     console.warn('[DCR Gym Shell] State hydration fault (non-fatal):', e);
+  }
+
+  // Boot-time silent biometric sync — populates the home readiness chip, the
+  // finish-screen recovery insight, and Progress-tab plateau footnotes WITHOUT
+  // needing to open the AI tab. Guarded + cooldown-aware inside fetchFitbitData.
+  if (LS.get('dcrgym_gh_connected', false)) {
+    setTimeout(() => { try { fetchFitbitData(false); } catch (e) {} }, 1200);
   }
 
   // Service worker — registered with a live OTA update watcher.
