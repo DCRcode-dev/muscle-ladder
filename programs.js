@@ -23,14 +23,14 @@ const PROGRAMS = [
         name: "Full Body #1",
         exercises: [
           {
-            id: "leg_press", name: "Leg Press", superset: "A",
+            id: "leg_press", name: "Superset 1: Leg Press", superset: "A",
             warmupSets: "2–3", workingSets: 3, reps: "6–8",
             rest: "30–60 sec",
             substitutions: ["Barbell Front Squat", "Dumbbell Lunge"],
             notes: ""
           },
           {
-            id: "db_lateral_raise", name: "Dumbbell Lateral Raise", superset: "A",
+            id: "dumbbell_lateral_raise", name: "Superset 1: Dumbbell Lateral Raise", superset: "A",
             warmupSets: "0–1", workingSets: 3, reps: "8–10",
             rest: "30–60 sec",
             substitutions: ["Cable Lateral Raise", "Machine Lateral Raise"],
@@ -44,26 +44,26 @@ const PROGRAMS = [
             notes: ""
           },
           {
-            id: "bb_romanian_deadlift", name: "Barbell Romanian Deadlift", superset: null,
+            id: "barbell_romanian_deadlift", name: "Barbell Romanian Deadlift", superset: null,
             warmupSets: "2–3", workingSets: 2, reps: "8–10",
             rest: "2–3 min",
             substitutions: ["Dumbbell Romanian Deadlift", "Hip Thrust"],
             notes: ""
           },
           {
-            id: "machine_chest_press", name: "Machine Chest Press", superset: "B",
+            id: "machine_chest_press", name: "Superset 2: Machine Chest Press", superset: "B",
             warmupSets: "1–2", workingSets: 3, reps: "6–8",
             rest: "1–2 min",
             substitutions: ["Bench Press", "Flat Dumbbell Press"],
             notes: ""
           },
           {
-            id: "standing_calf_raise", name: "Standing Calf Raise", superset: "B",
+            id: "standing_calf_raise", name: "Superset 2: Standing Calf Raise", superset: "B",
             warmupSets: "0–1", workingSets: 3, reps: "6–8",
             rest: "1–2 min",
-            substitutions: ["Seated Calf Raise", ""],
+            substitutions: ["Seated Calf Raise", "Leg Press Calf Press"],
             notes: ""
-          }
+          },
         ]
       },
       {
@@ -85,30 +85,30 @@ const PROGRAMS = [
             notes: ""
           },
           {
-            id: "incline_db_press", name: "Incline Dumbbell Press", superset: null,
+            id: "incline_dumbbell_press", name: "Incline Dumbbell Press", superset: null,
             warmupSets: "1–2", workingSets: 3, reps: "8–10",
             rest: "2–3 min",
-            substitutions: ["Incline Machine Chest Press", ""],
+            substitutions: ["Incline Machine Chest Press", "Incline Barbell Bench Press"],
             notes: ""
           },
           {
-            id: "chest_supported_tbar_row", name: "Chest-Supported T-Bar Row", superset: "A",
+            id: "chest_supported_t_bar_row", name: "Chest-Supported T-Bar Row", superset: null,
             warmupSets: "2–3", workingSets: 3, reps: "8–10",
             rest: "2–3 min",
             substitutions: ["Pendlay Row", "Dumbbell Row"],
             notes: ""
           },
           {
-            id: "bb_biceps_curl", name: "Barbell Biceps Curl", superset: "A",
+            id: "ez_bar_biceps_curl", name: "Superset 1: EZ-Bar Biceps Curl", superset: "A",
             warmupSets: "0–1", workingSets: 2, reps: "6–8",
-            rest: "0–1 min",
-            substitutions: ["Standing Barbell Biceps Curl", "Dumbbell Biceps Curl"],
+            rest: "30 sec",
+            substitutions: ["Standing Barbell Curl", "Dumbbell Biceps Curl"],
             notes: ""
           },
           {
-            id: "ez_bar_skullcrusher", name: "EZ-Bar Skullcrusher", superset: "A",
+            id: "ez_bar_skullcrusher", name: "Superset 1: EZ-Bar Skullcrusher", superset: "A",
             warmupSets: "0–1", workingSets: 2, reps: "10–12",
-            rest: "0–1 min",
+            rest: "30 sec",
             substitutions: ["Dumbbell Skullcrusher", "Overhead Triceps Extension"],
             notes: ""
           },
@@ -118,9 +118,9 @@ const PROGRAMS = [
             rest: "1–2 min",
             substitutions: ["Plate-Weighted Decline Sit-Up", "Hanging Leg Raise"],
             notes: ""
-          }
+          },
         ]
-      }
+      },
     ]
   },
 
@@ -142,14 +142,14 @@ const PROGRAMS = [
         name: "Full Body #1",
         exercises: [
           {
-            id: "bb_back_squat", name: "Barbell Back Squat", superset: null,
+            id: "barbell_back_squat", name: "Barbell Back Squat", superset: null,
             warmupSets: "2–3", workingSets: 3, reps: "3–5",
             rest: "3–4 min",
             substitutions: ["Leg Press", "Dumbbell Lunge"],
             notes: ""
           },
           {
-            id: "chest_supported_tbar_row", name: "Chest-Supported T-Bar Row", superset: null,
+            id: "chest_supported_t_bar_row", name: "Chest-Supported T-Bar Row", superset: null,
             warmupSets: "2–3", workingSets: 3, reps: "8–10",
             rest: "2–3 min",
             substitutions: ["Dumbbell Row", "Cable Row"],
@@ -159,14 +159,13 @@ const PROGRAMS = [
             id: "glute_ham_raise", name: "Glute Ham Raise", superset: null,
             warmupSets: "1–2", workingSets: 3, reps: "8–10",
             rest: "2–3 min",
-            substitutions: ["45° Back Extension", ""],
+            substitutions: ["45° Back Extension", "Lying Leg Curl"],
             notes: ""
           },
           {
-            id: "db_lateral_raise", name: "Dumbbell Lateral Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
+            id: "dumbbell_lateral_raise", name: "Dumbbell Lateral Raise", superset: null,
+            warmupSets: "0–1", workingSets: 2, reps: "12–15",
             rest: "1–2 min",
-            lastSetTechnique: "Lengthened Partials (Extended Set)",
             substitutions: ["Cable Lateral Raise", "Machine Lateral Raise"],
             notes: ""
           },
@@ -174,17 +173,16 @@ const PROGRAMS = [
             id: "pec_deck", name: "Pec Deck", superset: null,
             warmupSets: "0–1", workingSets: 2, reps: "15–20",
             rest: "1–2 min",
-            substitutions: ["Cable Fly", "Dumbbell Fly"],
+            substitutions: ["Dumbbell Fly", "Push-Up"],
             notes: ""
           },
           {
             id: "preacher_curl", name: "Preacher Curl", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "12–15",
             rest: "1–2 min",
-            lastSetTechnique: "Dropset",
             substitutions: ["EZ-Bar Biceps Curl", "Dumbbell Biceps Curl"],
             notes: ""
-          }
+          },
         ]
       },
       {
@@ -193,53 +191,46 @@ const PROGRAMS = [
         exercises: [
           {
             id: "bench_press", name: "Bench Press", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "6–8",
+            warmupSets: "2–3", workingSets: 3, reps: "3–5",
             rest: "3–4 min",
             substitutions: ["Machine Chest Press", "Flat Dumbbell Press"],
             notes: ""
           },
           {
             id: "leg_press", name: "Leg Press", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "8–10",
+            warmupSets: "2–3", workingSets: 3, reps: "6–8",
             rest: "3–4 min",
-            substitutions: ["Barbell Back Squat", "Dumbbell Lunge"],
+            substitutions: ["Barbell Front Squat", "Dumbbell Lunge"],
             notes: ""
           },
           {
-            id: "pullup_optional", name: "Pull-Up (Optional Assistance)", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "6–8",
+            id: "pull_up_optional_assistance", name: "Pull-Up (Optional Assistance)", superset: null,
+            warmupSets: "1–2", workingSets: 3, reps: "8–10",
             rest: "2–3 min",
             substitutions: ["Lat Pulldown", "Chin-Up"],
             notes: ""
           },
           {
-            id: "romanian_deadlift", name: "Romanian Deadlift", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "12–15",
-            rest: "2–3 min",
-            substitutions: ["Dumbbell Romanian Deadlift", "Hip Thrust"],
-            notes: ""
-          },
-          {
-            id: "seated_leg_curl", name: "Seated Leg Curl", superset: null,
-            warmupSets: "0–1", workingSets: 2, reps: "12–15",
+            id: "ez_bar_skullcrusher", name: "EZ-Bar Skullcrusher", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "12–15",
             rest: "1–2 min",
-            substitutions: ["Lying Leg Curl", "Nordic Ham Curl"],
+            substitutions: ["Dumbbell Skullcrusher", "Overhead Triceps Extension"],
             notes: ""
           },
           {
             id: "reverse_pec_deck", name: "Reverse Pec Deck", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "15–20",
             rest: "1–2 min",
-            substitutions: ["Dumbbell Rear Delt Fly", "Cable Rear Delt Fly"],
+            substitutions: ["Rope Facepull", "Reverse Cable Fly"],
             notes: ""
           },
           {
-            id: "ez_bar_skullcrusher", name: "EZ-Bar Skullcrusher", superset: null,
+            id: "seated_calf_raise", name: "Seated Calf Raise", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "10–12",
             rest: "1–2 min",
-            substitutions: ["Dumbbell Skullcrusher", "Overhead Triceps Extension"],
+            substitutions: ["Standing Calf Raise", "Leg Press Calf Press"],
             notes: ""
-          }
+          },
         ]
       },
       {
@@ -254,10 +245,10 @@ const PROGRAMS = [
             notes: ""
           },
           {
-            id: "incline_db_press", name: "Incline Dumbbell Press", superset: null,
+            id: "incline_dumbbell_press", name: "Incline Dumbbell Press", superset: null,
             warmupSets: "2–3", workingSets: 3, reps: "8–10",
             rest: "2–3 min",
-            substitutions: ["Incline Machine Chest Press", "Incline Barbell Press"],
+            substitutions: ["Incline Machine Chest Press", "Incline Barbell Bench Press"],
             notes: ""
           },
           {
@@ -278,19 +269,18 @@ const PROGRAMS = [
             id: "leg_extension", name: "Leg Extension", superset: null,
             warmupSets: "1–2", workingSets: 3, reps: "10–12",
             rest: "1–2 min",
-            lastSetTechnique: "Lengthened Partials (Extended Set)",
-            substitutions: ["Hack Squat", ""],
+            substitutions: ["Goblet Squat", "Dumbbell Lunge"],
             notes: ""
           },
           {
-            id: "goblet_squat_or_cable_crunch", name: "Plate-Weighted Decline Sit-Up", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
+            id: "plate_weighted_decline_sit_up", name: "Plate-Weighted Decline Sit-Up", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "8–10",
             rest: "1–2 min",
-            substitutions: ["Cable Crunch", "Hanging Leg Raise"],
+            substitutions: ["Cable Crunch", "Plank"],
             notes: ""
-          }
+          },
         ]
-      }
+      },
     ]
   },
 
@@ -326,35 +316,40 @@ const PROGRAMS = [
             notes: ""
           },
           {
-            id: "db_lateral_raise", name: "Dumbbell Lateral Raise", superset: null,
+            id: "dumbbell_lateral_raise", name: "Dumbbell Lateral Raise", superset: null,
             warmupSets: "0–1", workingSets: 2, reps: "12–15",
             rest: "1–2 min",
-            lastSetTechnique: "Lengthened Partials (Extended Set)",
             substitutions: ["Cable Lateral Raise", "Machine Lateral Raise"],
             notes: ""
           },
           {
-            id: "pullup_optional", name: "Pull-Up (Optional Assistance)", superset: null,
+            id: "pull_up_optional_assistance", name: "Pull-Up (Optional Assistance)", superset: null,
             warmupSets: "1–2", workingSets: 3, reps: "8–10",
-            rest: "1–2 min",
+            rest: "2–3 min",
             substitutions: ["Lat Pulldown", "Chin-Up"],
             notes: ""
           },
           {
             id: "pec_deck", name: "Pec Deck", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "30 sec",
-            substitutions: ["Cable Fly", "Dumbbell Fly"],
+            warmupSets: "0–1", workingSets: 2, reps: "15–20",
+            rest: "1–2 min",
+            substitutions: ["Dumbbell Fly", "Push-Up"],
             notes: ""
           },
           {
-            id: "superset1_preacher_curl", name: "Superset 1: Preacher Curl", superset: "A",
+            id: "preacher_curl", name: "Superset 1: Preacher Curl", superset: "A",
             warmupSets: "0–1", workingSets: 3, reps: "12–15",
             rest: "30 sec",
-            lastSetTechnique: "Dropset",
             substitutions: ["EZ-Bar Biceps Curl", "Dumbbell Biceps Curl"],
             notes: ""
-          }
+          },
+          {
+            id: "ez_bar_skullcrusher", name: "Superset 1: EZ-Bar Skullcrusher", superset: "A",
+            warmupSets: "0–1", workingSets: 3, reps: "12–15",
+            rest: "30 sec",
+            substitutions: ["Dumbbell Skullcrusher", "Overhead Triceps Extension"],
+            notes: ""
+          },
         ]
       },
       {
@@ -370,32 +365,32 @@ const PROGRAMS = [
           },
           {
             id: "leg_press", name: "Leg Press", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["Barbell Back Squat", "Hack Squat"],
+            warmupSets: "2–3", workingSets: 3, reps: "6–8",
+            rest: "3–4 min",
+            substitutions: ["Barbell Front Squat", "Dumbbell Lunge"],
             notes: ""
           },
           {
             id: "glute_ham_raise", name: "Glute Ham Raise", superset: null,
             warmupSets: "1–2", workingSets: 3, reps: "8–10",
-            rest: "1–2 min",
-            substitutions: ["45° Back Extension", "Dumbbell Romanian Deadlift"],
+            rest: "2–3 min",
+            substitutions: ["45° Back Extension", "Lying Leg Curl"],
             notes: ""
           },
           {
             id: "seated_calf_raise", name: "Seated Calf Raise", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "10–12",
+            warmupSets: "0–1", workingSets: 3, reps: "10–12",
             rest: "1–2 min",
-            substitutions: ["Standing Calf Raise", ""],
+            substitutions: ["Standing Calf Raise", "Leg Press Calf Press"],
             notes: ""
           },
           {
             id: "cable_crunch", name: "Cable Crunch", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
+            warmupSets: "0–1", workingSets: 3, reps: "10–12",
             rest: "1–2 min",
             substitutions: ["Plate-Weighted Decline Sit-Up", "Hanging Leg Raise"],
             notes: ""
-          }
+          },
         ]
       },
       {
@@ -405,45 +400,52 @@ const PROGRAMS = [
           {
             id: "lat_pulldown", name: "Lat Pulldown", superset: null,
             warmupSets: "1–2", workingSets: 3, reps: "10–12",
-            rest: "3–4 min",
+            rest: "2–3 min",
             substitutions: ["Pull-Up (Optional Assistance)", "Chin-Up"],
             notes: ""
           },
           {
             id: "overhead_barbell_press", name: "Overhead Barbell Press", superset: null,
             warmupSets: "2–3", workingSets: 3, reps: "6–8",
-            rest: "2–3 min",
-            substitutions: ["Machine Chest Press", "Dumbbell Shoulder Press"],
+            rest: "3–4 min",
+            substitutions: ["Dumbbell Shoulder Press (Standing)", "Dumbbell Shoulder Press (Seated)"],
             notes: ""
           },
           {
-            id: "flat_db_press", name: "Flat Dumbbell Press", superset: null,
+            id: "dumbbell_row", name: "Dumbbell Row", superset: null,
             warmupSets: "1–2", workingSets: 3, reps: "10–12",
-            rest: "1–2 min",
-            substitutions: ["Bench Press", "Cable Fly"],
+            rest: "2–3 min",
+            substitutions: ["Chest-Supported T-Bar Row", "Barbell Row"],
             notes: ""
           },
           {
-            id: "superset1_triceps_pressdown", name: "Superset 1: Triceps Pressdown", superset: "A",
+            id: "flat_dumbbell_press", name: "Flat Dumbbell Press", superset: null,
+            warmupSets: "1–2", workingSets: 3, reps: "8–10",
+            rest: "2–3 min",
+            substitutions: ["Dip", "Bench Press"],
+            notes: ""
+          },
+          {
+            id: "reverse_pec_deck", name: "Reverse Pec Deck", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "10–12",
+            rest: "1–2 min",
+            substitutions: ["Rope Facepull", "Reverse Cable Fly"],
+            notes: ""
+          },
+          {
+            id: "triceps_pressdown", name: "Superset 1: Triceps Pressdown", superset: "A",
             warmupSets: "0–1", workingSets: 3, reps: "10–12",
             rest: "30 sec",
-            substitutions: ["Rope Kickback", "Triceps Kickback (Cable)"],
+            substitutions: ["Triceps Kickback (Cable)", "EZ-Bar Skullcrusher"],
             notes: ""
           },
           {
-            id: "superset1_preacher_curl", name: "Superset 1: Preacher Curl", superset: "A",
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
+            id: "bayesian_cable_curl", name: "Superset 1: Bayesian Cable Curl", superset: "A",
+            warmupSets: "0–1", workingSets: 3, reps: "10–12",
             rest: "30 sec",
-            substitutions: ["EZ-Bar Biceps Curl", "Dumbbell Biceps Curl"],
+            substitutions: ["Incline Dumbbell Curl", "Preacher Curl"],
             notes: ""
           },
-          {
-            id: "superset1_ez_bar_skullcrusher", name: "Superset 1: EZ-Bar Skullcrusher", superset: "A",
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["Dumbbell Skullcrusher", "Overhead Triceps Extension"],
-            notes: ""
-          }
         ]
       },
       {
@@ -454,35 +456,26 @@ const PROGRAMS = [
             id: "barbell_back_squat", name: "Barbell Back Squat", superset: null,
             warmupSets: "2–3", workingSets: 3, reps: "3–5",
             rest: "3–4 min",
-            substitutions: ["Leg Press", "Goblet Squat"],
+            substitutions: ["Leg Press", "Dumbbell Lunge"],
+            notes: ""
+          },
+          {
+            id: "45_back_extension", name: "45° Back Extension", superset: null,
+            warmupSets: "1–2", workingSets: 3, reps: "8–10",
+            rest: "2–3 min",
+            substitutions: ["Good Morning", "Glute Ham Raise"],
             notes: ""
           },
           {
             id: "leg_extension", name: "Leg Extension", superset: null,
             warmupSets: "1–2", workingSets: 2, reps: "10–12",
             rest: "2–3 min",
-            lastSetTechnique: "Lengthened Partials (Extended Set)",
-            substitutions: ["Hack Squat", ""],
+            substitutions: ["Goblet Squat", "Dumbbell Lunge"],
             notes: ""
           },
           {
-            id: "45_back_extension", name: "45° Back Extension", superset: null,
+            id: "seated_leg_curl", name: "Seated Leg Curl", superset: null,
             warmupSets: "1–2", workingSets: 2, reps: "10–12",
-            rest: "2–3 min",
-            lastSetTechnique: "Lengthened Partials (Extended Set)",
-            substitutions: ["Good Morning", "Romanian Deadlift"],
-            notes: ""
-          },
-          {
-            id: "barbell_back_squat2", name: "Barbell Back Squat", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["Goblet Squat", "Leg Press"],
-            notes: ""
-          },
-          {
-            id: "leg_curl_seated", name: "Seated Leg Curl", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
             rest: "1–2 min",
             substitutions: ["Lying Leg Curl", "Nordic Ham Curl"],
             notes: ""
@@ -491,18 +484,18 @@ const PROGRAMS = [
             id: "standing_calf_raise", name: "Standing Calf Raise", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "12–15",
             rest: "1–2 min",
-            substitutions: ["Seated Calf Raise", ""],
+            substitutions: ["Seated Calf Raise", "Leg Press Calf Press"],
             notes: ""
           },
           {
             id: "roman_chair_leg_raise", name: "Roman Chair Leg Raise", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "10–20",
             rest: "1–2 min",
-            substitutions: ["Hanging Leg Raise", "Cable Crunch"],
+            substitutions: ["Hanging Leg Raise", "Bent-Knee Leg Raise"],
             notes: ""
-          }
+          },
         ]
-      }
+      },
     ]
   },
 
@@ -531,40 +524,40 @@ const PROGRAMS = [
             notes: ""
           },
           {
-            id: "barbell_row", name: "Barbell Row", superset: null,
+            id: "leg_press", name: "Leg Press", superset: null,
             warmupSets: "2–3", workingSets: 3, reps: "6–8",
             rest: "3–4 min",
-            substitutions: ["Pendlay Row", "Chest-Supported T-Bar Row"],
+            substitutions: ["Barbell Front Squat", "Dumbbell Lunge"],
             notes: ""
           },
           {
-            id: "leg_press", name: "Leg Press", superset: null,
+            id: "barbell_row", name: "Barbell Row", superset: null,
             warmupSets: "2–3", workingSets: 3, reps: "8–10",
             rest: "2–3 min",
-            substitutions: ["Barbell Front Squat", "Dumbbell Row"],
+            substitutions: ["Pendlay Row", "Dumbbell Row"],
             notes: ""
           },
           {
-            id: "db_lateral_raise", name: "Dumbbell Lateral Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
+            id: "dumbbell_lateral_raise", name: "Dumbbell Lateral Raise", superset: null,
+            warmupSets: "0–1", workingSets: 2, reps: "12–15",
             rest: "1–2 min",
             substitutions: ["Cable Lateral Raise", "Machine Lateral Raise"],
             notes: ""
           },
           {
-            id: "superset1_preacher_curl", name: "Superset 1: Preacher Curl", superset: "A",
+            id: "preacher_curl", name: "Superset 1: Preacher Curl", superset: "A",
             warmupSets: "0–1", workingSets: 3, reps: "12–15",
             rest: "30 sec",
             substitutions: ["EZ-Bar Biceps Curl", "Dumbbell Biceps Curl"],
             notes: ""
           },
           {
-            id: "superset1_standing_calf_raise", name: "Superset 1: Standing Calf Raise", superset: "A",
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
+            id: "seated_calf_raise", name: "Superset 1: Seated Calf Raise", superset: "A",
+            warmupSets: "0–1", workingSets: 3, reps: "10–12",
             rest: "30 sec",
-            substitutions: ["Seated Calf Raise", ""],
+            substitutions: ["Standing Calf Raise", "Leg Press Calf Press"],
             notes: ""
-          }
+          },
         ]
       },
       {
@@ -579,40 +572,40 @@ const PROGRAMS = [
             notes: ""
           },
           {
-            id: "pullup_optional", name: "Pull-Up (Optional Assistance)", superset: null,
+            id: "pull_up_optional_assistance", name: "Pull-Up (Optional Assistance)", superset: null,
             warmupSets: "1–2", workingSets: 3, reps: "8–10",
             rest: "2–3 min",
             substitutions: ["Lat Pulldown", "Chin-Up"],
             notes: ""
           },
           {
-            id: "incline_db_press", name: "Incline Dumbbell Press", superset: null,
+            id: "glute_ham_raise", name: "Glute Ham Raise", superset: null,
             warmupSets: "1–2", workingSets: 3, reps: "8–10",
             rest: "2–3 min",
-            substitutions: ["Incline Machine Chest Press", "Incline Barbell Press"],
+            substitutions: ["45° Back Extension", "Lying Leg Curl"],
             notes: ""
           },
           {
-            id: "ez_bar_curl", name: "EZ-Bar Biceps Curl", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
+            id: "pec_deck", name: "Pec Deck", superset: null,
+            warmupSets: "0–1", workingSets: 2, reps: "15–20",
             rest: "1–2 min",
-            substitutions: ["Preacher Curl", "Dumbbell Biceps Curl"],
+            substitutions: ["Dumbbell Fly", "Push-Up"],
             notes: ""
           },
           {
-            id: "lateral_raise", name: "Cable Lateral Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
-            rest: "1–2 min",
-            substitutions: ["Dumbbell Lateral Raise", "Machine Lateral Raise"],
-            notes: ""
-          },
-          {
-            id: "seated_calf_raise", name: "Seated Calf Raise", superset: null,
+            id: "ez_bar_skullcrusher", name: "EZ-Bar Skullcrusher", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "12–15",
             rest: "1–2 min",
-            substitutions: ["Standing Calf Raise", ""],
+            substitutions: ["Dumbbell Skullcrusher", "Overhead Triceps Extension"],
             notes: ""
-          }
+          },
+          {
+            id: "cable_crunch", name: "Cable Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "10–12",
+            rest: "1–2 min",
+            substitutions: ["Plate-Weighted Decline Sit-Up", "Hanging Leg Raise"],
+            notes: ""
+          },
         ]
       },
       {
@@ -622,52 +615,52 @@ const PROGRAMS = [
           {
             id: "overhead_barbell_press", name: "Overhead Barbell Press", superset: null,
             warmupSets: "2–3", workingSets: 3, reps: "6–8",
-            rest: "2–3 min",
-            substitutions: ["Dumbbell Shoulder Press", "Machine Shoulder Press"],
+            rest: "3–4 min",
+            substitutions: ["Dumbbell Shoulder Press (Standing)", "Dumbbell Shoulder Press (Seated)"],
             notes: ""
           },
           {
             id: "45_back_extension", name: "45° Back Extension", superset: null,
             warmupSets: "1–2", workingSets: 3, reps: "8–10",
             rest: "2–3 min",
-            substitutions: ["Good Morning", "Romanian Deadlift"],
+            substitutions: ["Good Morning", "Glute Ham Raise"],
             notes: ""
           },
           {
             id: "dumbbell_row", name: "Dumbbell Row", superset: null,
             warmupSets: "1–2", workingSets: 3, reps: "10–12",
             rest: "2–3 min",
-            substitutions: ["Chest-Supported T-Bar Row", "Cable Row"],
+            substitutions: ["Chest-Supported T-Bar Row", "Barbell Row"],
             notes: ""
           },
           {
             id: "leg_extension", name: "Leg Extension", superset: null,
             warmupSets: "1–2", workingSets: 2, reps: "15–20",
             rest: "1–2 min",
-            substitutions: ["Hack Squat", ""],
+            substitutions: ["Goblet Squat", "Dumbbell Lunge"],
             notes: ""
           },
           {
-            id: "superset1_triceps_pressdown", name: "Superset 1: Triceps Pressdown", superset: "A",
+            id: "triceps_pressdown", name: "Superset 1: Triceps Pressdown", superset: "A",
             warmupSets: "0–1", workingSets: 3, reps: "10–12",
             rest: "30 sec",
-            substitutions: ["EZ-Bar Skullcrusher", "Rope Pressdown"],
+            substitutions: ["EZ-Bar Skullcrusher", "Triceps Kickback (Cable)"],
             notes: ""
           },
           {
-            id: "superset1_bayesian_cable_curl", name: "Superset 1: Bayesian Cable Curl", superset: "A",
+            id: "bayesian_cable_curl", name: "Superset 1: Bayesian Cable Curl", superset: "A",
             warmupSets: "0–1", workingSets: 3, reps: "10–12",
             rest: "30 sec",
-            substitutions: ["Dumbbell Curl", "Preacher Curl"],
+            substitutions: ["Incline Dumbbell Curl", "Preacher Curl"],
             notes: ""
           },
           {
-            id: "superset1_seated_calf_raise", name: "Superset 1: Seated Calf Raise", superset: "A",
+            id: "standing_calf_raise", name: "Standing Calf Raise", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "12–15",
-            rest: "30 sec",
-            substitutions: ["Standing Calf Raise", ""],
+            rest: "1–2 min",
+            substitutions: ["Seated Calf Raise", "Leg Press Calf Press"],
             notes: ""
-          }
+          },
         ]
       },
       {
@@ -678,53 +671,46 @@ const PROGRAMS = [
             id: "barbell_back_squat", name: "Barbell Back Squat", superset: null,
             warmupSets: "2–3", workingSets: 3, reps: "3–5",
             rest: "3–4 min",
-            substitutions: ["Leg Press", "Goblet Squat"],
+            substitutions: ["Leg Press", "Dumbbell Lunge"],
             notes: ""
           },
           {
-            id: "flat_db_press", name: "Flat Dumbbell Press", superset: null,
+            id: "flat_dumbbell_press", name: "Flat Dumbbell Press", superset: null,
             warmupSets: "1–2", workingSets: 3, reps: "8–10",
             rest: "2–3 min",
-            substitutions: ["Bench Press", "Machine Chest Press"],
+            substitutions: ["Dip", "Bench Press"],
             notes: ""
           },
           {
             id: "lat_pulldown", name: "Lat Pulldown", superset: null,
-            warmupSets: "1–2", workingSets: 2, reps: "10–12",
-            rest: "1–2 min",
-            substitutions: ["Pull-Up (Optional Assistance)", "45° Back Extension"],
-            notes: ""
-          },
-          {
-            id: "dumbbell_fly", name: "Pec Deck", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["Cable Fly", "Dumbbell Fly"],
-            notes: ""
-          },
-          {
-            id: "pullup_optional", name: "Pull-Up (Optional Assistance)", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
-            rest: "1–2 min",
-            substitutions: ["Lat Pulldown", "Chin-Up"],
+            warmupSets: "1–2", workingSets: 3, reps: "10–12",
+            rest: "2–3 min",
+            substitutions: ["Pull-Up (Optional Assistance)", "Chin-Up"],
             notes: ""
           },
           {
             id: "seated_leg_curl", name: "Seated Leg Curl", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
+            warmupSets: "1–2", workingSets: 2, reps: "10–12",
             rest: "1–2 min",
             substitutions: ["Lying Leg Curl", "Nordic Ham Curl"],
             notes: ""
           },
           {
-            id: "leg_curl2", name: "Lying Leg Curl", superset: null,
+            id: "reverse_pec_deck", name: "Reverse Pec Deck", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "10–12",
+            rest: "1–2 min",
+            substitutions: ["Rope Facepull", "Reverse Cable Fly"],
+            notes: ""
+          },
+          {
+            id: "roman_chair_leg_raise", name: "Roman Chair Leg Raise", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "10–20",
             rest: "1–2 min",
-            substitutions: ["Seated Leg Curl", ""],
+            substitutions: ["Hanging Leg Raise", "Bent-Knee Leg Raise"],
             notes: ""
-          }
+          },
         ]
-      }
+      },
     ]
   },
 
@@ -755,15 +741,14 @@ const PROGRAMS = [
           {
             id: "leg_press", name: "Leg Press", superset: null,
             warmupSets: "2–3", workingSets: 3, reps: "6–8",
-            rest: "2–3 min",
+            rest: "3–4 min",
             substitutions: ["Barbell Front Squat", "Dumbbell Lunge"],
             notes: ""
           },
           {
             id: "lat_pulldown", name: "Lat Pulldown", superset: null,
-            warmupSets: "1–2", workingSets: 2, reps: "12–15",
-            rest: "1–2 min",
-            lastSetTechnique: "Lengthened Partials (Extended Set)",
+            warmupSets: "1–2", workingSets: 3, reps: "8–10",
+            rest: "2–3 min",
             substitutions: ["Pull-Up (Optional Assistance)", "Chin-Up"],
             notes: ""
           },
@@ -776,18 +761,18 @@ const PROGRAMS = [
           },
           {
             id: "preacher_curl", name: "Preacher Curl", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
+            warmupSets: "0–1", workingSets: 3, reps: "12–15",
             rest: "1–2 min",
             substitutions: ["EZ-Bar Biceps Curl", "Dumbbell Biceps Curl"],
             notes: ""
           },
           {
             id: "seated_calf_raise", name: "Seated Calf Raise", superset: null,
-            warmupSets: "0–1", workingSets: 2, reps: "10–12",
+            warmupSets: "0–1", workingSets: 3, reps: "10–12",
             rest: "1–2 min",
-            substitutions: ["Standing Calf Raise", ""],
+            substitutions: ["Standing Calf Raise", "Leg Press Calf Press"],
             notes: ""
-          }
+          },
         ]
       },
       {
@@ -797,46 +782,45 @@ const PROGRAMS = [
           {
             id: "deadlift", name: "Deadlift", superset: null,
             warmupSets: "2–3", workingSets: 3, reps: "3–5",
-            rest: "3–4 min",
+            rest: "3–5 min",
             substitutions: ["Romanian Deadlift", "Hip Thrust"],
             notes: ""
           },
           {
-            id: "incline_db_press", name: "Incline Dumbbell Press", superset: null,
-            warmupSets: "1–2", workingSets: 2, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["Incline Machine Chest Press", "Incline Barbell Press"],
-            notes: ""
-          },
-          {
-            id: "overhead_cable_lat_pullover", name: "Cable Lat Pullover", superset: null,
-            warmupSets: "1–2", workingSets: 2, reps: "12–15",
-            rest: "1–2 min",
-            lastSetTechnique: "Lengthened Partials (Extended Set)",
-            substitutions: ["Dumbbell Pullover", "Straight-Arm Lat Pulldown"],
-            notes: ""
-          },
-          {
-            id: "barbell_press", name: "Overhead Barbell Press", superset: null,
+            id: "overhead_barbell_press", name: "Overhead Barbell Press", superset: null,
             warmupSets: "1–2", workingSets: 3, reps: "8–10",
-            rest: "1–2 min",
-            substitutions: ["Dumbbell Shoulder Press", "Machine Shoulder Press"],
+            rest: "2–3 min",
+            substitutions: ["Dumbbell Shoulder Press (Seated)", "Barbell Upright Row"],
             notes: ""
           },
           {
-            id: "dumbbell_fly_pec_deck", name: "Pec Deck", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
+            id: "cable_lat_pullover", name: "Cable Lat Pullover", superset: null,
+            warmupSets: "0–1", workingSets: 2, reps: "12–15",
             rest: "1–2 min",
-            substitutions: ["Cable Fly", "Dumbbell Fly"],
+            substitutions: ["Dumbbell Lat Pullover", "Cable Lat Pull-In"],
             notes: ""
           },
           {
-            id: "skullcrusher", name: "EZ-Bar Skullcrusher", superset: null,
+            id: "pec_deck", name: "Pec Deck", superset: null,
+            warmupSets: "0–1", workingSets: 2, reps: "12–15",
+            rest: "1–2 min",
+            substitutions: ["Dumbbell Fly", "Push-Up"],
+            notes: ""
+          },
+          {
+            id: "cable_crunch", name: "Cable Crunch", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "10–12",
+            rest: "1–2 min",
+            substitutions: ["Plate-Weighted Decline Sit-Up", "Hanging Leg Raise"],
+            notes: ""
+          },
+          {
+            id: "ez_bar_skullcrusher", name: "EZ-Bar Skullcrusher", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "12–15",
             rest: "1–2 min",
             substitutions: ["Dumbbell Skullcrusher", "Overhead Triceps Extension"],
             notes: ""
-          }
+          },
         ]
       },
       {
@@ -845,47 +829,53 @@ const PROGRAMS = [
         exercises: [
           {
             id: "barbell_row", name: "Barbell Row", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "6–8",
+            warmupSets: "2–3", workingSets: 3, reps: "8–10",
             rest: "2–3 min",
-            substitutions: ["Chest-Supported T-Bar Row", "Dumbbell Row"],
+            substitutions: ["Pendlay Row", "Dumbbell Row"],
             notes: ""
           },
           {
-            id: "barbell_back_squat", name: "Barbell Back Squat", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "6–8",
-            rest: "2–3 min",
-            substitutions: ["Leg Press", "Goblet Squat"],
-            notes: ""
-          },
-          {
-            id: "45_back_extension", name: "45° Back Extension", superset: null,
+            id: "glute_ham_raise", name: "Glute Ham Raise", superset: null,
             warmupSets: "1–2", workingSets: 3, reps: "8–10",
             rest: "2–3 min",
-            substitutions: ["Good Morning", "Romanian Deadlift"],
+            substitutions: ["45° Back Extension", "Lying Leg Curl"],
             notes: ""
           },
           {
-            id: "pendlay_row", name: "Pendlay Row", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "8–10",
-            rest: "1–2 min",
-            substitutions: ["Barbell Row", "Dumbbell Row"],
-            notes: ""
-          },
-          {
-            id: "dumbbell_lateral_raise", name: "Dumbbell Lateral Raise", superset: null,
+            id: "barbell_shrug", name: "Barbell Shrug", superset: null,
             warmupSets: "0–1", workingSets: 2, reps: "10–12",
             rest: "1–2 min",
-            lastSetTechnique: "Dropset",
-            substitutions: ["Cable Lateral Raise", "Machine Lateral Raise"],
+            substitutions: ["Dumbbell Shrug", "Trap Bar Shrug"],
             notes: ""
           },
           {
-            id: "cable_crunch", name: "Cable Crunch", superset: null,
+            id: "reverse_pec_deck", name: "Reverse Pec Deck", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "10–12",
+            rest: "1–2 min",
+            substitutions: ["Rope Facepull", "Reverse Cable Fly"],
+            notes: ""
+          },
+          {
+            id: "triceps_pressdown", name: "Triceps Pressdown", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "12–15",
             rest: "1–2 min",
-            substitutions: ["Plate-Weighted Decline Sit-Up", "Hanging Leg Raise"],
+            substitutions: ["Triceps Kickback (Cable)", "EZ-Bar Skullcrusher"],
             notes: ""
-          }
+          },
+          {
+            id: "dumbbell_biceps_curl", name: "Dumbbell Biceps Curl", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "12–15",
+            rest: "1–2 min",
+            substitutions: ["EZ-Bar Biceps Curl", "Standing Barbell Curl"],
+            notes: ""
+          },
+          {
+            id: "roman_chair_leg_raise", name: "Roman Chair Leg Raise", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "10–20",
+            rest: "30 sec",
+            substitutions: ["Hanging Leg Raise", "Bent-Knee Leg Raise"],
+            notes: ""
+          },
         ]
       },
       {
@@ -896,53 +886,44 @@ const PROGRAMS = [
             id: "barbell_back_squat", name: "Barbell Back Squat", superset: null,
             warmupSets: "2–3", workingSets: 3, reps: "3–5",
             rest: "3–4 min",
-            substitutions: ["Leg Press", "Hack Squat"],
+            substitutions: ["Leg Press", "Dumbbell Lunge"],
             notes: ""
           },
           {
-            id: "flat_db_press", name: "Flat Dumbbell Press", superset: null,
+            id: "flat_dumbbell_press", name: "Flat Dumbbell Press", superset: null,
             warmupSets: "1–2", workingSets: 3, reps: "8–10",
             rest: "2–3 min",
-            substitutions: ["Bench Press", "Machine Chest Press"],
+            substitutions: ["Dip", "Bench Press"],
             notes: ""
           },
           {
             id: "lat_pulldown", name: "Lat Pulldown", superset: null,
-            warmupSets: "1–2", workingSets: 2, reps: "10–12",
-            rest: "1–2 min",
-            lastSetTechnique: "Lengthened Partials (Extended Set)",
+            warmupSets: "1–2", workingSets: 3, reps: "10–12",
+            rest: "2–3 min",
             substitutions: ["Pull-Up (Optional Assistance)", "Chin-Up"],
             notes: ""
           },
           {
-            id: "pec_deck", name: "Pec Deck", superset: null,
+            id: "cable_lateral_raise", name: "Cable Lateral Raise", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "10–12",
             rest: "1–2 min",
-            substitutions: ["Cable Fly", "Dumbbell Fly"],
+            substitutions: ["Machine Lateral Raise", "Dumbbell Lateral Raise"],
             notes: ""
           },
           {
-            id: "lying_leg_curl", name: "Lying Leg Curl", superset: null,
-            warmupSets: "0–1", workingSets: 2, reps: "10–12",
-            rest: "1–2 min",
-            lastSetTechnique: "Lengthened Partials (Extended Set)",
-            substitutions: ["Seated Leg Curl", "Nordic Ham Curl"],
-            notes: ""
-          },
-          {
-            id: "rope_pushdown", name: "Rope Pushdown", superset: null,
+            id: "cable_lat_pull_in", name: "Cable Lat Pull-In", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "10–12",
             rest: "1–2 min",
-            substitutions: ["EZ-Bar Skullcrusher", "Overhead Triceps Extension"],
+            substitutions: ["Cable Lat Pullover", "Dumbbell Lat Pullover"],
             notes: ""
           },
           {
-            id: "standing_calf_raise", name: "Standing Calf Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–20",
+            id: "overhead_triceps_extension", name: "Overhead Triceps Extension", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "10–12",
             rest: "1–2 min",
-            substitutions: ["Seated Calf Raise", ""],
+            substitutions: ["EZ-Bar Skullcrusher", "Dumbbell Skullcrusher"],
             notes: ""
-          }
+          },
         ]
       },
       {
@@ -950,57 +931,49 @@ const PROGRAMS = [
         name: "Full Body #5",
         exercises: [
           {
-            id: "ez_bar_skullcrusher", name: "EZ-Bar Skullcrusher", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
-            rest: "1–2 min",
-            substitutions: ["Dumbbell Skullcrusher", "Rope Pushdown"],
+            id: "overhead_barbell_press", name: "Overhead Barbell Press", superset: null,
+            warmupSets: "2–3", workingSets: 3, reps: "6–8",
+            rest: "3–4 min",
+            substitutions: ["Dumbbell Shoulder Press (Standing)", "Dumbbell Shoulder Press (Seated)"],
             notes: ""
           },
           {
-            id: "barbell_shrug", name: "Barbell Shrug", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["Dumbbell Shrug", "Machine Shrug"],
+            id: "dumbbell_row", name: "Dumbbell Row", superset: null,
+            warmupSets: "1–2", workingSets: 3, reps: "10–12",
+            rest: "2–3 min",
+            substitutions: ["Chest-Supported T-Bar Row", "Barbell Row"],
             notes: ""
           },
           {
-            id: "glute_ham_raise", name: "Glute Ham Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "8–10",
-            rest: "1–2 min",
-            substitutions: ["45° Back Extension", "Romanian Deadlift"],
+            id: "leg_extension", name: "Leg Extension", superset: null,
+            warmupSets: "1–2", workingSets: 2, reps: "15–20",
+            rest: "2–3 min",
+            substitutions: ["Goblet Squat", "Dumbbell Lunge"],
             notes: ""
           },
           {
-            id: "reverse_pec_deck", name: "Reverse Pec Deck", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
-            rest: "1–2 min",
-            substitutions: ["Rear Delt Fly", "Cable Rear Delt Fly"],
-            notes: ""
-          },
-          {
-            id: "bayesian_cable_curl", name: "Bayesian Cable Curl", superset: null,
-            warmupSets: "0–1", workingSets: 2, reps: "10–12",
-            rest: "1–2 min",
-            lastSetTechnique: "Lengthened Partials (Extended Set), Myo-reps",
-            substitutions: ["Preacher Curl", "Dumbbell Biceps Curl"],
+            id: "seated_leg_curl", name: "Seated Leg Curl", superset: null,
+            warmupSets: "1–2", workingSets: 2, reps: "10–12",
+            rest: "2–3 min",
+            substitutions: ["Lying Leg Curl", "Nordic Ham Curl"],
             notes: ""
           },
           {
             id: "cable_fly", name: "Cable Fly", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
+            warmupSets: "0–1", workingSets: 2, reps: "10–12",
             rest: "1–2 min",
-            substitutions: ["Pec Deck", "Dumbbell Fly"],
+            substitutions: ["Dumbbell Fly", "Pec Deck"],
             notes: ""
           },
           {
-            id: "cable_crunch", name: "Cable Crunch", superset: null,
+            id: "bayesian_cable_curl", name: "Bayesian Cable Curl", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "10–12",
             rest: "1–2 min",
-            substitutions: ["Plate-Weighted Decline Sit-Up", "Hanging Leg Raise"],
+            substitutions: ["Incline Dumbbell Curl", "Preacher Curl"],
             notes: ""
-          }
+          },
         ]
-      }
+      },
     ]
   },
 
@@ -1037,34 +1010,39 @@ const PROGRAMS = [
           },
           {
             id: "dumbbell_lateral_raise", name: "Dumbbell Lateral Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "8–10",
+            warmupSets: "0–1", workingSets: 2, reps: "8–10",
             rest: "1–2 min",
-            lastSetTechnique: "Lengthened Partials (Extended Set)",
             substitutions: ["Cable Lateral Raise", "Machine Lateral Raise"],
             notes: ""
           },
           {
-            id: "pullup_optional", name: "Pull-Up (Optional Assistance)", superset: null,
-            warmupSets: "0–1", workingSets: 2, reps: "8–10",
-            rest: "1–2 min",
-            lastSetTechnique: "Dropset",
+            id: "pull_up_optional_assistance", name: "Pull-Up (Optional Assistance)", superset: null,
+            warmupSets: "1–2", workingSets: 3, reps: "8–10",
+            rest: "2–3 min",
             substitutions: ["Lat Pulldown", "Chin-Up"],
             notes: ""
           },
           {
             id: "pec_deck", name: "Pec Deck", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "8–10",
-            rest: "30 sec",
-            substitutions: ["Cable Fly", "Dumbbell Fly"],
+            warmupSets: "0–1", workingSets: 2, reps: "8–10",
+            rest: "1–2 min",
+            substitutions: ["Dumbbell Fly", "Push-Up"],
             notes: ""
           },
           {
-            id: "superset1_preacher_curl", name: "Superset 1: Preacher Curl", superset: "A",
+            id: "preacher_curl", name: "Superset 1: Preacher Curl", superset: "A",
             warmupSets: "0–1", workingSets: 3, reps: "8–10",
             rest: "30 sec",
             substitutions: ["EZ-Bar Biceps Curl", "Dumbbell Biceps Curl"],
             notes: ""
-          }
+          },
+          {
+            id: "ez_bar_skullcrusher", name: "Superset 1: EZ-Bar Skullcrusher", superset: "A",
+            warmupSets: "0–1", workingSets: 3, reps: "8–10",
+            rest: "30 sec",
+            substitutions: ["Dumbbell Skullcrusher", "Overhead Triceps Extension"],
+            notes: ""
+          },
         ]
       },
       {
@@ -1080,23 +1058,23 @@ const PROGRAMS = [
           },
           {
             id: "leg_press", name: "Leg Press", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "6–8",
-            rest: "2–3 min",
-            substitutions: ["Barbell Front Squat", "Hack Squat"],
+            warmupSets: "2–3", workingSets: 3, reps: "6–8",
+            rest: "3–4 min",
+            substitutions: ["Barbell Front Squat", "Dumbbell Lunge"],
             notes: ""
           },
           {
             id: "glute_ham_raise", name: "Glute Ham Raise", superset: null,
             warmupSets: "1–2", workingSets: 3, reps: "8–10",
             rest: "2–3 min",
-            substitutions: ["45° Back Extension", "Romanian Deadlift"],
+            substitutions: ["45° Back Extension", "Lying Leg Curl"],
             notes: ""
           },
           {
             id: "seated_calf_raise", name: "Seated Calf Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
+            warmupSets: "0–1", workingSets: 3, reps: "8–10",
             rest: "1–2 min",
-            substitutions: ["Standing Calf Raise", ""],
+            substitutions: ["Standing Calf Raise", "Leg Press Calf Press"],
             notes: ""
           },
           {
@@ -1105,7 +1083,7 @@ const PROGRAMS = [
             rest: "1–2 min",
             substitutions: ["Plate-Weighted Decline Sit-Up", "Hanging Leg Raise"],
             notes: ""
-          }
+          },
         ]
       },
       {
@@ -1115,38 +1093,45 @@ const PROGRAMS = [
           {
             id: "overhead_barbell_press", name: "Overhead Barbell Press", superset: null,
             warmupSets: "2–3", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["Dumbbell Shoulder Press", "Machine Shoulder Press"],
+            rest: "3–4 min",
+            substitutions: ["Dumbbell Shoulder Press (Standing)", "Dumbbell Shoulder Press (Seated)"],
             notes: ""
           },
           {
-            id: "incline_db_press", name: "Incline Dumbbell Press", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "8–10",
+            id: "flat_dumbbell_press", name: "Flat Dumbbell Press", superset: null,
+            warmupSets: "1–2", workingSets: 3, reps: "10–12",
             rest: "2–3 min",
-            substitutions: ["Incline Machine Chest Press", "Incline Barbell Press"],
+            substitutions: ["Dip", "Bench Press"],
             notes: ""
           },
           {
             id: "cable_lateral_raise", name: "Cable Lateral Raise", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "12–15",
             rest: "1–2 min",
-            substitutions: ["Dumbbell Lateral Raise", "Machine Lateral Raise"],
+            substitutions: ["Machine Lateral Raise", "Dumbbell Lateral Raise"],
             notes: ""
           },
           {
-            id: "pec_deck", name: "Pec Deck", superset: null,
+            id: "cable_fly", name: "Cable Fly", superset: null,
+            warmupSets: "0–1", workingSets: 2, reps: "12–15",
+            rest: "1–2 min",
+            substitutions: ["Dumbbell Fly", "Pec Deck"],
+            notes: ""
+          },
+          {
+            id: "triceps_kickback_cable", name: "Triceps Kickback (Cable)", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "12–15",
             rest: "1–2 min",
-            substitutions: ["Cable Fly", "Dumbbell Fly"],
+            substitutions: ["EZ-Bar Skullcrusher", "Triceps Pressdown"],
             notes: ""
           },
           {
-            id: "triceps_pressdown", name: "Triceps Pressdown", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
+            id: "overhead_triceps_extension", name: "Overhead Triceps Extension", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
             rest: "1–2 min",
-            substitutions: ["EZ-Bar Skullcrusher", "Overhead Triceps Extension"],
+            substitutions: ["EZ-Bar Skullcrusher", "Dumbbell Skullcrusher"],
             notes: ""
-          }
+          },
         ]
       },
       {
@@ -1161,48 +1146,47 @@ const PROGRAMS = [
             notes: ""
           },
           {
+            id: "dumbbell_row", name: "Dumbbell Row", superset: null,
+            warmupSets: "1–2", workingSets: 3, reps: "10–12",
+            rest: "2–3 min",
+            substitutions: ["Chest-Supported T-Bar Row", "Barbell Row"],
+            notes: ""
+          },
+          {
+            id: "cable_lat_pull_in", name: "Cable Lat Pull-In", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "12–15",
+            rest: "1–2 min",
+            substitutions: ["Cable Lat Pullover", "Dumbbell Lat Pullover"],
+            notes: ""
+          },
+          {
+            id: "reverse_pec_deck", name: "Reverse Pec Deck", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "12–15",
+            rest: "1–2 min",
+            substitutions: ["Rope Facepull", "Reverse Cable Fly"],
+            notes: ""
+          },
+          {
             id: "barbell_shrug", name: "Barbell Shrug", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
-            rest: "1–2 min",
-            lastSetTechnique: "Cheat Reps",
-            substitutions: ["Dumbbell Shrug", "Machine Shrug"],
-            notes: ""
-          },
-          {
-            id: "pec_deck_reverse", name: "Reverse Pec Deck", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["Cable Rear Delt Fly", "Dumbbell Rear Delt Fly"],
-            notes: ""
-          },
-          {
-            id: "cable_row_lat_pullover", name: "Cable Lat Pullover", superset: null,
             warmupSets: "0–1", workingSets: 2, reps: "12–15",
             rest: "1–2 min",
-            substitutions: ["Dumbbell Pullover", "Straight-Arm Lat Pulldown"],
+            substitutions: ["Dumbbell Shrug", "Trap Bar Shrug"],
             notes: ""
           },
           {
-            id: "reverse_pulldown", name: "Reverse Pulldown", superset: null,
-            warmupSets: "0–1", workingSets: 2, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["Pull-In", "Lat Pulldown"],
-            notes: ""
-          },
-          {
-            id: "dumbbell_biceps_curl", name: "Dumbbell Biceps Curl", superset: null,
+            id: "hammer_curl", name: "Hammer Curl", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "12–15",
             rest: "1–2 min",
-            substitutions: ["Barbell Biceps Curl", "Preacher Curl"],
+            substitutions: ["Dumbbell Biceps Curl", "EZ-Bar Biceps Curl"],
             notes: ""
           },
           {
             id: "bayesian_cable_curl", name: "Bayesian Cable Curl", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
             rest: "1–2 min",
-            substitutions: ["Hammer Curl", "Incline Dumbbell Curl"],
+            substitutions: ["Incline Dumbbell Curl", "Preacher Curl"],
             notes: ""
-          }
+          },
         ]
       },
       {
@@ -1213,60 +1197,51 @@ const PROGRAMS = [
             id: "barbell_back_squat", name: "Barbell Back Squat", superset: null,
             warmupSets: "2–3", workingSets: 3, reps: "3–5",
             rest: "3–4 min",
-            substitutions: ["Leg Press", "Goblet Squat"],
+            substitutions: ["Leg Press", "Dumbbell Lunge"],
+            notes: ""
+          },
+          {
+            id: "45_back_extension", name: "45° Back Extension", superset: null,
+            warmupSets: "1–2", workingSets: 3, reps: "10–12",
+            rest: "2–3 min",
+            substitutions: ["Good Morning", "Glute Ham Raise"],
             notes: ""
           },
           {
             id: "leg_extension", name: "Leg Extension", superset: null,
             warmupSets: "1–2", workingSets: 2, reps: "12–15",
             rest: "2–3 min",
-            lastSetTechnique: "Lengthened Partials (Extended Set)",
-            substitutions: ["Hack Squat", ""],
+            substitutions: ["Goblet Squat", "Dumbbell Lunge"],
             notes: ""
           },
           {
-            id: "45_back_extension", name: "45° Back Extension", superset: null,
+            id: "seated_leg_curl", name: "Seated Leg Curl", superset: null,
             warmupSets: "1–2", workingSets: 2, reps: "12–15",
             rest: "2–3 min",
-            lastSetTechnique: "Lengthened Partials (Extended Set)",
-            substitutions: ["Good Morning", "Romanian Deadlift"],
+            substitutions: ["Lying Leg Curl", "Nordic Ham Curl"],
             notes: ""
           },
           {
-            id: "lying_leg_curl", name: "Lying Leg Curl", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "10–15",
-            rest: "1–2 min",
-            substitutions: ["Seated Leg Curl", "Nordic Ham Curl"],
-            notes: ""
-          },
-          {
-            id: "goblet_squat", name: "Goblet Squat", superset: null,
+            id: "standing_calf_raise", name: "Standing Calf Raise", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "15–20",
             rest: "1–2 min",
-            substitutions: ["Leg Press", "Hack Squat"],
+            substitutions: ["Seated Calf Raise", "Leg Press Calf Press"],
             notes: ""
           },
           {
-            id: "seated_calf_raise", name: "Seated Calf Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
-            rest: "1–2 min",
-            substitutions: ["Standing Calf Raise", ""],
+            id: "roman_chair_leg_raise", name: "Roman Chair Leg Raise", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "10–20",
+            rest: "30 sec",
+            substitutions: ["Hanging Leg Raise", "Bent-Knee Leg Raise"],
             notes: ""
           },
-          {
-            id: "leg_raise", name: "Hanging Leg Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–15",
-            rest: "1–2 min",
-            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
-            notes: ""
-          }
         ]
-      }
+      },
     ]
   },
 
   // ──────────────────────────────────────────────
-  // PROGRAM 16: Upper/Lower 6x/week
+  // PROGRAM 16: Upper/Lower Split 6x/week
   // ──────────────────────────────────────────────
   {
     id: "p16",
@@ -1290,41 +1265,40 @@ const PROGRAMS = [
             notes: ""
           },
           {
-            id: "barbell_row", name: "Barbell Row", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "6–8",
+            id: "pull_up_optional_assistance", name: "Pull-Up (Optional Assistance)", superset: null,
+            warmupSets: "1–2", workingSets: 3, reps: "8–10",
             rest: "2–3 min",
-            substitutions: ["Pendlay Row", "Dumbbell Row"],
+            substitutions: ["Lat Pulldown", "Chin-Up"],
             notes: ""
           },
           {
             id: "dumbbell_lateral_raise", name: "Dumbbell Lateral Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "8–10",
+            warmupSets: "0–1", workingSets: 2, reps: "8–10",
             rest: "1–2 min",
-            lastSetTechnique: "Lengthened Partials (Extended Set)",
             substitutions: ["Cable Lateral Raise", "Machine Lateral Raise"],
             notes: ""
           },
           {
-            id: "lat_pulldown", name: "Lat Pulldown", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "8–10",
-            rest: "1–2 min",
-            substitutions: ["Pull-Up (Optional Assistance)", "Chin-Up"],
-            notes: ""
-          },
-          {
-            id: "reverse_pec_deck", name: "Reverse Pec Deck", superset: null,
+            id: "rope_facepull", name: "Rope Facepull", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "8–10",
             rest: "1–2 min",
-            substitutions: ["Cable Rear Delt Fly", "Dumbbell Rear Delt Fly"],
+            substitutions: ["Reverse Pec Deck", "Reverse Cable Fly"],
             notes: ""
           },
           {
-            id: "biceps_curl", name: "Barbell Biceps Curl", superset: null,
+            id: "ez_bar_skullcrusher", name: "EZ-Bar Skullcrusher", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "8–10",
+            rest: "1–2 min",
+            substitutions: ["Dumbbell Skullcrusher", "Overhead Triceps Extension"],
+            notes: ""
+          },
+          {
+            id: "preacher_curl", name: "Preacher Curl", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "8–10",
             rest: "1–2 min",
             substitutions: ["EZ-Bar Biceps Curl", "Dumbbell Biceps Curl"],
             notes: ""
-          }
+          },
         ]
       },
       {
@@ -1341,38 +1315,31 @@ const PROGRAMS = [
           {
             id: "leg_press", name: "Leg Press", superset: null,
             warmupSets: "2–3", workingSets: 3, reps: "6–8",
-            rest: "2–3 min",
-            substitutions: ["Barbell Front Squat", "Hack Squat"],
+            rest: "3–4 min",
+            substitutions: ["Barbell Front Squat", "Dumbbell Lunge"],
             notes: ""
           },
           {
-            id: "barbell_front_squat", name: "Barbell Front Squat", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "6–8",
-            rest: "2–3 min",
-            substitutions: ["Barbell Back Squat", "Goblet Squat"],
-            notes: ""
-          },
-          {
-            id: "romanian_deadlift", name: "Romanian Deadlift", superset: null,
+            id: "glute_ham_raise", name: "Glute Ham Raise", superset: null,
             warmupSets: "1–2", workingSets: 3, reps: "8–10",
             rest: "2–3 min",
-            substitutions: ["45° Back Extension", "Good Morning"],
+            substitutions: ["45° Back Extension", "Lying Leg Curl"],
             notes: ""
           },
           {
-            id: "standing_calf_raise", name: "Standing Calf Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "6–8",
+            id: "seated_calf_raise", name: "Seated Calf Raise", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "8–10",
             rest: "1–2 min",
-            substitutions: ["Seated Calf Raise", ""],
+            substitutions: ["Standing Calf Raise", "Leg Press Calf Press"],
             notes: ""
           },
           {
-            id: "plate_weighted_decline_situp", name: "Plate-Weighted Decline Sit-Up", superset: null,
+            id: "cable_crunch", name: "Cable Crunch", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "10–12",
             rest: "1–2 min",
-            substitutions: ["Cable Crunch", "Hanging Leg Raise"],
+            substitutions: ["Plate-Weighted Decline Sit-Up", "Hanging Leg Raise"],
             notes: ""
-          }
+          },
         ]
       },
       {
@@ -1380,57 +1347,47 @@ const PROGRAMS = [
         name: "Upper #2 (Hypertrophy Focus)",
         exercises: [
           {
-            id: "overhead_barbell_press", name: "Overhead Barbell Press", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "6–8",
+            id: "barbell_row", name: "Barbell Row", superset: null,
+            warmupSets: "2–3", workingSets: 3, reps: "8–10",
             rest: "2–3 min",
-            substitutions: ["Dumbbell Shoulder Press (Standing)", "Machine Shoulder Press"],
+            substitutions: ["Pendlay Row", "Dumbbell Row"],
             notes: ""
           },
           {
-            id: "pendlay_row", name: "Pendlay Row", superset: null,
+            id: "overhead_barbell_press", name: "Overhead Barbell Press", superset: null,
             warmupSets: "2–3", workingSets: 3, reps: "6–8",
-            rest: "2–3 min",
-            substitutions: ["Barbell Row", "Dumbbell Row"],
+            rest: "3–4 min",
+            substitutions: ["Dumbbell Shoulder Press (Standing)", "Dumbbell Shoulder Press (Seated)"],
             notes: ""
           },
           {
             id: "cable_lat_pullover", name: "Cable Lat Pullover", superset: null,
-            warmupSets: "1–2", workingSets: 2, reps: "10–12",
-            rest: "1–2 min",
-            lastSetTechnique: "Lengthened Partials (Extended Set)",
-            substitutions: ["Dumbbell Pullover", "Straight-Arm Lat Pulldown"],
-            notes: ""
-          },
-          {
-            id: "overhead_barbell_press2", name: "Overhead Barbell Press", superset: null,
             warmupSets: "0–1", workingSets: 2, reps: "10–12",
             rest: "1–2 min",
-            lastSetTechnique: "Myo-reps",
-            substitutions: ["Dumbbell Fly", "Pec Deck"],
+            substitutions: ["Dumbbell Lat Pullover", "Cable Lat Pull-In"],
             notes: ""
           },
           {
             id: "cable_fly", name: "Cable Fly", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["Pec Deck", "Dumbbell Fly"],
-            notes: ""
-          },
-          {
-            id: "lat_pulldown2", name: "Lat Pulldown", superset: null,
             warmupSets: "0–1", workingSets: 2, reps: "10–12",
             rest: "1–2 min",
-            lastSetTechnique: "Lengthened Partials (Extended Set)",
-            substitutions: ["Pull-Up (Optional Assistance)", "Chin-Up"],
+            substitutions: ["Dumbbell Fly", "Pec Deck"],
             notes: ""
           },
           {
-            id: "barbell_biceps_curl", name: "Barbell Biceps Curl", superset: null,
+            id: "hammer_curl", name: "Hammer Curl", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "12–15",
             rest: "1–2 min",
-            substitutions: ["EZ-Bar Biceps Curl", "Dumbbell Biceps Curl"],
+            substitutions: ["Dumbbell Biceps Curl", "EZ-Bar Biceps Curl"],
             notes: ""
-          }
+          },
+          {
+            id: "triceps_kickback_cable", name: "Triceps Kickback (Cable)", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "12–15",
+            rest: "1–2 min",
+            substitutions: ["EZ-Bar Skullcrusher", "Triceps Pressdown"],
+            notes: ""
+          },
         ]
       },
       {
@@ -1441,54 +1398,44 @@ const PROGRAMS = [
             id: "barbell_back_squat", name: "Barbell Back Squat", superset: null,
             warmupSets: "2–3", workingSets: 3, reps: "3–5",
             rest: "3–4 min",
-            substitutions: ["Leg Press", "Hack Squat"],
-            notes: ""
-          },
-          {
-            id: "leg_extension", name: "Leg Extension", superset: null,
-            warmupSets: "1–2", workingSets: 2, reps: "10–12",
-            rest: "2–3 min",
-            lastSetTechnique: "Lengthened Partials (Extended Set)",
-            substitutions: ["Hack Squat", ""],
+            substitutions: ["Leg Press", "Dumbbell Lunge"],
             notes: ""
           },
           {
             id: "45_back_extension", name: "45° Back Extension", superset: null,
-            warmupSets: "1–2", workingSets: 2, reps: "10–12",
+            warmupSets: "1–2", workingSets: 3, reps: "8–10",
             rest: "2–3 min",
-            lastSetTechnique: "Lengthened Partials (Extended Set)",
-            substitutions: ["Good Morning", "Romanian Deadlift"],
+            substitutions: ["Good Morning", "Glute Ham Raise"],
+            notes: ""
+          },
+          {
+            id: "leg_extension", name: "Leg Extension", superset: null,
+            warmupSets: "1–2", workingSets: 3, reps: "10–12",
+            rest: "2–3 min",
+            substitutions: ["Goblet Squat", "Dumbbell Lunge"],
             notes: ""
           },
           {
             id: "seated_leg_curl", name: "Seated Leg Curl", superset: null,
             warmupSets: "1–2", workingSets: 2, reps: "10–12",
             rest: "2–3 min",
-            lastSetTechnique: "Lengthened Partials (Extended Set)",
             substitutions: ["Lying Leg Curl", "Nordic Ham Curl"],
-            notes: ""
-          },
-          {
-            id: "seated_calf_raise", name: "Seated Calf Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–20",
-            rest: "1–2 min",
-            substitutions: ["Standing Calf Raise", ""],
             notes: ""
           },
           {
             id: "standing_calf_raise", name: "Standing Calf Raise", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "12–15",
             rest: "1–2 min",
-            substitutions: ["Seated Calf Raise", ""],
+            substitutions: ["Seated Calf Raise", "Leg Press Calf Press"],
             notes: ""
           },
           {
             id: "roman_chair_leg_raise", name: "Roman Chair Leg Raise", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "10–20",
-            rest: "1–2 min",
-            substitutions: ["Hanging Leg Raise", "Cable Crunch"],
+            rest: "30 sec",
+            substitutions: ["Hanging Leg Raise", "Bent-Knee Leg Raise"],
             notes: ""
-          }
+          },
         ]
       },
       {
@@ -1496,16 +1443,16 @@ const PROGRAMS = [
         name: "Upper #3 (Muscle Endurance Focus)",
         exercises: [
           {
-            id: "flat_db_press", name: "Flat Dumbbell Press", superset: null,
+            id: "flat_dumbbell_press", name: "Flat Dumbbell Press", superset: null,
             warmupSets: "1–2", workingSets: 3, reps: "10–12",
-            rest: "1–2 min",
-            substitutions: ["Bench Press", "Machine Chest Press"],
+            rest: "2–3 min",
+            substitutions: ["Dip", "Bench Press"],
             notes: ""
           },
           {
             id: "lat_pulldown", name: "Lat Pulldown", superset: null,
             warmupSets: "1–2", workingSets: 3, reps: "10–12",
-            rest: "1–2 min",
+            rest: "2–3 min",
             substitutions: ["Pull-Up (Optional Assistance)", "Chin-Up"],
             notes: ""
           },
@@ -1513,30 +1460,30 @@ const PROGRAMS = [
             id: "cable_lateral_raise", name: "Cable Lateral Raise", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "12–15",
             rest: "1–2 min",
-            substitutions: ["Dumbbell Lateral Raise", "Machine Lateral Raise"],
+            substitutions: ["Machine Lateral Raise", "Dumbbell Lateral Raise"],
             notes: ""
           },
           {
             id: "dumbbell_row", name: "Dumbbell Row", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["Cable Row", "Chest-Supported T-Bar Row"],
+            warmupSets: "1–2", workingSets: 3, reps: "12–15",
+            rest: "2–3 min",
+            substitutions: ["Chest-Supported T-Bar Row", "Barbell Row"],
             notes: ""
           },
           {
             id: "overhead_triceps_extension", name: "Overhead Triceps Extension", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
             rest: "1–2 min",
-            substitutions: ["Rope Pushdown", "EZ-Bar Skullcrusher"],
+            substitutions: ["EZ-Bar Skullcrusher", "Dumbbell Skullcrusher"],
             notes: ""
           },
           {
             id: "bayesian_cable_curl", name: "Bayesian Cable Curl", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
             rest: "1–2 min",
-            substitutions: ["Hammer Curl", "Dumbbell Biceps Curl"],
+            substitutions: ["Incline Dumbbell Curl", "Preacher Curl"],
             notes: ""
-          }
+          },
         ]
       },
       {
@@ -1545,53 +1492,53 @@ const PROGRAMS = [
         exercises: [
           {
             id: "lunge_barbell", name: "Lunge (Barbell)", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "10–12",
+            warmupSets: "2–3", workingSets: 3, reps: "6–8",
             rest: "2–3 min",
-            substitutions: ["Dumbbell Lunge", "Goblet Squat"],
+            substitutions: ["Dumbbell Lunge", "Leg Press"],
             notes: ""
           },
           {
-            id: "good_morning", name: "Good Morning (Barbell)", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["45° Back Extension", "Romanian Deadlift"],
+            id: "good_morning", name: "Good Morning", superset: null,
+            warmupSets: "1–2", workingSets: 3, reps: "10–12",
+            rest: "2–3 min",
+            substitutions: ["45° Back Extension", "Glute Ham Raise"],
             notes: ""
           },
           {
             id: "goblet_squat", name: "Goblet Squat", superset: null,
             warmupSets: "1–2", workingSets: 3, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["Leg Press", "Hack Squat"],
+            rest: "2–3 min",
+            substitutions: ["Leg Extension", "Front Squat"],
             notes: ""
           },
           {
             id: "cable_hip_abduction", name: "Cable Hip Abduction", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
+            warmupSets: "0–1", workingSets: 3, reps: "12–15",
             rest: "1–2 min",
-            substitutions: ["Dumbbell Hip Abduction", "Machine Hip Abduction"],
+            substitutions: ["Machine Hip Abduction", "Weighted Hip Abduction"],
             notes: ""
           },
           {
             id: "standing_calf_raise", name: "Standing Calf Raise", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "15–20",
             rest: "1–2 min",
-            substitutions: ["Seated Calf Raise", ""],
+            substitutions: ["Seated Calf Raise", "Leg Press Calf Press"],
             notes: ""
           },
           {
             id: "plank", name: "Plank", superset: null,
-            warmupSets: "0", workingSets: 3, reps: "30–60 sec",
+            warmupSets: "0–1", workingSets: 3, reps: "30–60s",
             rest: "1–2 min",
-            substitutions: ["Cable Crunch", "Dead Bug"],
+            substitutions: ["LLPT Plank", "Cable Crunch"],
             notes: ""
-          }
+          },
         ]
-      }
+      },
     ]
   },
 
   // ──────────────────────────────────────────────
-  // PROGRAM 19: Push/Pull/Legs 6x/week
+  // PROGRAM 19: Push/Pull/Legs Split 6x/week
   // ──────────────────────────────────────────────
   {
     id: "p19",
@@ -1611,15 +1558,21 @@ const PROGRAMS = [
             id: "bench_press", name: "Bench Press", superset: null,
             warmupSets: "2–3", workingSets: 3, reps: "3–5",
             rest: "3–4 min",
-            lastSetTechnique: "Lengthened Partials (Extended Set)",
             substitutions: ["Machine Chest Press", "Flat Dumbbell Press"],
             notes: ""
           },
           {
-            id: "dumbbell_shoulder_press", name: "Dumbbell Shoulder Press", superset: null,
-            warmupSets: "1–2", workingSets: 2, reps: "8–10",
+            id: "dumbbell_shoulder_press_seated", name: "Dumbbell Shoulder Press (Seated)", superset: null,
+            warmupSets: "1–2", workingSets: 3, reps: "8–10",
             rest: "2–3 min",
-            substitutions: ["Overhead Barbell Press", "Machine Shoulder Press"],
+            substitutions: ["Overhead Barbell Press", "Barbell Upright Row"],
+            notes: ""
+          },
+          {
+            id: "pec_deck", name: "Pec Deck", superset: null,
+            warmupSets: "0–1", workingSets: 2, reps: "8–10",
+            rest: "1–2 min",
+            substitutions: ["Dumbbell Fly", "Push-Up"],
             notes: ""
           },
           {
@@ -1630,17 +1583,9 @@ const PROGRAMS = [
             notes: ""
           },
           {
-            id: "cable_fly", name: "Cable Fly", superset: null,
-            warmupSets: "0–1", workingSets: 2, reps: "8–10",
-            rest: "1–2 min",
-            substitutions: ["Pec Deck", "Dumbbell Fly"],
-            notes: ""
-          },
-          {
             id: "ez_bar_skullcrusher", name: "EZ-Bar Skullcrusher", superset: null,
-            warmupSets: "0–1", workingSets: 2, reps: "8–10",
+            warmupSets: "0–1", workingSets: 3, reps: "8–10",
             rest: "1–2 min",
-            lastSetTechnique: "Lengthened Partials (Extended Set)",
             substitutions: ["Dumbbell Skullcrusher", "Overhead Triceps Extension"],
             notes: ""
           },
@@ -1648,9 +1593,9 @@ const PROGRAMS = [
             id: "triceps_pressdown", name: "Triceps Pressdown", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "8–10",
             rest: "1–2 min",
-            substitutions: ["Rope Pushdown", "Triceps Kickback"],
+            substitutions: ["Triceps Kickback (Cable)", "EZ-Bar Skullcrusher"],
             notes: ""
-          }
+          },
         ]
       },
       {
@@ -1659,31 +1604,30 @@ const PROGRAMS = [
         exercises: [
           {
             id: "barbell_row", name: "Barbell Row", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "3–5",
+            warmupSets: "2–3", workingSets: 3, reps: "8–10",
             rest: "2–3 min",
-            substitutions: ["Chest-Supported T-Bar Row", "Pendlay Row"],
+            substitutions: ["Pendlay Row", "Dumbbell Row"],
             notes: ""
           },
           {
-            id: "lat_pulldown", name: "Lat Pulldown", superset: null,
+            id: "pull_up_optional_assistance", name: "Pull-Up (Optional Assistance)", superset: null,
             warmupSets: "1–2", workingSets: 3, reps: "8–10",
-            rest: "1–2 min",
-            lastSetTechnique: "Lengthened Partials (Extended Set)",
-            substitutions: ["Pull-Up (Optional Assistance)", "Chin-Up"],
+            rest: "2–3 min",
+            substitutions: ["Lat Pulldown", "Chin-Up"],
             notes: ""
           },
           {
             id: "rope_facepull", name: "Rope Facepull", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "8–10",
             rest: "1–2 min",
-            substitutions: ["Reverse Pec Deck", "Cable Rear Delt Fly"],
+            substitutions: ["Reverse Pec Deck", "Reverse Cable Fly"],
             notes: ""
           },
           {
             id: "cable_lat_pullover", name: "Cable Lat Pullover", superset: null,
             warmupSets: "0–1", workingSets: 2, reps: "8–10",
             rest: "1–2 min",
-            substitutions: ["Dumbbell Pullover", "Straight-Arm Lat Pulldown"],
+            substitutions: ["Dumbbell Lat Pullover", "Cable Lat Pull-In"],
             notes: ""
           },
           {
@@ -1695,11 +1639,11 @@ const PROGRAMS = [
           },
           {
             id: "ez_bar_biceps_curl", name: "EZ-Bar Biceps Curl", superset: null,
-            warmupSets: "0–1", workingSets: 2, reps: "8–10",
+            warmupSets: "0–1", workingSets: 3, reps: "8–10",
             rest: "1–2 min",
-            substitutions: ["Barbell Biceps Curl", "Dumbbell Biceps Curl"],
+            substitutions: ["Standing Barbell Curl", "Dumbbell Biceps Curl"],
             notes: ""
-          }
+          },
         ]
       },
       {
@@ -1707,54 +1651,40 @@ const PROGRAMS = [
         name: "Legs #1 (Strength Focus)",
         exercises: [
           {
-            id: "leg_press", name: "Leg Press", superset: null,
+            id: "deadlift", name: "Deadlift", superset: null,
             warmupSets: "2–3", workingSets: 3, reps: "3–5",
             rest: "3–5 min",
-            substitutions: ["Barbell Back Squat", "Hack Squat"],
-            notes: ""
-          },
-          {
-            id: "deadlift", name: "Deadlift", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "6–8",
-            rest: "3–4 min",
             substitutions: ["Romanian Deadlift", "Hip Thrust"],
             notes: ""
           },
           {
+            id: "leg_press", name: "Leg Press", superset: null,
+            warmupSets: "2–3", workingSets: 3, reps: "6–8",
+            rest: "3–4 min",
+            substitutions: ["Barbell Front Squat", "Dumbbell Lunge"],
+            notes: ""
+          },
+          {
             id: "glute_ham_raise", name: "Glute Ham Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "8–10",
-            rest: "1–2 min",
-            substitutions: ["45° Back Extension", "Romanian Deadlift"],
-            notes: ""
-          },
-          {
-            id: "leg_extension", name: "Leg Extension", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "8–10",
-            rest: "1–2 min",
-            substitutions: ["Hack Squat", ""],
-            notes: ""
-          },
-          {
-            id: "leg_press2", name: "Leg Press", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "8–10",
-            rest: "1–2 min",
-            substitutions: ["Goblet Squat", ""],
+            warmupSets: "1–2", workingSets: 3, reps: "8–10",
+            rest: "2–3 min",
+            substitutions: ["45° Back Extension", "Lying Leg Curl"],
             notes: ""
           },
           {
             id: "seated_calf_raise", name: "Seated Calf Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
+            warmupSets: "0–1", workingSets: 3, reps: "8–10",
             rest: "1–2 min",
-            substitutions: ["Standing Calf Raise", ""],
+            substitutions: ["Standing Calf Raise", "Leg Press Calf Press"],
             notes: ""
           },
           {
             id: "cable_crunch", name: "Cable Crunch", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "8–10",
+            warmupSets: "0–1", workingSets: 3, reps: "10–12",
             rest: "1–2 min",
             substitutions: ["Plate-Weighted Decline Sit-Up", "Hanging Leg Raise"],
             notes: ""
-          }
+          },
         ]
       },
       {
@@ -1765,45 +1695,44 @@ const PROGRAMS = [
             id: "overhead_barbell_press", name: "Overhead Barbell Press", superset: null,
             warmupSets: "2–3", workingSets: 3, reps: "6–8",
             rest: "3–4 min",
-            substitutions: ["Dumbbell Shoulder Press", "Machine Shoulder Press"],
+            substitutions: ["Dumbbell Shoulder Press (Standing)", "Dumbbell Shoulder Press (Seated)"],
             notes: ""
           },
           {
-            id: "flat_db_press", name: "Flat Dumbbell Press", superset: null,
+            id: "flat_dumbbell_press", name: "Flat Dumbbell Press", superset: null,
             warmupSets: "1–2", workingSets: 3, reps: "10–12",
             rest: "2–3 min",
-            substitutions: ["Bench Press", "Machine Chest Press"],
-            notes: ""
-          },
-          {
-            id: "cable_fly", name: "Cable Fly", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["Pec Deck", "Dumbbell Fly"],
+            substitutions: ["Dip", "Bench Press"],
             notes: ""
           },
           {
             id: "cable_lateral_raise", name: "Cable Lateral Raise", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "12–15",
             rest: "1–2 min",
-            substitutions: ["Dumbbell Lateral Raise", "Machine Lateral Raise"],
+            substitutions: ["Machine Lateral Raise", "Dumbbell Lateral Raise"],
+            notes: ""
+          },
+          {
+            id: "cable_fly", name: "Cable Fly", superset: null,
+            warmupSets: "0–1", workingSets: 2, reps: "15–20",
+            rest: "1–2 min",
+            substitutions: ["Dumbbell Fly", "Pec Deck"],
             notes: ""
           },
           {
             id: "triceps_kickback_cable", name: "Triceps Kickback (Cable)", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "12–15",
             rest: "1–2 min",
-            lastSetTechnique: "Myo-reps",
-            substitutions: ["Rope Pushdown", "Overhead Triceps Extension"],
+            substitutions: ["EZ-Bar Skullcrusher", "Triceps Pressdown"],
             notes: ""
           },
           {
             id: "overhead_triceps_extension", name: "Overhead Triceps Extension", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "12–15",
             rest: "1–2 min",
-            substitutions: ["EZ-Bar Skullcrusher", "Rope Pushdown"],
+            substitutions: ["EZ-Bar Skullcrusher", "Dumbbell Skullcrusher"],
             notes: ""
-          }
+          },
         ]
       },
       {
@@ -1820,53 +1749,45 @@ const PROGRAMS = [
           {
             id: "dumbbell_row", name: "Dumbbell Row", superset: null,
             warmupSets: "1–2", workingSets: 3, reps: "10–12",
-            rest: "1–2 min",
-            substitutions: ["Cable Row", "Chest-Supported T-Bar Row"],
+            rest: "2–3 min",
+            substitutions: ["Chest-Supported T-Bar Row", "Barbell Row"],
             notes: ""
           },
           {
-            id: "pec_deck_reverse", name: "Reverse Pec Deck", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
+            id: "cable_lat_pull_in", name: "Cable Lat Pull-In", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "10–12",
             rest: "1–2 min",
-            substitutions: ["Cable Rear Delt Fly", "Dumbbell Rear Delt Fly"],
+            substitutions: ["Cable Lat Pullover", "Dumbbell Lat Pullover"],
             notes: ""
           },
           {
-            id: "cable_lat_pullover", name: "Cable Lat Pullover", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
+            id: "reverse_pec_deck", name: "Reverse Pec Deck", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
             rest: "1–2 min",
-            substitutions: ["Dumbbell Pullover", "Straight-Arm Lat Pulldown"],
-            notes: ""
-          },
-          {
-            id: "reverse_pulldown", name: "Pull-In", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["Lat Pulldown", "Cable Pullover"],
+            substitutions: ["Rope Facepull", "Reverse Cable Fly"],
             notes: ""
           },
           {
             id: "barbell_shrug", name: "Barbell Shrug", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
+            warmupSets: "0–1", workingSets: 2, reps: "12–15",
             rest: "1–2 min",
-            lastSetTechnique: "Cheat Reps",
-            substitutions: ["Dumbbell Shrug", "Machine Shrug"],
-            notes: ""
-          },
-          {
-            id: "bayesian_cable_curl", name: "Bayesian Cable Curl", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["Hammer Curl", "Dumbbell Biceps Curl"],
+            substitutions: ["Dumbbell Shrug", "Trap Bar Shrug"],
             notes: ""
           },
           {
             id: "hammer_curl", name: "Hammer Curl", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "12–15",
             rest: "1–2 min",
-            substitutions: ["Barbell Biceps Curl", "EZ-Bar Biceps Curl"],
+            substitutions: ["Dumbbell Biceps Curl", "EZ-Bar Biceps Curl"],
             notes: ""
-          }
+          },
+          {
+            id: "bayesian_cable_curl", name: "Bayesian Cable Curl", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "12–15",
+            rest: "1–2 min",
+            substitutions: ["Incline Dumbbell Curl", "Preacher Curl"],
+            notes: ""
+          },
         ]
       },
       {
@@ -1877,57 +1798,48 @@ const PROGRAMS = [
             id: "barbell_back_squat", name: "Barbell Back Squat", superset: null,
             warmupSets: "2–3", workingSets: 3, reps: "3–5",
             rest: "3–4 min",
-            substitutions: ["Leg Press", "Goblet Squat"],
+            substitutions: ["Leg Press", "Dumbbell Lunge"],
             notes: ""
           },
           {
             id: "45_back_extension", name: "45° Back Extension", superset: null,
-            warmupSets: "1–2", workingSets: 2, reps: "12–15",
+            warmupSets: "1–2", workingSets: 3, reps: "10–12",
             rest: "2–3 min",
-            lastSetTechnique: "Lengthened Partials (Extended Set)",
-            substitutions: ["Good Morning", "Romanian Deadlift"],
+            substitutions: ["Good Morning", "Glute Ham Raise"],
             notes: ""
           },
           {
             id: "leg_extension", name: "Leg Extension", superset: null,
             warmupSets: "1–2", workingSets: 2, reps: "12–15",
             rest: "2–3 min",
-            lastSetTechnique: "Lengthened Partials (Extended Set)",
-            substitutions: ["Hack Squat", ""],
+            substitutions: ["Goblet Squat", "Dumbbell Lunge"],
             notes: ""
           },
           {
             id: "seated_leg_curl", name: "Seated Leg Curl", superset: null,
             warmupSets: "1–2", workingSets: 2, reps: "12–15",
-            rest: "1–2 min",
+            rest: "2–3 min",
             substitutions: ["Lying Leg Curl", "Nordic Ham Curl"],
             notes: ""
           },
           {
-            id: "goblet_squat", name: "Goblet Squat", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "2–3 min",
-            substitutions: ["Leg Press", "Barbell Back Squat"],
-            notes: ""
-          },
-          {
             id: "standing_calf_raise", name: "Standing Calf Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–20",
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
             rest: "1–2 min",
-            substitutions: ["Seated Calf Raise", ""],
+            substitutions: ["Seated Calf Raise", "Leg Press Calf Press"],
             notes: ""
           },
           {
-            id: "roman_chair_calf_raise", name: "Roman Chair Leg Raise", superset: null,
+            id: "roman_chair_leg_raise", name: "Roman Chair Leg Raise", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "10–20",
             rest: "1–2 min",
-            substitutions: ["Hanging Leg Raise", "Cable Crunch"],
+            substitutions: ["Hanging Leg Raise", "Bent-Knee Leg Raise"],
             notes: ""
-          }
+          },
         ]
-      }
+      },
     ]
-  }
+  },
 
 ];
 
