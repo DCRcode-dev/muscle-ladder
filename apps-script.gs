@@ -146,321 +146,290 @@ function getSpreadsheet_() {
   return ss;
 }
 
-// ╔══════════════════════════════════════════════════════════════════════════╗
-// ║              GOOGLE HEALTH API MODULE  (v4 — successor to Fitbit Web API)║
-// ║  Base: https://health.googleapis.com/v4/users/me                        ║
-// ║  Serves Fitbit Air + Google Health app data via Google OAuth.           ║
-// ║  ScriptApp.getOAuthToken() carries the googlehealth.* scopes declared   ║
-// ║  in appsscript.json — no client secret, no refresh-token dance.         ║
-// ║                                                                          ║
-// ║  ONE-TIME SETUP (≈10 min, do ONCE):                                     ║
-// ║   1. console.cloud.google.com → create project "dcr-gym-health"         ║
-// ║      → APIs & Services → Enable "Google Health API"                     ║
-// ║      → OAuth consent screen → External → add yourself as test user      ║
-// ║   2. Apps Script editor → Project Settings → change GCP project to      ║
-// ║      that project's NUMBER                                              ║
-// ║   3. Paste this file + the updated appsscript.json (Show manifest)      ║
-// ║   4. Run authorizeHealthAPI → approve the consent prompt                ║
-// ║      → check the log says HTTP 200                                      ║
-// ║   5. Deploy → Manage deployments → Edit → New version                   ║
-// ║      (URL stays the same — the app keeps working untouched)             ║
-// ╚══════════════════════════════════════════════════════════════════════════╝
-
+// ════════════════════════════════════════════════════════════════════════════
+// GOOGLE HEALTH API v4 — server-side proxy with a HEALTH-ONLY OAuth token.
+//
+// Why not ScriptApp.getOAuthToken(): it ALWAYS carries this script's scopes
+// (spreadsheets + script.external_request, needed for Sheets + UrlFetch), and
+// the Health API rejects any token that mixes non-health scopes
+// (403 DISALLOWED_OAUTH_SCOPES). So we mint a token via the apps-script-oauth2
+// library against a dedicated GCP OAuth client that requests ONLY health scopes.
+//
+// One-time owner consent: open ?action=getFitbit → tap the returned authUrl →
+// approve. The refresh token lands in Script Properties; the web app then serves
+// the owner's biometrics to any caller (executeAs USER_DEPLOYING, access ANYONE).
+//
+// SETUP (owner, once):
+//   1. Apps Script editor → Libraries → add  1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF  (identifier: OAuth2)
+//   2. GCP console → Credentials → Create OAuth client → "Web application".
+//      Authorized redirect URI = output of getHealthRedirectUri() (run it once).
+//   3. Script Properties: GH_OAUTH_CLIENT_ID, GH_OAUTH_CLIENT_SECRET = that client's id/secret.
+//   4. Redeploy the web app, then open ?action=getFitbit and complete the authUrl once.
+// ════════════════════════════════════════════════════════════════════════════
 const HEALTH_API        = 'https://health.googleapis.com/v4/users/me';
 const SHEET_NAME_FITBIT = 'FitbitData';
+const GH_OAUTH_SCOPES   = [
+  'https://www.googleapis.com/auth/googlehealth.sleep.readonly',
+  'https://www.googleapis.com/auth/googlehealth.health_metrics_and_measurements.readonly',
+].join(' ');
 
-// Run this ONCE from the editor to trigger the Google Health scope consent.
-function authorizeHealthAPI() {
-  const today = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
-  const data  = healthFetch_('/dataTypes/sleep/dataPoints:reconcile', {
-    dataSourceFamily: 'users/me/dataSourceFamilies/google-wearables',
-    filter: 'sleep.interval.civil_end_time >= "' + healthPrevDay_(today) + '"',
-  });
-  Logger.log(data ? 'Auth OK — Health API reachable. Sample: ' + JSON.stringify(data).slice(0, 300)
-                  : 'Auth test FAILED — check GCP project link, API enablement, and scopes.');
+function ghProp_(k) { return PropertiesService.getScriptProperties().getProperty(k) || ''; }
+
+// Health-only OAuth2 service (apps-script-oauth2 library, identifier "OAuth2").
+function getHealthService_() {
+  return OAuth2.createService('dcrHealth')
+    .setAuthorizationBaseUrl('https://accounts.google.com/o/oauth2/v2/auth')
+    .setTokenUrl('https://oauth2.googleapis.com/token')
+    .setClientId(ghProp_('GH_OAUTH_CLIENT_ID'))
+    .setClientSecret(ghProp_('GH_OAUTH_CLIENT_SECRET'))
+    .setCallbackFunction('healthAuthCallback')
+    .setPropertyStore(PropertiesService.getScriptProperties())
+    .setCache(CacheService.getScriptCache())
+    .setScope(GH_OAUTH_SCOPES)
+    .setParam('access_type', 'offline')
+    .setParam('prompt', 'consent');
 }
 
-// ── Generic authenticated GET against the Health API ─────────────────────────
+// OAuth2 redirect target (library handles /usercallback → this fn).
+function healthAuthCallback(request) {
+  const ok = getHealthService_().handleCallback(request);
+  return HtmlService.createHtmlOutput(
+    '<body style="font-family:-apple-system,sans-serif;padding:48px;text-align:center;background:#FAF7F2;color:#2A2421">' +
+    (ok ? '<h2>&#10003; Google Health connected</h2><p>Close this tab and pull-to-refresh the DCR&nbsp;Gym AI tab.</p>'
+        : '<h2>Authorization failed</h2><p>Reopen the AI tab and try again.</p>') + '</body>');
+}
+
+// Run ONCE from the editor; paste the logged URI into the GCP OAuth client.
+function getHealthRedirectUri() { Logger.log(getHealthService_().getRedirectUri()); }
+
+function healthHasAccess_() {
+  try { return !!(ghProp_('GH_OAUTH_CLIENT_ID') && getHealthService_().hasAccess()); } catch (e) { return false; }
+}
+
+// Authenticated GET against the Health API with the health-only token.
 function healthFetch_(path, params) {
-  const token = ScriptApp.getOAuthToken();
+  const service = getHealthService_();
+  if (!service.hasAccess()) throw new Error('no-access');
   let url = HEALTH_API + path;
   if (params) {
-    const qs = Object.keys(params)
-      .map(function(k) { return k + '=' + encodeURIComponent(params[k]); })
-      .join('&');
+    const qs = Object.keys(params).map(function (k) { return k + '=' + encodeURIComponent(params[k]); }).join('&');
     url += (url.indexOf('?') >= 0 ? '&' : '?') + qs;
   }
-  const res = UrlFetchApp.fetch(url, {
-    headers: { Authorization: 'Bearer ' + token, Accept: 'application/json' },
-    muteHttpExceptions: true,
-  });
+  const res  = UrlFetchApp.fetch(url, { headers: { Authorization: 'Bearer ' + service.getAccessToken(), Accept: 'application/json' }, muteHttpExceptions: true });
   const code = res.getResponseCode();
-  if (code >= 200 && code < 300) {
-    try { return JSON.parse(res.getContentText() || '{}'); } catch(e) { return null; }
-  }
-  Logger.log('Health API ' + path + ' → HTTP ' + code + ': ' + res.getContentText().slice(0, 280));
+  if (code >= 200 && code < 300) { try { return JSON.parse(res.getContentText() || '{}'); } catch (e) { return null; } }
+  if (code === 401 || code === 403) { Logger.log('Health ' + path + ' → ' + code + ': ' + res.getContentText().slice(0, 220)); throw new Error('auth-' + code); }
+  Logger.log('Health ' + path + ' → HTTP ' + code + ': ' + res.getContentText().slice(0, 220));
   return null;
 }
 
-// ── Main GET endpoint (action=getFitbit — name kept for client compat) ──────
-function fitbitGetLatestData() {
-  const authUrl = ScriptApp.getService().getUrl() + '?action=fitbitAuth';
-  try {
-    // 30-min memo cache — app opens stay instant, API stays unhammered
-    const cache = CacheService.getScriptCache();
-    const memo  = cache.get('dcr_health_payload');
-    if (memo) return jsonResponse({ ok: true, connected: true, cached: 'memo', fitbit: JSON.parse(memo) });
-
-    const tz    = Session.getScriptTimeZone();
-    const today = Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd');
-
-    const sleep = healthSleepFor_(today);
-    const rhr   = healthDailyValue_('daily-resting-heart-rate', today);
-    const hrv   = healthDailyValue_('daily-heart-rate-variability', today);
-    const spo2  = healthDailyValue_('daily-oxygen-saturation', today);
-
-    // If every single signal is empty the account likely isn't authorized —
-    // fall through to the cached copy / reconnect path rather than serving voids.
-    const allEmpty = sleep.score === null && rhr === null && hrv === null;
-
-    const trailing  = healthBuildTrailing_(today, 7);
-    const readiness = computeReadiness_(rhr, hrv, sleep.score);
-
-    const payload = {
-      readinessScore:    readiness.score,
-      readinessFactor:   readiness.factor,
-      sleepScore:        sleep.score,
-      restingHR:         rhr,
-      hrv:               hrv,
-      spo2:              spo2,
-      deepSleepMinutes:  sleep.deepMinutes,
-      remSleepMinutes:   sleep.remMinutes,
-      lightSleepMinutes: sleep.lightMinutes,
-      fetchedAt:         today,
-      trailingReadiness: trailing.readiness,
-      trailingSleep:     trailing.sleep,
-      trailingHRV:       trailing.hrv,
-      source:            'google-health-api',
-    };
-
-    if (allEmpty) {
-      const cached = healthGetCached_();
-      if (cached) return jsonResponse({ ok: true, connected: true, cached: true, stale: true, fitbit: cached });
-      return jsonResponse({ ok: true, connected: false, authUrl: authUrl, reason: 'no-data' });
-    }
-
-    healthCacheToSheet_(payload);
-    try { cache.put('dcr_health_payload', JSON.stringify(payload), 1800); } catch(e) {}
-    return jsonResponse({ ok: true, connected: true, fitbit: payload });
-
-  } catch(err) {
-    Logger.log('fitbitGetLatestData error: ' + err.message);
-    try {
-      const cached = healthGetCached_();
-      if (cached) return jsonResponse({ ok: true, connected: true, cached: true, stale: true, fitbit: cached });
-    } catch(e2) {}
-    return jsonResponse({ ok: true, connected: false, authUrl: authUrl, reason: 'error' });
-  }
+// list method (verified v4 contract), following nextPageToken up to maxPages.
+function healthList_(dataType, filter, pageSize, maxPages) {
+  maxPages = maxPages || 1;
+  let all = [], pageToken = '', pages = 0;
+  do {
+    const params = { pageSize: pageSize, filter: filter };
+    if (pageToken) params.pageToken = pageToken;
+    const r = healthFetch_('/dataTypes/' + dataType + '/dataPoints', params);
+    if (r && r.dataPoints) all = all.concat(r.dataPoints);
+    pageToken = (r && r.nextPageToken) || '';
+    pages++;
+  } while (pageToken && pages < maxPages);
+  return all;
 }
 
-function fitbitStartAuth_() {
-  return HtmlService.createHtmlOutput(
-    '<body style="font-family:-apple-system,sans-serif;padding:48px;text-align:center;background:#FAF7F2;color:#2A2421">' +
-    '<h2>DCR Gym · Google Health API</h2>' +
-    '<p>Biometrics are authorized through the script owner\'s Google account.<br>' +
-    'If data is missing: open the Apps Script editor → run <b>authorizeHealthAPI</b> → approve → redeploy.<br><br>' +
-    'Then return to DCR Gym and pull down on the AI tab.</p>' +
-    '</body>'
-  );
+// ── Pure parsers (no GAS calls — unit-tested in Node) ───────────────────────
+function healthDateKey_(d) {
+  if (!d) return null;
+  const dd = d.date || d;
+  if (dd && dd.year) return Utilities.formatString('%04d-%02d-%02d', dd.year, dd.month || 1, dd.day || 1);
+  return null;
 }
+function healthNum_(v) { if (v === null || v === undefined) return null; const n = typeof v === 'string' ? Number(v) : v; return (typeof n === 'number' && isFinite(n)) ? n : null; }
 
-function fitbitStatus_() {
-  const today = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
-  const rhr   = healthDailyValue_('daily-resting-heart-rate', today);
-  const sleep = healthSleepFor_(today);
-  return jsonResponse({ ok: true, connected: rhr !== null || sleep.score !== null, api: 'google-health-v4' });
-}
-
-// ── Sleep — reconciled wearable stream, main sleep ending today ──────────────
-function healthSleepFor_(dateStr) {
-  const empty = { score: null, deepMinutes: null, remMinutes: null, lightMinutes: null, totalMinutes: null };
-  try {
-    const data = healthFetch_('/dataTypes/sleep/dataPoints:reconcile', {
-      dataSourceFamily: 'users/me/dataSourceFamilies/google-wearables',
-      filter: 'sleep.interval.civil_end_time >= "' + dateStr + '"',
-    });
-    const pts = (data && data.dataPoints) || [];
-    if (!pts.length) return empty;
-
-    // Prefer the MAIN sleep whose end date == dateStr; else longest available
-    let best = null, bestMins = -1;
-    pts.forEach(function(p) {
-      const s = p.sleep || {};
-      const sum = s.summary || {};
-      const mins = parseInt(sum.minutesAsleep || 0, 10);
-      const endsToday = (s.interval && String(s.interval.endTime || '').slice(0, 10) === dateStr)
-        || (s.interval && s.interval.civilEndTime && s.interval.civilEndTime.date &&
-            Utilities.formatString('%04d-%02d-%02d',
-              s.interval.civilEndTime.date.year, s.interval.civilEndTime.date.month, s.interval.civilEndTime.date.day) === dateStr);
-      const main = s.metadata && s.metadata.main;
-      const rank = (endsToday ? 100000 : 0) + (main ? 10000 : 0) + mins;
-      if (rank > bestMins) { bestMins = rank; best = s; }
-    });
-    if (!best || !best.summary) return empty;
-
-    const sum   = best.summary;
-    const total = parseInt(sum.minutesAsleep || 0, 10) || null;
-    let deep = null, rem = null, light = null;
-    (sum.stagesSummary || []).forEach(function(st) {
-      const m = parseInt(st.minutes || 0, 10);
-      if (st.type === 'DEEP')  deep  = m;
-      if (st.type === 'REM')   rem   = m;
-      if (st.type === 'LIGHT') light = m;
-    });
-    const period = parseInt(sum.minutesInSleepPeriod || 0, 10);
-    const eff    = (total && period) ? Math.round((total / period) * 100) : null;
-    const score  = healthComputeSleepScore_(total, deep, rem, eff);
-    return { score: score, deepMinutes: deep, remMinutes: rem, lightMinutes: light, totalMinutes: total };
-  } catch(e) {
-    Logger.log('healthSleepFor_ error: ' + e.message);
-    return empty;
-  }
-}
-
-// ── Generic daily metric — tolerant numeric extraction ───────────────────────
-// Lists dataPoints for a daily-* data type around dateStr and deep-scans the
-// payload for the first plausible numeric reading. Survives shape drift in the
-// young API; logs misses instead of guessing.
-function healthDailyValue_(dataType, dateStr) {
-  try {
-    const snake = dataType.replace(/-/g, '_');
-    let data = healthFetch_('/dataTypes/' + dataType + '/dataPoints', {
-      filter: snake + '.sample_time.civil_time >= "' + dateStr + 'T00:00:00"',
-      page_size: 8,
-    });
-    if (!data || !(data.dataPoints || []).length) {
-      // Some daily types are interval-based — retry with interval filter
-      data = healthFetch_('/dataTypes/' + dataType + '/dataPoints', {
-        filter: snake + '.interval.civil_start_time >= "' + dateStr + 'T00:00:00"',
-        page_size: 8,
-      });
-    }
-    const pts = (data && data.dataPoints) || [];
-    if (!pts.length) return null;
-
-    const camel = dataType.replace(/-([a-z])/g, function(_, c) { return c.toUpperCase(); });
-    for (let i = 0; i < pts.length; i++) {
-      const node = pts[i][camel] || pts[i];
-      const v = healthFirstNumber_(node, 0);
-      if (v !== null) return Math.round(v * 10) / 10;
-    }
-    return null;
-  } catch(e) {
-    Logger.log('healthDailyValue_(' + dataType + ') error: ' + e.message);
-    return null;
-  }
-}
-
-const HEALTH_NUM_KEYS  = ['bpm', 'beatsPerMinute', 'rmssd', 'milliseconds', 'dailyRmssd', 'value', 'percentage', 'avg', 'average'];
+const HEALTH_NUM_KEYS  = ['bpm', 'beatsPerMinute', 'rmssd', 'milliseconds', 'averageHeartRateVariabilityMilliseconds', 'value', 'percentage', 'avg', 'average'];
 const HEALTH_SKIP_KEYS = { interval: 1, sampleTime: 1, civilTime: 1, civilStartTime: 1, civilEndTime: 1, date: 1, time: 1, dataSource: 1, name: 1, createTime: 1, updateTime: 1, metadata: 1 };
-
 function healthFirstNumber_(node, depth) {
+  depth = depth || 0;
   if (node === null || node === undefined || depth > 4) return null;
   if (typeof node === 'number' && isFinite(node)) return node;
   if (typeof node === 'string' && node !== '' && isFinite(Number(node))) return Number(node);
   if (typeof node !== 'object') return null;
-  // Preferred keys first
-  for (let i = 0; i < HEALTH_NUM_KEYS.length; i++) {
-    const k = HEALTH_NUM_KEYS[i];
-    if (node[k] !== undefined) {
-      const v = healthFirstNumber_(node[k], depth + 1);
-      if (v !== null) return v;
-    }
-  }
-  // Then any non-structural key
-  for (const k in node) {
-    if (HEALTH_SKIP_KEYS[k]) continue;
-    const v = healthFirstNumber_(node[k], depth + 1);
-    if (v !== null) return v;
-  }
+  for (let i = 0; i < HEALTH_NUM_KEYS.length; i++) { const k = HEALTH_NUM_KEYS[i]; if (node[k] !== undefined) { const v = healthFirstNumber_(node[k], depth + 1); if (v !== null) return v; } }
+  for (const k in node) { if (HEALTH_SKIP_KEYS[k]) continue; const v = healthFirstNumber_(node[k], depth + 1); if (v !== null) return v; }
   return null;
 }
 
-// ── 7-day trailing arrays for the AI tab sparklines ──────────────────────────
-function healthBuildTrailing_(todayStr, days) {
-  const readiness = [], sleep = [], hrv = [];
-  const tz  = Session.getScriptTimeZone();
-  const end = new Date(todayStr + 'T12:00:00');
-  for (let i = days - 1; i >= 0; i--) {
-    const d  = new Date(end); d.setDate(d.getDate() - i);
-    const ds = Utilities.formatDate(d, tz, 'yyyy-MM-dd');
-    const slp = healthSleepFor_(ds);
-    const r   = healthDailyValue_('daily-resting-heart-rate', ds);
-    const h   = healthDailyValue_('daily-heart-rate-variability', ds);
-    const rd  = computeReadiness_(r, h, slp.score);
-    readiness.push(rd.score);
-    sleep.push(slp.score);
-    hrv.push(h);
-  }
-  return { readiness: readiness, sleep: sleep, hrv: hrv };
+function healthParseSleep_(pts) {
+  const byDay = {};
+  (pts || []).forEach(function (p) {
+    const s = p.sleep; if (!s) return;
+    if (s.metadata && s.metadata.nap) return;
+    const day = healthDateKey_(s.interval && s.interval.civilEndTime) || (s.interval && s.interval.endTime ? String(s.interval.endTime).slice(0, 10) : null);
+    if (!day) return;
+    const sum = s.summary || {};
+    const total = healthNum_(sum.minutesAsleep); if (!total) return;
+    const period = healthNum_(sum.minutesInSleepPeriod);
+    let deep = null, rem = null, light = null;
+    (sum.stagesSummary || []).forEach(function (st) { const m = healthNum_(st.minutes); if (st.type === 'DEEP') deep = m; else if (st.type === 'REM') rem = m; else if (st.type === 'LIGHT') light = m; });
+    const eff = (total && period) ? Math.round((total / period) * 100) : null;
+    if (!byDay[day] || total > byDay[day]._rank) byDay[day] = { _rank: total, score: healthComputeSleepScore_(total, deep, rem, eff), deep: deep, rem: rem, light: light, total: total, eff: eff };
+  });
+  return byDay;
+}
+function healthParseDaily_(pts, camelField, valueFn) {
+  const byDay = {};
+  (pts || []).forEach(function (p) {
+    const node = p[camelField]; if (!node) return;
+    const day = healthDateKey_(node.date); if (!day) return;
+    const v = valueFn(node);
+    if (v !== null && byDay[day] === undefined) byDay[day] = Math.round(v * 10) / 10;
+  });
+  return byDay;
 }
 
-// ── Readiness score ───────────────────────────────────────────────────────────
 function computeReadiness_(rhr, hrv, sleepScore) {
   const pillars = [];
-  if (sleepScore !== null) pillars.push(['sleep quality',      sleepScore]);
-  if (hrv        !== null) pillars.push(['hrv recovery',       Math.min(100, Math.round((hrv / 80) * 100))]);
-  if (rhr        !== null) pillars.push(['resting heart rate', Math.max(0,   Math.round(100 - (rhr - 45)))]);
+  if (sleepScore !== null && sleepScore !== undefined) pillars.push(['sleep quality', sleepScore]);
+  if (hrv !== null && hrv !== undefined)               pillars.push(['hrv recovery', Math.min(100, Math.round((hrv / 80) * 100))]);
+  if (rhr !== null && rhr !== undefined)               pillars.push(['resting heart rate', Math.max(0, Math.round(100 - (rhr - 45)))]);
   if (!pillars.length) return { score: null, factor: null };
-
-  const avg    = Math.round(pillars.reduce((s,p) => s + p[1], 0) / pillars.length);
-  const score  = Math.max(0, Math.min(100, avg));
-  const factor = pillars.sort((a,b) => a[1]-b[1])[0][0];
-  return { score, factor };
+  const avg = Math.round(pillars.reduce(function (s, p) { return s + p[1]; }, 0) / pillars.length);
+  return { score: Math.max(0, Math.min(100, avg)), factor: pillars.sort(function (a, b) { return a[1] - b[1]; })[0][0] };
 }
-
-// ── Sleep score (0–100 estimate) ─────────────────────────────────────────────
 function healthComputeSleepScore_(totalMins, deepMins, remMins, efficiency) {
   if (!totalMins || totalMins < 90) return null;
-  const durScore  = totalMins < 300 ? (totalMins/300)*40 : totalMins < 420 ? 40+((totalMins-300)/120)*30 : totalMins <= 540 ? 70+((totalMins-420)/120)*25 : 95-((totalMins-540)/60)*5;
-  const deepScore = deepMins ? Math.min(100, (deepMins/totalMins)*100/0.18) : 40;
-  const remScore  = remMins  ? Math.min(100, (remMins/totalMins)*100/0.20)  : 40;
+  const durScore  = totalMins < 300 ? (totalMins / 300) * 40 : totalMins < 420 ? 40 + ((totalMins - 300) / 120) * 30 : totalMins <= 540 ? 70 + ((totalMins - 420) / 120) * 25 : 95 - ((totalMins - 540) / 60) * 5;
+  const deepScore = deepMins ? Math.min(100, (deepMins / totalMins) * 100 / 0.18) : 40;
+  const remScore  = remMins  ? Math.min(100, (remMins / totalMins) * 100 / 0.20)  : 40;
   const effScore  = efficiency ? Math.min(100, efficiency) : 80;
-  return Math.max(0, Math.min(100, Math.round(Math.min(durScore,95)*0.35 + deepScore*0.30 + remScore*0.20 + effScore*0.15)));
+  return Math.max(0, Math.min(100, Math.round(Math.min(durScore, 95) * 0.35 + deepScore * 0.30 + remScore * 0.20 + effScore * 0.15)));
 }
 
-// ── Sheet cache ───────────────────────────────────────────────────────────────
+// Assemble 30-day trailing arrays + last-known snapshot. dateFmt(daysAgo)→'YYYY-MM-DD'.
+function healthAssemble_(today, dateFmt, sleepByDay, rhrByDay, hrvByDay, spo2ByDay, DAYS) {
+  DAYS = DAYS || 30;
+  const tReadiness = [], tSleep = [], tHRV = [], tRHR = [], tDates = [];
+  let any = false;
+  for (let i = DAYS - 1; i >= 0; i--) {
+    const ds  = dateFmt(i);
+    const slp = sleepByDay[ds] || {};
+    const rhr = (rhrByDay[ds] === undefined) ? null : rhrByDay[ds];
+    const hrv = (hrvByDay[ds] === undefined) ? null : hrvByDay[ds];
+    const rd  = computeReadiness_(rhr, hrv, slp.score != null ? slp.score : null);
+    tDates.push(ds); tReadiness.push(rd.score); tSleep.push(slp.score != null ? slp.score : null); tHRV.push(hrv); tRHR.push(rhr);
+    if (rd.score != null || slp.score != null || hrv != null || rhr != null) any = true;
+  }
+  let idx = -1;
+  for (let j = tDates.length - 1; j >= 0; j--) { if (tReadiness[j] != null || tSleep[j] != null || tHRV[j] != null || tRHR[j] != null) { idx = j; break; } }
+  const asOf = idx >= 0 ? tDates[idx] : null;
+  const cd   = asOf ? (sleepByDay[asOf] || {}) : {};
+  const cRhr = asOf ? ((rhrByDay[asOf] === undefined) ? null : rhrByDay[asOf]) : null;
+  const cHrv = asOf ? ((hrvByDay[asOf] === undefined) ? null : hrvByDay[asOf]) : null;
+  const readiness = computeReadiness_(cRhr, cHrv, cd.score != null ? cd.score : null);
+  return {
+    readinessScore: readiness.score, readinessFactor: readiness.factor,
+    sleepScore: cd.score != null ? cd.score : null, restingHR: cRhr, hrv: cHrv,
+    spo2: asOf ? ((spo2ByDay[asOf] === undefined) ? null : spo2ByDay[asOf]) : null,
+    deepSleepMinutes: cd.deep != null ? cd.deep : null, remSleepMinutes: cd.rem != null ? cd.rem : null, lightSleepMinutes: cd.light != null ? cd.light : null,
+    sleepEfficiency: cd.eff != null ? cd.eff : null,
+    asOf: asOf, fetchedAt: today,
+    trailingReadiness: tReadiness, trailingSleep: tSleep, trailingHRV: tHRV, trailingRHR: tRHR, trailingDates: tDates,
+    source: 'google-health-api', _any: any,
+  };
+}
+
+// ── Main GET endpoint (action=getFitbit — name kept for client compat) ──────
+function fitbitGetLatestData() {
+  let authUrl = '';
+  try { authUrl = getHealthService_().getAuthorizationUrl(); } catch (e) { authUrl = ScriptApp.getService().getUrl() + '?action=fitbitAuth'; }
+
+  if (!healthHasAccess_()) {
+    const cachedNA = healthGetCached_();
+    if (cachedNA) return jsonResponse({ ok: true, connected: true, cached: true, stale: true, fitbit: cachedNA });
+    return jsonResponse({ ok: true, connected: false, authUrl: authUrl, reason: 'unauthorized' });
+  }
+
+  try {
+    const cache = CacheService.getScriptCache();
+    const memo  = cache.get('dcr_health_payload');
+    if (memo) return jsonResponse({ ok: true, connected: true, cached: 'memo', fitbit: JSON.parse(memo) });
+
+    const tz       = Session.getScriptTimeZone();
+    const today    = Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd');
+    const monthAgo = Utilities.formatDate(new Date(Date.now() - 31 * 86400000), tz, 'yyyy-MM-dd');
+    const dateFmt  = function (daysAgo) { const d = new Date(today + 'T12:00:00'); d.setDate(d.getDate() - daysAgo); return Utilities.formatDate(d, tz, 'yyyy-MM-dd'); };
+
+    const sleepByDay = healthParseSleep_(healthList_('sleep', 'sleep.interval.civil_end_time >= "' + monthAgo + '"', 25, 2));
+    const rhrByDay   = healthParseDaily_(healthList_('daily-resting-heart-rate',     'dailyRestingHeartRate.date >= "'     + monthAgo + '"', 60, 1), 'dailyRestingHeartRate',     function (n) { return healthNum_(n.beatsPerMinute); });
+    const hrvByDay   = healthParseDaily_(healthList_('daily-heart-rate-variability', 'dailyHeartRateVariability.date >= "' + monthAgo + '"', 60, 1), 'dailyHeartRateVariability', function (n) { return healthNum_(n.averageHeartRateVariabilityMilliseconds); });
+    const spo2ByDay  = healthParseDaily_(healthList_('daily-oxygen-saturation',      'dailyOxygenSaturation.date >= "'     + monthAgo + '"', 60, 1), 'dailyOxygenSaturation',     function (n) { return healthFirstNumber_(n, 0); });
+
+    const payload = healthAssemble_(today, dateFmt, sleepByDay, rhrByDay, hrvByDay, spo2ByDay, 30);
+
+    if (!payload._any) {
+      const cached = healthGetCached_();
+      if (cached) return jsonResponse({ ok: true, connected: true, cached: true, stale: true, fitbit: cached });
+      return jsonResponse({ ok: true, connected: false, authUrl: authUrl, reason: 'no-data' });
+    }
+    delete payload._any;
+    healthCacheToSheet_(payload);
+    try { cache.put('dcr_health_payload', JSON.stringify(payload), 1800); } catch (e) {}
+    return jsonResponse({ ok: true, connected: true, fitbit: payload });
+
+  } catch (err) {
+    Logger.log('fitbitGetLatestData error: ' + err.message);
+    if (String(err.message).indexOf('auth') === 0) {
+      try { getHealthService_().reset(); } catch (e) {}
+      return jsonResponse({ ok: true, connected: false, authUrl: authUrl, reason: 'reauth' });
+    }
+    try { const cached = healthGetCached_(); if (cached) return jsonResponse({ ok: true, connected: true, cached: true, stale: true, fitbit: cached }); } catch (e2) {}
+    return jsonResponse({ ok: true, connected: false, authUrl: authUrl, reason: 'error' });
+  }
+}
+
+// Landing page that links to the OAuth consent (owner taps once).
+function fitbitStartAuth_() {
+  let url = '';
+  try { url = getHealthService_().getAuthorizationUrl(); } catch (e) {}
+  if (!url) return HtmlService.createHtmlOutput('<body style="font-family:-apple-system,sans-serif;padding:40px">OAuth client not configured. Set GH_OAUTH_CLIENT_ID / GH_OAUTH_CLIENT_SECRET in Script Properties.</body>');
+  return HtmlService.createHtmlOutput(
+    '<body style="font-family:-apple-system,sans-serif;padding:48px;text-align:center;background:#FAF7F2;color:#2A2421">' +
+    '<h2>DCR Gym · Connect Google Health</h2><p>One-time approval for the script owner\'s account.</p>' +
+    '<p><a href="' + url + '" target="_blank" rel="noopener" style="display:inline-block;padding:12px 26px;background:#2A2421;color:#fff;border-radius:24px;text-decoration:none">Authorize &rarr;</a></p></body>');
+}
+
+function fitbitStatus_() {
+  return jsonResponse({ ok: true, connected: healthHasAccess_(), api: 'google-health-v4', clientConfigured: !!ghProp_('GH_OAUTH_CLIENT_ID') });
+}
+
+// ── Sheet cache (stale fallback) ────────────────────────────────────────────
 function healthCacheToSheet_(payload) {
   try {
     const ss = getSpreadsheet_();
     let sheet = ss.getSheetByName(SHEET_NAME_FITBIT);
-    if (!sheet) {
-      sheet = ss.insertSheet(SHEET_NAME_FITBIT);
-      sheet.appendRow(['Date','Readiness','ReadinessFactor','Sleep','RHR','HRV','DeepMin','CachedAt']);
-      sheet.setFrozenRows(1);
-    }
+    if (!sheet) { sheet = ss.insertSheet(SHEET_NAME_FITBIT); sheet.appendRow(['Date', 'Readiness', 'ReadinessFactor', 'Sleep', 'RHR', 'HRV', 'DeepMin', 'RemMin', 'LightMin', 'SleepEff', 'SpO2', 'CachedAt']); sheet.setFrozenRows(1); }
     const data = sheet.getDataRange().getValues();
-    const idx  = data.slice(1).findIndex(r => r[0] === payload.fetchedAt);
-    const row  = [payload.fetchedAt, payload.readinessScore, payload.readinessFactor||'', payload.sleepScore, payload.restingHR, payload.hrv, payload.deepSleepMinutes, new Date().toLocaleString()];
-    if (idx >= 0) sheet.getRange(idx+2, 1, 1, row.length).setValues([row]);
+    const idx  = data.slice(1).findIndex(function (r) { return r[0] === payload.fetchedAt; });
+    const row  = [payload.fetchedAt, payload.readinessScore, payload.readinessFactor || '', payload.sleepScore, payload.restingHR, payload.hrv, payload.deepSleepMinutes, payload.remSleepMinutes, payload.lightSleepMinutes, payload.sleepEfficiency, payload.spo2, new Date().toLocaleString()];
+    if (idx >= 0) sheet.getRange(idx + 2, 1, 1, row.length).setValues([row]);
     else          sheet.appendRow(row);
-  } catch(e) { Logger.log('healthCacheToSheet_ error: ' + e.message); }
+  } catch (e) { Logger.log('healthCacheToSheet_ error: ' + e.message); }
 }
 
 function healthGetCached_() {
   try {
-    const ss    = getSpreadsheet_();
+    const ss = getSpreadsheet_();
     const sheet = ss.getSheetByName(SHEET_NAME_FITBIT);
     if (!sheet || sheet.getLastRow() < 2) return null;
-    const last = sheet.getRange(sheet.getLastRow(), 1, 1, 7).getValues()[0];
-    return { fetchedAt: last[0], readinessScore: last[1]||null, readinessFactor: last[2]||null, sleepScore: last[3]||null, restingHR: last[4]||null, hrv: last[5]||null, deepSleepMinutes: last[6]||null, trailingReadiness: [], trailingSleep: [], trailingHRV: [] };
-  } catch(e) { return null; }
-}
-
-function healthNextDay_(dateStr) {
-  const d = new Date(dateStr + 'T12:00:00Z'); d.setDate(d.getDate()+1); return Utilities.formatDate(d,'UTC','yyyy-MM-dd');
-}
-
-function healthPrevDay_(dateStr) {
-  const d = new Date(dateStr + 'T12:00:00Z'); d.setDate(d.getDate()-1); return Utilities.formatDate(d,'UTC','yyyy-MM-dd');
+    const last = sheet.getRange(sheet.getLastRow(), 1, 1, 11).getValues()[0];
+    if (last[1] === '' && last[3] === '' && last[4] === '' && last[5] === '') return null;  // all-null cache → treat as none
+    return {
+      fetchedAt: last[0], asOf: last[0],
+      readinessScore: last[1] || null, readinessFactor: last[2] || null, sleepScore: last[3] || null,
+      restingHR: last[4] || null, hrv: last[5] || null, deepSleepMinutes: last[6] || null,
+      remSleepMinutes: last[7] || null, lightSleepMinutes: last[8] || null, sleepEfficiency: last[9] || null, spo2: last[10] || null,
+      trailingReadiness: [], trailingSleep: [], trailingHRV: [], trailingRHR: [], trailingDates: [], source: 'google-health-cache',
+    };
+  } catch (e) { return null; }
 }
