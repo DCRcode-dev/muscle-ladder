@@ -4390,7 +4390,7 @@ function saveSettings(s) { LS.set('dcrgym_settings', s); }
 // Schema-versioned, non-destructive, with rolling last-good backup.
 // History must survive every app update. Period.
 const SCHEMA_VERSION = 2;
-const APP_BUILD = '2026.06.14 · ota-4 · workout-data-fix';
+const APP_BUILD = '2026.06.15 · ota-5 · server-proxy';
 
 function migrateStorage() {
   const v = LS.get('dcrgym_schema_version', 1);
@@ -8690,223 +8690,17 @@ function anaCorrelations(fb) {
   return `<div class="ana2-card"><div class="ana2-card-eyebrow">recovery ↔ performance<span class="ana2-card-aside">offline · your logs</span></div>${cardHtml}</div>`;
 }
 
-const GH_CLIENT_ID = '811601427555-4a1afoo56tcdcd6ncocgegpnha2cjl4s.apps.googleusercontent.com';
-const GH_SCOPES = [
-  'https://www.googleapis.com/auth/googlehealth.sleep.readonly',
-  'https://www.googleapis.com/auth/googlehealth.health_metrics_and_measurements.readonly',
-].join(' ');
-const GH_API = 'https://health.googleapis.com/v4/users/me';
-
-function ghTokenValid() {
-  const t = LS.get('dcrgym_gh_token', null);
-  return (t && t.token && t.exp && t.exp > Date.now() + 60000) ? t.token : null;
-}
-
-function _ghLoadGis() {
-  return new Promise((resolve, reject) => {
-    if (window.google && google.accounts && google.accounts.oauth2) return resolve();
-    const s = document.createElement('script');
-    s.src = 'https://accounts.google.com/gsi/client';
-    s.onload = () => resolve();
-    s.onerror = () => reject(new Error('GIS load failed'));
-    document.head.appendChild(s);
-  });
-}
-
-// interactive=true must be called from a user gesture (the connect chip tap)
-async function ghGetToken(interactive) {
-  const cached = ghTokenValid();
-  if (cached) return cached;
-  if (!GH_CLIENT_ID || GH_CLIENT_ID.indexOf('__') === 0) return null; // not configured
-  await _ghLoadGis();
-  return new Promise((resolve) => {
-    try {
-      const tc = google.accounts.oauth2.initTokenClient({
-        client_id: GH_CLIENT_ID,
-        scope: GH_SCOPES,
-        callback: (resp) => {
-          if (resp && resp.access_token) {
-            LS.set('dcrgym_gh_token', { token: resp.access_token, exp: Date.now() + ((resp.expires_in || 3500) * 1000) });
-            LS.set('dcrgym_gh_connected', true);
-            resolve(resp.access_token);
-          } else resolve(null);
-        },
-        error_callback: (err) => { try { if (ST.fitbit) ST.fitbit.lastError = 'gis-' + ((err && err.type) || 'error'); } catch(e){} resolve(null); },
-      });
-      tc.requestAccessToken({ prompt: interactive ? '' : 'none' });
-    } catch(e) { resolve(null); }
-  });
-}
-
-async function ghFetch(token, url) {
-  let res;
-  try {
-    res = await fetch(url, { headers: { Authorization: 'Bearer ' + token, Accept: 'application/json' } });
-  } catch (e) { throw new Error('network'); }
-  if (res.status === 401 || res.status === 403) { LS.set('dcrgym_gh_token', null); throw new Error('auth-' + res.status); }
-  if (res.status === 400) {
-    let t = ''; try { t = await res.text(); } catch (_) {}
-    console.warn('[DCR Gym] Health 400 (filter/contract):', t.slice(0, 280));
-    throw new Error('badreq-400');
-  }
-  if (!res.ok) throw new Error('http-' + res.status);
-  return res.json();
-}
-
-// GET list method (developers.google.com/health …/dataPoints), following
-// nextPageToken up to maxPages. Returns a merged { dataPoints:[...] }.
-async function ghList(token, dataType, filter, pageSize, maxPages) {
-  maxPages = maxPages || 1;
-  let all = [], pageToken = '', pages = 0;
-  do {
-    let url = GH_API + '/dataTypes/' + dataType + '/dataPoints?pageSize=' + pageSize
-            + '&filter=' + encodeURIComponent(filter);
-    if (pageToken) url += '&pageToken=' + encodeURIComponent(pageToken);
-    const r = await ghFetch(token, url);
-    if (r && r.dataPoints) all = all.concat(r.dataPoints);
-    pageToken = (r && r.nextPageToken) || '';
-    pages++;
-  } while (pageToken && pages < maxPages);
-  return { dataPoints: all };
-}
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  GOOGLE HEALTH — SERVER PROXY (via Apps Script ?action=getFitbit)         ║
+// ║  Direct client-side GSI was removed: the token popup is unreliable in an  ║
+// ║  installed mobile PWA. The Apps Script web app now mints a HEALTH-ONLY    ║
+// ║  OAuth token server-side and returns a parsed JSON payload, so the PWA    ║
+// ║  just GETs it. No client secret, no scopes, no popup in the app.          ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
 
 function ghLocalDate(d) {
   const dt = d ? new Date(d) : new Date();
   return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
-}
-// Accepts a google.type.Date {year,month,day} OR a CivilDateTime {date:{...},time:{...}}
-function ghDateKey(d) {
-  if (!d) return null;
-  const dd = d.date || d;
-  if (dd && dd.year) return dd.year + '-' + String(dd.month || 1).padStart(2, '0') + '-' + String(dd.day || 1).padStart(2, '0');
-  return null;
-}
-function ghNum(v) {
-  if (v === null || v === undefined) return null;
-  const n = typeof v === 'string' ? Number(v) : v;
-  return (typeof n === 'number' && isFinite(n)) ? n : null;
-}
-const GH_SKIP = { date: 1, sampleTime: 1, civilTime: 1, interval: 1, metadata: 1, dataSource: 1, name: 1, createTime: 1, updateTime: 1 };
-function ghFirstNumber(node, depth) {
-  depth = depth || 0;
-  if (node === null || node === undefined || depth > 4) return null;
-  if (typeof node === 'number' && isFinite(node)) return node;
-  if (typeof node === 'string' && node !== '' && isFinite(Number(node))) return Number(node);
-  if (typeof node !== 'object') return null;
-  for (const k in node) {
-    if (GH_SKIP[k]) continue;
-    const v = ghFirstNumber(node[k], depth + 1);
-    if (v !== null) return v;
-  }
-  return null;
-}
-
-function ghComputeSleepScore(totalMins, deepMins, remMins, efficiency) {
-  if (!totalMins || totalMins < 90) return null;
-  const durScore  = totalMins < 300 ? (totalMins/300)*40 : totalMins < 420 ? 40+((totalMins-300)/120)*30 : totalMins <= 540 ? 70+((totalMins-420)/120)*25 : 95-((totalMins-540)/60)*5;
-  const deepScore = deepMins ? Math.min(100, (deepMins/totalMins)*100/0.18) : 40;
-  const remScore  = remMins  ? Math.min(100, (remMins/totalMins)*100/0.20)  : 40;
-  const effScore  = efficiency ? Math.min(100, efficiency) : 80;
-  return Math.max(0, Math.min(100, Math.round(Math.min(durScore,95)*0.35 + deepScore*0.30 + remScore*0.20 + effScore*0.15)));
-}
-function ghComputeReadiness(rhr, hrv, sleepScore) {
-  const pillars = [];
-  if (sleepScore !== null && sleepScore !== undefined) pillars.push(['sleep quality', sleepScore]);
-  if (hrv !== null && hrv !== undefined)               pillars.push(['hrv recovery', Math.min(100, Math.round((hrv / 80) * 100))]);
-  if (rhr !== null && rhr !== undefined)               pillars.push(['resting heart rate', Math.max(0, Math.round(100 - (rhr - 45)))]);
-  if (!pillars.length) return { score: null, factor: null };
-  const avg = Math.round(pillars.reduce((s, p) => s + p[1], 0) / pillars.length);
-  return { score: Math.max(0, Math.min(100, avg)), factor: pillars.sort((a, b) => a[1] - b[1])[0][0] };
-}
-
-// Sleep list → { 'YYYY-MM-DD'(end date): {score,deep,rem,light,total,efficiency} }
-function ghParseSleep(resp) {
-  const byDay = {};
-  ((resp && resp.dataPoints) || []).forEach(p => {
-    const s = p.sleep; if (!s) return;
-    const meta = s.metadata || {};
-    if (meta.nap) return;
-    const day = ghDateKey(s.interval && s.interval.civilEndTime) || (s.interval && s.interval.endTime ? ghLocalDate(s.interval.endTime) : null);
-    if (!day) return;
-    const sum = s.summary || {};
-    const total = ghNum(sum.minutesAsleep);
-    if (!total) return;
-    const period = ghNum(sum.minutesInSleepPeriod);
-    let deep = null, rem = null, light = null;
-    (sum.stagesSummary || []).forEach(st => {
-      const m = ghNum(st.minutes);
-      if (st.type === 'DEEP') deep = m;
-      else if (st.type === 'REM') rem = m;
-      else if (st.type === 'LIGHT') light = m;
-    });
-    const eff = (total && period) ? Math.round((total / period) * 100) : null;
-    if (!byDay[day] || total > byDay[day]._rank) {
-      byDay[day] = { _rank: total, score: ghComputeSleepScore(total, deep, rem, eff), deep, rem, light, total, efficiency: eff };
-    }
-  });
-  return byDay;
-}
-// Daily-summary list (RHR/HRV/SpO2) → { 'YYYY-MM-DD': number }
-function ghParseDaily(resp, field, valueFn) {
-  const byDay = {};
-  ((resp && resp.dataPoints) || []).forEach(p => {
-    const node = p[field]; if (!node) return;
-    const day = ghDateKey(node.date);
-    if (!day) return;
-    const v = valueFn(node);
-    if (v !== null && byDay[day] === undefined) byDay[day] = Math.round(v * 10) / 10;
-  });
-  return byDay;
-}
-
-function ghAssemble(sleepResp, rhrResp, hrvResp, spo2Resp, DAYS) {
-  DAYS = DAYS || 30;
-  const sleepByDay = ghParseSleep(sleepResp);
-  const rhrByDay  = ghParseDaily(rhrResp,  'dailyRestingHeartRate',     n => ghNum(n.beatsPerMinute));
-  const hrvByDay  = ghParseDaily(hrvResp,  'dailyHeartRateVariability', n => ghNum(n.averageHeartRateVariabilityMilliseconds));
-  const spo2ByDay = ghParseDaily(spo2Resp, 'dailyOxygenSaturation',     n => ghFirstNumber(n));
-
-  const trailingReadiness = [], trailingSleep = [], trailingHRV = [], trailingRHR = [], trailingDates = [];
-  const bioLog = {};
-  for (let i = DAYS - 1; i >= 0; i--) {
-    const day = ghLocalDate(Date.now() - i * 86400000);
-    const slp = sleepByDay[day] || {};
-    const rhr = rhrByDay[day] ?? null;
-    const hrv = hrvByDay[day] ?? null;
-    const rd  = ghComputeReadiness(rhr, hrv, slp.score ?? null);
-    trailingDates.push(day);
-    trailingReadiness.push(rd.score);
-    trailingSleep.push(slp.score ?? null);
-    trailingHRV.push(hrv);
-    trailingRHR.push(rhr);
-    if (rd.score != null || slp.score != null || hrv != null || rhr != null) {
-      bioLog[day] = { readiness: rd.score, sleep: slp.score ?? null, hrv, rhr, deep: slp.deep ?? null, spo2: spo2ByDay[day] ?? null };
-    }
-  }
-  // "Current" snapshot = most recent day that actually has data (last-known, dated)
-  let idx = -1;
-  for (let i = trailingDates.length - 1; i >= 0; i--) {
-    if (trailingReadiness[i] != null || trailingSleep[i] != null || trailingHRV[i] != null || trailingRHR[i] != null) { idx = i; break; }
-  }
-  const asOf = idx >= 0 ? trailingDates[idx] : null;
-  const cDay = asOf ? (sleepByDay[asOf] || {}) : {};
-  const cRhr = asOf ? (rhrByDay[asOf] ?? null) : null;
-  const cHrv = asOf ? (hrvByDay[asOf] ?? null) : null;
-  const readiness = ghComputeReadiness(cRhr, cHrv, cDay.score ?? null);
-  return {
-    payload: {
-      readinessScore: readiness.score, readinessFactor: readiness.factor,
-      sleepScore: cDay.score ?? null, restingHR: cRhr, hrv: cHrv,
-      spo2: asOf ? (spo2ByDay[asOf] ?? null) : null,
-      deepSleepMinutes: cDay.deep ?? null, remSleepMinutes: cDay.rem ?? null, lightSleepMinutes: cDay.light ?? null,
-      sleepEfficiency: cDay.efficiency ?? null,
-      asOf: asOf, fetchedAt: ghLocalDate(),
-      trailingReadiness, trailingSleep, trailingHRV, trailingRHR, trailingDates,
-      source: 'google-health-direct',
-    },
-    bioLog: bioLog,
-    anyData: Object.keys(bioLog).length > 0,
-  };
 }
 
 // Persistent daily biometric log — accumulates across syncs so the correlation
@@ -8931,19 +8725,17 @@ function ghMergeBioLog(fresh) {
   return log;
 }
 
-// Four parallel list calls (verified v4 contract). Graceful per-type degradation;
-// only auth failures propagate (they kill the whole sync).
-async function ghPullAll(token) {
-  const monthAgo = ghLocalDate(Date.now() - 31 * 86400000);
-  const swallow = e => { if (String(e.message).indexOf('auth') === 0) throw e; return null; };
-  const [sleepResp, rhrResp, hrvResp, spo2Resp] = await Promise.all([
-    ghList(token, 'sleep',                          'sleep.interval.civil_end_time >= "' + monthAgo + '"', 25, 2).catch(swallow),
-    ghList(token, 'daily-resting-heart-rate',       'dailyRestingHeartRate.date >= "'     + monthAgo + '"', 60, 1).catch(swallow),
-    ghList(token, 'daily-heart-rate-variability',   'dailyHeartRateVariability.date >= "' + monthAgo + '"', 60, 1).catch(swallow),
-    ghList(token, 'daily-oxygen-saturation',        'dailyOxygenSaturation.date >= "'     + monthAgo + '"', 60, 1).catch(() => null),
-  ]);
-  const out = ghAssemble(sleepResp, rhrResp, hrvResp, spo2Resp, 30);
-  if (out.anyData) ghMergeBioLog(out.bioLog);
+// Build a {date:{readiness,sleep,hrv,rhr,deep,spo2}} map from the server payload's
+// trailing arrays so the offline correlation engine + trends accrue over time.
+function ghBioFromPayload(p) {
+  const out = {};
+  const D = p.trailingDates || [], R = p.trailingReadiness || [], S = p.trailingSleep || [], H = p.trailingHRV || [], RH = p.trailingRHR || [];
+  for (let i = 0; i < D.length; i++) {
+    const day = D[i]; if (!day) continue;
+    const e = { readiness: R[i] ?? null, sleep: S[i] ?? null, hrv: H[i] ?? null, rhr: RH[i] ?? null };
+    if (e.readiness != null || e.sleep != null || e.hrv != null || e.rhr != null) out[day] = e;
+  }
+  if (p.asOf && out[p.asOf]) { out[p.asOf].deep = p.deepSleepMinutes ?? null; out[p.asOf].spo2 = p.spo2 ?? null; }
   return out;
 }
 
@@ -8958,12 +8750,31 @@ function ghSetAnaBusy(on) {
   if (scr) scr.classList.toggle('ana-loading', !!on);
 }
 
+// One-time authorization prompt — opens the server's OAuth consent URL.
+function ghPromptHealthAuth(authUrl) {
+  if (!authUrl) return;
+  if (typeof openSheet === 'function') {
+    openSheet(
+      '<div style="padding:24px 20px 26px;text-align:center">' +
+        '<div style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-weight:600;font-size:1.55rem;color:#1A1714;margin-bottom:8px">Connect Google Health</div>' +
+        '<div style="font-family:var(--font-body);font-size:12.5px;line-height:1.55;color:#5A534A;margin-bottom:20px">One-time approval. Opens Google to authorize your biometrics, then return here and tap refresh.</div>' +
+        '<a href="' + authUrl + '" target="_blank" rel="noopener" ' +
+          'style="display:inline-block;padding:13px 30px;background:#1A1714;color:#FAF7F2;border-radius:26px;text-decoration:none;' +
+          'font-family:var(--font-mono,monospace);font-size:12px;letter-spacing:0.06em">authorize &rarr;</a>' +
+      '</div>'
+    );
+  } else {
+    try { window.open(authUrl, '_blank', 'noopener'); } catch (e) {}
+  }
+}
+
 // User-gesture entry point — the reconnect chip taps this.
 function ghConnect() { if (ST.fitbit) ST.fitbit.lastError = null; fetchFitbitData(true, true); }
 
-// Single, re-entrancy-guarded sync. Render NEVER calls this in a way that can
-// recurse: the old renderAnalysis→fetch→renderAnalysis strobe loop is gone.
-// Triggered only by: nav into Analysis, the refresh/reconnect buttons, and boot.
+// ── Biometric sync via the Apps Script proxy (GET ?action=getFitbit) ────────
+// Re-entrancy guarded + failure-cooldown'd (the old render↔fetch strobe stays
+// dead). Triggered only by nav into Analysis, the refresh/reconnect buttons,
+// and boot. renderAnalysis is PURE and never calls this in a loop.
 async function fetchFitbitData(force, interactive) {
   force = !!force; interactive = !!interactive;
   const fb = ST.fitbit;
@@ -8971,33 +8782,51 @@ async function fetchFitbitData(force, interactive) {
   if (!force && fb._failUntil && Date.now() < fb._failUntil) return;     // failure cooldown
   if (!force && fb.fetchedAt === ghLocalDate() && fb.dataState === 'synced') return; // fresh today
 
+  const s = getSettings();
+  if (!s.sheets) {                                                       // backend not configured
+    fb.connected = false; fb.dataState = 'disconnected'; fb.lastError = 'no-backend-url';
+    if (ST.screen === 'analysis') renderAnalysis();
+    return;
+  }
+
   fb._fetching = true;
   ghSetAnaBusy(true);
-  const wasConnected = LS.get('dcrgym_gh_connected', false);
   try {
-    let token = ghTokenValid();
-    if (!token && (interactive || wasConnected)) token = await ghGetToken(interactive);
-    if (!token) {
+    const res  = await fetch(s.sheets + '?action=getFitbit', { method: 'GET' });
+    const resp = await res.json();
+
+    // ── Not authorized / server has no token ──────────────────────────────
+    if (!resp || resp.connected === false) {
       fb.connected  = false;
       fb.dataState  = 'disconnected';
-      fb.lastError  = interactive ? (fb.lastError || 'consent-cancelled') : (wasConnected ? 'token-expired' : null);
+      fb.lastError  = (resp && resp.reason) || 'unauthorized';
+      fb.authUrl    = (resp && resp.authUrl) || null;
       fb._failUntil = interactive ? 0 : Date.now() + 10 * 60 * 1000;     // silent: back off 10 min
+      if (interactive && fb.authUrl) ghPromptHealthAuth(fb.authUrl);     // tap → open consent
+      LS.set('dcrgym_fitbit', ghPersistableFitbit(fb));
       return;
     }
-    const out = await ghPullAll(token);
-    Object.assign(fb, out.payload);
+
+    // ── Connected — map the server payload onto ST.fitbit ─────────────────
+    const p = resp.fitbit || {};
+    const hasData = (p.readinessScore != null) || (p.sleepScore != null) || (p.restingHR != null) || (p.hrv != null)
+                 || (Array.isArray(p.trailingReadiness) && p.trailingReadiness.some(v => v != null));
+    Object.assign(fb, p);                                                // readinessScore, trailing*, asOf, etc.
     fb.connected  = true;
+    fb.authUrl    = null;
     fb.lastSync   = Date.now();
-    fb.lastError  = out.anyData ? null : 'no-data';
     fb._failUntil = 0;
-    fb.dataState  = out.anyData ? 'synced' : 'connected-no-data';
+    fb.lastError  = hasData ? null : 'no-data';
+    // Honest state — never claim "synced" on an empty/stale-cache payload.
+    fb.dataState  = hasData ? (resp.stale ? 'stale' : 'synced') : 'connected-no-data';
+    if (!fb.asOf) fb.asOf = p.fetchedAt || null;
+    if (hasData) { try { ghMergeBioLog(ghBioFromPayload(p)); } catch (e) {} } // grow correlation dataset
     LS.set('dcrgym_fitbit', ghPersistableFitbit(fb));
+
   } catch (e) {
-    const code = String((e && e.message) || 'error');
-    fb.lastError = code;
-    if (code.indexOf('auth') === 0) { fb.connected = false; fb.dataState = 'disconnected'; LS.set('dcrgym_gh_connected', false); }
+    fb.lastError  = 'network';
     fb._failUntil = Date.now() + 10 * 60 * 1000;
-    console.error('[DCR Gym] Health fetch failed:', code);
+    console.error('[DCR Gym] Health fetch failed:', e && e.message);
   } finally {
     fb._fetching = false;
     ghSetAnaBusy(false);
@@ -9709,7 +9538,7 @@ function bootstrapApp() {
   // Boot-time silent biometric sync — populates the home readiness chip, the
   // finish-screen recovery insight, and Progress-tab plateau footnotes WITHOUT
   // needing to open the AI tab. Guarded + cooldown-aware inside fetchFitbitData.
-  if (LS.get('dcrgym_gh_connected', false)) {
+  if (getSettings().sheets) {
     setTimeout(() => { try { fetchFitbitData(false); } catch (e) {} }, 1200);
   }
 
