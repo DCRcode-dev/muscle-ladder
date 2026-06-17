@@ -6191,9 +6191,9 @@ function renderHome() {
     ${resumeHTML}
 
     ${ns && ns.session ? (() => {
-      return `<div class="boarding-card" style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 22px 24px;">
-        <div class="bc-label" style="margin-bottom: 6px;">Next up</div>
-        <div class="bc-name" style="font-size: 22px; font-weight: 700; margin-bottom: 18px;">${ns.session.name}</div>
+      return `<div class="boarding-card" style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 20px 22px;">
+        <div class="bc-label" style="margin-bottom: 4px;">Next up</div>
+        <div class="bc-name" style="font-family: var(--font-hero); font-style: italic; font-size: 17px; font-weight: 600; color: var(--charcoal); margin-bottom: 14px; max-width: 90%; line-height: 1.25;">${ns.session.name}</div>
         <button class="premium-action-pill" onclick="${ctaOnclick}">START WORKOUT</button>
       </div>`;
     })() : `<button class="premium-action-pill" onclick="${ctaOnclick}">CHOOSE A PROGRAM</button>`}`;
@@ -8363,6 +8363,13 @@ function renderDetailChart(values) {
     return `${x},${y}`;
   }).join(' ');
   return `<polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+}
+
+function anaFmtDay(iso, withYear) {
+  if (!iso) return '—';
+  const p = iso.split('-'); if (p.length < 3) return iso;
+  const d = new Date(+p[0], +p[1] - 1, +p[2]);
+  return d.toLocaleDateString('en-US', withYear ? { month: 'short', day: 'numeric', year: 'numeric' } : { month: 'short', day: 'numeric' });
 }
 
 // ── Biometric Calculators & Profile Matchers ──────────────────────────────────
