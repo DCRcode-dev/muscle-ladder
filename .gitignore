@@ -3,3 +3,6 @@
 * copy.*
 *.alias
 * alias
+
+# local source photos (not for deploy)
+Workouts/

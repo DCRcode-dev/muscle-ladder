@@ -4,7 +4,7 @@
 
 set -e
 
-REPO_DIR="/Users/dcr/Documents/Claude/Projects/Gym"
+REPO_DIR="/Users/dcr/Documents/LLMs/Projects/Gym"
 REMOTE="https://github.com/DCRcode-dev/muscle-ladder.git"
 MSG="${1:-chore: deploy $(date '+%Y-%m-%d %H:%M')}"
 
