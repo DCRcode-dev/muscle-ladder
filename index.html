@@ -871,7 +871,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 .tl-dot { width: 7px; height: 7px; border-radius: 4px; display: inline-block; margin-right: 5px; vertical-align: 0; }
 .tl-behind { background: oklch(48% 0.130 35 / 0.85); }
 .tl-track  { background: oklch(70% 0.110 82 / 0.86); }
-.tl-done   { background: oklch(76% 0.130 85); box-shadow: 0 0 6px oklch(76% 0.130 85 / 0.55); }
+.tl-done   { background: oklch(72.3% 0.190 145); box-shadow: 0 0 6px oklch(72.3% 0.190 145 / 0.55); }
 
 /* ── Pearl ripple celebration ── */
 @keyframes pearlRippleA {
@@ -4849,7 +4849,7 @@ function saveSettings(s) { LS.set('dcrgym_settings', s); }
 // Schema-versioned, non-destructive, with rolling last-good backup.
 // History must survive every app update. Period.
 const SCHEMA_VERSION = 2;
-const APP_BUILD = '2026.06.20 · ota-10 · resume-pill-fix';
+const APP_BUILD = '2026.06.20 · ota-10 · resume-pill + green-complete';
 
 function migrateStorage() {
   const v = LS.get('dcrgym_schema_version', 1);
@@ -5949,7 +5949,7 @@ function buildSilhouetteSVG(targets, actuals, weekComplete) {
   //  dormant   (no sets)   flat warm-grey ink — clearly asleep
   //  behind    (<50%)      DEEP TERRACOTTA — attention, not reward
   //  on-track  (50–99%)    warm peach-gold
-  //  complete  (≥100%)     full gold bloom
+  //  complete  (≥100%)     emerald-green bloom — the universal "done" reward
   // The old encoding returned the SAME gold for 50% and 95% — never again.
   function pct(muscle) {
     const t = targets[muscle] || 0, a = actuals[muscle] || 0;
@@ -5961,7 +5961,7 @@ function buildSilhouetteSVG(targets, actuals, weekComplete) {
     if (p === null)  return 'oklch(76% 0.014 60 / 0.30)';  // dormant ink
     if (p < 0.50)    return 'oklch(48% 0.130 35 / 0.85)';  // behind — deep terracotta
     if (p < 1.00)    return 'oklch(70% 0.110 82 / 0.86)';  // on-track — peach-gold
-    return 'oklch(76% 0.130 85 / 0.92)';                   // complete — bright gold
+    return 'oklch(72.3% 0.190 145 / 0.92)';                // complete — emerald green (--green)
   }
   function isActive(muscle) {
     const t = targets[muscle] || 0, a = actuals[muscle] || 0;
@@ -5970,7 +5970,7 @@ function buildSilhouetteSVG(targets, actuals, weekComplete) {
   function glowFilter(muscle) {
     const p = pct(muscle);
     if (p === null) return 'none';
-    if (p >= 1.00)  return 'url(#glowGold)';   // bloom is EARNED, only at 100%
+    if (p >= 1.00)  return 'url(#glowGreen)';  // bloom is EARNED, only at 100% — emerald
     if (p >= 0.50)  return 'url(#glowLight)';  // soft halo on the way up
     return 'none';                             // behind = flat urgency, no reward glow
   }
@@ -6089,6 +6089,19 @@ function buildSilhouetteSVG(targets, actuals, weekComplete) {
         values="1.1 0.2 0 0 0  0.7 0.9 0 0 0  0 0 0.2 0 0  0 0 0 0.38 0" result="goldBloom"/>
       <feMerge>
         <feMergeNode in="goldBloom"/>
+        <feMergeNode in="innerGlow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <!-- Emerald volumetric bloom — earned reward for 100%-complete muscles -->
+    <filter id="glowGreen" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2.0" result="innerBlur"/>
+      <feComposite in="innerBlur" in2="SourceGraphic" operator="in" result="innerGlow"/>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="9" result="outerBloom"/>
+      <feColorMatrix in="outerBloom" type="matrix"
+        values="0.15 0.25 0 0 0  0.30 1.10 0.15 0 0  0 0.10 0.25 0 0  0 0 0 0.38 0" result="greenBloom"/>
+      <feMerge>
+        <feMergeNode in="greenBloom"/>
         <feMergeNode in="innerGlow"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
