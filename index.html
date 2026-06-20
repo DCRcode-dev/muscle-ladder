@@ -1426,6 +1426,68 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
 .cue-section p { font-size: 14px; color: var(--text); line-height: 1.6; }
 .cue-tip { background: #FFF7ED; border-left: 3px solid var(--accent); border-radius: 0 10px 10px 0; padding: 10px 14px; font-size: 13px; color: #92400E; margin-top: 8px; }
 
+/* ── Exercise picker sheet — library search, set/rep picker (Decisions 1,2,6,7) ── */
+.bs-sub { font-size: 12.5px; color: var(--muted); line-height: 1.5; margin: -8px 0 16px; }
+.bs-search {
+  width: 100%; box-sizing: border-box; padding: 11px 14px; min-height: 44px;
+  border: 1px solid var(--border); border-radius: 12px; background: #fff;
+  font-size: 14px; font-family: var(--font-body); color: var(--text);
+  margin-bottom: 12px; -webkit-appearance: none; outline: none;
+  transition: border-color 160ms ease;
+}
+.bs-search:focus { border-color: var(--accent); }
+.bs-search::placeholder { color: var(--muted); }
+.lib-section { margin-bottom: 14px; }
+.lib-muscle-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); font-weight: 600; margin: 14px 2px 6px; }
+.lib-empty { font-size: 13px; color: var(--muted); font-style: italic; text-align: center; padding: 18px 4px; }
+
+.srp { margin: 4px 0 8px; }
+.srp-row { display: flex; align-items: center; justify-content: space-between; padding: 16px 2px; border-bottom: 1px solid var(--border); }
+.srp-row:last-child { border-bottom: none; }
+.srp-lbl { font-size: 15px; font-weight: 600; color: var(--text); }
+.srp-hint { font-size: 11px; font-weight: 400; color: var(--muted); margin-left: 3px; }
+.srp-stepper { display: flex; align-items: center; gap: 6px; }
+.srp-btn {
+  width: 42px; height: 42px; border-radius: 12px; border: 1px solid var(--border);
+  background: #fff; color: var(--text); font-size: 22px; line-height: 1; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent;
+  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+.srp-btn:active { transform: scale(0.92); border-color: var(--accent); background: #FFF7ED; }
+.srp-val { min-width: 52px; text-align: center; font-size: 22px; font-weight: 700; color: var(--charcoal); font-variant-numeric: tabular-nums lining-nums; }
+.srp-preview {
+  text-align: center; font-family: var(--font-hero); font-style: italic;
+  font-size: 34px; color: var(--accent); margin: 8px 0 14px;
+  font-variant-numeric: tabular-nums lining-nums; letter-spacing: 0.5px;
+}
+
+/* ── Additions in the workout list (Decisions 4,5) ── */
+.add-group-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); font-weight: 600; margin: 18px 2px 8px; }
+.ex-card-add { position: relative; }
+.ex-card-add::before { content: ''; position: absolute; top: 14px; bottom: 14px; left: 0; width: 3px; border-radius: 0 3px 3px 0; background: rgba(240,78,35,0.32); }
+.ex-remove-btn { color: var(--muted); }
+.ex-remove-btn:active { color: #C0432A; }
+.add-ex-pill {
+  width: 100%; box-sizing: border-box; margin: 10px 0 6px; padding: 16px;
+  border-radius: 16px; border: 1.5px dashed rgba(240,78,35,0.38); background: #fff;
+  color: var(--accent); font-size: 15px; font-weight: 600; font-family: var(--font-body);
+  cursor: pointer; box-shadow: var(--shadow); min-height: 56px;
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  -webkit-tap-highlight-color: transparent; transition: background 140ms ease, border-color 140ms ease, transform 120ms ease;
+}
+.add-ex-pill:active { background: #FFF7ED; border-color: var(--accent); transform: scale(0.99); }
+.add-ex-plus { font-size: 20px; font-weight: 400; line-height: 1; }
+
+/* ── History popup: grouped exercise list (Decisions 3,5) ── */
+.cal-ex-list { margin-top: 16px; border-top: 1px solid var(--border); padding-top: 10px; text-align: left; max-height: 38vh; overflow-y: auto; }
+.cal-ex-group-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted); font-weight: 600; margin: 12px 0 4px; }
+.cal-ex-group-add { color: var(--accent); }
+.cal-ex-row { display: flex; align-items: baseline; gap: 8px; padding: 6px 0; font-size: 13.5px; }
+.cal-ex-check { color: #22C55E; font-size: 11px; flex-shrink: 0; }
+.cal-ex-name { flex: 1; color: var(--text); }
+.cal-ex-sub { font-size: 11px; color: var(--muted); font-style: italic; margin-left: 6px; }
+.cal-ex-vol { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums lining-nums; flex-shrink: 0; }
+
 /* ── Finish screen ── */
 #finish-screen {
   position: fixed; inset: 0; background: var(--bg); z-index: 300;
@@ -4290,13 +4352,39 @@ const SUB_LIBRARY = {
     {name:'Single-Leg Calf Raise',tag:'Travel'},{name:'Step Calf Raise',tag:'Travel'},
   ],
   Core:[
-    {name:'Cable Crunch',tag:'Gym'},{name:'Hanging Leg Raise',tag:'Gym'},
+    {name:'Cable Crunch',tag:'Gym'},{name:'Cable Machine Crunch',tag:'Gym'},
+    {name:'Hanging Leg Raise',tag:'Gym'},
     {name:'Roman Chair Leg Raise',tag:'Gym'},{name:'Plate-Weighted Decline Sit-Up',tag:'Gym'},
     {name:'Pull-In',tag:'Gym'},{name:'Ab Wheel',tag:'Gym'},
     {name:'Plank',tag:'Travel'},{name:'Lying Leg Raise',tag:'Travel'},
     {name:'Crunch',tag:'Travel'},{name:'Mountain Climber',tag:'Travel'},
   ],
 };
+
+// ── Master exercise library — the flat, searchable "All Exercises" list backing
+//    both the substitution sheet and the "+ Add Exercise" sheet (Decisions 1 & 6).
+//    Built once from SUB_LIBRARY (each entry already curated + tagged), every
+//    item carrying its muscle group so a swap can cross muscle groups mid-session.
+const EXERCISE_LIBRARY = (() => {
+  const seen = new Set();
+  const out = [];
+  for (const [muscle, list] of Object.entries(SUB_LIBRARY)) {
+    for (const item of list) {
+      const k = normalizeEx(item.name);
+      if (seen.has(k)) continue;
+      seen.add(k);
+      out.push({ name: item.name, tag: item.tag, muscle });
+    }
+  }
+  return out.sort((a, b) => a.name.localeCompare(b.name));
+})();
+
+// Backfill muscle map from the library so EVERY substitute/addition exercise
+// resolves to a muscle group and credits the right weekly volume / 1RM bucket.
+EXERCISE_LIBRARY.forEach(it => {
+  const k = normalizeEx(it.name);
+  if (!MUSCLE_MAP[k]) MUSCLE_MAP[k] = it.muscle;
+});
 
 
 // ── Utility functions ────────────────────────────────────────────────────────
@@ -4400,6 +4488,8 @@ let ST = {
   workoutNotes: {},     // key: `${sessionId}_${exIdx}` → session-scoped note string
   workoutDrafts: {},    // key: `${key}-${si}` | `${key}-wu` → {w,r} typed-but-unlogged values
   workoutSubs: {},      // key: `${sessionId}_${exIdx}` → substituted exercise name (session-scoped)
+  workoutSubMeta: {},   // key: `${sessionId}_${exIdx}` → {sets,reps} custom counts for a substituted slot
+  workoutAdditions: [], // [{name,muscle,sets,reps}] accessory exercises added via "+"; index n → key `add_${n}`
   dismissedWarmups: new Set(),  // in-memory: normalised exercise names with warm-up dismissed
   syncQueue: [],        // pending Sheets pushes — drained on 'online' or next boot
   audioCtx: null,
@@ -4468,7 +4558,7 @@ function saveSettings(s) { LS.set('dcrgym_settings', s); }
 // Schema-versioned, non-destructive, with rolling last-good backup.
 // History must survive every app update. Period.
 const SCHEMA_VERSION = 2;
-const APP_BUILD = '2026.06.15 · ota-5 · server-proxy';
+const APP_BUILD = '2026.06.20 · ota-6 · swap+add';
 
 function migrateStorage() {
   const v = LS.get('dcrgym_schema_version', 1);
@@ -4507,14 +4597,64 @@ function migrateStorage() {
   LS.set('dcrgym_schema_version', SCHEMA_VERSION);
 }
 
+// Additions are keyed by a STABLE id (`add_${id}`), not array position — so
+// removing one mid-session never re-points another card's logged sets.
+function additionByKey(key) {
+  if (!key || key.indexOf('add_') !== 0) return null;
+  const id = parseInt(key.slice(4));
+  return (ST.workoutAdditions || []).find(a => a && a.id === id) || null;
+}
+
 // Live exercise identity — travel swap and session substitution aware.
 // THE name that gets stamped on sets and used for history lookup.
 function liveExName(key, ex) {
+  // Additions own their identity outright — never travel/sub-mapped.
+  if (key && key.indexOf('add_') === 0) {
+    const a = additionByKey(key);
+    return a ? a.name : (ex ? stripSuperset(ex.name) : '');
+  }
   const name = stripSuperset(ex.name);
   const travel = ST.travelMode && TRAVEL_MAP[normalizeEx(name)];
   if (travel) return travel.name;
   if (ST.workoutSubs && ST.workoutSubs[key]) return ST.workoutSubs[key];
   return name;
+}
+
+// Effective set count / rep range for a slot — honours custom counts on a
+// substituted slot (Decision 2) and addition cards, else the programmed value.
+function effSetCount(key, ex) {
+  if (key && key.indexOf('add_') === 0) {
+    const a = additionByKey(key);
+    return a ? a.sets : 3;
+  }
+  if (ST.workoutSubs && ST.workoutSubs[key] && ST.workoutSubMeta && ST.workoutSubMeta[key] && ST.workoutSubMeta[key].sets)
+    return ST.workoutSubMeta[key].sets;
+  return (ex && ex.workingSets) || 3;
+}
+function effReps(key, ex) {
+  if (key && key.indexOf('add_') === 0) {
+    const a = additionByKey(key);
+    return a ? a.reps : '8–10';
+  }
+  if (ST.workoutSubs && ST.workoutSubs[key] && ST.workoutSubMeta && ST.workoutSubMeta[key] && ST.workoutSubMeta[key].reps)
+    return ST.workoutSubMeta[key].reps;
+  return (ex && ex.reps) || '8–10';
+}
+// Resolve the exercise descriptor behind any workout key (program slot or
+// addition). Returns {ex,name,isAddition,exIdx,addId} or null.
+function slotForKey(key) {
+  if (key && key.indexOf('add_') === 0) {
+    const a = additionByKey(key);
+    if (!a) return null;
+    return { ex: { name: a.name, workingSets: a.sets, reps: a.reps, rest: a.rest || '2–3 min', substitutions: [] },
+             name: a.name, isAddition: true, addId: a.id };
+  }
+  const prog = PROGRAMS.find(p => p.id === ST.currentProgram);
+  const sess = prog && prog.sessions.find(s => s.id === ST.currentSession);
+  const exIdx = parseInt(key.split('_').pop());
+  const ex = sess && sess.exercises[exIdx];
+  if (!ex) return null;
+  return { ex, name: stripSuperset(ex.name), isAddition: false, exIdx };
 }
 
 // Single source of truth for the live-workout snapshot
@@ -4527,6 +4667,8 @@ function buildWorkoutPayload() {
     sets: ST.workoutSets,
     drafts: ST.workoutDrafts || {},
     subs: ST.workoutSubs || {},
+    subMeta: ST.workoutSubMeta || {},
+    additions: ST.workoutAdditions || [],
     notes: ST.workoutNotes || {},
     travelMode: ST.travelMode,
     travelLocked: ST.travelLocked,
@@ -6488,6 +6630,172 @@ function selectProgramFromBrowser(id) {
 }
 
 // ── Workout renderer ──────────────────────────────────────────────────────────
+// ── Single exercise card (program slot OR accessory addition) ───────────────
+// Extracted so additions reuse the exact same logging/prefill/rest/overload UI.
+// isAddition=true → key is `add_${n}`, resolves via ST.workoutAdditions.
+function exerciseCardHTML(ex, key, i, isAddition) {
+  const notes = getNotes();
+  const restTimes = getRestTimes();
+  const name = isAddition ? liveExName(key, ex) : stripSuperset(ex.name);
+  const isExpanded = ST.expandedCards.has(key);
+  const isCompleted = ST.completedCards.has(key);
+  const muscle = getMuscle(name);
+  const barbell = isBarbell(name);
+  const cueAvail = !!FORM_CUES[normalizeEx(name)];
+  const travel = !isAddition && ST.travelMode && TRAVEL_MAP[normalizeEx(name)];
+  const displayName = liveExName(key, ex);
+  const subbed = !isAddition && !travel && ST.workoutSubs && ST.workoutSubs[key];
+  const loggedSets = ST.workoutSets[key] || [];
+
+  // Sets count / reps — honours custom counts on subbed slots & additions
+  const totalSets = effSetCount(key, ex);
+  const reps = effReps(key, ex);
+
+  // Last performance (pre-fill) — looked up by the EFFECTIVE exercise identity.
+  const lastPerfFull = getLastPerformanceFull(displayName);
+  const lastPerf = lastPerfFull ? lastPerfFull.sets : null;
+
+  // Weight suggestion for new exercises — gone after the first real log
+  let suggestion = null;
+  if (!lastPerf && loggedSets.filter(Boolean).length === 0) {
+    suggestion = suggestWeight(name, muscle);
+  }
+
+  // Overload nudge check
+  let overloadNudge = '';
+  if (loggedSets.length === totalSets && totalSets > 0) {
+    const topRep = parseInt((reps.match(/(\d+)$/) || ['',reps])[1]);
+    if (!isNaN(topRep) && loggedSets.every(s => s.r >= topRep)) {
+      overloadNudge = `<div class="overload-nudge">⬆ All sets hit ${topRep} reps — increase weight next session!</div>`;
+    }
+  }
+
+  // ── Build set rows with trend micro-indicators ───────────────────────────
+  let histAvgW = null;
+  if (lastPerf && lastPerf.length > 0) {
+    const wArr = lastPerf.filter(s => s && s.w > 0).map(s => s.w);
+    if (wArr.length > 0) histAvgW = wArr.reduce((a, b) => a + b, 0) / wArr.length;
+  }
+
+  let setRows = '';
+  for (let si = 0; si < totalSets; si++) {
+    const logged = loggedSets[si];
+    const lastSet = lastPerf && (lastPerf[si] != null ? lastPerf[si] : lastPerf[lastPerf.length - 1]);
+    const draft = !logged && ST.workoutDrafts && ST.workoutDrafts[key + '-' + si];
+    const preW = logged ? logged.w : (draft && draft.w !== '' ? draft.w : (lastSet != null ? lastSet.w : ''));
+    const preR = logged ? logged.r : (draft && draft.r !== '' ? draft.r : (lastSet != null ? lastSet.r : ''));
+    const isLastSet = si === totalSets - 1;
+    const tech = isLastSet && ex.lastSetTechnique ? `<span class="technique-badge">${ex.lastSetTechnique}</span>` : '';
+    const isLogged = !!logged;
+    const plateHtml = barbell && isExpanded && ST.openPlate === `${key}_${si}` ? renderPlatePopover(preW || 0) : '';
+
+    let trendHtml = '';
+    if (!isLogged && histAvgW !== null && preW !== '' && Number(preW) > 0) {
+      const diff = Number(preW) - histAvgW;
+      const absDiff = Math.abs(diff);
+      if (absDiff >= 0.5) {
+        const arrow   = diff > 0 ? '↑' : '↓';
+        const cls     = diff > 0 ? 'trend-arrow-up' : 'trend-arrow-down';
+        const diffStr = (diff > 0 ? '+' : '') + diff.toFixed(1) + ' kg vs avg';
+        trendHtml = `<div class="set-trend">
+          <span class="${cls}">${arrow}</span>
+          <span>${diffStr}</span>
+        </div>`;
+      }
+    }
+
+    setRows += `
+    <div class="set-row" id="setrow-${key}-${si}">
+      <div class="set-num">${si+1}</div>
+      <input class="set-input${isLogged?' logged':''}" id="wi-${key}-${si}" type="text" inputmode="none"
+        value="${preW}" placeholder="kg" autocomplete="off"
+        onclick="openNumpad(this,'${key}',${si},${i},'w')"
+        oninput="markDraft('${key}',${si})"
+        ${barbell?`onfocus="showPlate('${key}',${si})" onblur="hidePlate('${key}',${si})"`:''}>
+      <div class="set-sep">×</div>
+      <input class="set-input${isLogged?' logged':''}" id="ri-${key}-${si}" type="text" inputmode="none"
+        value="${preR}" placeholder="reps" autocomplete="off"
+        onclick="openNumpad(this,'${key}',${si},${i},'r')"
+        oninput="markDraft('${key}',${si})">
+      <button class="set-log-btn${isLogged?' logged':''}" onclick="${isLogged ? `unlogSet('${key}',${si},${i})` : `logSet('${key}',${si},${i})`}"
+        >${isLogged ? checkSVG() : '→'}</button>
+    </div>
+    ${trendHtml}
+    ${tech ? `<div style="padding-left:30px;margin-bottom:6px">${tech}</div>` : ''}
+    ${plateHtml}`;
+  }
+
+  // Warm-up set row — one interactive row; hidden if user dismissed for this exercise
+  const wuKey = `${key}_wu`;
+  const wuDismissed = ST.dismissedWarmups.has(normalizeEx(name));
+  const wuLogged = ST.workoutSets[wuKey] && ST.workoutSets[wuKey][0];
+  const wuDraft = !wuLogged && ST.workoutDrafts && ST.workoutDrafts[key + '-wu'];
+  const wuPreW = wuLogged ? wuLogged.w : (wuDraft && wuDraft.w !== '' ? wuDraft.w : (lastPerf && lastPerf[0] ? Math.round((lastPerf[0].w || 0) * 0.5) : ''));
+  const wuPreR = wuLogged ? wuLogged.r : (wuDraft && wuDraft.r !== '' ? wuDraft.r : '');
+  const warmupRowHtml = (!wuDismissed) ? `
+    <div class="warmup-row" id="wurow-${key}">
+      <span class="warmup-label">warm-up</span>
+      <input class="warmup-input" id="wuwi-${key}" type="text" inputmode="none"
+        value="${wuPreW}" placeholder="kg" autocomplete="off"
+        onclick="openNumpad(this,'${key}',0,${i},'w',true)" oninput="markDraftWu('${key}')">
+      <span class="warmup-sep">×</span>
+      <input class="warmup-input" id="wuri-${key}" type="text" inputmode="none"
+        value="${wuPreR}" placeholder="reps" autocomplete="off"
+        onclick="openNumpad(this,'${key}',0,${i},'r',true)" oninput="markDraftWu('${key}')">
+      <button class="warmup-dismiss" onclick="dismissWarmup(event,'${key}','${normalizeEx(name)}')" title="Remove warm-up">✕</button>
+    </div>` : '';
+
+  const noteKey = normalizeEx(name);
+  const noteVal = notes[noteKey] || '';
+  const restSec = restTimes[normalizeEx(name)] || parseRestSeconds(ex.rest);
+
+  return `
+  <div class="ex-card${isExpanded?' expanded':''}${isCompleted?' completed':''}${isAddition?' ex-card-add':''}" id="excard-${key}">
+    <div class="ex-card-header" onclick="toggleCard('${key}')">
+      <div class="ex-card-header-left">
+        <div class="ex-name">${displayName} ${isCompleted ? '<span class="ex-check">✓</span>' : ''}</div>
+        ${subbed ? `<div class="ex-sub-note">⇄ swapped from ${name}</div>` : (isAddition ? `<div class="ex-sub-note">✚ added exercise</div>` : '')}
+        ${muscleBadgeHtml(muscle)}
+        ${lastPerf ? `<div class="ex-last-perf">${lastPerf[lastPerf.length-1].w}kg × ${lastPerf[lastPerf.length-1].r} · ${relDay(lastPerfFull.endTime)}</div>` : ''}
+        <div class="ex-meta">${totalSets} × ${travel ? travel.reps : reps} · ${formatDuration(restSec)} rest</div>
+      </div>
+      <div class="ex-card-actions">
+        <button class="ex-graph-btn" onclick="showProgressGraph(event,'${name}')" title="Progress">⬆</button>
+        ${cueAvail || true ? `<button class="ex-cue-btn" onclick="showCue(event,'${key}',${i})">?</button>` : ''}
+        ${isAddition ? `<button class="ex-cue-btn ex-remove-btn" onclick="removeAddition(event,${i})" title="Remove">✕</button>` : (travel ? '' : `<button class="ex-cue-btn" onclick="showSubs(event,'${key}',${i})" title="Substitutions">⇄</button>`)}
+        <button class="ex-note-btn${(ST.workoutNotes[key] || noteVal) ? ' has-note' : ''}" id="notebtn-${key}"
+          onclick="toggleNotePanel(event,'${key}','${noteKey}')" title="Add note">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
+          </svg>
+        </button>
+        <svg class="ex-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+    </div>
+    <div class="ex-body">
+      <div class="ex-body-inner">
+        ${warmupRowHtml}
+        ${suggestion ? `<div class="weight-suggestion">💡 Suggested start: ~${suggestion.w}kg (based on ${suggestion.basis})</div>` : ''}
+        ${overloadNudge}
+        ${setRows}
+        <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+          <div class="set-hint rest-time-row">
+            <span style="color:var(--muted)">Rest</span>
+            <span class="rest-time-display" id="rest-lbl-${key}" onclick="editRestTime('${key}',${i},this)" title="Tap to edit">${formatDuration(restSec)}</span>
+          </div>
+        </div>
+        <!-- Inline note panel — revealed by header pen icon -->
+        <div class="ex-note-panel${(ST.workoutNotes[key] || noteVal) ? ' open' : ''}" id="notepanel-${key}">
+          <textarea class="ex-note-area" id="noteinput-${key}"
+            placeholder="Session notes…"
+            oninput="saveSessionNote('${key}','${noteKey}',this.value)"
+          >${ST.workoutNotes[key] !== undefined ? ST.workoutNotes[key] : noteVal}</textarea>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
 function renderWorkout() {
   const el = document.getElementById('screen-workout');
   if (!el) return;
@@ -6498,175 +6806,20 @@ function renderWorkout() {
   const notes = getNotes();
   const restTimes = getRestTimes();
 
-  // Build exercise HTML
-  const exCards = exList.map((ex, i) => {
-    const key = `${sess.id}_${i}`;
-    const name = stripSuperset(ex.name);
-    const isExpanded = ST.expandedCards.has(key);
-    const isCompleted = ST.completedCards.has(key);
-    const muscle = getMuscle(name);
-    const barbell = isBarbell(name);
-    const cueAvail = !!FORM_CUES[normalizeEx(name)];
-    const travel = ST.travelMode && TRAVEL_MAP[normalizeEx(name)];
-    const displayName = liveExName(key, ex);
-    const subbed = !travel && ST.workoutSubs && ST.workoutSubs[key];
-    const loggedSets = ST.workoutSets[key] || [];
-
-    // Sets count for this exercise
-    const totalSets = ex.workingSets || 3;
-    const reps = ex.reps || '8–10';
-
-    // Last performance (pre-fill) — looked up by the EFFECTIVE exercise
-    // identity so substituted/travel exercises pull THEIR history, not the
-    // original slot's.
-    const lastPerfFull = getLastPerformanceFull(displayName);
-    const lastPerf = lastPerfFull ? lastPerfFull.sets : null;
-
-    // Weight suggestion for new exercises
-    let suggestion = null;
-    if (!lastPerf) {
-      suggestion = suggestWeight(name, muscle);
-    }
-
-    // Overload nudge check
-    let overloadNudge = '';
-    if (loggedSets.length === totalSets && totalSets > 0) {
-      const topRep = parseInt((reps.match(/(\d+)$/) || ['',reps])[1]);
-      if (!isNaN(topRep) && loggedSets.every(s => s.r >= topRep)) {
-        overloadNudge = `<div class="overload-nudge">⬆ All sets hit ${topRep} reps — increase weight next session!</div>`;
-      }
-    }
-
-    // ── Build set rows with trend micro-indicators ───────────────────────────
-    // Compute historical average weight across all logged sets for this exercise
-    let histAvgW = null;
-    if (lastPerf && lastPerf.length > 0) {
-      const wArr = lastPerf.filter(s => s && s.w > 0).map(s => s.w);
-      if (wArr.length > 0) histAvgW = wArr.reduce((a, b) => a + b, 0) / wArr.length;
-    }
-
-    let setRows = '';
-    for (let si = 0; si < totalSets; si++) {
-      const logged = loggedSets[si];
-      const lastSet = lastPerf && (lastPerf[si] != null ? lastPerf[si] : lastPerf[lastPerf.length - 1]);
-      // Draft values (typed but not checkmarked) outrank prefill — zero loss on reload
-      const draft = !logged && ST.workoutDrafts && ST.workoutDrafts[key + '-' + si];
-      const preW = logged ? logged.w : (draft && draft.w !== '' ? draft.w : (lastSet != null ? lastSet.w : ''));
-      const preR = logged ? logged.r : (draft && draft.r !== '' ? draft.r : (lastSet != null ? lastSet.r : ''));
-      const isLastSet = si === totalSets - 1;
-      const tech = isLastSet && ex.lastSetTechnique ? `<span class="technique-badge">${ex.lastSetTechnique}</span>` : '';
-      const isLogged = !!logged;
-      const plateHtml = barbell && isExpanded && ST.openPlate === `${key}_${si}` ? renderPlatePopover(preW || 0) : '';
-
-      // ── Trend micro-indicator: compare pre-filled weight to historic average ─
-      let trendHtml = '';
-      if (!isLogged && histAvgW !== null && preW !== '' && Number(preW) > 0) {
-        const diff = Number(preW) - histAvgW;
-        const absDiff = Math.abs(diff);
-        if (absDiff >= 0.5) {
-          const arrow   = diff > 0 ? '↑' : '↓';
-          const cls     = diff > 0 ? 'trend-arrow-up' : 'trend-arrow-down';
-          const diffStr = (diff > 0 ? '+' : '') + diff.toFixed(1) + ' kg vs avg';
-          trendHtml = `<div class="set-trend">
-            <span class="${cls}">${arrow}</span>
-            <span>${diffStr}</span>
-          </div>`;
-        }
-      }
-
-      setRows += `
-      <div class="set-row" id="setrow-${key}-${si}">
-        <div class="set-num">${si+1}</div>
-        <input class="set-input${isLogged?' logged':''}" id="wi-${key}-${si}" type="text" inputmode="none"
-          value="${preW}" placeholder="kg" autocomplete="off"
-          onclick="openNumpad(this,'${key}',${si},${i},'w')"
-          oninput="markDraft('${key}',${si})"
-          ${barbell?`onfocus="showPlate('${key}',${si})" onblur="hidePlate('${key}',${si})"`:''}>
-        <div class="set-sep">×</div>
-        <input class="set-input${isLogged?' logged':''}" id="ri-${key}-${si}" type="text" inputmode="none"
-          value="${preR}" placeholder="reps" autocomplete="off"
-          onclick="openNumpad(this,'${key}',${si},${i},'r')"
-          oninput="markDraft('${key}',${si})">
-        <button class="set-log-btn${isLogged?' logged':''}" onclick="${isLogged ? `unlogSet('${key}',${si},${i})` : `logSet('${key}',${si},${i})`}"
-          >${isLogged ? checkSVG() : '→'}</button>
-      </div>
-      ${trendHtml}
-      ${tech ? `<div style="padding-left:30px;margin-bottom:6px">${tech}</div>` : ''}
-      ${plateHtml}`;
-    }
-
-    // Warm-up set row — one interactive row; hidden if user dismissed for this exercise
-    const wuKey = `${key}_wu`;
-    const wuDismissed = ST.dismissedWarmups.has(normalizeEx(name));
-    const wuLogged = ST.workoutSets[wuKey] && ST.workoutSets[wuKey][0];
-    const wuDraft = !wuLogged && ST.workoutDrafts && ST.workoutDrafts[key + '-wu'];
-    const wuPreW = wuLogged ? wuLogged.w : (wuDraft && wuDraft.w !== '' ? wuDraft.w : (lastPerf && lastPerf[0] ? Math.round((lastPerf[0].w || 0) * 0.5) : ''));
-    const wuPreR = wuLogged ? wuLogged.r : (wuDraft && wuDraft.r !== '' ? wuDraft.r : '');
-    const warmupRowHtml = (!wuDismissed) ? `
-      <div class="warmup-row" id="wurow-${key}">
-        <span class="warmup-label">warm-up</span>
-        <input class="warmup-input" id="wuwi-${key}" type="text" inputmode="none"
-          value="${wuPreW}" placeholder="kg" autocomplete="off"
-          onclick="openNumpad(this,'${key}',0,${i},'w',true)" oninput="markDraftWu('${key}')">
-        <span class="warmup-sep">×</span>
-        <input class="warmup-input" id="wuri-${key}" type="text" inputmode="none"
-          value="${wuPreR}" placeholder="reps" autocomplete="off"
-          onclick="openNumpad(this,'${key}',0,${i},'r',true)" oninput="markDraftWu('${key}')">
-        <button class="warmup-dismiss" onclick="dismissWarmup(event,'${key}','${normalizeEx(name)}')" title="Remove warm-up">✕</button>
-      </div>` : '';
-    const warmupText = '';
-
-    const noteKey = normalizeEx(name);
-    const noteVal = notes[noteKey] || '';
-
-    const restSec = restTimes[normalizeEx(name)] || parseRestSeconds(ex.rest);
-
-    return `
-    <div class="ex-card${isExpanded?' expanded':''}${isCompleted?' completed':''}" id="excard-${key}">
-      <div class="ex-card-header" onclick="toggleCard('${key}')">
-        <div class="ex-card-header-left">
-          <div class="ex-name">${displayName} ${isCompleted ? '<span class="ex-check">✓</span>' : ''}</div>
-          ${subbed ? `<div class="ex-sub-note">⇄ swapped from ${name}</div>` : ''}
-          ${muscleBadgeHtml(muscle)}
-          ${lastPerf ? `<div class="ex-last-perf">${lastPerf[lastPerf.length-1].w}kg × ${lastPerf[lastPerf.length-1].r} · ${relDay(lastPerfFull.endTime)}</div>` : ''}
-          <div class="ex-meta">${totalSets} × ${travel ? travel.reps : reps} · ${formatDuration(restSec)} rest</div>
-        </div>
-        <div class="ex-card-actions">
-          <button class="ex-graph-btn" onclick="showProgressGraph(event,'${name}')" title="Progress">⬆</button>
-          ${cueAvail || true ? `<button class="ex-cue-btn" onclick="showCue(event,'${key}',${i})">?</button>` : ''}
-          ${travel ? '' : `<button class="ex-cue-btn" onclick="showSubs(event,'${key}',${i})" title="Substitutions">⇄</button>`}
-          <button class="ex-note-btn${(ST.workoutNotes[key] || noteVal) ? ' has-note' : ''}" id="notebtn-${key}"
-            onclick="toggleNotePanel(event,'${key}','${noteKey}')" title="Add note">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
-            </svg>
-          </button>
-          <svg class="ex-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-      </div>
-      <div class="ex-body">
-        <div class="ex-body-inner">
-          ${warmupRowHtml}
-          ${suggestion ? `<div class="weight-suggestion">💡 Suggested start: ~${suggestion.w}kg (based on ${suggestion.basis})</div>` : ''}
-          ${overloadNudge}
-          ${setRows}
-          <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
-            <div class="set-hint rest-time-row">
-              <span style="color:var(--muted)">Rest</span>
-              <span class="rest-time-display" id="rest-lbl-${key}" onclick="editRestTime('${key}',${i},this)" title="Tap to edit">${formatDuration(restSec)}</span>
-            </div>
-          </div>
-          <!-- Inline note panel — revealed by header pen icon -->
-          <div class="ex-note-panel${(ST.workoutNotes[key] || noteVal) ? ' open' : ''}" id="notepanel-${key}">
-            <textarea class="ex-note-area" id="noteinput-${key}"
-              placeholder="Session notes…"
-              oninput="saveSessionNote('${key}','${noteKey}',this.value)"
-            >${ST.workoutNotes[key] !== undefined ? ST.workoutNotes[key] : noteVal}</textarea>
-          </div>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
+  // Build exercise HTML — programmed slots first, then accessory additions
+  const exCards = exList.map((ex, i) => exerciseCardHTML(ex, `${sess.id}_${i}`, i, false)).join('');
+  const allProgDone = exList.length > 0 && exList.every((_, idx) => ST.completedCards.has(`${sess.id}_${idx}`));
+  let addCards = '';
+  if (ST.workoutAdditions && ST.workoutAdditions.length) {
+    addCards = `<div class="add-group-lbl">✚ Additions</div>` +
+      ST.workoutAdditions.map((a) => {
+        const slot = slotForKey('add_' + a.id);
+        return slot ? exerciseCardHTML(slot.ex, 'add_' + a.id, a.id, true) : '';
+      }).join('');
+  }
+  const addPill = allProgDone
+    ? `<button class="add-ex-pill" onclick="showAddSheet()"><span class="add-ex-plus">+</span> Add Exercise</button>`
+    : '';
 
   el.innerHTML = `
   <div id="workout-header${ST.travelLocked?' travel-locked':''}">
@@ -6702,7 +6855,7 @@ function renderWorkout() {
       </label>
     </div>` : ''}
   </div>
-  <div class="exercise-list">${exCards}</div>
+  <div class="exercise-list">${exCards}${addCards}${addPill}</div>
   <div style="padding:16px 16px calc(var(--nav-h) + 28px)">
     <button class="btn btn-primary" onclick="shimmerBtn(this);setTimeout(()=>finishWorkout(),220)">Finish Workout</button>
   </div>`;
@@ -6891,7 +7044,11 @@ function logSet(key, si, exIdx) {
   const prog = PROGRAMS.find(p => p.id === ST.currentProgram);
   const sess = prog && prog.sessions.find(s => s.id === ST.currentSession);
   if (!sess) return;
-  const ex = sess.exercises[exIdx];
+  // Resolve from the key so additions (add_N) and subbed slots work uniformly
+  const isAdd = typeof key === 'string' && key.indexOf('add_') === 0;
+  const slot = slotForKey(key);
+  if (!slot) return;
+  const ex = slot.ex;
   const wi = document.getElementById('wi-' + key + '-' + si);
   const ri = document.getElementById('ri-' + key + '-' + si);
   if (!wi || !ri) return;
@@ -6951,7 +7108,7 @@ function logSet(key, si, exIdx) {
   updateProgressBadge();
 
   // Check if exercise complete
-  const totalSets = ex.workingSets || 3;
+  const totalSets = effSetCount(key, ex);
   const loggedSets = ST.workoutSets[key] || [];
   const doneCount = loggedSets.filter(Boolean).length;
 
@@ -6968,24 +7125,28 @@ function logSet(key, si, exIdx) {
         const nameEl = card.querySelector('.ex-name');
         if (nameEl) nameEl.innerHTML = liveExName(key, ex) + ' <span class="ex-check">✓</span>';
       }
-      // Update progress bar + badge
-      const segs = document.querySelectorAll('.wh-seg');
-      if (segs[exIdx]) segs[exIdx].classList.add('done');
+      // Update progress bar + badge — programmed segments only
+      if (!isAdd) {
+        const segs = document.querySelectorAll('.wh-seg');
+        if (segs[exIdx]) segs[exIdx].classList.add('done');
+      }
       updateProgressBadge();
 
-      // Auto-advance to next exercise
-      const _prog = PROGRAMS.find(p => p.id === ST.currentProgram);
-      const _sess = _prog && _prog.sessions.find(s => s.id === ST.currentSession);
-      if (_sess) {
-        const nextIdx = exIdx + 1;
-        if (nextIdx < _sess.exercises.length) {
-          const nextKey = `${_sess.id}_${nextIdx}`;
-          if (!ST.completedCards.has(nextKey)) {
-            setTimeout(() => {
-              toggleCard(nextKey);
-              const nextCard = document.getElementById('excard-' + nextKey);
-              if (nextCard) nextCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 250);
+      // Auto-advance to next programmed exercise (additions don't auto-advance)
+      if (!isAdd) {
+        const _prog = PROGRAMS.find(p => p.id === ST.currentProgram);
+        const _sess = _prog && _prog.sessions.find(s => s.id === ST.currentSession);
+        if (_sess) {
+          const nextIdx = exIdx + 1;
+          if (nextIdx < _sess.exercises.length) {
+            const nextKey = `${_sess.id}_${nextIdx}`;
+            if (!ST.completedCards.has(nextKey)) {
+              setTimeout(() => {
+                toggleCard(nextKey);
+                const nextCard = document.getElementById('excard-' + nextKey);
+                if (nextCard) nextCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }, 250);
+            }
           }
         }
       }
@@ -6993,7 +7154,7 @@ function logSet(key, si, exIdx) {
   }
 
   // Check overload nudge
-  const reps = ex.reps || '8–10';
+  const reps = effReps(key, ex);
   const topRep = parseInt((reps.match(/(\d+)$/) || ['', '10'])[1]);
   if (doneCount >= totalSets && !isNaN(topRep) && loggedSets.every(s => s && s.r >= topRep)) {
     const body = document.querySelector('#excard-' + key + ' .ex-body-inner');
@@ -7014,9 +7175,9 @@ function logSet(key, si, exIdx) {
     let nextText = '', afterText = '';
     const isLastSet = si === totalSets - 1;
     if (isLastSet) {
-      // Find next exercise
+      // Find next programmed exercise (additions have no programmed successor)
       const nextExIdx = exIdx + 1;
-      if (nextExIdx < sess.exercises.length) {
+      if (!isAdd && nextExIdx < sess.exercises.length) {
         const nextEx = sess.exercises[nextExIdx];
         const nextName = liveExName(`${sess.id}_${nextExIdx}`, nextEx);
         const nextLast = getLastPerformance(nextName);
@@ -7030,9 +7191,9 @@ function logSet(key, si, exIdx) {
       const preW = ST.workoutSets[key] && ST.workoutSets[key][si] ? ST.workoutSets[key][si].w : w;
       nextText = 'Next: Set ' + (nextSi + 1) + ' · ' + preW + 'kg × ' + r;
       if (si === totalSets - 2) {
-        // Second to last — also show next exercise
+        // Second to last — also show next programmed exercise
         const nextExIdx = exIdx + 1;
-        if (nextExIdx < sess.exercises.length) {
+        if (!isAdd && nextExIdx < sess.exercises.length) {
           const nextEx = sess.exercises[nextExIdx];
           afterText = 'After: ' + stripSuperset(nextEx.name);
         }
@@ -7096,11 +7257,11 @@ function unlogSet(key, si, exIdx) {
   }
 
   // Un-complete the card if it was marked done; re-expand so user can see sets
-  const prog = PROGRAMS.find(p => p.id === ST.currentProgram);
-  const sess = prog && prog.sessions.find(s => s.id === ST.currentSession);
-  if (sess) {
-    const ex = sess.exercises[exIdx];
-    const totalSets = ex ? (ex.workingSets || 3) : 3;
+  const isAdd = typeof key === 'string' && key.indexOf('add_') === 0;
+  const slot = slotForKey(key);
+  if (slot) {
+    const ex = slot.ex;
+    const totalSets = effSetCount(key, ex);
     const remaining = (ST.workoutSets[key] || []).filter(Boolean).length;
     if (remaining < totalSets) {
       ST.completedCards.delete(key);
@@ -7110,21 +7271,22 @@ function unlogSet(key, si, exIdx) {
         card.classList.remove('completed');
         card.classList.add('expanded');
         const nameEl = card.querySelector('.ex-name');
-        if (nameEl) nameEl.innerHTML = stripSuperset(ex.name);
+        if (nameEl) nameEl.innerHTML = liveExName(key, ex);
       }
-      const segs = document.querySelectorAll('.wh-seg');
-      if (segs[exIdx]) segs[exIdx].classList.remove('done');
+      if (!isAdd) {
+        const segs = document.querySelectorAll('.wh-seg');
+        if (segs[exIdx]) segs[exIdx].classList.remove('done');
+      }
     }
   }
   updateProgressBadge();
 }
 
 function editRestTime(key, exIdx, el) {
-  const prog = PROGRAMS.find(p => p.id === ST.currentProgram);
-  const sess = prog && prog.sessions.find(s => s.id === ST.currentSession);
-  if (!sess) return;
-  const ex = sess.exercises[exIdx];
-  const name = stripSuperset(ex.name);
+  const slot = slotForKey(key);
+  if (!slot) return;
+  const ex = slot.ex;
+  const name = slot.name;
   const restTimes = getRestTimes();
   const current = restTimes[normalizeEx(name)] || parseRestSeconds(ex.rest);
 
@@ -7196,11 +7358,12 @@ function saveSessionNote(key, nameKey, text) {
 
 function showCue(e, key, exIdx) {
   e.stopPropagation();
-  const prog = PROGRAMS.find(p => p.id === ST.currentProgram);
-  const sess = prog && prog.sessions.find(s => s.id === ST.currentSession);
-  if (!sess) return;
-  const ex = sess.exercises[exIdx];
-  const name = stripSuperset(ex.name);
+  // Resolve the EFFECTIVE exercise — a subbed slot shows the sub's cues, an
+  // addition shows its own; falls back gracefully when no cues exist.
+  const slot = slotForKey(key);
+  if (!slot) return;
+  const ex = slot.ex;
+  const name = liveExName(key, ex);
   const cue = FORM_CUES[normalizeEx(name)];
   const content = cue ? `
     <div class="cue-section"><h4>Setup</h4><p>${cue.setup}</p></div>
@@ -7211,49 +7374,106 @@ function showCue(e, key, exIdx) {
   openSheet(`<div class="bs-title">${name}</div>${content}`);
 }
 
+// ── Exercise picker sheet — substitution (Decisions 1,2,3) & additions (4,5,6,7).
+//    One bottom sheet, one mental model: Nippard picks (subs only) on top,
+//    full searchable library below; choosing opens a custom set/rep picker.
+function setSheetBody(html) {
+  const el = document.getElementById('sheet-content');
+  if (el) el.innerHTML = html;
+  ST.openSubCard = null;
+}
+
 function showSubs(e, key, exIdx) {
-  e.stopPropagation();
-  const prog = PROGRAMS.find(p => p.id === ST.currentProgram);
-  const sess = prog && prog.sessions.find(s => s.id === ST.currentSession);
-  if (!sess) return;
-  const ex = sess.exercises[exIdx];
-  const name = stripSuperset(ex.name);
-  const muscle = getMuscle(name);
-  const nippardSubs = (ex.substitutions || []).filter(s => s && s.trim());
-  const libSubs = (SUB_LIBRARY[muscle] || []).filter(s => !nippardSubs.includes(s.name) && s.name !== name);
+  if (e && e.stopPropagation) e.stopPropagation();
+  const slot = slotForKey(key);
+  if (!slot || slot.isAddition) return;
+  ST._lib = { mode: 'sub', key: key, exIdx: exIdx, name: stripSuperset(slot.ex.name), muscle: getMuscle(stripSuperset(slot.ex.name)) };
+  openSheet(subsSheetHTML());
+}
 
-  let nippardHtml = nippardSubs.map(s => buildSubCard(s, 'Gym', key, exIdx)).join('');
-  let libHtml = libSubs.slice(0, 8).map(s => buildSubCard(s.name, s.tag, key, exIdx)).join('');
-
-  const activeSub = ST.workoutSubs && ST.workoutSubs[key];
-  openSheet(`
-    <div class="bs-title">Substitutions for ${name}</div>
-    ${activeSub ? `<button class="btn btn-sheet-secondary" style="margin-bottom:14px" onclick="revertSubstitution('${key}')">↩ Back to ${name}</button>` : ''}
+function subsSheetHTML() {
+  const ctx = ST._lib || {};
+  const slot = slotForKey(ctx.key);
+  const ex = slot ? slot.ex : null;
+  const name = ctx.name || '';
+  const nippardSubs = ((ex && ex.substitutions) || []).filter(s => s && s.trim());
+  const activeSub = ST.workoutSubs && ST.workoutSubs[ctx.key];
+  const nippardHtml = nippardSubs.map(s => libCard(s, getMuscle(s), 'Nippard')).join('');
+  return `
+    <div class="bs-title">Swap ${name}</div>
+    ${activeSub ? `<button class="btn btn-sheet-secondary" style="margin-bottom:14px" onclick="revertSubstitution('${ctx.key}')">↩ Back to ${name}</button>` : ''}
     ${nippardSubs.length ? `<div class="bs-section-lbl">Nippard Recommends</div>
-    <div style="margin-bottom:12px">${nippardHtml}</div>` : ''}
-    <div class="bs-section-lbl">More Options</div>
-    ${libHtml}
+      <div class="lib-section">${nippardHtml}</div>` : ''}
+    <div class="bs-section-lbl">All Exercises</div>
+    <input class="bs-search" id="lib-search" type="text" placeholder="Search any exercise…" autocomplete="off" oninput="filterLib(this.value)">
+    <div id="lib-list">${libListHTML('')}</div>
+  `;
+}
+
+function showAddSheet() {
+  ST._lib = { mode: 'add' };
+  openSheet(`
+    <div class="bs-title">Add Exercise</div>
+    <div class="bs-sub">Accessory work — logs after your programmed exercises and counts toward weekly volume.</div>
+    <div class="bs-section-lbl">All Exercises</div>
+    <input class="bs-search" id="lib-search" type="text" placeholder="Search any exercise…" autocomplete="off" oninput="filterLib(this.value)">
+    <div id="lib-list">${libListHTML('')}</div>
   `);
 }
 
-function buildSubCard(name, tag, workoutKey, exIdx) {
-  const last = getLastPerformance(name);
-  const lastText = last && last[0] ? last[0].w + 'kg × ' + last[0].r : 'No history';
-  const muscle = getMuscle(name);
-  const prog = PROGRAMS.find(p => p.id === ST.currentProgram);
-  const sess = prog && prog.sessions.find(s => s.id === ST.currentSession);
-  const ex = sess && sess.exercises[exIdx];
+function addSheetHTML() {
   return `
-  <div class="sub-card highlighted" id="subcard-${workoutKey}-${name.replace(/\s/g,'_')}">
-    <div class="sub-card-header" onclick="toggleSubCard('${workoutKey}-${name.replace(/\s/g,'_')}')">
+    <div class="bs-title">Add Exercise</div>
+    <div class="bs-sub">Accessory work — logs after your programmed exercises and counts toward weekly volume.</div>
+    <div class="bs-section-lbl">All Exercises</div>
+    <input class="bs-search" id="lib-search" type="text" placeholder="Search any exercise…" autocomplete="off" oninput="filterLib(this.value)">
+    <div id="lib-list">${libListHTML('')}</div>
+  `;
+}
+
+function libListHTML(filter) {
+  const f = normalizeEx(filter || '');
+  let items = EXERCISE_LIBRARY;
+  if (f) items = items.filter(it => normalizeEx(it.name).indexOf(f) !== -1 || normalizeEx(it.muscle).indexOf(f) !== -1);
+  if (items.length === 0) return `<div class="lib-empty">No exercises match that search.</div>`;
+  if (f) return items.map(it => libCard(it.name, it.muscle, it.tag)).join('');
+  // Browsing (no filter) → grouped by muscle for fast scanning
+  const order = ['Chest','Back','Shoulders','Biceps','Triceps','Quads','Hamstrings','Glutes','Calves','Core'];
+  const byMuscle = {};
+  for (const it of items) { (byMuscle[it.muscle] = byMuscle[it.muscle] || []).push(it); }
+  const muscles = Object.keys(byMuscle).sort((a,b) => {
+    const ia = order.indexOf(a), ib = order.indexOf(b);
+    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+  });
+  return muscles.map(m => `<div class="lib-muscle-lbl">${m}</div>` + byMuscle[m].map(it => libCard(it.name, it.muscle, it.tag)).join('')).join('');
+}
+
+function libCard(name, muscle, tag) {
+  const last = getLastPerformance(name);
+  const lastText = last && last[0] ? last[0].w + 'kg × ' + last[0].r + ' last time' : 'No history yet';
+  let sug = '';
+  if (!last) {
+    const s = suggestWeight(name, muscle);
+    if (s) sug = ` · suggested ~${s.w}kg`;
+  }
+  const id = name.replace(/[^a-zA-Z0-9]/g, '_');
+  return `
+  <div class="sub-card" id="subcard-${id}">
+    <div class="sub-card-header" onclick="toggleSubCard('${id}')">
       <span class="sub-card-name">${name}</span>
-      <span class="sub-card-tag">${tag}</span>
+      <span class="sub-card-tag">${muscle}</span>
     </div>
     <div class="sub-card-body">
-      <div class="sub-card-detail">${ex ? (ex.workingSets||3) + ' × ' + (ex.reps||'8–10') : ''} · Last: ${lastText}</div>
-      <button class="sub-use-btn" onclick="useSubstitution('${workoutKey}',${exIdx},'${name}')">Use This Exercise</button>
+      <div class="sub-card-detail">${lastText}${sug}</div>
+      <button class="sub-use-btn" onclick="chooseExercise('${name.replace(/'/g, "\\'")}')">Use This Exercise</button>
     </div>
   </div>`;
+}
+
+function filterLib(val) {
+  const list = document.getElementById('lib-list');
+  if (list) list.innerHTML = libListHTML(val);
+  ST.openSubCard = null;
 }
 
 function toggleSubCard(id) {
@@ -7267,25 +7487,135 @@ function toggleSubCard(id) {
   ST.openSubCard = card.classList.contains('open') ? id : null;
 }
 
-function useSubstitution(key, exIdx, subName) {
-  // Session-scoped swap — the card, prefill, and _name stamping all follow.
-  // Recorded in notes for the permanent record too.
-  const prog = PROGRAMS.find(p => p.id === ST.currentProgram);
-  const sess = prog && prog.sessions.find(s => s.id === ST.currentSession);
-  if (!sess) return;
-  const ex = sess.exercises[exIdx];
+// Step 2 — pick a custom set/rep count before committing (Decision 2)
+function chooseExercise(name) {
+  ST._lib = ST._lib || {};
+  const ctx = ST._lib;
+  let defSets = 3, defReps = 10;
+  if (ctx.mode === 'sub' && ctx.key) {
+    const slot = slotForKey(ctx.key);
+    if (slot) {
+      defSets = slot.ex.workingSets || 3;
+      const m = String(slot.ex.reps || '10').match(/(\d+)\s*$/);
+      defReps = m ? parseInt(m[1]) : 10;
+    }
+  }
+  ST._pick = { name: name, sets: defSets, reps: defReps };
+  setSheetBody(pickerHTML());
+}
+
+function pickerHTML() {
+  const p = ST._pick || { name: '', sets: 3, reps: 10 };
+  const ctx = ST._lib || {};
+  const isSub = ctx.mode === 'sub';
+  const title = isSub ? `Swap → ${p.name}` : `Add ${p.name}`;
+  const confirmLbl = isSub ? 'Use this exercise' : 'Add to workout';
+  return `
+    <div class="bs-title">${title}</div>
+    <div class="bs-sub">Set your own volume — substitutes &amp; additions aren't locked to the programmed structure.</div>
+    <div class="srp">
+      <div class="srp-row">
+        <span class="srp-lbl">Sets</span>
+        <div class="srp-stepper">
+          <button class="srp-btn" onclick="pickAdjust('sets',-1)">−</button>
+          <span class="srp-val" id="srp-sets">${p.sets}</span>
+          <button class="srp-btn srp-up" onclick="pickAdjust('sets',1)">+</button>
+        </div>
+      </div>
+      <div class="srp-row">
+        <span class="srp-lbl">Reps <span class="srp-hint">target</span></span>
+        <div class="srp-stepper">
+          <button class="srp-btn" onclick="pickAdjust('reps',-1)">−</button>
+          <span class="srp-val" id="srp-reps">${p.reps}</span>
+          <button class="srp-btn srp-up" onclick="pickAdjust('reps',1)">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="srp-preview" id="srp-preview">${p.sets} × ${p.reps}</div>
+    <button class="btn btn-primary" style="margin-top:6px" onclick="confirmPick()">${confirmLbl}</button>
+    <button class="btn btn-sheet-ghost" onclick="backToLib()">← Back to list</button>
+  `;
+}
+
+function pickAdjust(field, delta) {
+  const p = ST._pick;
+  if (!p) return;
+  if (field === 'sets') p.sets = Math.max(1, Math.min(10, p.sets + delta));
+  else p.reps = Math.max(1, Math.min(50, p.reps + delta));
+  const se = document.getElementById('srp-sets'); if (se) se.textContent = p.sets;
+  const re = document.getElementById('srp-reps'); if (re) re.textContent = p.reps;
+  const pv = document.getElementById('srp-preview'); if (pv) pv.textContent = p.sets + ' × ' + p.reps;
+  haptic('tick');
+}
+
+function backToLib() {
+  const ctx = ST._lib || {};
+  setSheetBody(ctx.mode === 'add' ? addSheetHTML() : subsSheetHTML());
+}
+
+function confirmPick() {
+  const p = ST._pick, ctx = ST._lib || {};
+  if (!p) return;
+  if (ctx.mode === 'sub') applySubstitution(ctx.key, ctx.exIdx, p.name, p.sets, String(p.reps));
+  else applyAddition(p.name, p.sets, String(p.reps));
+}
+
+function applySubstitution(key, exIdx, subName, sets, reps) {
+  const slot = slotForKey(key);
   if (!ST.workoutSubs) ST.workoutSubs = {};
+  if (!ST.workoutSubMeta) ST.workoutSubMeta = {};
   ST.workoutSubs[key] = subName;
-  const notes = getNotes();
-  notes[normalizeEx(stripSuperset(ex.name))] = 'Using: ' + subName;
-  saveNotes(notes);
+  ST.workoutSubMeta[key] = { sets: sets, reps: String(reps) };
+  // Different movement now — drop any sets/drafts logged under the prior identity
+  delete ST.workoutSets[key];
+  delete ST.workoutSets[key + '_wu'];
+  if (ST.workoutDrafts) { for (const k of Object.keys(ST.workoutDrafts)) { if (k.indexOf(key + '-') === 0) delete ST.workoutDrafts[k]; } }
+  ST.completedCards.delete(key);
+  ST.expandedCards.add(key);
+  if (slot) { const notes = getNotes(); notes[normalizeEx(slot.name)] = 'Using: ' + subName; saveNotes(notes); }
   saveNow();
   closeSheet();
   renderWorkout();
 }
 
+function applyAddition(name, sets, reps) {
+  if (!ST.workoutAdditions) ST.workoutAdditions = [];
+  const id = ST.workoutAdditions.reduce((m, a) => Math.max(m, a.id), -1) + 1;
+  ST.workoutAdditions.push({ id: id, name: name, muscle: getMuscle(name), sets: sets, reps: String(reps), rest: '2–3 min' });
+  saveNow();
+  closeSheet();
+  renderWorkout();
+  setTimeout(() => {
+    const k = 'add_' + id;
+    if (!ST.expandedCards.has(k)) toggleCard(k);
+    const c = document.getElementById('excard-' + k);
+    if (c) c.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 80);
+}
+
+function removeAddition(e, id) {
+  if (e && e.stopPropagation) e.stopPropagation();
+  const idx = (ST.workoutAdditions || []).findIndex(a => a && a.id === id);
+  if (idx < 0) return;
+  const key = 'add_' + id;
+  ST.workoutAdditions.splice(idx, 1);
+  delete ST.workoutSets[key];
+  delete ST.workoutSets[key + '_wu'];
+  if (ST.workoutDrafts) { for (const k of Object.keys(ST.workoutDrafts)) { if (k.indexOf(key + '-') === 0) delete ST.workoutDrafts[k]; } }
+  if (ST.workoutNotes) delete ST.workoutNotes[key];
+  ST.completedCards.delete(key);
+  ST.expandedCards.delete(key);
+  saveNow();
+  renderWorkout();
+}
+
 function revertSubstitution(key) {
   if (ST.workoutSubs) delete ST.workoutSubs[key];
+  if (ST.workoutSubMeta) delete ST.workoutSubMeta[key];
+  delete ST.workoutSets[key];
+  delete ST.workoutSets[key + '_wu'];
+  if (ST.workoutDrafts) { for (const k of Object.keys(ST.workoutDrafts)) { if (k.indexOf(key + '-') === 0) delete ST.workoutDrafts[k]; } }
+  ST.completedCards.delete(key);
   saveNow();
   closeSheet();
   renderWorkout();
@@ -7404,6 +7734,8 @@ function beginWorkout(progId, sessId) {
   ST.workoutNotes  = {};   // reset session-scoped notes for fresh workout
   ST.workoutDrafts = {};
   ST.workoutSubs   = {};
+  ST.workoutSubMeta = {};
+  ST.workoutAdditions = [];
   ST.expandedCards = new Set();
   ST.completedCards = new Set();
   ST.durationSecs = 0;
@@ -7432,6 +7764,8 @@ function resumeWorkout() {
   ST.workoutSets = saved.sets || {};
   ST.workoutDrafts = saved.drafts || {};   // typed-but-unlogged values come back
   ST.workoutSubs   = saved.subs   || {};   // session substitutions come back
+  ST.workoutSubMeta = saved.subMeta || {}; // custom set/rep on substituted slots come back
+  ST.workoutAdditions = saved.additions || []; // accessory additions come back
   ST.workoutNotes  = saved.notes  || {};   // session notes come back
   ST.travelMode = saved.travelMode || false;
   ST.travelLocked = saved.travelLocked || false;
@@ -7520,6 +7854,7 @@ function cancelWorkout() {
       ST.currentProgram = null; ST.currentSession = null;
       ST.workoutSets = {}; ST.workoutStart = null; ST.durationSecs = 0;
       ST.workoutDrafts = {}; ST.workoutSubs = {}; ST.workoutNotes = {};
+      ST.workoutSubMeta = {}; ST.workoutAdditions = [];
       ST.expandedCards = new Set(); ST.completedCards = new Set();
       ST.travelMode = false; ST.travelLocked = false;
       Maps('home');
@@ -7670,7 +8005,9 @@ function commitWorkout() {
       const curMax = sets.reduce((m,s)=>Math.max(m,s.w||0),0);
       const prevMax = prevSets.reduce((m,s)=>Math.max(m,s.w||0),0);
       const gainName = (sets.find(s => s && s._name) || {})._name || stripSuperset(ex.name);
-      if (curMax - prevMax > maxGain) { maxGain = curMax - prevMax; biggestGain = { name: gainName, gain: maxGain }; }
+      // Only a real gain if there was a prior load to beat — skips first-time
+      // additions/exercises that would otherwise read as a spurious "+Xkg".
+      if (prevMax > 0 && curMax - prevMax > maxGain) { maxGain = curMax - prevMax; biggestGain = { name: gainName, gain: maxGain }; }
     }
   }
 
@@ -7701,6 +8038,8 @@ function commitWorkout() {
   LS.remove('dcrgym_current_workout');
   ST.workoutDrafts = {};
   ST.workoutSubs   = {};
+  ST.workoutSubMeta = {};
+  ST.workoutAdditions = [];
   bgSyncToSheets();
 
   // e1RM delta vs previous same session
@@ -8255,7 +8594,7 @@ function renderFiveWeekCalendar() {
         const dur  = formatDuration(w.duration || 0);
         const vol  = Math.round(Object.values(w.sets || {}).flat().filter(Boolean).reduce((s, x) => s + (x.w||0)*(x.r||0), 0));
         daysHTML += `<div class="cal-day-cell cal-day-done"
-          onclick="openCalDay('${sessName}','${dateStr}','${dur}','${vol}kg')"
+          onclick="openCalDay('${w.id || w.endTime}','${dateStr}')"
           title="${sessName}">
           <span class="cal-day-num">${dayNum}</span>
         </div>`;
@@ -8278,9 +8617,63 @@ function renderFiveWeekCalendar() {
   </div>`;
 }
 
-function openCalDay(sessName, dateStr, dur, vol) {
+function openCalDay(id, dateStr) {
   const popup = document.getElementById('cal-popup');
   if (!popup) return;
+  const w = getHistory().find(x => String(x.id) === String(id) || String(x.endTime) === String(id));
+  if (!w) return;
+  const sessName = w.sessionName || 'Workout';
+  const dur = formatDuration(w.duration || 0);
+  const vol = Math.round(Object.values(w.sets || {}).flat().filter(Boolean).reduce((s, x) => s + (x.w||0)*(x.r||0), 0));
+
+  const sets = w.sets || {};
+  const prog = PROGRAMS.find(p => p.id === w.programId);
+  const sess = prog && prog.sessions.find(s => s.id === w.sessionId);
+
+  // One log row — "✓ Name  n × reps", with a "→ from X" badge when substituted
+  const rowFor = (name, setArr, subFrom) => {
+    const done = (setArr || []).filter(Boolean);
+    if (done.length === 0) return '';
+    const reps = done[0] ? done[0].r : '';
+    return `<div class="cal-ex-row">
+      <span class="cal-ex-check">✓</span>
+      <span class="cal-ex-name">${name}${subFrom ? `<span class="cal-ex-sub">→ from ${subFrom}</span>` : ''}</span>
+      <span class="cal-ex-vol">${done.length} × ${reps}</span>
+    </div>`;
+  };
+
+  // Programmed exercises in their original order; detect substitutions via _name
+  let progRows = '';
+  if (sess) {
+    sess.exercises.forEach((ex, i) => {
+      const key = `${w.sessionId}_${i}`;
+      const setArr = sets[key];
+      if (!Array.isArray(setArr)) return;
+      const programmed = stripSuperset(ex.name);
+      const stamped = (setArr.find(s => s && s._name) || {})._name || programmed;
+      const subFrom = (normalizeEx(stamped) !== normalizeEx(programmed)) ? programmed : null;
+      progRows += rowFor(stamped, setArr, subFrom);
+    });
+  }
+
+  // Accessory additions (add_* keys), in id order
+  const addKeys = Object.keys(sets)
+    .filter(k => k.indexOf('add_') === 0 && !k.endsWith('_wu'))
+    .sort((a, b) => parseInt(a.slice(4)) - parseInt(b.slice(4)));
+  let addRows = '';
+  for (const key of addKeys) {
+    const setArr = sets[key];
+    if (!Array.isArray(setArr)) continue;
+    const nm = (setArr.find(s => s && s._name) || {})._name || 'Added exercise';
+    addRows += rowFor(nm, setArr, null);
+  }
+
+  const listHTML = (progRows || addRows) ? `
+    <div class="cal-ex-list">
+      ${progRows ? `<div class="cal-ex-group-lbl">programmed</div>${progRows}` : ''}
+      ${addRows ? `<div class="cal-ex-group-lbl cal-ex-group-add">✚ additions</div>${addRows}` : ''}
+    </div>` : '';
+
   document.getElementById('cal-popup-content').innerHTML = `
     <div class="cal-popup-date">${dateStr}</div>
     <div class="cal-popup-session">routine // ${sessName.toLowerCase()}</div>
@@ -8290,10 +8683,11 @@ function openCalDay(sessName, dateStr, dur, vol) {
         <div class="cal-popup-stat-lbl">Duration</div>
       </div>
       <div class="cal-popup-stat">
-        <div class="cal-popup-stat-val">${vol}</div>
+        <div class="cal-popup-stat-val">${vol}kg</div>
         <div class="cal-popup-stat-lbl">Volume</div>
       </div>
-    </div>`;
+    </div>
+    ${listHTML}`;
   popup.style.display = 'flex';
   requestAnimationFrame(() => popup.classList.add('visible'));
 }
