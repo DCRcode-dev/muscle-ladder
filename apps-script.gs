@@ -25,6 +25,7 @@ function doPost(e) {
 
     if (action === 'syncWorkouts') return syncWorkouts(body.workouts || []);
     if (action === 'saveState')    return saveState(body.history || [], body.ts || 0);
+    if (action === 'deleteWorkout') return deleteWorkoutInSheet(body.id);
 
     return jsonResponse({ ok: false, message: 'Unknown action: ' + action });
   } catch(err) {
@@ -102,26 +103,44 @@ function syncWorkouts(workouts) {
     summarySheet.getRange(1,1,1,8).setFontWeight('bold').setBackground('#1a1a1a').setFontColor('white');
   }
 
-  const existingLogIds     = new Set(logSheet.getDataRange().getValues().slice(1).map(r => r[0]));
-  const existingSummaryIds = new Set(summarySheet.getDataRange().getValues().slice(1).map(r => r[0]));
+  const logValues = logSheet.getDataRange().getValues();
+  const summaryValues = summarySheet.getDataRange().getValues();
+  
+  const workoutIdsToSync = workouts.map(function(w) { return w.id || (w.date + '-' + w.sessionName); });
+  const idsSet = new Set(workoutIdsToSync);
+
+  // 1. Delete matching rows from WorkoutSummary (iterate backwards to preserve indices)
+  for (let i = summaryValues.length - 1; i >= 1; i--) {
+    const rowId = String(summaryValues[i][0]);
+    if (idsSet.has(rowId)) {
+      summarySheet.deleteRow(i + 1);
+    }
+  }
+
+  // 2. Delete matching rows from WorkoutLog (iterate backwards)
+  for (let i = logValues.length - 1; i >= 1; i--) {
+    const rowId = String(logValues[i][0]);
+    const match = workoutIdsToSync.some(function(wid) {
+      return rowId === wid || rowId.indexOf(wid + '-') === 0;
+    });
+    if (match) {
+      logSheet.deleteRow(i + 1);
+    }
+  }
 
   let added = 0;
   workouts.forEach(w => {
     const wid     = w.id || (w.date + '-' + w.sessionName);
     const dateStr = new Date(w.date).toLocaleDateString('en-US');
 
-    if (!existingSummaryIds.has(wid)) {
-      summarySheet.appendRow([wid, dateStr, w.programName||'', w.sessionName||'', w.duration||'', w.totalVolume||0, w.totalSets||0, (w.exercises||[]).map(e=>e.name).join(', ')]);
-      added++;
-    }
+    summarySheet.appendRow([wid, dateStr, w.programName||'', w.sessionName||'', w.duration||'', w.totalVolume||0, w.totalSets||0, (w.exercises||[]).map(e=>e.name).join(', ')]);
+    added++;
 
     (w.exercises||[]).forEach(ex => {
       (ex.sets||[]).forEach((s, i) => {
         const rowId = wid + '-' + ex.name + '-' + i;
-        if (!existingLogIds.has(rowId)) {
-          const setVol = (parseFloat(s.weight)||0) * (parseInt(s.reps)||0);
-          logSheet.appendRow([rowId, dateStr, w.programName||'', w.sessionName||'', ex.name, i+1, s.weight||'', s.reps||'', setVol, w.duration||'', w.totalVolume||0, w.totalSets||0]);
-        }
+        const setVol = (parseFloat(s.weight)||0) * (parseInt(s.reps)||0);
+        logSheet.appendRow([rowId, dateStr, w.programName||'', w.sessionName||'', ex.name, i+1, s.weight||'', s.reps||'', setVol, w.duration||'', w.totalVolume||0, w.totalSets||0]);
       });
     });
   });
@@ -129,6 +148,33 @@ function syncWorkouts(workouts) {
   logSheet.autoResizeColumns(1, 12);
   summarySheet.autoResizeColumns(1, 8);
   return jsonResponse({ ok: true, added });
+}
+
+function deleteWorkoutInSheet(wid) {
+  if (!wid) return jsonResponse({ ok: false, message: 'Missing ID' });
+  const ss = getSpreadsheet_();
+  
+  let summarySheet = ss.getSheetByName(SHEET_NAME_SUMMARY);
+  if (summarySheet) {
+    const values = summarySheet.getDataRange().getValues();
+    for (let i = values.length - 1; i >= 1; i--) {
+      if (String(values[i][0]) === String(wid)) {
+        summarySheet.deleteRow(i + 1);
+      }
+    }
+  }
+  
+  let logSheet = ss.getSheetByName(SHEET_NAME_LOG);
+  if (logSheet) {
+    const values = logSheet.getDataRange().getValues();
+    for (let i = values.length - 1; i >= 1; i--) {
+      const rowId = String(values[i][0]);
+      if (rowId === String(wid) || rowId.indexOf(wid + '-') === 0) {
+        logSheet.deleteRow(i + 1);
+      }
+    }
+  }
+  return jsonResponse({ ok: true });
 }
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────

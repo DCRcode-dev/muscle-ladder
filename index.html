@@ -2051,6 +2051,104 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   transform: scale(0.96);
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
+.ana-trend-pill {
+  font-size: 8.5px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  padding: 2.5px 6.5px;
+  border-radius: 7px;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.trend-up {
+  background: rgba(40, 167, 69, 0.11);
+  color: #28A745;
+}
+.trend-down {
+  background: rgba(220, 53, 69, 0.11);
+  color: #DC3545;
+}
+.trend-neutral {
+  background: rgba(139, 122, 92, 0.11);
+  color: var(--accent);
+}
+
+.ana-insight-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 18px 20px;
+  margin: 0 20px 24px;
+  box-shadow: var(--shadow);
+  text-align: left;
+}
+.ana-insight-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.ana-insight-title {
+  font-size: 9.5px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.ana-insight-badge {
+  font-size: 8px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  padding: 3px 7px;
+  border-radius: 7px;
+  background: rgba(139, 122, 92, 0.08);
+  color: var(--accent);
+  letter-spacing: 0.03em;
+}
+.ana-balance-scale {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ana-scale-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 500;
+}
+.ana-scale-bar-bg {
+  position: relative;
+  height: 5px;
+  background: rgba(42,36,33,0.06);
+  border-radius: 3px;
+  overflow: visible;
+}
+.ana-scale-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+.ana-scale-marker {
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  background: var(--charcoal);
+  border: 1.5px solid #FAF7F2;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: left 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+.ana-scale-desc {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin-top: 4px;
+}
 .ana-card-eyebrow {
   font-size: 8px;
   letter-spacing: 0.12em;
@@ -4483,6 +4581,9 @@ let ST = {
   programFilter: null,
   currentProgram: null,
   currentSession: null,
+  editingWorkoutId: null,
+  isBackdated: false,
+  workoutEnd: null,
   travelMode: false,
   travelLocked: false,
   workoutSets: {},      // key: `${sessionId}_${exIdx}` → [{w,r,ts,_name}]  |  `${key}_wu` for warm-up
@@ -4677,6 +4778,9 @@ function buildWorkoutPayload() {
     expandedCards: [...ST.expandedCards],
     completedCards: [...ST.completedCards],
     startTime: ST.workoutStart,
+    editingWorkoutId: ST.editingWorkoutId || null,
+    isBackdated: ST.isBackdated || false,
+    workoutEnd: ST.workoutEnd || null
   };
 }
 
@@ -6823,15 +6927,29 @@ function renderWorkout() {
     ? `<button class="add-ex-pill" onclick="showAddSheet()"><span class="add-ex-plus">+</span> Add Exercise</button>`
     : '';
 
+  const headerModeLabel = ST.editingWorkoutId ? 'Editing Workout' : (ST.isBackdated ? 'Past Workout' : 'Active Workout');
+  const showDateHeader = ST.editingWorkoutId || ST.isBackdated;
+  const finishBtnText = ST.editingWorkoutId ? 'Save Changes' : (ST.isBackdated ? 'Save Workout' : 'Finish Workout');
+
   el.innerHTML = `
   <div id="workout-header${ST.travelLocked?' travel-locked':''}">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
       <button onclick="cancelWorkout()" style="background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;padding:4px 8px 4px 0;flex-shrink:0;font-family:var(--font-body);width:44px;text-align:left">✕</button>
-      <div class="wh-session">${sess.name}</div>
+      <div style="display:flex;flex-direction:column;align-items:center;flex:1;min-width:0;">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:rgba(250,247,242,0.42);margin-bottom:2px;">
+          ${headerModeLabel}
+        </div>
+        <div class="wh-session" style="margin-bottom:0 !important;font-size:1.3rem !important;flex:none !important;line-height:1.1;">${sess.name}</div>
+        ${showDateHeader ? `
+          <div style="font-size:11px;color:var(--accent);margin-top:4px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.08);padding:2px 8px;border-radius:20px;" onclick="editWorkoutDateTime()">
+            📅 ${new Date(ST.workoutStart).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} <span style="font-size:9px;opacity:0.8;">(edit)</span>
+          </div>
+        ` : ''}
+      </div>
       <div style="width:44px;flex-shrink:0"></div>
     </div>
     <div class="wh-top">
-      <div class="wh-duration" id="wh-dur">${formatDuration(ST.durationSecs)}</div>
+      <div class="wh-duration" id="wh-dur" ${showDateHeader ? 'onclick="editWorkoutDateTime()" style="cursor:pointer;"' : ''}>${formatDuration(ST.durationSecs)}</div>
       ${(()=>{
         const total = exList.length;
         const done = exList.filter((_,i)=>ST.completedCards.has(`${sess.id}_${i}`)).length;
@@ -6859,7 +6977,7 @@ function renderWorkout() {
   </div>
   <div class="exercise-list">${exCards}${addCards}${addPill}</div>
   <div style="padding:16px 16px calc(var(--nav-h) + 28px)">
-    <button class="btn btn-primary" onclick="shimmerBtn(this);setTimeout(()=>finishWorkout(),220)">Finish Workout</button>
+    <button class="btn btn-primary" onclick="shimmerBtn(this);setTimeout(()=>finishWorkout(),220)">${finishBtnText}</button>
   </div>`;
 
   // Restore rest timer if active
@@ -7690,6 +7808,23 @@ function startWorkoutFromHome(progId, sessId) {
   const existing = LS.get('dcrgym_current_workout');
   const hasLogged = existing && existing.sets &&
     Object.values(existing.sets).some(arr => Array.isArray(arr) && arr.some(s => s && s.r > 0));
+  const isPast = existing && (existing.editingWorkoutId || existing.isBackdated);
+
+  if (existing && isPast) {
+    confirmSheet({
+      title: 'Unfinished session',
+      body: existing.editingWorkoutId
+        ? 'You have an unfinished edit session. Starting a new workout will discard your edits.'
+        : 'You have an unfinished backdated workout draft. Starting a new workout will discard this draft.',
+      confirmLabel: 'Start new workout',
+      cancelLabel: 'Keep current',
+      onConfirm: () => {
+        LS.remove('dcrgym_current_workout');
+        beginWorkout(progId, sessId);
+      }
+    });
+    return;
+  }
 
   if (existing && existing.programId === progId && existing.sessionId === sessId && hasLogged) {
     confirmSheet({
@@ -7771,19 +7906,35 @@ function resumeWorkout() {
   ST.workoutNotes  = saved.notes  || {};   // session notes come back
   ST.travelMode = saved.travelMode || false;
   ST.travelLocked = saved.travelLocked || false;
-  ST.workoutStart = Date.now() - (saved.durationSecs || 0) * 1000;
+  
+  ST.editingWorkoutId = saved.editingWorkoutId || null;
+  ST.isBackdated = saved.isBackdated || false;
+  ST.workoutEnd = saved.workoutEnd || null;
   ST.durationSecs = saved.durationSecs || 0;
+  
+  if (ST.editingWorkoutId || ST.isBackdated) {
+    ST.workoutStart = saved.startTime || Date.now();
+    if (ST.durationTimer) clearInterval(ST.durationTimer);
+    ST.durationTimer = null;
+  } else {
+    ST.workoutStart = Date.now() - (saved.durationSecs || 0) * 1000;
+    if (ST.durationTimer) clearInterval(ST.durationTimer);
+    ST.durationTimer = setInterval(() => {
+      ST.durationSecs = Math.floor((Date.now() - ST.workoutStart) / 1000);
+      const el = document.getElementById('wh-dur');
+      if (el) el.textContent = formatDuration(ST.durationSecs);
+      const pd = document.getElementById('pill-dur');
+      if (pd) pd.textContent = formatDuration(ST.durationSecs);
+    }, 1000);
+  }
+  
   ST.expandedCards = new Set(saved.expandedCards || []);
   ST.completedCards = new Set(saved.completedCards || []);
-  if (ST.durationTimer) clearInterval(ST.durationTimer);
-  ST.durationTimer = setInterval(() => {
-    ST.durationSecs = Math.floor((Date.now() - ST.workoutStart) / 1000);
-    const el = document.getElementById('wh-dur');
-    if (el) el.textContent = formatDuration(ST.durationSecs);
-    const pd = document.getElementById('pill-dur');
-    if (pd) pd.textContent = formatDuration(ST.durationSecs);
-  }, 1000);
-  if (navigator.wakeLock) navigator.wakeLock.request('screen').then(wl => ST.wakeLock = wl).catch(()=>{});
+  
+  if (!ST.editingWorkoutId && !ST.isBackdated && navigator.wakeLock) {
+    navigator.wakeLock.request('screen').then(wl => ST.wakeLock = wl).catch(()=>{});
+  }
+  
   // Restore rest timer — island reappears with correct ring progress
   const savedEnd = LS.get('dcrgym_rest_end');
   if (savedEnd && savedEnd > Date.now()) {
@@ -7802,8 +7953,27 @@ function resumeWorkout() {
 
 function discardWorkout() {
   const saved = LS.get('dcrgym_current_workout');
-  const hasLogged = saved && saved.sets &&
+  if (!saved) return;
+  const isPast = saved.editingWorkoutId || saved.isBackdated;
+  const hasLogged = saved.sets &&
     Object.values(saved.sets).some(arr => Array.isArray(arr) && arr.some(s => s && s.r > 0));
+  
+  if (isPast) {
+    confirmSheet({
+      title: saved.editingWorkoutId ? 'Discard edits?' : 'Discard draft?',
+      body: saved.editingWorkoutId 
+        ? 'Any changes you made will be discarded. The original workout remains untouched.'
+        : 'This backdated workout draft will be permanently deleted.',
+      confirmLabel: 'Discard',
+      destructive: true,
+      onConfirm: () => {
+        LS.remove('dcrgym_current_workout');
+        renderHome();
+      }
+    });
+    return;
+  }
+  
   if (!hasLogged) {
     LS.remove('dcrgym_current_workout');
     renderHome();
@@ -7838,28 +8008,31 @@ function abandonPrompt() {
 function cancelWorkout() {
   const hasLogged = Object.values(ST.workoutSets || {})
     .some(arr => Array.isArray(arr) && arr.some(s => s && s.r > 0));
+  const isPast = ST.editingWorkoutId || ST.isBackdated;
+  
   confirmSheet({
-    title: 'Cancel this workout?',
-    body: hasLogged
-      ? 'Your logged sets will be archived to history first — nothing is thrown away.'
-      : 'Nothing logged yet — the session will simply close.',
-    confirmLabel: 'Cancel workout',
-    cancelLabel: 'Keep training',
+    title: isPast ? 'Discard changes?' : 'Cancel this workout?',
+    body: isPast
+      ? (ST.editingWorkoutId ? 'Any changes you made will be discarded. The original workout remains untouched.' : 'This backdated workout draft will be permanently deleted.')
+      : (hasLogged ? 'Your logged sets will be archived to history first — nothing is thrown away.' : 'Nothing logged yet — the session will simply close.'),
+    confirmLabel: isPast ? 'Discard' : 'Cancel workout',
+    cancelLabel: isPast ? 'Keep editing' : 'Keep training',
     destructive: true,
     onConfirm: () => {
-      if (hasLogged) archiveWorkoutToHistory(buildWorkoutPayload());
+      if (hasLogged && !isPast) archiveWorkoutToHistory(buildWorkoutPayload());
       if (ST.durationTimer) clearInterval(ST.durationTimer);
       ST.durationTimer = null;
       if (ST.wakeLock) ST.wakeLock.release().catch(()=>{});
       cancelRestTimer();
       LS.remove('dcrgym_current_workout');
       ST.currentProgram = null; ST.currentSession = null;
+      ST.editingWorkoutId = null; ST.isBackdated = false; ST.workoutEnd = null;
       ST.workoutSets = {}; ST.workoutStart = null; ST.durationSecs = 0;
       ST.workoutDrafts = {}; ST.workoutSubs = {}; ST.workoutNotes = {};
       ST.workoutSubMeta = {}; ST.workoutAdditions = [];
       ST.expandedCards = new Set(); ST.completedCards = new Set();
       ST.travelMode = false; ST.travelLocked = false;
-      Maps('home');
+      Maps(isPast ? 'history' : 'home');
     },
   });
 }
@@ -8013,36 +8186,97 @@ function commitWorkout() {
     }
   }
 
-  const entry = {
-    id: Date.now().toString(),
-    programId: ST.currentProgram,
-    sessionId: ST.currentSession,
-    sessionName: sess ? sess.name : '',
-    startTime: ST.workoutStart,
-    endTime: Date.now(),
-    duration,
-    travelMode: ST.travelMode,
-    sets: ST.workoutSets,
-    notes: { ...ST.workoutNotes },
-  };
-  if (ST.fitbit && ST.fitbit.connected) {
-    entry.biometrics = {
-      readiness: ST.fitbit.readinessScore ?? null,
-      sleep: ST.fitbit.sleepScore ?? null,
-      hrv: ST.fitbit.hrv ?? null,
-      rhr: ST.fitbit.restingHR ?? null,
-      deep: ST.fitbit.deepSleepMinutes ?? null,
-      spo2: ST.fitbit.spo2 ?? null
+  let entry;
+  if (ST.editingWorkoutId) {
+    const idx = hist.findIndex(w => String(w.id) === String(ST.editingWorkoutId));
+    if (idx !== -1) {
+      const original = hist[idx];
+      entry = {
+        ...original,
+        duration,
+        travelMode: ST.travelMode,
+        sets: ST.workoutSets,
+        notes: { ...ST.workoutNotes },
+        subs: ST.workoutSubs || {},
+        subMeta: ST.workoutSubMeta || {},
+        additions: ST.workoutAdditions || [],
+        completedCards: [...ST.completedCards],
+        startTime: ST.workoutStart,
+        endTime: ST.workoutEnd || (ST.workoutStart + duration * 1000)
+      };
+      hist[idx] = entry;
+    } else {
+      entry = {
+        id: ST.editingWorkoutId,
+        programId: ST.currentProgram,
+        sessionId: ST.currentSession,
+        sessionName: sess ? sess.name : '',
+        startTime: ST.workoutStart,
+        endTime: ST.workoutEnd || (ST.workoutStart + duration * 1000),
+        duration,
+        travelMode: ST.travelMode,
+        sets: ST.workoutSets,
+        notes: { ...ST.workoutNotes },
+        subs: ST.workoutSubs || {},
+        subMeta: ST.workoutSubMeta || {},
+        additions: ST.workoutAdditions || [],
+        completedCards: [...ST.completedCards],
+      };
+      hist.push(entry);
+    }
+  } else {
+    const id = Date.now().toString();
+    const startTime = ST.workoutStart || Date.now() - duration * 1000;
+    const endTime = ST.isBackdated ? (startTime + duration * 1000) : Date.now();
+    entry = {
+      id,
+      programId: ST.currentProgram,
+      sessionId: ST.currentSession,
+      sessionName: sess ? sess.name : '',
+      startTime,
+      endTime,
+      duration,
+      travelMode: ST.travelMode,
+      sets: ST.workoutSets,
+      notes: { ...ST.workoutNotes },
+      subs: ST.workoutSubs || {},
+      subMeta: ST.workoutSubMeta || {},
+      additions: ST.workoutAdditions || [],
+      completedCards: [...ST.completedCards],
     };
+    if (ST.fitbit && ST.fitbit.connected) {
+      entry.biometrics = {
+        readiness: ST.fitbit.readinessScore ?? null,
+        sleep: ST.fitbit.sleepScore ?? null,
+        hrv: ST.fitbit.hrv ?? null,
+        rhr: ST.fitbit.restingHR ?? null,
+        deep: ST.fitbit.deepSleepMinutes ?? null,
+        spo2: ST.fitbit.spo2 ?? null
+      };
+    }
+    hist.push(entry);
   }
-  hist.push(entry);
+
   saveHistory(hist);
   LS.remove('dcrgym_current_workout');
+  
+  const wasEditing = !!ST.editingWorkoutId;
+  const wasBackdated = !!ST.isBackdated;
+
+  ST.editingWorkoutId = null;
+  ST.isBackdated = false;
+  ST.workoutEnd = null;
   ST.workoutDrafts = {};
   ST.workoutSubs   = {};
   ST.workoutSubMeta = {};
   ST.workoutAdditions = [];
-  bgSyncToSheets();
+  
+  bgSyncToSheets(entry);
+
+  if (wasEditing || wasBackdated) {
+    Maps('history');
+    return;
+  }
 
   // e1RM delta vs previous same session
   const currentProg = PROGRAMS.find(p => p.id === ST.currentProgram);
@@ -8601,7 +8835,13 @@ function renderFiveWeekCalendar() {
           <span class="cal-day-num">${dayNum}</span>
         </div>`;
       } else {
-        daysHTML += `<div class="cal-day-cell cal-day-open"><span class="cal-day-num">${dayNum}</span></div>`;
+        const dateStrForClick = d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }).replace(/'/g, "\\'");
+        daysHTML += `<div class="cal-day-cell cal-day-open"
+          onclick="clickOpenCalDay(${d.getTime()}, '${dateStrForClick}')"
+          style="cursor:pointer;"
+          title="Log past workout">
+          <span class="cal-day-num">${dayNum}</span>
+        </div>`;
       }
     }
     weeksHTML += `<div class="cal-week-row">
@@ -8617,6 +8857,293 @@ function renderFiveWeekCalendar() {
     </div>
     <div class="cal-grid">${weeksHTML}</div>
   </div>`;
+}
+
+function editCompletedWorkout(workoutId) {
+  const existing = LS.get('dcrgym_current_workout');
+  const hasLogged = existing && existing.sets &&
+    Object.values(existing.sets).some(arr => Array.isArray(arr) && arr.some(s => s && s.r > 0));
+
+  const proceed = () => {
+    const w = getHistory().find(x => String(x.id) === String(workoutId) || String(x.endTime) === String(workoutId));
+    if (!w) return;
+
+    ST.editingWorkoutId = w.id || w.endTime;
+    ST.isBackdated = false;
+    ST.currentProgram = w.programId;
+    ST.currentSession = w.sessionId;
+    ST.travelMode = w.travelMode || false;
+    ST.travelLocked = w.travelLocked || false;
+    ST.workoutSets = JSON.parse(JSON.stringify(w.sets || {}));
+    ST.workoutNotes = JSON.parse(JSON.stringify(w.notes || {}));
+    ST.workoutDrafts = {};
+    ST.workoutSubs = w.subs ? JSON.parse(JSON.stringify(w.subs)) : {};
+    ST.workoutSubMeta = w.subMeta ? JSON.parse(JSON.stringify(w.subMeta)) : {};
+    ST.workoutAdditions = w.additions ? JSON.parse(JSON.stringify(w.additions)) : [];
+    
+    // Reconstruct fields if they were not stored in this workout (for backward compatibility)
+    if (!w.additions || w.additions.length === 0) {
+      const additions = [];
+      const addKeys = Object.keys(w.sets || {})
+        .filter(k => k.startsWith('add_') && !k.endsWith('_wu'))
+        .sort((a, b) => parseInt(a.slice(4)) - parseInt(b.slice(4)));
+      for (const key of addKeys) {
+        const id = parseInt(key.slice(4));
+        const setArr = w.sets[key] || [];
+        const name = (setArr.find(s => s && s._name) || {})._name || 'Added exercise';
+        additions.push({
+          id: id,
+          name: name,
+          muscle: getMuscle(name),
+          sets: setArr.length,
+          reps: setArr[0] && setArr[0].r ? String(setArr[0].r) : '8-10',
+          rest: '2–3 min'
+        });
+      }
+      ST.workoutAdditions = additions;
+    }
+    
+    if (!w.subs) {
+      const prog = PROGRAMS.find(p => p.id === w.programId);
+      const sess = prog && prog.sessions.find(s => s.id === w.sessionId);
+      if (sess) {
+        sess.exercises.forEach((ex, i) => {
+          const key = `${sess.id}_${i}`;
+          const setArr = w.sets[key];
+          if (Array.isArray(setArr)) {
+            const programmed = stripSuperset(ex.name);
+            const stamped = (setArr.find(s => s && s._name) || {})._name;
+            if (stamped && normalizeEx(stamped) !== normalizeEx(programmed)) {
+              ST.workoutSubs[key] = stamped;
+              ST.workoutSubMeta[key] = {
+                sets: setArr.length,
+                reps: setArr[0] && setArr[0].r ? String(setArr[0].r) : String(ex.reps || '8-10')
+              };
+            }
+          }
+        });
+      }
+    }
+    
+    ST.completedCards = w.completedCards ? new Set(w.completedCards) : new Set();
+    if (!w.completedCards) {
+      for (const key of Object.keys(w.sets || {})) {
+        if (key.endsWith('_wu')) continue;
+        const setArr = w.sets[key] || [];
+        if (setArr.some(s => s && s.r > 0)) {
+          ST.completedCards.add(key);
+        }
+      }
+    }
+    
+    ST.expandedCards = new Set();
+    ST.durationSecs = w.duration || 0;
+    ST.workoutStart = w.startTime || (w.endTime - ST.durationSecs * 1000);
+    ST.workoutEnd = w.endTime || (ST.workoutStart + ST.durationSecs * 1000);
+    
+    if (ST.durationTimer) clearInterval(ST.durationTimer);
+    ST.durationTimer = null;
+    
+    saveNow();
+    Maps('workout');
+  };
+
+  if (existing && hasLogged) {
+    confirmSheet({
+      title: 'Workout in progress',
+      body: 'You have a live workout session with logged sets. Editing an old workout will cancel and archive your current live session. Proceed?',
+      confirmLabel: 'Yes, proceed',
+      cancelLabel: 'Cancel',
+      destructive: true,
+      onConfirm: () => {
+        archiveWorkoutToHistory(existing);
+        LS.remove('dcrgym_current_workout');
+        proceed();
+      }
+    });
+  } else {
+    if (existing) LS.remove('dcrgym_current_workout');
+    proceed();
+  }
+}
+
+function clickOpenCalDay(timestamp, dateStr) {
+  const existing = LS.get('dcrgym_current_workout');
+  const hasLogged = existing && existing.sets &&
+    Object.values(existing.sets).some(arr => Array.isArray(arr) && arr.some(s => s && s.r > 0));
+
+  const proceed = () => {
+    let html = `
+      <div class="bs-title">Log Workout on ${dateStr}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;text-align:left">Select a routine to log:</div>
+      <div style="max-height:300px;overflow-y:auto;text-align:left">
+    `;
+    
+    PROGRAMS.forEach(p => {
+      html += `<div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin:16px 0 8px">${p.name}</div>`;
+      p.sessions.forEach(s => {
+        html += `
+          <div onclick="closeSheet(); beginBackdatedWorkout('${p.id}', '${s.id}', ${timestamp})"
+               style="display:flex;align-items:center;justify-content:space-between;padding:12px 8px;border-bottom:1px solid var(--border);cursor:pointer;">
+            <div style="flex:1">
+              <div style="font-size:14px;font-weight:600;color:var(--charcoal)">${s.name}</div>
+              <div style="font-size:12px;color:var(--muted)">${s.exercises.length} exercises</div>
+            </div>
+            <div style="color:var(--accent);font-size:16px;font-weight:bold;padding-right:8px">＋</div>
+          </div>
+        `;
+      });
+    });
+    
+    html += `</div>`;
+    openSheet(html);
+  };
+
+  if (existing && hasLogged) {
+    confirmSheet({
+      title: 'Workout in progress',
+      body: 'You have a live workout session with logged sets. Logging a past workout will cancel and archive your current live session. Proceed?',
+      confirmLabel: 'Yes, proceed',
+      cancelLabel: 'Cancel',
+      destructive: true,
+      onConfirm: () => {
+        archiveWorkoutToHistory(existing);
+        LS.remove('dcrgym_current_workout');
+        proceed();
+      }
+    });
+  } else {
+    if (existing) LS.remove('dcrgym_current_workout');
+    proceed();
+  }
+}
+
+function beginBackdatedWorkout(progId, sessId, timestamp) {
+  ST.currentProgram = progId;
+  ST.currentSession = sessId;
+  ST.isBackdated = true;
+  ST.editingWorkoutId = null;
+  ST.travelMode = false;
+  ST.travelLocked = false;
+  ST.workoutSets   = {};
+  ST.workoutNotes  = {};
+  ST.workoutDrafts = {};
+  ST.workoutSubs   = {};
+  ST.workoutSubMeta = {};
+  ST.workoutAdditions = [];
+  ST.expandedCards = new Set();
+  ST.completedCards = new Set();
+  ST.durationSecs = 45 * 60; // default 45 min
+  
+  // Set the time to 12:00 PM (noon) on that calendar date
+  const d = new Date(timestamp);
+  d.setHours(12, 0, 0, 0);
+  ST.workoutStart = d.getTime();
+  ST.workoutEnd = ST.workoutStart + (ST.durationSecs * 1000);
+  
+  if (ST.durationTimer) clearInterval(ST.durationTimer);
+  ST.durationTimer = null;
+  
+  saveNow();
+  Maps('workout');
+}
+
+function editWorkoutDateTime() {
+  const localOffset = new Date(ST.workoutStart).getTimezoneOffset() * 60000;
+  const localISOTime = new Date(ST.workoutStart - localOffset).toISOString().slice(0, 16);
+  
+  let deleteBtnHtml = '';
+  if (ST.editingWorkoutId) {
+    deleteBtnHtml = `
+      <div style="margin-top: 12px; border-top: 1px solid var(--border); padding-top: 16px;">
+        <button class="btn btn-primary btn-destructive" style="width: 100%; display: block;" onclick="deleteWorkout('${ST.editingWorkoutId}')">Delete Workout</button>
+      </div>
+    `;
+  }
+
+  openSheet(`
+    <div class="bs-title">Workout Details</div>
+    <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 16px; text-align: left;">
+      <div>
+        <label style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); display: block; margin-bottom: 6px;">Workout Date & Time</label>
+        <input type="datetime-local" id="edit-workout-datetime" style="width: 100%; border: 1px solid var(--border); border-radius: 12px; padding: 12px; font-size: 15px; background: rgba(255,255,255,0.6); color: var(--charcoal); -webkit-appearance: none; box-sizing: border-box;" value="${localISOTime}">
+      </div>
+      <div>
+        <label style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); display: block; margin-bottom: 6px;">Duration (Minutes)</label>
+        <input type="number" id="edit-workout-duration" pattern="[0-9]*" inputmode="numeric" style="width: 100%; border: 1px solid var(--border); border-radius: 12px; padding: 12px; font-size: 15px; background: rgba(255,255,255,0.6); color: var(--charcoal); box-sizing: border-box;" value="${Math.round(ST.durationSecs / 60)}">
+      </div>
+      <div style="display: flex; gap: 10px; margin-top: 8px;">
+        <button class="btn btn-primary" style="flex: 1;" onclick="saveWorkoutDetails()">Apply</button>
+        <button class="btn btn-sheet-ghost" onclick="closeSheet()">Cancel</button>
+      </div>
+      ${deleteBtnHtml}
+    </div>
+  `);
+}
+
+function saveWorkoutDetails() {
+  const dtEl = document.getElementById('edit-workout-datetime');
+  const durEl = document.getElementById('edit-workout-duration');
+  if (!dtEl || !durEl) return;
+  
+  const dtVal = dtEl.value;
+  const durVal = parseInt(durEl.value) || 0;
+  
+  if (dtVal) {
+    const newStart = new Date(dtVal).getTime();
+    if (!isNaN(newStart)) {
+      ST.workoutStart = newStart;
+      ST.workoutEnd = newStart + (durVal * 60 * 1000);
+    }
+  }
+  
+  ST.durationSecs = durVal * 60;
+  
+  saveNow();
+  closeSheet();
+  renderWorkout();
+}
+
+function deleteWorkout(id) {
+  confirmSheet({
+    title: 'Delete this workout?',
+    body: 'This will permanently remove this workout from your history and Google Sheets.',
+    confirmLabel: 'Delete',
+    cancelLabel: 'Cancel',
+    destructive: true,
+    onConfirm: () => {
+      const hist = getHistory();
+      const idx = hist.findIndex(w => String(w.id) === String(id));
+      if (idx !== -1) {
+        hist.splice(idx, 1);
+        saveHistory(hist);
+        
+        // Sync delete to Google Sheets
+        const s = getSettings();
+        if (s.sheets) {
+          postToSheets({ action: 'deleteWorkout', id: id }).catch(() => {});
+          postToSheets({ action: 'saveState', history: hist, ts: Date.now() }).catch(() => {});
+        }
+      }
+      
+      // Clear state
+      if (ST.durationTimer) clearInterval(ST.durationTimer);
+      ST.durationTimer = null;
+      if (ST.wakeLock) ST.wakeLock.release().catch(()=>{});
+      cancelRestTimer();
+      LS.remove('dcrgym_current_workout');
+      ST.currentProgram = null; ST.currentSession = null;
+      ST.editingWorkoutId = null; ST.isBackdated = false; ST.workoutEnd = null;
+      ST.workoutSets = {}; ST.workoutStart = null; ST.durationSecs = 0;
+      ST.workoutDrafts = {}; ST.workoutSubs = {}; ST.workoutNotes = {};
+      ST.workoutSubMeta = {}; ST.workoutAdditions = [];
+      ST.expandedCards = new Set(); ST.completedCards = new Set();
+      ST.travelMode = false; ST.travelLocked = false;
+      
+      closeSheet();
+      Maps('history');
+    }
+  });
 }
 
 function openCalDay(id, dateStr) {
@@ -8689,7 +9216,10 @@ function openCalDay(id, dateStr) {
         <div class="cal-popup-stat-lbl">Volume</div>
       </div>
     </div>
-    ${listHTML}`;
+    ${listHTML}
+    <div style="margin-top:20px; display:flex; gap:10px;">
+      <button class="btn btn-primary" style="flex:1; padding:10px; font-size:13px;" onclick="closeCalPopup(); editCompletedWorkout('${w.id || w.endTime}')">Edit Workout</button>
+    </div>`;
   popup.style.display = 'flex';
   requestAnimationFrame(() => popup.classList.add('visible'));
 }
@@ -9031,6 +9561,92 @@ function renderAnalysis() {
   ST.lastAnalysisBio = bio;
   ST.lastAnalysisWorkout = lastWorkout;
   
+  const fourWeeksAgo = Date.now() - 28 * 24 * 60 * 60 * 1000;
+  
+  // Trailing datasets for delta calculations (last 28 days or workouts)
+  const readinessTrail = (fb.trailingReadiness || []).slice(-28).filter(v => v != null);
+  const oldestReadiness = readinessTrail[0] ?? bio.readiness;
+  const readinessDiff = bio.readiness - oldestReadiness;
+  
+  let hist4w = getHistory().filter(w => w.endTime >= fourWeeksAgo);
+  if (hist4w.length < 5) hist4w = getHistory().slice(-7);
+  
+  const strainTrail = hist4w.map(w => calculateWorkoutStrain(w));
+  const oldestStrain = strainTrail[0] ?? strain;
+  const strainDiff = strain - oldestStrain;
+  
+  const cnsTrail = hist4w.map(w => {
+    const wBio = getEffectiveBiometrics(w);
+    const wStrain = calculateWorkoutStrain(w);
+    return calculateCNSCapacity(wBio.readiness, wStrain);
+  });
+  const oldestCns = cnsTrail[0] ?? cns;
+  const cnsDiff = cns - oldestCns;
+  
+  const hrrTrail = hist4w.map(w => {
+    const wBio = getEffectiveBiometrics(w);
+    const { avgRpe: wRpe } = getWorkoutSetsAndRpe(w);
+    return calculateHRRecovery(wBio.readiness, wRpe);
+  });
+  const oldestHrr = hrrTrail[0] ?? hrr;
+  const hrrDiff = hrr - oldestHrr;
+  
+  const sleepTrail = (fb.trailingSleep || []).slice(-28).filter(v => v != null);
+  const oldestSleep = sleepTrail[0] ?? bio.sleep;
+  const sleepDiff = (bio.sleep ?? 0) - (oldestSleep ?? 0);
+
+  const makeTrendPill = (diff, isPct, invertColors = false) => {
+    if (diff === 0 || isNaN(diff)) {
+      return `<span class="ana-trend-pill trend-neutral">steady</span>`;
+    }
+    const sign = diff > 0 ? '+' : '';
+    const val = diff.toFixed(0);
+    const formatted = `${sign}${val}${isPct ? '%' : ''}`;
+    let isGood = diff > 0;
+    if (invertColors) isGood = diff < 0;
+    const cls = isGood ? 'trend-up' : 'trend-down';
+    return `<span class="ana-trend-pill ${cls}">${formatted}</span>`;
+  };
+
+  // Autonomic Balance Gauge calculations
+  const avgReadiness = readinessTrail.length ? readinessTrail.reduce((a, b) => a + b, 0) / readinessTrail.length : 70;
+  const avgStrain = strainTrail.length ? strainTrail.reduce((a, b) => a + b, 0) / strainTrail.length : 50;
+  const balancePct = Math.max(10, Math.min(90, (avgReadiness / (avgReadiness + avgStrain)) * 100));
+
+  let balanceState = "BALANCED";
+  let loadWord = "perfectly balanced";
+  let scaleColor = "var(--accent)";
+  let recommendationsHTML = "";
+  
+  if (balancePct > 58) {
+    balanceState = "REBOUNDING";
+    loadWord = "fully absorbed";
+    scaleColor = "#28A745";
+    recommendationsHTML = `
+      <li>Your nervous system is primed. You have high CNS reserve to absorb progressive overload.</li>
+      <li>Consider adding 1 working set to your primary compound lifts this week.</li>
+      <li>Keep rest times strict to maximize training density.</li>
+    `;
+  } else if (balancePct < 42) {
+    balanceState = "OVERREACHING";
+    loadWord = "slightly excessive";
+    scaleColor = "#DC3545";
+    recommendationsHTML = `
+      <li>CNS capacity is running low. Higher systemic fatigue warrants volume management.</li>
+      <li>Reduce total working sets by 15-20% for your next 2 sessions to prevent regression.</li>
+      <li>Increase target sleep duration by 30 minutes to facilitate parasympathetic rebound.</li>
+    `;
+  } else {
+    balanceState = "OPTIMAL";
+    loadWord = "on track";
+    scaleColor = "#B8860B";
+    recommendationsHTML = `
+      <li>Autonomic stress and recovery inputs are in perfect equilibrium.</li>
+      <li>Maintain your current training splits and focus on lifting velocity and form quality.</li>
+      <li>Ensure post-workout hydration and continue with normal target sleep guidelines.</li>
+    `;
+  }
+  
   let summaryLine1 = "";
   let summaryLine2 = "";
   if (bio.readiness >= 80) {
@@ -9085,7 +9701,10 @@ function renderAnalysis() {
     <div class="ana-metric-grid">
       <!-- 1. Waking Readiness -->
       <div class="ana-metric-card glowing-card" onclick="openMetricDetail('readiness')">
-        <div class="ana-card-eyebrow">Before Workout</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+          <div class="ana-card-eyebrow">Before Workout</div>
+          ${makeTrendPill(readinessDiff, false)}
+        </div>
         <div class="ana-card-val">${bio.readiness}</div>
         <div class="ana-card-lbl">Waking Readiness</div>
         <div class="ana-card-status">${bio.isEstimated ? 'estimated' : 'fitbit sync'}</div>
@@ -9093,7 +9712,10 @@ function renderAnalysis() {
 
       <!-- 2. Workout Strain -->
       <div class="ana-metric-card" onclick="openMetricDetail('strain')">
-        <div class="ana-card-eyebrow">During Workout</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+          <div class="ana-card-eyebrow">During Workout</div>
+          ${makeTrendPill(strainDiff, false, true)}
+        </div>
         <div class="ana-card-val">${strain}</div>
         <div class="ana-card-lbl">Workout Strain</div>
         <div class="ana-card-status">${Math.round(lastWorkout.duration / 60)}m · ${totalSets} sets</div>
@@ -9101,7 +9723,10 @@ function renderAnalysis() {
 
       <!-- 3. CNS Capacity -->
       <div class="ana-metric-card" onclick="openMetricDetail('cns')">
-        <div class="ana-card-eyebrow">Post-Workout</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+          <div class="ana-card-eyebrow">Post-Workout</div>
+          ${makeTrendPill(cnsDiff, false)}
+        </div>
         <div class="ana-card-val">${cns}%</div>
         <div class="ana-card-lbl">CNS Capacity</div>
         <div class="ana-card-status">energy budget</div>
@@ -9109,7 +9734,10 @@ function renderAnalysis() {
 
       <!-- 4. HR Recovery -->
       <div class="ana-metric-card" onclick="openMetricDetail('hrr')">
-        <div class="ana-card-eyebrow">Post-Workout</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+          <div class="ana-card-eyebrow">Post-Workout</div>
+          ${makeTrendPill(hrrDiff, false)}
+        </div>
         <div class="ana-card-val">-${hrr}</div>
         <div class="ana-card-lbl">HR Recovery (1m)</div>
         <div class="ana-card-status">BPM drop</div>
@@ -9117,7 +9745,10 @@ function renderAnalysis() {
 
       <!-- 5. Sleep Target -->
       <div class="ana-metric-card" onclick="openMetricDetail('sleep')">
-        <div class="ana-card-eyebrow">Recovery Action</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+          <div class="ana-card-eyebrow">Recovery Action</div>
+          ${makeTrendPill(sleepDiff, false)}
+        </div>
         <div class="ana-card-val" style="font-size: 21px; margin-top: 4px; margin-bottom: 4px;">${sleepTarget.h}h ${sleepTarget.m}m</div>
         <div class="ana-card-lbl">Sleep Target</div>
         <div class="ana-card-status">overnight target</div>
@@ -9125,10 +9756,44 @@ function renderAnalysis() {
 
       <!-- 6. Fatigue Trend -->
       <div class="ana-metric-card" onclick="openMetricDetail('fatigue')">
-        <div class="ana-card-eyebrow">Recovery Action</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+          <div class="ana-card-eyebrow">Recovery Action</div>
+          ${makeTrendPill(fatigue.deltaPct, true)}
+        </div>
         <div class="ana-card-val">${fatigue.deltaPct >= 0 ? '+' : ''}${fatigue.deltaPct}%</div>
         <div class="ana-card-lbl">Fatigue Trend</div>
         <div class="ana-card-status">EVR efficiency</div>
+      </div>
+    </div>
+
+    <!-- Autonomic Balance Console -->
+    <div class="ana-insight-card">
+      <div class="ana-insight-header">
+        <span class="ana-insight-title">// Autonomic Balance Console</span>
+        <span class="ana-insight-badge" style="background: ${scaleColor}22; color: ${scaleColor};">${balanceState}</span>
+      </div>
+      <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 12px;">
+        <!-- Balance Scale -->
+        <div class="ana-balance-scale">
+          <div class="ana-scale-labels">
+            <span>Stress (Strain)</span>
+            <span>Recovery (Readiness)</span>
+          </div>
+          <div class="ana-scale-bar-bg">
+            <div class="ana-scale-bar-fill" style="width: ${balancePct}%; background: ${scaleColor};"></div>
+            <div class="ana-scale-marker" style="left: ${balancePct}%;"></div>
+          </div>
+          <div class="ana-scale-desc">
+            Your 4-week training load is <strong>${loadWord}</strong> relative to your autonomic reserve.
+          </div>
+        </div>
+        
+        <div style="border-top: 0.5px solid var(--border); padding-top: 12px; margin-top: 4px;">
+          <div style="font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.15rem; color:var(--charcoal); margin-bottom: 6px;">AI Adaptive Recommendations:</div>
+          <ul style="margin: 0; padding-left: 18px; font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; display: flex; flex-direction: column; gap: 4px;">
+            ${recommendationsHTML}
+          </ul>
+        </div>
       </div>
     </div>
 
@@ -10260,7 +10925,7 @@ function cloudSyncStatus() {
   return 'last synced ' + syncRelTime(t) + (q ? ' · ' + q + ' pending' : '');
 }
 
-async function bgSyncToSheets() {
+async function bgSyncToSheets(specificEntry) {
   const s = getSettings();
   if (!s.sheets) return;
   const hist = getHistory();
@@ -10271,7 +10936,8 @@ async function bgSyncToSheets() {
 
   // Readable rows for the just-finished workout. Built from the history record
   // (not live ST), so it stays correct even if the user navigated away.
-  const rows = historyToWorkoutRows([hist[hist.length - 1]]);
+  const targetEntry = specificEntry || hist[hist.length - 1];
+  const rows = historyToWorkoutRows([targetEntry]);
   if (rows.length) await postToSheets({ action: 'syncWorkouts', workouts: rows });
 }
 
