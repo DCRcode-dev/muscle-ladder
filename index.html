@@ -9030,28 +9030,6 @@ function renderAnalysis() {
   
   ST.lastAnalysisBio = bio;
   ST.lastAnalysisWorkout = lastWorkout;
-
-  const fourWeeksAgo = Date.now() - 28 * 24 * 60 * 60 * 1000;
-  
-  // Trailing datasets (last 28 days or workouts)
-  const readinessTrail = (fb.trailingReadiness || []).slice(-28).filter(v => v != null);
-  
-  let hist4w = getHistory().filter(w => w.endTime >= fourWeeksAgo);
-  if (hist4w.length < 5) hist4w = getHistory().slice(-7);
-  
-  const strainTrail = hist4w.map(w => calculateWorkoutStrain(w));
-  const cnsTrail = hist4w.map(w => {
-    const wBio = getEffectiveBiometrics(w);
-    const wStrain = calculateWorkoutStrain(w);
-    return calculateCNSCapacity(wBio.readiness, wStrain);
-  });
-  const hrrTrail = hist4w.map(w => {
-    const wBio = getEffectiveBiometrics(w);
-    const { avgRpe: wRpe } = getWorkoutSetsAndRpe(w);
-    return calculateHRRecovery(wBio.readiness, wRpe);
-  });
-  const sleepTrail = (fb.trailingSleep || []).slice(-28).filter(v => v != null);
-  const fatigueTrail = hist4w.map(w => calculateEVR(w));
   
   let summaryLine1 = "";
   let summaryLine2 = "";
@@ -9109,7 +9087,6 @@ function renderAnalysis() {
       <div class="ana-metric-card glowing-card" onclick="openMetricDetail('readiness')">
         <div class="ana-card-eyebrow">Before Workout</div>
         <div class="ana-card-val">${bio.readiness}</div>
-        <div style="height:14px; margin: 4px 0 2px;">${renderMiniSparkline(readinessTrail)}</div>
         <div class="ana-card-lbl">Waking Readiness</div>
         <div class="ana-card-status">${bio.isEstimated ? 'estimated' : 'fitbit sync'}</div>
       </div>
@@ -9118,7 +9095,6 @@ function renderAnalysis() {
       <div class="ana-metric-card" onclick="openMetricDetail('strain')">
         <div class="ana-card-eyebrow">During Workout</div>
         <div class="ana-card-val">${strain}</div>
-        <div style="height:14px; margin: 4px 0 2px;">${renderMiniSparkline(strainTrail)}</div>
         <div class="ana-card-lbl">Workout Strain</div>
         <div class="ana-card-status">${Math.round(lastWorkout.duration / 60)}m · ${totalSets} sets</div>
       </div>
@@ -9127,7 +9103,6 @@ function renderAnalysis() {
       <div class="ana-metric-card" onclick="openMetricDetail('cns')">
         <div class="ana-card-eyebrow">Post-Workout</div>
         <div class="ana-card-val">${cns}%</div>
-        <div style="height:14px; margin: 4px 0 2px;">${renderMiniSparkline(cnsTrail)}</div>
         <div class="ana-card-lbl">CNS Capacity</div>
         <div class="ana-card-status">energy budget</div>
       </div>
@@ -9136,7 +9111,6 @@ function renderAnalysis() {
       <div class="ana-metric-card" onclick="openMetricDetail('hrr')">
         <div class="ana-card-eyebrow">Post-Workout</div>
         <div class="ana-card-val">-${hrr}</div>
-        <div style="height:14px; margin: 4px 0 2px;">${renderMiniSparkline(hrrTrail)}</div>
         <div class="ana-card-lbl">HR Recovery (1m)</div>
         <div class="ana-card-status">BPM drop</div>
       </div>
@@ -9145,7 +9119,6 @@ function renderAnalysis() {
       <div class="ana-metric-card" onclick="openMetricDetail('sleep')">
         <div class="ana-card-eyebrow">Recovery Action</div>
         <div class="ana-card-val" style="font-size: 21px; margin-top: 4px; margin-bottom: 4px;">${sleepTarget.h}h ${sleepTarget.m}m</div>
-        <div style="height:14px; margin: 4px 0 2px;">${renderMiniSparkline(sleepTrail)}</div>
         <div class="ana-card-lbl">Sleep Target</div>
         <div class="ana-card-status">overnight target</div>
       </div>
@@ -9154,23 +9127,15 @@ function renderAnalysis() {
       <div class="ana-metric-card" onclick="openMetricDetail('fatigue')">
         <div class="ana-card-eyebrow">Recovery Action</div>
         <div class="ana-card-val">${fatigue.deltaPct >= 0 ? '+' : ''}${fatigue.deltaPct}%</div>
-        <div style="height:14px; margin: 4px 0 2px;">${renderMiniSparkline(fatigueTrail)}</div>
         <div class="ana-card-lbl">Fatigue Trend</div>
         <div class="ana-card-status">EVR efficiency</div>
       </div>
-    </div>
-
-    <!-- Trail / Chart module below the grid -->
-    <div style="margin-top: 10px;">
-      ${anaTrailPanel(fb)}
     </div>
 
     <button class="ana-sync-footer" onclick="${fb.connected ? 'fetchFitbitData(true)' : 'ghConnect()'}">
       ${fb.connected ? (fb.lastSync ? 'synced ' + new Date(fb.lastSync).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : 'refresh') : '⟳ connect health sync'}
     </button>
   </div>`;
-
-  requestAnimationFrame(() => initChartHover(fb));
 }
 
 function openMetricDetail(metricType, passedBio, passedLastWorkout) {
