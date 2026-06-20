@@ -64,6 +64,13 @@ const PROGRAMS = [
             substitutions: ["Seated Calf Raise", "Leg Press Calf Press"],
             notes: ""
           },
+          {
+            id: "machine_crunch", name: "Machine Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
+            rest: "1–2 min",
+            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            notes: ""
+          },
         ]
       },
       {
@@ -113,10 +120,10 @@ const PROGRAMS = [
             notes: ""
           },
           {
-            id: "cable_crunch", name: "Cable Crunch", superset: null,
-            warmupSets: "1", workingSets: 3, reps: "10–12",
+            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
             rest: "1–2 min",
-            substitutions: ["Plate-Weighted Decline Sit-Up", "Hanging Leg Raise"],
+            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
             notes: ""
           },
         ]
@@ -183,6 +190,13 @@ const PROGRAMS = [
             substitutions: ["EZ-Bar Biceps Curl", "Dumbbell Biceps Curl"],
             notes: ""
           },
+          {
+            id: "machine_crunch", name: "Machine Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
+            rest: "1–2 min",
+            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            notes: ""
+          },
         ]
       },
       {
@@ -231,6 +245,13 @@ const PROGRAMS = [
             substitutions: ["Standing Calf Raise", "Leg Press Calf Press"],
             notes: ""
           },
+          {
+            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
+            rest: "1–2 min",
+            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
+            notes: ""
+          },
         ]
       },
       {
@@ -273,10 +294,10 @@ const PROGRAMS = [
             notes: ""
           },
           {
-            id: "plate_weighted_decline_sit_up", name: "Plate-Weighted Decline Sit-Up", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "8–10",
+            id: "machine_crunch", name: "Machine Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
             rest: "1–2 min",
-            substitutions: ["Cable Crunch", "Plank"],
+            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
             notes: ""
           },
         ]
@@ -350,6 +371,13 @@ const PROGRAMS = [
             substitutions: ["Dumbbell Skullcrusher", "Overhead Triceps Extension"],
             notes: ""
           },
+          {
+            id: "machine_crunch", name: "Machine Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
+            rest: "1–2 min",
+            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            notes: ""
+          },
         ]
       },
       {
@@ -385,10 +413,10 @@ const PROGRAMS = [
             notes: ""
           },
           {
-            id: "cable_crunch", name: "Cable Crunch", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
+            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
             rest: "1–2 min",
-            substitutions: ["Plate-Weighted Decline Sit-Up", "Hanging Leg Raise"],
+            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
             notes: ""
           },
         ]
@@ -446,6 +474,13 @@ const PROGRAMS = [
             substitutions: ["Incline Dumbbell Curl", "Preacher Curl"],
             notes: ""
           },
+          {
+            id: "machine_crunch", name: "Machine Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
+            rest: "1–2 min",
+            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            notes: ""
+          },
         ]
       },
       {
@@ -488,10 +523,10 @@ const PROGRAMS = [
             notes: ""
           },
           {
-            id: "roman_chair_leg_raise", name: "Roman Chair Leg Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–20",
+            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
             rest: "1–2 min",
-            substitutions: ["Hanging Leg Raise", "Bent-Knee Leg Raise"],
+            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
             notes: ""
           },
         ]
@@ -558,6 +593,13 @@ const PROGRAMS = [
             substitutions: ["Standing Calf Raise", "Leg Press Calf Press"],
             notes: ""
           },
+          {
+            id: "machine_crunch", name: "Machine Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
+            rest: "1–2 min",
+            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            notes: ""
+          },
         ]
       },
       {
@@ -600,10 +642,10 @@ const PROGRAMS = [
             notes: ""
           },
           {
-            id: "cable_crunch", name: "Cable Crunch", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
+            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
             rest: "1–2 min",
-            substitutions: ["Plate-Weighted Decline Sit-Up", "Hanging Leg Raise"],
+            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
             notes: ""
           },
         ]
@@ -661,6 +703,13 @@ const PROGRAMS = [
             substitutions: ["Seated Calf Raise", "Leg Press Calf Press"],
             notes: ""
           },
+          {
+            id: "machine_crunch", name: "Machine Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
+            rest: "1–2 min",
+            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            notes: ""
+          },
         ]
       },
       {
@@ -703,10 +752,10 @@ const PROGRAMS = [
             notes: ""
           },
           {
-            id: "roman_chair_leg_raise", name: "Roman Chair Leg Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–20",
+            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
             rest: "1–2 min",
-            substitutions: ["Hanging Leg Raise", "Bent-Knee Leg Raise"],
+            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
             notes: ""
           },
         ]
@@ -773,6 +822,13 @@ const PROGRAMS = [
             substitutions: ["Standing Calf Raise", "Leg Press Calf Press"],
             notes: ""
           },
+          {
+            id: "machine_crunch", name: "Machine Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
+            rest: "1–2 min",
+            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            notes: ""
+          },
         ]
       },
       {
@@ -808,17 +864,17 @@ const PROGRAMS = [
             notes: ""
           },
           {
-            id: "cable_crunch", name: "Cable Crunch", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
-            rest: "1–2 min",
-            substitutions: ["Plate-Weighted Decline Sit-Up", "Hanging Leg Raise"],
-            notes: ""
-          },
-          {
             id: "ez_bar_skullcrusher", name: "EZ-Bar Skullcrusher", superset: null,
             warmupSets: "0–1", workingSets: 3, reps: "12–15",
             rest: "1–2 min",
             substitutions: ["Dumbbell Skullcrusher", "Overhead Triceps Extension"],
+            notes: ""
+          },
+          {
+            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
+            rest: "1–2 min",
+            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
             notes: ""
           },
         ]
@@ -870,10 +926,10 @@ const PROGRAMS = [
             notes: ""
           },
           {
-            id: "roman_chair_leg_raise", name: "Roman Chair Leg Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–20",
-            rest: "30 sec",
-            substitutions: ["Hanging Leg Raise", "Bent-Knee Leg Raise"],
+            id: "machine_crunch", name: "Machine Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
+            rest: "1–2 min",
+            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
             notes: ""
           },
         ]
@@ -924,6 +980,13 @@ const PROGRAMS = [
             substitutions: ["EZ-Bar Skullcrusher", "Dumbbell Skullcrusher"],
             notes: ""
           },
+          {
+            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
+            rest: "1–2 min",
+            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
+            notes: ""
+          },
         ]
       },
       {
@@ -970,6 +1033,13 @@ const PROGRAMS = [
             warmupSets: "0–1", workingSets: 3, reps: "10–12",
             rest: "1–2 min",
             substitutions: ["Incline Dumbbell Curl", "Preacher Curl"],
+            notes: ""
+          },
+          {
+            id: "machine_crunch", name: "Machine Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
+            rest: "1–2 min",
+            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
             notes: ""
           },
         ]
@@ -1043,6 +1113,13 @@ const PROGRAMS = [
             substitutions: ["Dumbbell Skullcrusher", "Overhead Triceps Extension"],
             notes: ""
           },
+          {
+            id: "machine_crunch", name: "Machine Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
+            rest: "1–2 min",
+            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            notes: ""
+          },
         ]
       },
       {
@@ -1078,10 +1155,10 @@ const PROGRAMS = [
             notes: ""
           },
           {
-            id: "cable_crunch", name: "Cable Crunch", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
+            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
             rest: "1–2 min",
-            substitutions: ["Plate-Weighted Decline Sit-Up", "Hanging Leg Raise"],
+            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
             notes: ""
           },
         ]
@@ -1130,6 +1207,13 @@ const PROGRAMS = [
             warmupSets: "0–1", workingSets: 3, reps: "15–20",
             rest: "1–2 min",
             substitutions: ["EZ-Bar Skullcrusher", "Dumbbell Skullcrusher"],
+            notes: ""
+          },
+          {
+            id: "machine_crunch", name: "Machine Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
+            rest: "1–2 min",
+            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
             notes: ""
           },
         ]
@@ -1187,6 +1271,13 @@ const PROGRAMS = [
             substitutions: ["Incline Dumbbell Curl", "Preacher Curl"],
             notes: ""
           },
+          {
+            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
+            rest: "1–2 min",
+            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
+            notes: ""
+          },
         ]
       },
       {
@@ -1229,10 +1320,10 @@ const PROGRAMS = [
             notes: ""
           },
           {
-            id: "roman_chair_leg_raise", name: "Roman Chair Leg Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–20",
-            rest: "30 sec",
-            substitutions: ["Hanging Leg Raise", "Bent-Knee Leg Raise"],
+            id: "machine_crunch", name: "Machine Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
+            rest: "1–2 min",
+            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
             notes: ""
           },
         ]
@@ -1299,6 +1390,13 @@ const PROGRAMS = [
             substitutions: ["EZ-Bar Biceps Curl", "Dumbbell Biceps Curl"],
             notes: ""
           },
+          {
+            id: "machine_crunch", name: "Machine Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
+            rest: "1–2 min",
+            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            notes: ""
+          },
         ]
       },
       {
@@ -1334,10 +1432,10 @@ const PROGRAMS = [
             notes: ""
           },
           {
-            id: "cable_crunch", name: "Cable Crunch", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
+            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
             rest: "1–2 min",
-            substitutions: ["Plate-Weighted Decline Sit-Up", "Hanging Leg Raise"],
+            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
             notes: ""
           },
         ]
@@ -1388,6 +1486,13 @@ const PROGRAMS = [
             substitutions: ["EZ-Bar Skullcrusher", "Triceps Pressdown"],
             notes: ""
           },
+          {
+            id: "machine_crunch", name: "Machine Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
+            rest: "1–2 min",
+            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            notes: ""
+          },
         ]
       },
       {
@@ -1430,10 +1535,10 @@ const PROGRAMS = [
             notes: ""
           },
           {
-            id: "roman_chair_leg_raise", name: "Roman Chair Leg Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–20",
-            rest: "30 sec",
-            substitutions: ["Hanging Leg Raise", "Bent-Knee Leg Raise"],
+            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
+            rest: "1–2 min",
+            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
             notes: ""
           },
         ]
@@ -1484,6 +1589,13 @@ const PROGRAMS = [
             substitutions: ["Incline Dumbbell Curl", "Preacher Curl"],
             notes: ""
           },
+          {
+            id: "machine_crunch", name: "Machine Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
+            rest: "1–2 min",
+            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            notes: ""
+          },
         ]
       },
       {
@@ -1526,10 +1638,10 @@ const PROGRAMS = [
             notes: ""
           },
           {
-            id: "plank", name: "Plank", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "30–60s",
+            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
             rest: "1–2 min",
-            substitutions: ["LLPT Plank", "Cable Crunch"],
+            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
             notes: ""
           },
         ]
@@ -1596,6 +1708,13 @@ const PROGRAMS = [
             substitutions: ["Triceps Kickback (Cable)", "EZ-Bar Skullcrusher"],
             notes: ""
           },
+          {
+            id: "machine_crunch", name: "Machine Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
+            rest: "1–2 min",
+            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            notes: ""
+          },
         ]
       },
       {
@@ -1644,6 +1763,13 @@ const PROGRAMS = [
             substitutions: ["Standing Barbell Curl", "Dumbbell Biceps Curl"],
             notes: ""
           },
+          {
+            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
+            rest: "1–2 min",
+            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
+            notes: ""
+          },
         ]
       },
       {
@@ -1679,10 +1805,10 @@ const PROGRAMS = [
             notes: ""
           },
           {
-            id: "cable_crunch", name: "Cable Crunch", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
+            id: "machine_crunch", name: "Machine Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
             rest: "1–2 min",
-            substitutions: ["Plate-Weighted Decline Sit-Up", "Hanging Leg Raise"],
+            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
             notes: ""
           },
         ]
@@ -1731,6 +1857,13 @@ const PROGRAMS = [
             warmupSets: "0–1", workingSets: 3, reps: "12–15",
             rest: "1–2 min",
             substitutions: ["EZ-Bar Skullcrusher", "Dumbbell Skullcrusher"],
+            notes: ""
+          },
+          {
+            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
+            rest: "1–2 min",
+            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
             notes: ""
           },
         ]
@@ -1788,6 +1921,13 @@ const PROGRAMS = [
             substitutions: ["Incline Dumbbell Curl", "Preacher Curl"],
             notes: ""
           },
+          {
+            id: "machine_crunch", name: "Machine Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
+            rest: "1–2 min",
+            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            notes: ""
+          },
         ]
       },
       {
@@ -1830,10 +1970,10 @@ const PROGRAMS = [
             notes: ""
           },
           {
-            id: "roman_chair_leg_raise", name: "Roman Chair Leg Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–20",
+            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "15–20",
             rest: "1–2 min",
-            substitutions: ["Hanging Leg Raise", "Bent-Knee Leg Raise"],
+            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
             notes: ""
           },
         ]
