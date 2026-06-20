@@ -5348,6 +5348,7 @@ function initUpdateWatcher(reg) {
     _lastUpdateCheck = Date.now();
     reg.update().catch(() => {});
   });
+  reg.update().catch(() => {});
   _lastUpdateCheck = Date.now();
 }
 
