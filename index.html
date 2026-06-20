@@ -655,7 +655,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 .bc-ex + .bc-ex { border-top: 0.5px solid var(--border); }
 .bc-ex .bc-sets { font-size: 10.5px; color: var(--muted); font-variant-numeric: tabular-nums; flex-shrink: 0; margin-left: 12px; }
 .bc-more { font-size: 10.5px; color: var(--muted); font-style: italic; padding-top: 5px; }
-.boarding-card .premium-action-pill { margin: 0 !important; width: 100% !important; }
+.boarding-card .premium-action-pill { margin: 0 auto !important; width: auto !important; min-width: 220px !important; max-width: 280px !important; }
 
 /* ── Launch awakening — once per boot, the app wakes rather than loads ── */
 .awaken .premium-masthead        { animation: awakenUp 520ms var(--ease) both; }
@@ -819,9 +819,10 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 .premium-action-pill {
   background: var(--charcoal) !important; color: #FFFFFF !important;
   border: none !important; border-radius: 32px !important;
-  padding: 20px 0 !important; width: 100% !important; max-width: 320px !important;
+  padding: 14px 24px !important; width: 100% !important; max-width: 320px !important;
+  box-sizing: border-box !important;
   text-align: center !important; font-weight: 700 !important;
-  letter-spacing: 0.25em !important; font-size: 0.78rem !important;
+  letter-spacing: 0.12em !important; font-size: 0.78rem !important;
   text-transform: uppercase !important; font-family: var(--font-body) !important;
   box-shadow: var(--shadow-cta) !important;
   cursor: pointer !important; flex-shrink: 0 !important;
