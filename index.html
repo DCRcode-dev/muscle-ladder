@@ -9030,6 +9030,28 @@ function renderAnalysis() {
   
   ST.lastAnalysisBio = bio;
   ST.lastAnalysisWorkout = lastWorkout;
+
+  const fourWeeksAgo = Date.now() - 28 * 24 * 60 * 60 * 1000;
+  
+  // Trailing datasets (last 28 days or workouts)
+  const readinessTrail = (fb.trailingReadiness || []).slice(-28).filter(v => v != null);
+  
+  let hist4w = getHistory().filter(w => w.endTime >= fourWeeksAgo);
+  if (hist4w.length < 5) hist4w = getHistory().slice(-7);
+  
+  const strainTrail = hist4w.map(w => calculateWorkoutStrain(w));
+  const cnsTrail = hist4w.map(w => {
+    const wBio = getEffectiveBiometrics(w);
+    const wStrain = calculateWorkoutStrain(w);
+    return calculateCNSCapacity(wBio.readiness, wStrain);
+  });
+  const hrrTrail = hist4w.map(w => {
+    const wBio = getEffectiveBiometrics(w);
+    const { avgRpe: wRpe } = getWorkoutSetsAndRpe(w);
+    return calculateHRRecovery(wBio.readiness, wRpe);
+  });
+  const sleepTrail = (fb.trailingSleep || []).slice(-28).filter(v => v != null);
+  const fatigueTrail = hist4w.map(w => calculateEVR(w));
   
   let summaryLine1 = "";
   let summaryLine2 = "";
@@ -9087,6 +9109,7 @@ function renderAnalysis() {
       <div class="ana-metric-card glowing-card" onclick="openMetricDetail('readiness')">
         <div class="ana-card-eyebrow">Before Workout</div>
         <div class="ana-card-val">${bio.readiness}</div>
+        <div style="height:14px; margin: 4px 0 2px;">${renderMiniSparkline(readinessTrail)}</div>
         <div class="ana-card-lbl">Waking Readiness</div>
         <div class="ana-card-status">${bio.isEstimated ? 'estimated' : 'fitbit sync'}</div>
       </div>
@@ -9095,6 +9118,7 @@ function renderAnalysis() {
       <div class="ana-metric-card" onclick="openMetricDetail('strain')">
         <div class="ana-card-eyebrow">During Workout</div>
         <div class="ana-card-val">${strain}</div>
+        <div style="height:14px; margin: 4px 0 2px;">${renderMiniSparkline(strainTrail)}</div>
         <div class="ana-card-lbl">Workout Strain</div>
         <div class="ana-card-status">${Math.round(lastWorkout.duration / 60)}m · ${totalSets} sets</div>
       </div>
@@ -9103,6 +9127,7 @@ function renderAnalysis() {
       <div class="ana-metric-card" onclick="openMetricDetail('cns')">
         <div class="ana-card-eyebrow">Post-Workout</div>
         <div class="ana-card-val">${cns}%</div>
+        <div style="height:14px; margin: 4px 0 2px;">${renderMiniSparkline(cnsTrail)}</div>
         <div class="ana-card-lbl">CNS Capacity</div>
         <div class="ana-card-status">energy budget</div>
       </div>
@@ -9111,6 +9136,7 @@ function renderAnalysis() {
       <div class="ana-metric-card" onclick="openMetricDetail('hrr')">
         <div class="ana-card-eyebrow">Post-Workout</div>
         <div class="ana-card-val">-${hrr}</div>
+        <div style="height:14px; margin: 4px 0 2px;">${renderMiniSparkline(hrrTrail)}</div>
         <div class="ana-card-lbl">HR Recovery (1m)</div>
         <div class="ana-card-status">BPM drop</div>
       </div>
@@ -9119,6 +9145,7 @@ function renderAnalysis() {
       <div class="ana-metric-card" onclick="openMetricDetail('sleep')">
         <div class="ana-card-eyebrow">Recovery Action</div>
         <div class="ana-card-val" style="font-size: 21px; margin-top: 4px; margin-bottom: 4px;">${sleepTarget.h}h ${sleepTarget.m}m</div>
+        <div style="height:14px; margin: 4px 0 2px;">${renderMiniSparkline(sleepTrail)}</div>
         <div class="ana-card-lbl">Sleep Target</div>
         <div class="ana-card-status">overnight target</div>
       </div>
@@ -9127,6 +9154,7 @@ function renderAnalysis() {
       <div class="ana-metric-card" onclick="openMetricDetail('fatigue')">
         <div class="ana-card-eyebrow">Recovery Action</div>
         <div class="ana-card-val">${fatigue.deltaPct >= 0 ? '+' : ''}${fatigue.deltaPct}%</div>
+        <div style="height:14px; margin: 4px 0 2px;">${renderMiniSparkline(fatigueTrail)}</div>
         <div class="ana-card-lbl">Fatigue Trend</div>
         <div class="ana-card-status">EVR efficiency</div>
       </div>
@@ -9157,10 +9185,11 @@ function openMetricDetail(metricType, passedBio, passedLastWorkout) {
   let content = "";
   const fb = ST.fitbit;
   const dateStr = ghLocalDate(lastWorkout.endTime);
+  const fourWeeksAgo = Date.now() - 28 * 24 * 60 * 60 * 1000;
 
   const makeTrajectoryBox = (msg) => `
     <div style="background: var(--bg-card, rgba(42,36,33,0.03)); border-left: 3.5px solid var(--accent, #8B7A5C); padding: 12px 14px; font-size: 13px; border-radius: 4px; margin: 16px 0; line-height: 1.45;">
-      <strong style="color: var(--text-primary, #1A1714); display: block; margin-bottom: 4px; font-size: 11px; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.05em;">Trajectory Analysis</strong>
+      <strong style="color: var(--text-primary, #1A1714); display: block; margin-bottom: 4px; font-size: 11px; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.05em;">Trajectory Analysis (4 Weeks)</strong>
       <span style="color: var(--text-secondary, #5A534A);">${msg}</span>
     </div>
   `;
@@ -9168,7 +9197,8 @@ function openMetricDetail(metricType, passedBio, passedLastWorkout) {
   if (metricType === 'readiness') {
     title = "Waking Readiness";
     const status = bio.readiness >= 80 ? "excellent" : (bio.readiness < 65 ? "suppressed" : "steady");
-    const trailing = (fb.trailingReadiness || []).filter(v => v != null);
+    const trailing = (fb.trailingReadiness || []).slice(-28).filter(v => v != null);
+    const trailingDates = (fb.trailingDates || []).slice(-28);
     
     let trajectoryMsg = "No historical readiness trend available.";
     if (trailing.length >= 2) {
@@ -9177,17 +9207,17 @@ function openMetricDetail(metricType, passedBio, passedLastWorkout) {
       const diff = newest - oldest;
       const absDiff = Math.abs(diff);
       if (diff > 0) {
-        trajectoryMsg = `Your waking readiness is trending upwards (+${absDiff} points over the last ${trailing.length} days), indicating positive adaptation and a higher capacity to absorb training stress.`;
+        trajectoryMsg = `Your waking readiness is trending upwards (+${absDiff} points over the last 4 weeks), indicating positive adaptation and a higher capacity to absorb training stress.`;
       } else if (diff < 0) {
-        trajectoryMsg = `Your waking readiness is trending downwards (-${absDiff} points over the last ${trailing.length} days), suggesting accumulated fatigue. Consider prioritizing active recovery.`;
+        trajectoryMsg = `Your waking readiness is trending downwards (-${absDiff} points over the last 4 weeks), suggesting accumulated fatigue. Consider prioritizing active recovery.`;
       } else {
-        trajectoryMsg = `Your waking readiness has remained stable at ${newest} points over the last ${trailing.length} days, showing a consistent recovery profile.`;
+        trajectoryMsg = `Your waking readiness has remained stable at ${newest} points over the last 4 weeks, showing a consistent recovery profile.`;
       }
     }
 
     let chartHtml = "";
     if (trailing.length >= 2) {
-      chartHtml = `<div style="height: 100px; margin: 16px 0;">${renderSheetChart(trailing, fb.trailingDates || [], "Readiness")}</div>`;
+      chartHtml = `<div style="height: 100px; margin: 16px 0;">${renderSheetChart(trailing, trailingDates, "Readiness")}</div>`;
     }
     
     content = `
@@ -9210,7 +9240,8 @@ function openMetricDetail(metricType, passedBio, passedLastWorkout) {
     const { totalSets, avgRpe } = getWorkoutSetsAndRpe(lastWorkout);
     const durMin = Math.round(lastWorkout.duration / 60);
     
-    const hist = getHistory().slice(-7);
+    let hist = getHistory().filter(w => w.endTime >= fourWeeksAgo);
+    if (hist.length < 5) hist = getHistory().slice(-7);
     const strains = hist.map(w => calculateWorkoutStrain(w));
     const dates = hist.map(w => ghLocalDate(w.endTime));
     
@@ -9221,11 +9252,11 @@ function openMetricDetail(metricType, passedBio, passedLastWorkout) {
       const diff = newest - oldest;
       const absDiff = Math.round(Math.abs(diff));
       if (diff > 2) {
-        trajectoryMsg = `Workout strain is on an upward trajectory (+${absDiff} points over the last ${strains.length} sessions), indicating progressive training volume and overload.`;
+        trajectoryMsg = `Workout strain is on an upward trajectory (+${absDiff} points over the last 4 weeks), indicating progressive training volume and overload.`;
       } else if (diff < -2) {
-        trajectoryMsg = `Workout strain is trending downwards (-${absDiff} points over the last ${strains.length} sessions), reflecting deliberate load reduction or recovery programming.`;
+        trajectoryMsg = `Workout strain is trending downwards (-${absDiff} points over the last 4 weeks), reflecting deliberate load reduction or recovery programming.`;
       } else {
-        trajectoryMsg = `Workout strain has remained consistent (change of ${diff > 0 ? '+' : ''}${Math.round(diff)} points over the last ${strains.length} sessions), keeping physical demands steady.`;
+        trajectoryMsg = `Workout strain has remained consistent (change of ${diff > 0 ? '+' : ''}${Math.round(diff)} points over the last 4 weeks), keeping physical demands steady.`;
       }
     }
 
@@ -9251,7 +9282,8 @@ function openMetricDetail(metricType, passedBio, passedLastWorkout) {
     const drop = Math.round(strain * 0.25);
     const cnsStatus = cns >= 75 ? "strong" : (cns < 60 ? "depleted" : "moderate");
     
-    const hist = getHistory().slice(-7);
+    let hist = getHistory().filter(w => w.endTime >= fourWeeksAgo);
+    if (hist.length < 5) hist = getHistory().slice(-7);
     const cnsVals = hist.map(w => {
       const wBio = getEffectiveBiometrics(w);
       const wStrain = calculateWorkoutStrain(w);
@@ -9266,11 +9298,11 @@ function openMetricDetail(metricType, passedBio, passedLastWorkout) {
       const diff = newest - oldest;
       const absDiff = Math.round(Math.abs(diff));
       if (diff > 2) {
-        trajectoryMsg = `Post-workout CNS capacity has improved (+${absDiff}% reserve over the last ${cnsVals.length} sessions), indicating your nervous system is recovering faster and adapting well.`;
+        trajectoryMsg = `Post-workout CNS capacity has improved (+${absDiff}% reserve over the last 4 weeks), indicating your nervous system is recovering faster and adapting well.`;
       } else if (diff < -2) {
-        trajectoryMsg = `Post-workout CNS capacity has declined (-${absDiff}% reserve over the last ${cnsVals.length} sessions), suggesting central fatigue is accumulating. Consider managing volume.`;
+        trajectoryMsg = `Post-workout CNS capacity has declined (-${absDiff}% reserve over the last 4 weeks), suggesting central fatigue is accumulating. Consider managing volume.`;
       } else {
-        trajectoryMsg = `Post-workout CNS capacity has held steady (change of ${diff > 0 ? '+' : ''}${Math.round(diff)}% over the last ${cnsVals.length} sessions), showing balanced nervous system recovery.`;
+        trajectoryMsg = `Post-workout CNS capacity has held steady (change of ${diff > 0 ? '+' : ''}${Math.round(diff)}% over the last 4 weeks), showing balanced nervous system recovery.`;
       }
     }
 
@@ -9295,7 +9327,8 @@ function openMetricDetail(metricType, passedBio, passedLastWorkout) {
     const { totalSets, avgRpe } = getWorkoutSetsAndRpe(lastWorkout);
     const hrr = calculateHRRecovery(bio.readiness, avgRpe);
     
-    const hist = getHistory().slice(-7);
+    let hist = getHistory().filter(w => w.endTime >= fourWeeksAgo);
+    if (hist.length < 5) hist = getHistory().slice(-7);
     const hrrVals = hist.map(w => {
       const wBio = getEffectiveBiometrics(w);
       const { avgRpe: wRpe } = getWorkoutSetsAndRpe(w);
@@ -9310,11 +9343,11 @@ function openMetricDetail(metricType, passedBio, passedLastWorkout) {
       const diff = newest - oldest;
       const absDiff = Math.round(Math.abs(diff));
       if (diff > 1) {
-        trajectoryMsg = `1-minute heart rate recovery is improving (+${absDiff} BPM over the last ${hrrVals.length} sessions), signaling stronger vagal tone and enhanced cardiovascular fitness.`;
+        trajectoryMsg = `1-minute heart rate recovery is improving (+${absDiff} BPM over the last 4 weeks), signaling stronger vagal tone and enhanced cardiovascular fitness.`;
       } else if (diff < -1) {
-        trajectoryMsg = `1-minute heart rate recovery has slowed down (-${absDiff} BPM over the last ${hrrVals.length} sessions), hinting at parasympathetic suppression or fatigue.`;
+        trajectoryMsg = `1-minute heart rate recovery has slowed down (-${absDiff} BPM over the last 4 weeks), hinting at parasympathetic suppression or fatigue.`;
       } else {
-        trajectoryMsg = `1-minute heart rate recovery remains stable (change of ${diff > 0 ? '+' : ''}${Math.round(diff)} BPM over the last ${hrrVals.length} sessions), indicating steady heart rate deceleration.`;
+        trajectoryMsg = `1-minute heart rate recovery remains stable (change of ${diff > 0 ? '+' : ''}${Math.round(diff)} BPM over the last 4 weeks), indicating steady heart rate deceleration.`;
       }
     }
 
@@ -9341,7 +9374,8 @@ function openMetricDetail(metricType, passedBio, passedLastWorkout) {
     const score = bio.sleep ?? "–";
     const efficiency = fb.sleepEfficiency ?? null;
     
-    const trailing = (fb.trailingSleep || []).filter(v => v != null);
+    const trailing = (fb.trailingSleep || []).slice(-28).filter(v => v != null);
+    const trailingDates = (fb.trailingDates || []).slice(-28);
     
     let trajectoryMsg = "No historical sleep score trend available.";
     if (trailing.length >= 2) {
@@ -9350,17 +9384,17 @@ function openMetricDetail(metricType, passedBio, passedLastWorkout) {
       const diff = newest - oldest;
       const absDiff = Math.abs(diff);
       if (diff > 0) {
-        trajectoryMsg = `Sleep quality is trending upwards (+${absDiff} points over the last ${trailing.length} days), providing better physiological repair and CNS rejuvenation.`;
+        trajectoryMsg = `Sleep quality is trending upwards (+${absDiff} points over the last 4 weeks), providing better physiological repair and CNS rejuvenation.`;
       } else if (diff < 0) {
-        trajectoryMsg = `Sleep quality is trending downwards (-${absDiff} points over the last ${trailing.length} days), which could delay recovery and decrease readiness.`;
+        trajectoryMsg = `Sleep quality is trending downwards (-${absDiff} points over the last 4 weeks), which could delay recovery and decrease readiness.`;
       } else {
-        trajectoryMsg = `Sleep quality has stabilized at ${newest} points over the last ${trailing.length} days, offering consistent support for daily recovery.`;
+        trajectoryMsg = `Sleep quality has stabilized at ${newest} points over the last 4 weeks, offering consistent support for daily recovery.`;
       }
     }
 
     let chartHtml = "";
     if (trailing.length >= 2) {
-      chartHtml = `<div style="height: 100px; margin: 16px 0;">${renderSheetChart(trailing, fb.trailingDates || [], "Sleep Score")}</div>`;
+      chartHtml = `<div style="height: 100px; margin: 16px 0;">${renderSheetChart(trailing, trailingDates, "Sleep Score")}</div>`;
     }
     
     content = `
@@ -9380,24 +9414,29 @@ function openMetricDetail(metricType, passedBio, passedLastWorkout) {
     const fatigue = calculateFatigueTrend(lastWorkout);
     const sign = fatigue.deltaPct >= 0 ? "+" : "";
     
+    let hist = getHistory().filter(w => w.endTime >= fourWeeksAgo);
+    if (hist.length < 5) hist = getHistory().slice(-7);
+    const evrVals = hist.map(w => calculateEVR(w));
+    const dates = hist.map(w => ghLocalDate(w.endTime));
+    
     let trajectoryMsg = "No historical fatigue trend available.";
-    if (fatigue.values && fatigue.values.length >= 2) {
-      const oldest = fatigue.values[0];
-      const newest = fatigue.values[fatigue.values.length - 1];
+    if (evrVals.length >= 2) {
+      const oldest = evrVals[0];
+      const newest = evrVals[evrVals.length - 1];
       const pct = oldest > 0 ? ((newest - oldest) / oldest) * 100 : 0;
       const absPct = Math.abs(pct).toFixed(1);
       if (pct > 1) {
-        trajectoryMsg = `Neuromuscular efficiency (EVR) is on an upward trend (+${absPct}% over the last ${fatigue.values.length} sessions), demonstrating positive strength adaptation and neural efficiency.`;
+        trajectoryMsg = `Neuromuscular efficiency (EVR) is on an upward trend (+${absPct}% over the last 4 weeks), demonstrating positive strength adaptation and neural efficiency.`;
       } else if (pct < -1) {
-        trajectoryMsg = `Neuromuscular efficiency (EVR) is on a downward trend (-${absPct}% over the last ${fatigue.values.length} sessions), signaling fatigue accumulation or reduced force output.`;
+        trajectoryMsg = `Neuromuscular efficiency (EVR) is on a downward trend (-${absPct}% over the last 4 weeks), signaling fatigue accumulation or reduced force output.`;
       } else {
-        trajectoryMsg = `Neuromuscular efficiency (EVR) has remained steady (change of ${pct > 0 ? '+' : ''}${pct.toFixed(1)}% over the last ${fatigue.values.length} sessions), showing stable lifting output.`;
+        trajectoryMsg = `Neuromuscular efficiency (EVR) has remained steady (change of ${pct > 0 ? '+' : ''}${pct.toFixed(1)}% over the last 4 weeks), showing stable lifting output.`;
       }
     }
 
     let chartHtml = "";
-    if (fatigue.values.length >= 2) {
-      chartHtml = `<div style="height: 100px; margin: 16px 0;">${renderSheetChart(fatigue.values, Array.from({length: fatigue.values.length}, (_, i) => i.toString()), "EVR")}</div>`;
+    if (evrVals.length >= 2) {
+      chartHtml = `<div style="height: 100px; margin: 16px 0;">${renderSheetChart(evrVals, dates, "EVR")}</div>`;
     }
     
     content = `
@@ -9443,6 +9482,23 @@ function renderSheetChart(values, dates, label) {
     ${dots}
     <text x="${padL}" y="${H}" font-size="7" fill="var(--muted)">${dates[0] ? anaFmtDay(dates[0]) : ''}</text>
     <text x="${W - padR}" y="${H}" text-anchor="end" font-size="7" fill="var(--muted)">${dates[N-1] ? anaFmtDay(dates[N-1]) : ''}</text>
+  </svg>`;
+}
+
+function renderMiniSparkline(values) {
+  if (!values || values.length < 2) return "";
+  const max = Math.max(...values);
+  const min = Math.min(...values);
+  const range = max - min || 1;
+  const W = 80, H = 14;
+  const N = values.length;
+  const x = i => (i / (N - 1)) * W;
+  const y = v => H - ((v - min) / range) * H;
+  const points = values.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+  const diff = values[N - 1] - values[0];
+  const stroke = diff > 0 ? '#28A745' : (diff < 0 ? '#DC3545' : '#8B7A5C');
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="overflow:visible; display:block;">
+    <polyline points="${points}" fill="none" stroke="${stroke}" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
   </svg>`;
 }
 
