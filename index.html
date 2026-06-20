@@ -9026,6 +9026,9 @@ function renderAnalysis() {
   const sleepTarget = calculateSleepTarget(strain, bio.sleep);
   const fatigue = calculateFatigueTrend(lastWorkout);
   
+  ST.lastAnalysisBio = bio;
+  ST.lastAnalysisWorkout = lastWorkout;
+  
   let summaryLine1 = "";
   let summaryLine2 = "";
   if (bio.readiness >= 80) {
@@ -9079,7 +9082,7 @@ function renderAnalysis() {
     <!-- Chronological Metric Grid -->
     <div class="ana-metric-grid">
       <!-- 1. Waking Readiness -->
-      <div class="ana-metric-card glowing-card" onclick="openMetricDetail('readiness', ${JSON.stringify(bio)}, ${JSON.stringify(lastWorkout)})">
+      <div class="ana-metric-card glowing-card" onclick="openMetricDetail('readiness')">
         <div class="ana-card-eyebrow">Before Workout</div>
         <div class="ana-card-val">${bio.readiness}</div>
         <div class="ana-card-lbl">Waking Readiness</div>
@@ -9087,7 +9090,7 @@ function renderAnalysis() {
       </div>
 
       <!-- 2. Workout Strain -->
-      <div class="ana-metric-card" onclick="openMetricDetail('strain', ${JSON.stringify(bio)}, ${JSON.stringify(lastWorkout)})">
+      <div class="ana-metric-card" onclick="openMetricDetail('strain')">
         <div class="ana-card-eyebrow">During Workout</div>
         <div class="ana-card-val">${strain}</div>
         <div class="ana-card-lbl">Workout Strain</div>
@@ -9095,7 +9098,7 @@ function renderAnalysis() {
       </div>
 
       <!-- 3. CNS Capacity -->
-      <div class="ana-metric-card" onclick="openMetricDetail('cns', ${JSON.stringify(bio)}, ${JSON.stringify(lastWorkout)})">
+      <div class="ana-metric-card" onclick="openMetricDetail('cns')">
         <div class="ana-card-eyebrow">Post-Workout</div>
         <div class="ana-card-val">${cns}%</div>
         <div class="ana-card-lbl">CNS Capacity</div>
@@ -9103,7 +9106,7 @@ function renderAnalysis() {
       </div>
 
       <!-- 4. HR Recovery -->
-      <div class="ana-metric-card" onclick="openMetricDetail('hrr', ${JSON.stringify(bio)}, ${JSON.stringify(lastWorkout)})">
+      <div class="ana-metric-card" onclick="openMetricDetail('hrr')">
         <div class="ana-card-eyebrow">Post-Workout</div>
         <div class="ana-card-val">-${hrr}</div>
         <div class="ana-card-lbl">HR Recovery (1m)</div>
@@ -9111,7 +9114,7 @@ function renderAnalysis() {
       </div>
 
       <!-- 5. Sleep Target -->
-      <div class="ana-metric-card" onclick="openMetricDetail('sleep', ${JSON.stringify(bio)}, ${JSON.stringify(lastWorkout)})">
+      <div class="ana-metric-card" onclick="openMetricDetail('sleep')">
         <div class="ana-card-eyebrow">Recovery Action</div>
         <div class="ana-card-val" style="font-size: 21px; margin-top: 4px; margin-bottom: 4px;">${sleepTarget.h}h ${sleepTarget.m}m</div>
         <div class="ana-card-lbl">Sleep Target</div>
@@ -9119,7 +9122,7 @@ function renderAnalysis() {
       </div>
 
       <!-- 6. Fatigue Trend -->
-      <div class="ana-metric-card" onclick="openMetricDetail('fatigue', ${JSON.stringify(bio)}, ${JSON.stringify(lastWorkout)})">
+      <div class="ana-metric-card" onclick="openMetricDetail('fatigue')">
         <div class="ana-card-eyebrow">Recovery Action</div>
         <div class="ana-card-val">${fatigue.deltaPct >= 0 ? '+' : ''}${fatigue.deltaPct}%</div>
         <div class="ana-card-lbl">Fatigue Trend</div>
@@ -9140,18 +9143,46 @@ function renderAnalysis() {
   requestAnimationFrame(() => initChartHover(fb));
 }
 
-function openMetricDetail(metricType, bio, lastWorkout) {
+function openMetricDetail(metricType, passedBio, passedLastWorkout) {
   try { if (typeof haptic === 'function') haptic('tap'); } catch (e) {}
+  
+  const lastWorkout = passedLastWorkout || ST.lastAnalysisWorkout || getAnalyzedWorkout();
+  if (!lastWorkout) return;
+  const bio = passedBio || ST.lastAnalysisBio || getEffectiveBiometrics(lastWorkout);
+  if (!bio) return;
+
   let title = "";
   let content = "";
   const fb = ST.fitbit;
   const dateStr = ghLocalDate(lastWorkout.endTime);
+
+  const makeTrajectoryBox = (msg) => `
+    <div style="background: var(--bg-card, rgba(42,36,33,0.03)); border-left: 3.5px solid var(--accent, #8B7A5C); padding: 12px 14px; font-size: 13px; border-radius: 4px; margin: 16px 0; line-height: 1.45;">
+      <strong style="color: var(--text-primary, #1A1714); display: block; margin-bottom: 4px; font-size: 11px; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.05em;">Trajectory Analysis</strong>
+      <span style="color: var(--text-secondary, #5A534A);">${msg}</span>
+    </div>
+  `;
 
   if (metricType === 'readiness') {
     title = "Waking Readiness";
     const status = bio.readiness >= 80 ? "excellent" : (bio.readiness < 65 ? "suppressed" : "steady");
     const trailing = (fb.trailingReadiness || []).filter(v => v != null);
     
+    let trajectoryMsg = "No historical readiness trend available.";
+    if (trailing.length >= 2) {
+      const oldest = trailing[0];
+      const newest = trailing[trailing.length - 1];
+      const diff = newest - oldest;
+      const absDiff = Math.abs(diff);
+      if (diff > 0) {
+        trajectoryMsg = `Your waking readiness is trending upwards (+${absDiff} points over the last ${trailing.length} days), indicating positive adaptation and a higher capacity to absorb training stress.`;
+      } else if (diff < 0) {
+        trajectoryMsg = `Your waking readiness is trending downwards (-${absDiff} points over the last ${trailing.length} days), suggesting accumulated fatigue. Consider prioritizing active recovery.`;
+      } else {
+        trajectoryMsg = `Your waking readiness has remained stable at ${newest} points over the last ${trailing.length} days, showing a consistent recovery profile.`;
+      }
+    }
+
     let chartHtml = "";
     if (trailing.length >= 2) {
       chartHtml = `<div style="height: 100px; margin: 16px 0;">${renderSheetChart(trailing, fb.trailingDates || [], "Readiness")}</div>`;
@@ -9164,6 +9195,7 @@ function openMetricDetail(metricType, bio, lastWorkout) {
         It is computed from sleep duration, sleep quality, heart rate variability (HRV), and resting heart rate (RHR).
         Your score of <strong>${bio.readiness}</strong> suggests your body was <strong>${status}</strong> to absorb workout strain during this session.
       </div>
+      ${makeTrajectoryBox(trajectoryMsg)}
       ${chartHtml}
       <div style="font-size: 11.5px; color: var(--muted); font-family: var(--font-mono); margin-top: 10px;">
         As of: ${anaFmtDay(dateStr, true)}
@@ -9180,6 +9212,21 @@ function openMetricDetail(metricType, bio, lastWorkout) {
     const strains = hist.map(w => calculateWorkoutStrain(w));
     const dates = hist.map(w => ghLocalDate(w.endTime));
     
+    let trajectoryMsg = "No historical strain trend available.";
+    if (strains.length >= 2) {
+      const oldest = strains[0];
+      const newest = strains[strains.length - 1];
+      const diff = newest - oldest;
+      const absDiff = Math.round(Math.abs(diff));
+      if (diff > 2) {
+        trajectoryMsg = `Workout strain is on an upward trajectory (+${absDiff} points over the last ${strains.length} sessions), indicating progressive training volume and overload.`;
+      } else if (diff < -2) {
+        trajectoryMsg = `Workout strain is trending downwards (-${absDiff} points over the last ${strains.length} sessions), reflecting deliberate load reduction or recovery programming.`;
+      } else {
+        trajectoryMsg = `Workout strain has remained consistent (change of ${diff > 0 ? '+' : ''}${Math.round(diff)} points over the last ${strains.length} sessions), keeping physical demands steady.`;
+      }
+    }
+
     let chartHtml = "";
     if (strains.length >= 2) {
       chartHtml = `<div style="height: 100px; margin: 16px 0;">${renderSheetChart(strains, dates, "Strain")}</div>`;
@@ -9191,6 +9238,7 @@ function openMetricDetail(metricType, bio, lastWorkout) {
         Workout Strain measures the cumulative physiological stress of a training session. It is dynamically calculated from your active training duration (<strong>${durMin} minutes</strong>), total working sets (<strong>${totalSets} sets</strong>), and average RPE (<strong>${avgRpe.toFixed(1)}</strong>).
         A score of <strong>${strain}</strong> indicates a high-intensity overload session designed to trigger muscle growth, requiring active recovery.
       </div>
+      ${makeTrajectoryBox(trajectoryMsg)}
       ${chartHtml}
     `;
   }
@@ -9209,6 +9257,21 @@ function openMetricDetail(metricType, bio, lastWorkout) {
     });
     const dates = hist.map(w => ghLocalDate(w.endTime));
     
+    let trajectoryMsg = "No historical CNS capacity trend available.";
+    if (cnsVals.length >= 2) {
+      const oldest = cnsVals[0];
+      const newest = cnsVals[cnsVals.length - 1];
+      const diff = newest - oldest;
+      const absDiff = Math.round(Math.abs(diff));
+      if (diff > 2) {
+        trajectoryMsg = `Post-workout CNS capacity has improved (+${absDiff}% reserve over the last ${cnsVals.length} sessions), indicating your nervous system is recovering faster and adapting well.`;
+      } else if (diff < -2) {
+        trajectoryMsg = `Post-workout CNS capacity has declined (-${absDiff}% reserve over the last ${cnsVals.length} sessions), suggesting central fatigue is accumulating. Consider managing volume.`;
+      } else {
+        trajectoryMsg = `Post-workout CNS capacity has held steady (change of ${diff > 0 ? '+' : ''}${Math.round(diff)}% over the last ${cnsVals.length} sessions), showing balanced nervous system recovery.`;
+      }
+    }
+
     let chartHtml = "";
     if (cnsVals.length >= 2) {
       chartHtml = `<div style="height: 100px; margin: 16px 0;">${renderSheetChart(cnsVals, dates, "CNS %")}</div>`;
@@ -9221,6 +9284,7 @@ function openMetricDetail(metricType, bio, lastWorkout) {
         High-load lifting causes central fatigue, dropping your capacity by <strong>${drop}%</strong> relative to your waking readiness. 
         Your current post-workout capacity of <strong>${cns}%</strong> indicates that your nervous system is <strong>${cnsStatus}</strong>.
       </div>
+      ${makeTrajectoryBox(trajectoryMsg)}
       ${chartHtml}
     `;
   }
@@ -9237,6 +9301,21 @@ function openMetricDetail(metricType, bio, lastWorkout) {
     });
     const dates = hist.map(w => ghLocalDate(w.endTime));
     
+    let trajectoryMsg = "No historical heart rate recovery trend available.";
+    if (hrrVals.length >= 2) {
+      const oldest = hrrVals[0];
+      const newest = hrrVals[hrrVals.length - 1];
+      const diff = newest - oldest;
+      const absDiff = Math.round(Math.abs(diff));
+      if (diff > 1) {
+        trajectoryMsg = `1-minute heart rate recovery is improving (+${absDiff} BPM over the last ${hrrVals.length} sessions), signaling stronger vagal tone and enhanced cardiovascular fitness.`;
+      } else if (diff < -1) {
+        trajectoryMsg = `1-minute heart rate recovery has slowed down (-${absDiff} BPM over the last ${hrrVals.length} sessions), hinting at parasympathetic suppression or fatigue.`;
+      } else {
+        trajectoryMsg = `1-minute heart rate recovery remains stable (change of ${diff > 0 ? '+' : ''}${Math.round(diff)} BPM over the last ${hrrVals.length} sessions), indicating steady heart rate deceleration.`;
+      }
+    }
+
     let chartHtml = "";
     if (hrrVals.length >= 2) {
       chartHtml = `<div style="height: 100px; margin: 16px 0;">${renderSheetChart(hrrVals, dates, "HRR (BPM)")}</div>`;
@@ -9249,6 +9328,7 @@ function openMetricDetail(metricType, bio, lastWorkout) {
         It is a direct indicator of parasympathetic nervous system tone and cardiovascular conditioning.
         A drop of <strong>${hrr} BPM</strong> represents a strong and healthy cardiovascular transition from fight-or-flight to rest.
       </div>
+      ${makeTrajectoryBox(trajectoryMsg)}
       ${chartHtml}
     `;
   }
@@ -9260,6 +9340,22 @@ function openMetricDetail(metricType, bio, lastWorkout) {
     const efficiency = fb.sleepEfficiency ?? null;
     
     const trailing = (fb.trailingSleep || []).filter(v => v != null);
+    
+    let trajectoryMsg = "No historical sleep score trend available.";
+    if (trailing.length >= 2) {
+      const oldest = trailing[0];
+      const newest = trailing[trailing.length - 1];
+      const diff = newest - oldest;
+      const absDiff = Math.abs(diff);
+      if (diff > 0) {
+        trajectoryMsg = `Sleep quality is trending upwards (+${absDiff} points over the last ${trailing.length} days), providing better physiological repair and CNS rejuvenation.`;
+      } else if (diff < 0) {
+        trajectoryMsg = `Sleep quality is trending downwards (-${absDiff} points over the last ${trailing.length} days), which could delay recovery and decrease readiness.`;
+      } else {
+        trajectoryMsg = `Sleep quality has stabilized at ${newest} points over the last ${trailing.length} days, offering consistent support for daily recovery.`;
+      }
+    }
+
     let chartHtml = "";
     if (trailing.length >= 2) {
       chartHtml = `<div style="height: 100px; margin: 16px 0;">${renderSheetChart(trailing, fb.trailingDates || [], "Sleep Score")}</div>`;
@@ -9273,6 +9369,7 @@ function openMetricDetail(metricType, bio, lastWorkout) {
         Your target for tonight is <strong>${sleepTarget.h} hours and ${sleepTarget.m} minutes</strong>. 
         Yesterday's sleep quality score was <strong>${score}</strong>${efficiency ? ` with ${efficiency}% efficiency` : ''}.
       </div>
+      ${makeTrajectoryBox(trajectoryMsg)}
       ${chartHtml}
     `;
   }
@@ -9281,6 +9378,21 @@ function openMetricDetail(metricType, bio, lastWorkout) {
     const fatigue = calculateFatigueTrend(lastWorkout);
     const sign = fatigue.deltaPct >= 0 ? "+" : "";
     
+    let trajectoryMsg = "No historical fatigue trend available.";
+    if (fatigue.values && fatigue.values.length >= 2) {
+      const oldest = fatigue.values[0];
+      const newest = fatigue.values[fatigue.values.length - 1];
+      const pct = oldest > 0 ? ((newest - oldest) / oldest) * 100 : 0;
+      const absPct = Math.abs(pct).toFixed(1);
+      if (pct > 1) {
+        trajectoryMsg = `Neuromuscular efficiency (EVR) is on an upward trend (+${absPct}% over the last ${fatigue.values.length} sessions), demonstrating positive strength adaptation and neural efficiency.`;
+      } else if (pct < -1) {
+        trajectoryMsg = `Neuromuscular efficiency (EVR) is on a downward trend (-${absPct}% over the last ${fatigue.values.length} sessions), signaling fatigue accumulation or reduced force output.`;
+      } else {
+        trajectoryMsg = `Neuromuscular efficiency (EVR) has remained steady (change of ${pct > 0 ? '+' : ''}${pct.toFixed(1)}% over the last ${fatigue.values.length} sessions), showing stable lifting output.`;
+      }
+    }
+
     let chartHtml = "";
     if (fatigue.values.length >= 2) {
       chartHtml = `<div style="height: 100px; margin: 16px 0;">${renderSheetChart(fatigue.values, Array.from({length: fatigue.values.length}, (_, i) => i.toString()), "EVR")}</div>`;
@@ -9294,6 +9406,7 @@ function openMetricDetail(metricType, bio, lastWorkout) {
         Today's EVR of <strong>${fatigue.currentEVR.toFixed(1)}</strong> is <strong>${sign}${fatigue.deltaPct}%</strong> relative to your baseline of similar workouts (<strong>${fatigue.baselineEVR.toFixed(1)}</strong>).
         A positive trend shows neural adaptation and recovery, while a negative trend warns of systemic fatigue.
       </div>
+      ${makeTrajectoryBox(trajectoryMsg)}
       ${chartHtml}
     `;
   }
