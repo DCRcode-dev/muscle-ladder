@@ -4776,11 +4776,15 @@ let ST = {
   workoutDrafts: {},    // key: `${key}-${si}` | `${key}-wu` → {w,r} typed-but-unlogged values
   workoutSubs: {},      // key: `${sessionId}_${exIdx}` → substituted exercise name (session-scoped)
   workoutSubMeta: {},   // key: `${sessionId}_${exIdx}` → {sets,reps} custom counts for a substituted slot
+  workoutAutoSubs: {},   // key: `${sessionId}_${exIdx}` → automatically substituted exercise name
+  workoutAutoSubMeta: {},// key: `${sessionId}_${exIdx}` → {sets,reps} default counts for an auto-substituted slot
+  blacklistedExercises: new Set(), // persistent: normalised names of exercises to never show again
   workoutAdditions: [], // [{name,muscle,sets,reps}] accessory exercises added via "+"; index n → key `add_${n}`
   dismissedWarmups: new Set(),  // in-memory: normalised exercise names with warm-up dismissed
   syncQueue: [],        // pending Sheets pushes — drained on 'online' or next boot
   audioCtx: null,
   workoutStart: null,
+  workoutCommitted: false, // true once a workout is committed → blocks saveNow from resurrecting the live snapshot
   durationSecs: 0,
   durationTimer: null,
   expandedCards: new Set(),
@@ -4845,7 +4849,7 @@ function saveSettings(s) { LS.set('dcrgym_settings', s); }
 // Schema-versioned, non-destructive, with rolling last-good backup.
 // History must survive every app update. Period.
 const SCHEMA_VERSION = 2;
-const APP_BUILD = '2026.06.20 · ota-8 · integrate-abs';
+const APP_BUILD = '2026.06.20 · ota-10 · resume-pill-fix';
 
 function migrateStorage() {
   const v = LS.get('dcrgym_schema_version', 1);
@@ -4894,6 +4898,81 @@ function additionByKey(key) {
 
 // Live exercise identity — travel swap and session substitution aware.
 // THE name that gets stamped on sets and used for history lookup.
+// ── Auto-substitution engine ──────────────────────────────────────────────────
+function getTravelExDetails(subName) {
+  const norm = normalizeEx(subName);
+  for (const val of Object.values(TRAVEL_MAP)) {
+    if (normalizeEx(val.name) === norm) return val;
+  }
+  return null;
+}
+
+function autoSubstituteExercise(key, exIdx, ex) {
+  const originalName = stripSuperset(ex.name);
+  const muscle = getMuscle(originalName);
+  const candidates = SUB_LIBRARY[muscle] || [];
+  const isTravel = ST.travelMode;
+  const targetTag = isTravel ? 'Travel' : 'Gym';
+
+  const match = candidates.find(c => {
+    const norm = normalizeEx(c.name);
+    if (c.tag !== targetTag) return false;
+    if (ST.blacklistedExercises.has(norm)) return false;
+    if (norm === normalizeEx(originalName)) return false;
+    // Must not be the currently active auto-sub name (avoid loops)
+    const currentDisplay = liveExName(key, ex);
+    if (norm === normalizeEx(currentDisplay)) return false;
+    return true;
+  });
+
+  if (match) {
+    ST.workoutAutoSubs[key] = match.name;
+    if (isTravel) {
+      const details = getTravelExDetails(match.name);
+      ST.workoutAutoSubMeta[key] = {
+        sets: details ? details.sets : (ex.workingSets || 3),
+        reps: details ? details.reps : (ex.reps || '12–15')
+      };
+    } else {
+      ST.workoutAutoSubMeta[key] = {
+        sets: ex.workingSets || 3,
+        reps: ex.reps || '8–10'
+      };
+    }
+    return true;
+  }
+  return false;
+}
+
+function applyAutoSubstitutions() {
+  if (!ST.workoutAutoSubs) ST.workoutAutoSubs = {};
+  if (!ST.workoutAutoSubMeta) ST.workoutAutoSubMeta = {};
+  
+  // Clear previous auto-substitutions
+  for (const k in ST.workoutAutoSubs) delete ST.workoutAutoSubs[k];
+  for (const k in ST.workoutAutoSubMeta) delete ST.workoutAutoSubMeta[k];
+
+  const prog = PROGRAMS.find(p => p.id === ST.currentProgram);
+  const sess = prog && prog.sessions.find(s => s.id === ST.currentSession);
+  if (!sess) return;
+
+  sess.exercises.forEach((ex, exIdx) => {
+    const key = `${sess.id}_${exIdx}`;
+    if (ST.workoutSubs && ST.workoutSubs[key]) return; // Skip if manually subbed
+
+    const originalName = stripSuperset(ex.name);
+    let displayName = originalName;
+    if (ST.travelMode) {
+      const travel = TRAVEL_MAP[normalizeEx(originalName)];
+      if (travel) displayName = travel.name;
+    }
+
+    if (ST.blacklistedExercises.has(normalizeEx(displayName))) {
+      autoSubstituteExercise(key, exIdx, ex);
+    }
+  });
+}
+
 function liveExName(key, ex) {
   // Additions own their identity outright — never travel/sub-mapped.
   if (key && key.indexOf('add_') === 0) {
@@ -4901,9 +4980,10 @@ function liveExName(key, ex) {
     return a ? a.name : (ex ? stripSuperset(ex.name) : '');
   }
   const name = stripSuperset(ex.name);
+  if (ST.workoutSubs && ST.workoutSubs[key]) return ST.workoutSubs[key];
+  if (ST.workoutAutoSubs && ST.workoutAutoSubs[key]) return ST.workoutAutoSubs[key];
   const travel = ST.travelMode && TRAVEL_MAP[normalizeEx(name)];
   if (travel) return travel.name;
-  if (ST.workoutSubs && ST.workoutSubs[key]) return ST.workoutSubs[key];
   return name;
 }
 
@@ -4916,6 +4996,8 @@ function effSetCount(key, ex) {
   }
   if (ST.workoutSubs && ST.workoutSubs[key] && ST.workoutSubMeta && ST.workoutSubMeta[key] && ST.workoutSubMeta[key].sets)
     return ST.workoutSubMeta[key].sets;
+  if (ST.workoutAutoSubs && ST.workoutAutoSubs[key] && ST.workoutAutoSubMeta && ST.workoutAutoSubMeta[key] && ST.workoutAutoSubMeta[key].sets)
+    return ST.workoutAutoSubMeta[key].sets;
   return (ex && ex.workingSets) || 3;
 }
 function effReps(key, ex) {
@@ -4925,6 +5007,11 @@ function effReps(key, ex) {
   }
   if (ST.workoutSubs && ST.workoutSubs[key] && ST.workoutSubMeta && ST.workoutSubMeta[key] && ST.workoutSubMeta[key].reps)
     return ST.workoutSubMeta[key].reps;
+  if (ST.workoutAutoSubs && ST.workoutAutoSubs[key] && ST.workoutAutoSubMeta && ST.workoutAutoSubMeta[key] && ST.workoutAutoSubMeta[key].reps)
+    return ST.workoutAutoSubMeta[key].reps;
+  const name = ex ? stripSuperset(ex.name) : '';
+  const travel = ST.travelMode && TRAVEL_MAP[normalizeEx(name)];
+  if (travel) return travel.reps;
   return (ex && ex.reps) || '8–10';
 }
 // Resolve the exercise descriptor behind any workout key (program slot or
@@ -4955,6 +5042,8 @@ function buildWorkoutPayload() {
     drafts: ST.workoutDrafts || {},
     subs: ST.workoutSubs || {},
     subMeta: ST.workoutSubMeta || {},
+    autoSubs: ST.workoutAutoSubs || {},
+    autoSubMeta: ST.workoutAutoSubMeta || {},
     additions: ST.workoutAdditions || [],
     notes: ST.workoutNotes || {},
     travelMode: ST.travelMode,
@@ -4972,6 +5061,7 @@ function buildWorkoutPayload() {
 // Synchronous, un-debounced write — called on every set checkmark and on
 // visibilitychange. A logged set is on disk before the ripple finishes.
 function saveNow() {
+  if (ST.workoutCommitted) return; // committed/finished — never resurrect the live snapshot
   if (!ST.currentSession || !ST.workoutStart) return;
   LS.set('dcrgym_current_workout', buildWorkoutPayload());
 }
@@ -6935,7 +7025,8 @@ function exerciseCardHTML(ex, key, i, isAddition) {
   const cueAvail = !!FORM_CUES[normalizeEx(name)];
   const travel = !isAddition && ST.travelMode && TRAVEL_MAP[normalizeEx(name)];
   const displayName = liveExName(key, ex);
-  const subbed = !isAddition && !travel && ST.workoutSubs && ST.workoutSubs[key];
+  const subbed = !isAddition && ST.workoutSubs && ST.workoutSubs[key];
+  const autoSubbed = !isAddition && ST.workoutAutoSubs && ST.workoutAutoSubs[key];
   const loggedSets = ST.workoutSets[key] || [];
 
   // Sets count / reps — honours custom counts on subbed slots & additions
@@ -7045,15 +7136,20 @@ function exerciseCardHTML(ex, key, i, isAddition) {
     <div class="ex-card-header" onclick="toggleCard('${key}')">
       <div class="ex-card-header-left">
         <div class="ex-name">${displayName} ${isCompleted ? '<span class="ex-check">✓</span>' : ''}</div>
-        ${subbed ? `<div class="ex-sub-note">⇄ swapped from ${name}</div>` : (isAddition ? `<div class="ex-sub-note">✚ added exercise</div>` : '')}
+        ${subbed ? `<div class="ex-sub-note">⇄ swapped from ${name}</div>` : 
+          (autoSubbed ? `<div class="ex-sub-note">⇄ auto-swapped from ${name} (blacklisted)</div>` : 
+          (isAddition ? `<div class="ex-sub-note">✚ added exercise</div>` : ''))}
         ${muscleBadgeHtml(muscle)}
         ${lastPerf ? `<div class="ex-last-perf">${lastPerf[lastPerf.length-1].w}kg × ${lastPerf[lastPerf.length-1].r} · ${relDay(lastPerfFull.endTime)}</div>` : ''}
-        <div class="ex-meta">${totalSets} × ${travel ? travel.reps : reps} · ${formatDuration(restSec)} rest</div>
+        <div class="ex-meta">${totalSets} × ${reps} · ${formatDuration(restSec)} rest</div>
       </div>
       <div class="ex-card-actions">
         <button class="ex-graph-btn" onclick="showProgressGraph(event,'${name}')" title="Progress">⬆</button>
         ${cueAvail || true ? `<button class="ex-cue-btn" onclick="showCue(event,'${key}',${i})">?</button>` : ''}
-        ${isAddition ? `<button class="ex-cue-btn ex-remove-btn" onclick="removeAddition(event,${i})" title="Remove">✕</button>` : (travel ? '' : `<button class="ex-cue-btn" onclick="showSubs(event,'${key}',${i})" title="Substitutions">⇄</button>`)}
+        ${isAddition ? `<button class="ex-cue-btn ex-remove-btn" onclick="removeAddition(event,${i})" title="Remove">✕</button>` : `
+          <button class="ex-cue-btn" onclick="showSubs(event,'${key}',${i})" title="Substitutions">⇄</button>
+          <button class="ex-cue-btn ex-remove-btn" onclick="blacklistExercisePrompt(event,'${key}')" title="Never show again">✕</button>
+        `}
         <button class="ex-note-btn${(ST.workoutNotes[key] || noteVal) ? ' has-note' : ''}" id="notebtn-${key}"
           onclick="toggleNotePanel(event,'${key}','${noteKey}')" title="Add note">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -7319,6 +7415,8 @@ function shimmerBtn(btn) {
 
 function setTravel(on) {
   ST.travelMode = on;
+  applyAutoSubstitutions();
+  saveNow();
   renderWorkout();
 }
 
@@ -7688,6 +7786,28 @@ function setSheetBody(html) {
   ST.openSubCard = null;
 }
 
+function blacklistExercisePrompt(e, key) {
+  if (e && e.stopPropagation) e.stopPropagation();
+  const slot = slotForKey(key);
+  if (!slot) return;
+  
+  const displayName = liveExName(key, slot.ex);
+  confirmSheet({
+    title: 'Never show this exercise?',
+    body: `Are you sure you want to blacklist <strong>${displayName}</strong>? It will not be shown again, and the app will automatically substitute it in the future.`,
+    confirmLabel: 'Blacklist exercise',
+    cancelLabel: 'Keep it',
+    destructive: true,
+    onConfirm: () => {
+      ST.blacklistedExercises.add(normalizeEx(displayName));
+      LS.set('dcrgym_blacklist', [...ST.blacklistedExercises]);
+      applyAutoSubstitutions();
+      saveNow();
+      renderWorkout();
+    }
+  });
+}
+
 function showSubs(e, key, exIdx) {
   if (e && e.stopPropagation) e.stopPropagation();
   const slot = slotForKey(key);
@@ -8048,6 +8168,7 @@ function startWorkoutFromHome(progId, sessId) {
 }
 
 function beginWorkout(progId, sessId) {
+  ST.workoutCommitted = false; // fresh live workout — re-enable snapshot autosave
   ST.currentProgram = progId;
   ST.currentSession = sessId;
   ST.travelMode = false;
@@ -8057,6 +8178,8 @@ function beginWorkout(progId, sessId) {
   ST.workoutDrafts = {};
   ST.workoutSubs   = {};
   ST.workoutSubMeta = {};
+  ST.workoutAutoSubs = {};
+  ST.workoutAutoSubMeta = {};
   ST.workoutAdditions = [];
   ST.expandedCards = new Set();
   ST.completedCards = new Set();
@@ -8074,6 +8197,7 @@ function beginWorkout(progId, sessId) {
   if (navigator.wakeLock) {
     navigator.wakeLock.request('screen').then(wl => { ST.wakeLock = wl; }).catch(() => {});
   }
+  applyAutoSubstitutions();
   saveNow();
   Maps('workout');
 }
@@ -8081,16 +8205,20 @@ function beginWorkout(progId, sessId) {
 function resumeWorkout() {
   const saved = LS.get('dcrgym_current_workout');
   if (!saved) return;
+  ST.workoutCommitted = false; // resuming a live workout — re-enable snapshot autosave
   ST.currentProgram = saved.programId;
   ST.currentSession = saved.sessionId;
   ST.workoutSets = saved.sets || {};
   ST.workoutDrafts = saved.drafts || {};   // typed-but-unlogged values come back
   ST.workoutSubs   = saved.subs   || {};   // session substitutions come back
   ST.workoutSubMeta = saved.subMeta || {}; // custom set/rep on substituted slots come back
+  ST.workoutAutoSubs = saved.autoSubs || {};
+  ST.workoutAutoSubMeta = saved.autoSubMeta || {};
   ST.workoutAdditions = saved.additions || []; // accessory additions come back
   ST.workoutNotes  = saved.notes  || {};   // session notes come back
   ST.travelMode = saved.travelMode || false;
   ST.travelLocked = saved.travelLocked || false;
+  applyAutoSubstitutions();
   
   ST.editingWorkoutId = saved.editingWorkoutId || null;
   ST.isBackdated = saved.isBackdated || false;
@@ -8444,7 +8572,14 @@ function commitWorkout() {
 
   saveHistory(hist);
   LS.remove('dcrgym_current_workout');
-  
+  // Workout is committed: block any in-flight saveNow (pending draft/save debounce,
+  // visibilitychange, pagehide) from re-creating the snapshot — otherwise the
+  // "Continue" pill reappears on Home after finishing. currentSession/currentProgram
+  // intentionally stay set; the finish screen below still reads them.
+  ST.workoutCommitted = true;
+  clearTimeout(_draftTimeout);
+  clearTimeout(_saveTimeout);
+
   const wasEditing = !!ST.editingWorkoutId;
   const wasBackdated = !!ST.isBackdated;
 
@@ -8605,6 +8740,12 @@ function dismissFinish() {
   const el = document.getElementById('finish-screen');
   if (el) el.remove();
   stopConfetti();
+  // Belt-and-suspenders: workout is fully done and we're leaving for Home. Null the
+  // live-session markers saveNow() keys off, so even outside the workoutCommitted
+  // guard nothing (late timer, visibilitychange, pagehide) can resurrect the
+  // snapshot / "Continue" pill. currentProgram stays for the Home silhouette/streak.
+  ST.currentSession = null;
+  ST.workoutStart = null;
   Maps('home');
 }
 
@@ -9053,6 +9194,7 @@ function editCompletedWorkout(workoutId) {
     const w = getHistory().find(x => String(x.id) === String(workoutId) || String(x.endTime) === String(workoutId));
     if (!w) return;
 
+    ST.workoutCommitted = false; // editing a workout — re-enable snapshot autosave
     ST.editingWorkoutId = w.id || w.endTime;
     ST.isBackdated = false;
     ST.currentProgram = w.programId;
@@ -9204,6 +9346,7 @@ function clickOpenCalDay(timestamp, dateStr) {
 }
 
 function beginBackdatedWorkout(progId, sessId, timestamp) {
+  ST.workoutCommitted = false; // new backdated log — re-enable snapshot autosave
   ST.currentProgram = progId;
   ST.currentSession = sessId;
   ST.isBackdated = true;
@@ -10556,6 +10699,23 @@ function renderSettings() {
   const el = document.getElementById('screen-settings');
   if (!el) return;
   const s = getSettings();
+  
+  const blacklist = ST.blacklistedExercises ? [...ST.blacklistedExercises] : [];
+  let blacklistHtml = '';
+  if (blacklist.length > 0) {
+    blacklistHtml = `
+    <div class="settings-section">
+      <div class="settings-section-title">Blacklisted Exercises</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.4">Exercises you have blocked. Tap "Remove" to restore them:</div>
+      ${blacklist.map(exName => `
+        <div class="settings-row">
+          <label style="text-transform:capitalize">${exName}</label>
+          <button onclick="unblacklistExercise('${exName.replace(/'/g, "\\'")}')" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:4px 10px;font-size:12px;cursor:pointer">Remove</button>
+        </div>
+      `).join('')}
+    </div>`;
+  }
+
   el.innerHTML = `
   <div class="screen-content">
     <div class="page-header"><h1>Settings</h1></div>
@@ -10597,6 +10757,7 @@ function renderSettings() {
         <span style="color:var(--muted)">›</span>
       </div>
     </div>
+    ${blacklistHtml}
     <div class="settings-section">
       <div class="settings-section-title">App</div>
       <div class="settings-row"><label>Sound effects</label>
@@ -10616,6 +10777,16 @@ function renderSettings() {
       </div>
     </div>
   </div>`;
+}
+
+function unblacklistExercise(exName) {
+  if (ST.blacklistedExercises) {
+    ST.blacklistedExercises.delete(normalizeEx(exName));
+    LS.set('dcrgym_blacklist', [...ST.blacklistedExercises]);
+    applyAutoSubstitutions();
+    saveNow();
+    renderSettings();
+  }
 }
 
 function saveSetting(key, val) {
@@ -11231,6 +11402,7 @@ function bootstrapApp() {
   // State hydration — fully wrapped, LS proxy handles any storage exceptions
   try {
     ST.defaultProgram = LS.get('dcrgym_default_prog');
+    ST.blacklistedExercises = new Set(LS.get('dcrgym_blacklist', []));
     // Auto-migrate URL — replace any old script URL with the current V9 deployment
     const CURRENT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxcAKZDYOzbSJ1a5OjqYRo9OyL9OIhEhoos8a4aQE5MB68atj7XAWQeyTuulmB6UFUt/exec';
     const storedSettings = LS.get('dcrgym_settings', null);
