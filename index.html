@@ -871,7 +871,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 .tl-dot { width: 7px; height: 7px; border-radius: 4px; display: inline-block; margin-right: 5px; vertical-align: 0; }
 .tl-behind { background: oklch(48% 0.130 35 / 0.85); }
 .tl-track  { background: oklch(70% 0.110 82 / 0.86); }
-.tl-done   { background: oklch(72.3% 0.190 145); box-shadow: 0 0 6px oklch(72.3% 0.190 145 / 0.55); }
+.tl-done   { background: oklch(56% 0.075 145); box-shadow: 0 0 6px oklch(56% 0.075 145 / 0.55); }
 
 /* ── Pearl ripple celebration ── */
 @keyframes pearlRippleA {
@@ -1682,21 +1682,21 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
 /* Calendar day popup */
 #cal-popup {
   position: fixed; inset: 0;
-  background: rgba(10,10,20,0.52);
-  backdrop-filter: blur(22px) saturate(1.5);
-  -webkit-backdrop-filter: blur(22px) saturate(1.5);
+  background: rgba(36,28,22,0.46);
+  backdrop-filter: blur(20px) saturate(1.25);
+  -webkit-backdrop-filter: blur(20px) saturate(1.25);
   z-index: 650; display: none; align-items: center; justify-content: center;
   padding: 32px 24px; opacity: 0; transition: opacity 280ms ease;
 }
 #cal-popup.visible { opacity: 1; }
 #cal-popup-panel {
   width: 100%; max-width: 340px;
-  background: linear-gradient(145deg, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0.16) 100%);
-  border: 1px solid rgba(255,255,255,0.58);
+  background: linear-gradient(150deg, #F4ECDD 0%, #E8DAC4 100%);
+  border: 1px solid rgba(42,36,33,0.12);
   border-radius: 28px;
-  box-shadow: 0 40px 100px rgba(0,0,0,0.42),
-              inset 0 1.5px 0 rgba(255,255,255,0.75),
-              inset 0 -1px 0 rgba(255,255,255,0.12);
+  box-shadow: 0 30px 80px rgba(46,34,24,0.34),
+              inset 0 1.5px 0 rgba(255,255,255,0.55),
+              inset 0 -1px 0 rgba(120,96,64,0.10);
   padding: 28px 24px 32px;
   transform: translateY(24px) scale(0.95);
   transition: transform var(--dur-slow) var(--ease);
@@ -1712,7 +1712,7 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
 }
 .cal-popup-date {
   font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase;
-  color: rgba(42,36,33,0.42); margin-bottom: 6px;
+  color: rgba(42,36,33,0.58); margin-bottom: 6px;
 }
 .cal-popup-session {
   font-family: var(--font-hero); font-style: italic;
@@ -1720,18 +1720,18 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   color: var(--charcoal); line-height: 1.1; margin-bottom: 4px;
 }
 .cal-popup-prog {
-  font-size: 10px; color: rgba(42,36,33,0.38);
+  font-size: 10px; color: rgba(42,36,33,0.52);
   text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 20px;
 }
 .cal-popup-stats { display: flex; gap: 10px; }
 .cal-popup-stat {
-  flex: 1; background: rgba(255,255,255,0.42);
+  flex: 1; background: #FBF6EC;
   border-radius: 12px; padding: 12px 10px;
-  border: 1px solid rgba(255,255,255,0.62); text-align: center;
+  border: 1px solid rgba(42,36,33,0.08); text-align: center;
 }
 .cal-popup-stat-val { font-size: 16px; font-weight: 700; color: var(--charcoal); font-variant-numeric: tabular-nums; }
 .cal-popup-stat-lbl {
-  font-size: 9px; color: rgba(42,36,33,0.42);
+  font-size: 9px; color: rgba(42,36,33,0.58);
   text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px;
 }
 
@@ -4849,7 +4849,7 @@ function saveSettings(s) { LS.set('dcrgym_settings', s); }
 // Schema-versioned, non-destructive, with rolling last-good backup.
 // History must survive every app update. Period.
 const SCHEMA_VERSION = 2;
-const APP_BUILD = '2026.06.20 · ota-10 · resume-pill + green-complete';
+const APP_BUILD = '2026.06.20 · ota-10 · resume + sage-complete + tan-popup';
 
 function migrateStorage() {
   const v = LS.get('dcrgym_schema_version', 1);
@@ -5949,7 +5949,7 @@ function buildSilhouetteSVG(targets, actuals, weekComplete) {
   //  dormant   (no sets)   flat warm-grey ink — clearly asleep
   //  behind    (<50%)      DEEP TERRACOTTA — attention, not reward
   //  on-track  (50–99%)    warm peach-gold
-  //  complete  (≥100%)     emerald-green bloom — the universal "done" reward
+  //  complete  (≥100%)     darker-sage bloom — calm "done" reward, on-theme
   // The old encoding returned the SAME gold for 50% and 95% — never again.
   function pct(muscle) {
     const t = targets[muscle] || 0, a = actuals[muscle] || 0;
@@ -5961,7 +5961,7 @@ function buildSilhouetteSVG(targets, actuals, weekComplete) {
     if (p === null)  return 'oklch(76% 0.014 60 / 0.30)';  // dormant ink
     if (p < 0.50)    return 'oklch(48% 0.130 35 / 0.85)';  // behind — deep terracotta
     if (p < 1.00)    return 'oklch(70% 0.110 82 / 0.86)';  // on-track — peach-gold
-    return 'oklch(72.3% 0.190 145 / 0.92)';                // complete — emerald green (--green)
+    return 'oklch(56% 0.075 145 / 0.92)';                  // complete — darker muted sage (warm theme)
   }
   function isActive(muscle) {
     const t = targets[muscle] || 0, a = actuals[muscle] || 0;
@@ -6093,13 +6093,13 @@ function buildSilhouetteSVG(targets, actuals, weekComplete) {
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
-    <!-- Emerald volumetric bloom — earned reward for 100%-complete muscles -->
+    <!-- Sage volumetric bloom — calm earned reward for 100%-complete muscles -->
     <filter id="glowGreen" x="-60%" y="-60%" width="220%" height="220%">
       <feGaussianBlur in="SourceGraphic" stdDeviation="2.0" result="innerBlur"/>
       <feComposite in="innerBlur" in2="SourceGraphic" operator="in" result="innerGlow"/>
       <feGaussianBlur in="SourceGraphic" stdDeviation="9" result="outerBloom"/>
       <feColorMatrix in="outerBloom" type="matrix"
-        values="0.15 0.25 0 0 0  0.30 1.10 0.15 0 0  0 0.10 0.25 0 0  0 0 0 0.38 0" result="greenBloom"/>
+        values="0.40 0.28 0 0 0  0.28 0.82 0.12 0 0  0.08 0.22 0.32 0 0  0 0 0 0.30 0" result="greenBloom"/>
       <feMerge>
         <feMergeNode in="greenBloom"/>
         <feMergeNode in="innerGlow"/>
