@@ -39,10 +39,32 @@ function pullState() {
   const stateSheet = ss.getSheetByName(SHEET_NAME_STATE);
   if (!stateSheet) return jsonResponse({ ok: true, history: [], ts: 0 });
   try {
-    const json    = stateSheet.getRange(2, 1).getValue();
-    const ts      = stateSheet.getRange(2, 2).getValue();
-    const history = json ? JSON.parse(json) : [];
-    return jsonResponse({ ok: true, history, ts: ts || 0 });
+    const values = stateSheet.getDataRange().getValues();
+    const history = [];
+    let maxTs = 0;
+    
+    // Check for old format (single row containing JSON array in column A)
+    if (values.length === 2 && values[1][0] && String(values[1][0]).trim().startsWith('[')) {
+      try {
+        const oldHistory = JSON.parse(values[1][0]);
+        if (Array.isArray(oldHistory)) {
+          return jsonResponse({ ok: true, history: oldHistory, ts: Number(values[1][1]) || 0 });
+        }
+      } catch(e) {}
+    }
+    
+    for (let i = 1; i < values.length; i++) {
+      const jsonStr = values[i][1];
+      if (jsonStr) {
+        try {
+          const w = JSON.parse(jsonStr);
+          if (w) history.push(w);
+        } catch(e) {}
+      }
+      const ts = Number(values[i][2]);
+      if (ts > maxTs) maxTs = ts;
+    }
+    return jsonResponse({ ok: true, history: history, ts: maxTs });
   } catch(e) {
     return jsonResponse({ ok: true, history: [], ts: 0 });
   }
@@ -53,18 +75,40 @@ function saveState(history, ts) {
   let stateSheet = ss.getSheetByName(SHEET_NAME_STATE);
   if (!stateSheet) {
     stateSheet = ss.insertSheet(SHEET_NAME_STATE);
-    stateSheet.appendRow(['History JSON', 'Timestamp', 'Updated']);
+    stateSheet.appendRow(['Workout ID', 'Workout JSON', 'Timestamp', 'Updated']);
     stateSheet.setFrozenRows(1);
-    stateSheet.getRange(1,1,1,3).setFontWeight('bold').setBackground('#1a1a1a').setFontColor('white');
+    stateSheet.getRange(1,1,1,4).setFontWeight('bold').setBackground('#1a1a1a').setFontColor('white');
+  } else {
+    // Ensure header row is set to the new 4-column format
+    if (stateSheet.getMaxColumns() < 4) {
+      stateSheet.insertColumnsAfter(stateSheet.getMaxColumns(), 4 - stateSheet.getMaxColumns());
+    }
+    stateSheet.getRange(1, 1, 1, 4).setValues([['Workout ID', 'Workout JSON', 'Timestamp', 'Updated']]);
+    stateSheet.getRange(1, 1, 1, 4).setFontWeight('bold').setBackground('#1a1a1a').setFontColor('white');
   }
+
   // ── Non-destructive union merge ───────────────────────────────────────────
   // The cloud copy must never lose workouts to a smaller/older device push.
   // Merge incoming with what is already stored, keyed by id (incoming wins on
   // conflict so edits propagate). A wiped or partial device can never shrink
   // the cloud history — it can only ever add to it.
   let existing = [];
-  try { const j = stateSheet.getRange(2, 1).getValue(); existing = j ? JSON.parse(j) : []; }
-  catch(e) { existing = []; }
+  const values = stateSheet.getDataRange().getValues();
+  if (values.length === 2 && values[1][0] && String(values[1][0]).trim().startsWith('[')) {
+    try {
+      const oldHistory = JSON.parse(values[1][0]);
+      if (Array.isArray(oldHistory)) existing = oldHistory;
+    } catch(e) {}
+  } else {
+    for (let i = 1; i < values.length; i++) {
+      const jsonStr = values[i][1];
+      if (jsonStr) {
+        try {
+          existing.push(JSON.parse(jsonStr));
+        } catch(e) {}
+      }
+    }
+  }
 
   const map = {};
   (existing || []).forEach(function(w) { if (w && w.id) map[w.id] = w; });
@@ -77,9 +121,21 @@ function saveState(history, ts) {
     return jsonResponse({ ok: true, skipped: 'empty-incoming', count: existing.length });
   }
 
-  stateSheet.getRange(2, 1).setValue(JSON.stringify(merged));
-  stateSheet.getRange(2, 2).setValue(ts || Date.now());
-  stateSheet.getRange(2, 3).setValue(new Date().toLocaleString());
+  const rowsToWrite = merged.map(function(w) {
+    return [
+      String(w.id),
+      JSON.stringify(w),
+      String(ts || Date.now()),
+      new Date().toLocaleString()
+    ];
+  });
+
+  if (stateSheet.getLastRow() > 1) {
+    stateSheet.getRange(2, 1, stateSheet.getLastRow() - 1, 4).clearContent();
+  }
+  if (rowsToWrite.length > 0) {
+    stateSheet.getRange(2, 1, rowsToWrite.length, 4).setValues(rowsToWrite);
+  }
   return jsonResponse({ ok: true, count: merged.length });
 }
 

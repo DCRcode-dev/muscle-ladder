@@ -4849,7 +4849,7 @@ function saveSettings(s) { LS.set('dcrgym_settings', s); }
 // Schema-versioned, non-destructive, with rolling last-good backup.
 // History must survive every app update. Period.
 const SCHEMA_VERSION = 2;
-const APP_BUILD = '2026.06.20 · ota-10 · resume + sage-complete + tan-popup';
+const APP_BUILD = '2026.06.22 · ota-11 · finish-resume-pill-fix';
 
 function migrateStorage() {
   const v = LS.get('dcrgym_schema_version', 1);
@@ -8623,7 +8623,17 @@ function commitWorkout() {
 
   generateInsightCard(entry, duration);
 
-  ST.lastSummary = { duration, prevDur, biggestGain, e1rmDelta, curE1RM };
+  ST.lastSummary = { duration, prevDur, biggestGain, e1rmDelta, curE1RM, programId: ST.currentProgram, sessionId: ST.currentSession };
+
+  // Belt-and-suspenders: workout is fully done. Null the live session markers
+  // so that saveNow() is blocked and the floating workout-pill is hidden immediately.
+  ST.currentSession = null;
+  ST.workoutStart = null;
+  if (ST.durationTimer) {
+    clearInterval(ST.durationTimer);
+    ST.durationTimer = null;
+  }
+
   const milestone = checkMilestone();
   if (milestone) {
     ST.milestoneN = milestone;
@@ -8640,8 +8650,10 @@ function showFinish() {
   playSound('finish');
   haptic('finish');
   const s = ST.lastSummary || {};
-  const prog = PROGRAMS.find(p => p.id === ST.currentProgram);
-  const sess = prog && prog.sessions.find(ss => ss.id === ST.currentSession);
+  const progId = s.programId || ST.currentProgram;
+  const sessId = s.sessionId || ST.currentSession;
+  const prog = PROGRAMS.find(p => p.id === progId);
+  const sess = prog && prog.sessions.find(ss => ss.id === sessId);
 
   // Build the program session table
   const hist = getHistory();
@@ -8658,7 +8670,7 @@ function showFinish() {
   }
 
   const tableRows = prog ? prog.sessions.map(ps => {
-    const isNow = ps.id === ST.currentSession;
+    const isNow = ps.id === sessId;
     const priorDone = doneThisWeek[ps.id];
     if (isNow) {
       return `<div class="finish-row finish-row-now">
@@ -8695,8 +8707,8 @@ function showFinish() {
   const gainLabel = s.biggestGain ? s.biggestGain.name : 'Top gain';
 
   // Set compliance %
-  const prog2 = PROGRAMS.find(p => p.id === ST.currentProgram);
-  const sess2 = prog2 && prog2.sessions.find(ss => ss.id === ST.currentSession);
+  const prog2 = PROGRAMS.find(p => p.id === progId);
+  const sess2 = prog2 && prog2.sessions.find(ss => ss.id === sessId);
   let compliancePct = '—';
   if (sess2) {
     const total   = sess2.exercises.length;
@@ -11100,17 +11112,20 @@ document.addEventListener('visibilitychange', () => {
 // ── Cloud sync (bidirectional) ────────────────────────────────────────────────
 async function pullFromSheets() {
   const s = getSettings();
-  if (!s.sheets) return;
+  if (!s.sheets) return 0;
   try {
     const resp = await fetch(s.sheets + '?action=pullState');
-    if (!resp.ok) return;
+    if (!resp.ok) return 0;
     const data = await resp.json();
     if (data.ok && Array.isArray(data.history) && data.history.length > 0) {
       const local = getHistory();
       const merged = mergeHistories(local, data.history);
-      if (merged.length > local.length) saveHistory(merged);
+      const added = merged.length - local.length;
+      if (added > 0) saveHistory(merged);
+      return added;
     }
   } catch(e) { /* silent — background op */ }
+  return 0;
 }
 
 // ── Sync queue — queue-first persistence layer ────────────────────────────────
@@ -11154,9 +11169,14 @@ async function drainSyncQueue() {
         method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(item.payload)
       });
-      if (!resp.ok) failed.push(item);
-      else anyOk = true;
-      // success — item is NOT added to failed → effectively dequeued
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data && data.ok) {
+          anyOk = true;
+          continue;
+        }
+      }
+      failed.push(item);
     } catch(e) { failed.push(item); }
   }
   LS.set('dcrgym_sync_queue', failed);
@@ -11220,9 +11240,12 @@ async function postToSheets(payload) {
       body: JSON.stringify(payload),
     });
     if (r.ok) {
-      dequeueSyncPayload(payload);
-      LS.set('dcrgym_last_sync', Date.now());
-      return true;
+      const data = await r.json();
+      if (data && data.ok) {
+        dequeueSyncPayload(payload);
+        LS.set('dcrgym_last_sync', Date.now());
+        return true;
+      }
     }
   } catch(e) { /* stays queued — drains on next boot or reconnect */ }
   return false;
@@ -11317,10 +11340,14 @@ async function manualSync() {
   if (!s.sheets) { if (btn) { btn.textContent = 'No URL set'; btn.disabled = false; } return; }
   try {
     // PULL BEFORE PUSH — merge cloud in first, then flush queue, backfill, push.
-    await pullFromSheets();
+    const added = await pullFromSheets();
     await drainSyncQueue();
     await backfillAllRows();
     await bgSyncToSheets();
+    if (added > 0) {
+      renderHome();
+      if (ST.screen === 'history') renderHistory();
+    }
     if (btn) { btn.textContent = 'Synced ✓'; setTimeout(()=>{ btn.textContent='Sync Now'; btn.disabled=false; }, 2000); }
   } catch(e) {
     if (btn) { btn.textContent = 'Error'; btn.disabled = false; }
@@ -11336,10 +11363,7 @@ async function recoverFromCloud() {
   }
   if (btn) { btn.textContent = 'Pulling…'; btn.disabled = true; }
   try {
-    const before = getHistory().length;
-    await pullFromSheets();
-    const after = getHistory().length;
-    const added = after - before;
+    const added = await pullFromSheets();
     if (btn) {
       btn.textContent = added > 0 ? `Restored ${added} workout${added!==1?'s':''}` : 'Up to date ✓';
       setTimeout(()=>{ btn.textContent='Recover ↓'; btn.disabled=false; }, 3000);
@@ -11404,6 +11428,18 @@ function bootstrapApp() {
     if (mg && mg.classList.contains('visible')) { _closeMuscleGraphDom(); return; }
     const gb = document.getElementById('graph-backdrop');
     if (gb && gb.style.display === 'flex') { closeProgressGraph(); return; }
+    const fs = document.getElementById('finish-screen');
+    if (fs) {
+      window.__navFromPop = true;
+      try { dismissFinish(); } finally { window.__navFromPop = false; }
+      return;
+    }
+    const ms = document.getElementById('milestone-screen');
+    if (ms) {
+      window.__navFromPop = true;
+      try { dismissMilestone(); } finally { window.__navFromPop = false; }
+      return;
+    }
     // 2. Then navigate to the state's screen
     const target = (e.state && e.state.screen) || 'home';
     if (target !== ST.screen) {
@@ -11478,7 +11514,11 @@ function bootstrapApp() {
   // non-blocking: any failure here can never break boot or the render path.
   (async () => {
     try {
-      await pullFromSheets();
+      const added = await pullFromSheets();
+      if (added > 0) {
+        if (ST.screen === 'home') renderHome();
+        else if (ST.screen === 'history') renderHistory();
+      }
       await drainSyncQueue();
       await backfillAllRows();
       await bgSyncToSheets();
