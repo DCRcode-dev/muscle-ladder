@@ -34,40 +34,156 @@ function doPost(e) {
 }
 
 // ── STATE BLOB (bidirectional sync) ──────────────────────────────────────────
+function reconstructHistoryFromLog_() {
+  const ss = getSpreadsheet_();
+  const logSheet = ss.getSheetByName(SHEET_NAME_LOG);
+  if (!logSheet) return [];
+  
+  try {
+    const values = logSheet.getDataRange().getValues();
+    if (values.length < 2) return [];
+    
+    const workoutsMap = {};
+    
+    for (let i = 1; i < values.length; i++) {
+      const row = values[i];
+      const rowId       = String(row[0] || '');
+      const dateStr     = String(row[1] || '');
+      const sessionName = String(row[3] || '');
+      const exName      = String(row[4] || '');
+      const setNum      = Number(row[5] || 0);
+      const weight      = Number(row[6] || 0);
+      const reps        = Number(row[7] || 0);
+      const duration    = String(row[9] || '');
+      
+      if (!rowId || !exName || isNaN(setNum)) continue;
+      
+      // Extract wid (workout ID) from rowId
+      const suffix = '-' + exName + '-' + (setNum - 1);
+      let wid = '';
+      if (rowId.indexOf(suffix) !== -1) {
+        wid = rowId.substring(0, rowId.lastIndexOf(suffix));
+      } else {
+        const dashIdx = rowId.indexOf('-');
+        wid = dashIdx !== -1 ? rowId.substring(0, dashIdx) : rowId;
+      }
+      
+      if (!wid) wid = dateStr + '-' + sessionName;
+      
+      if (!workoutsMap[wid]) {
+        const timestamp = isNaN(Number(wid)) ? new Date(dateStr).getTime() : Number(wid);
+        workoutsMap[wid] = {
+          id: wid,
+          programId: 'import',
+          sessionId: 'import',
+          sessionName: sessionName || 'Imported Workout',
+          startTime: timestamp || Date.now(),
+          endTime: timestamp || Date.now(),
+          duration: duration ? parseInt(duration) || 3600 : 3600,
+          travelMode: false,
+          sets: {}
+        };
+      }
+      
+      const wKey = 'import_' + exName.replace(/\s+/g, '_').toLowerCase();
+      if (!workoutsMap[wid].sets[wKey]) {
+        workoutsMap[wid].sets[wKey] = [];
+      }
+      
+      const setIdx = setNum - 1;
+      if (setIdx >= 0) {
+        workoutsMap[wid].sets[wKey][setIdx] = {
+          w: weight,
+          r: reps,
+          ts: workoutsMap[wid].startTime,
+          _name: exName
+        };
+      }
+    }
+    
+    const history = [];
+    for (const wid in workoutsMap) {
+      const w = workoutsMap[wid];
+      const cleanSets = {};
+      let hasSets = false;
+      for (const k in w.sets) {
+        const arr = w.sets[k];
+        if (arr && arr.length > 0) {
+          const filtered = arr.filter(Boolean);
+          if (filtered.length > 0) {
+            cleanSets[k] = filtered;
+            hasSets = true;
+          }
+        }
+      }
+      if (hasSets) {
+        w.sets = cleanSets;
+        history.push(w);
+      }
+    }
+    
+    return history.sort((a, b) => (a.endTime || 0) - (b.endTime || 0));
+  } catch(e) {
+    Logger.log('Error reconstructing history: ' + e.toString());
+    return [];
+  }
+}
+
 function pullState() {
   const ss         = getSpreadsheet_();
   const stateSheet = ss.getSheetByName(SHEET_NAME_STATE);
-  if (!stateSheet) return jsonResponse({ ok: true, history: [], ts: 0 });
-  try {
-    const values = stateSheet.getDataRange().getValues();
-    const history = [];
-    let maxTs = 0;
-    
-    // Check for old format (single row containing JSON array in column A)
-    if (values.length === 2 && values[1][0] && String(values[1][0]).trim().startsWith('[')) {
-      try {
-        const oldHistory = JSON.parse(values[1][0]);
-        if (Array.isArray(oldHistory)) {
-          return jsonResponse({ ok: true, history: oldHistory, ts: Number(values[1][1]) || 0 });
-        }
-      } catch(e) {}
-    }
-    
-    for (let i = 1; i < values.length; i++) {
-      const jsonStr = values[i][1];
-      if (jsonStr) {
+  let history      = [];
+  let maxTs        = 0;
+  
+  if (stateSheet) {
+    try {
+      const values = stateSheet.getDataRange().getValues();
+      
+      // Check for old format (single row containing JSON array in column A)
+      if (values.length === 2 && values[1][0] && String(values[1][0]).trim().startsWith('[')) {
         try {
-          const w = JSON.parse(jsonStr);
-          if (w) history.push(w);
+          const oldHistory = JSON.parse(values[1][0]);
+          if (Array.isArray(oldHistory)) {
+            history = oldHistory;
+            maxTs = Number(values[1][1]) || 0;
+          }
         } catch(e) {}
+      } else {
+        for (let i = 1; i < values.length; i++) {
+          const jsonStr = values[i][1];
+          if (jsonStr) {
+            try {
+              const w = JSON.parse(jsonStr);
+              if (w) history.push(w);
+            } catch(e) {}
+          }
+          const ts = Number(values[i][2]);
+          if (ts > maxTs) maxTs = ts;
+        }
       }
-      const ts = Number(values[i][2]);
-      if (ts > maxTs) maxTs = ts;
-    }
-    return jsonResponse({ ok: true, history: history, ts: maxTs });
-  } catch(e) {
-    return jsonResponse({ ok: true, history: [], ts: 0 });
+    } catch(e) {}
   }
+  
+  // Reconstruct from WorkoutLog as a self-healing fallback/merge
+  try {
+    const reconstructed = reconstructHistoryFromLog_();
+    if (reconstructed.length > 0) {
+      const map = {};
+      reconstructed.forEach(function(w) { if (w && w.id) map[w.id] = w; });
+      history.forEach(function(w) { if (w && w.id) map[w.id] = w; });
+      const merged = Object.keys(map).map(function(k) { return map[k]; })
+                           .sort(function(a, b) { return (a.endTime || 0) - (b.endTime || 0); });
+      
+      if (merged.length > history.length) {
+        history = merged;
+        saveState(history, maxTs || Date.now());
+      }
+    }
+  } catch(e) {
+    Logger.log('Self-healing pullState merge failed: ' + e.toString());
+  }
+  
+  return jsonResponse({ ok: true, history: history, ts: maxTs });
 }
 
 function saveState(history, ts) {
