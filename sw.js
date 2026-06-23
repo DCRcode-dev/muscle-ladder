@@ -1,4 +1,5 @@
-const CACHE = 'dcr-gym-v17';
+
+const CACHE = 'dcr-gym-v18';
 const ASSETS = ['./index.html', './programs.js', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -65,24 +66,48 @@ self.addEventListener('message', e => {
 
   // Rest-timer notification — fires if the phone is locked / app backgrounded
   if (type === 'SCHEDULE_NOTIFICATION') {
-    if (self.__restTimer) clearTimeout(self.__restTimer);
-    self.__restTimer = setTimeout(() => {
+    if (self.__restTimer) {
+      clearTimeout(self.__restTimer);
       self.__restTimer = null;
-      self.registration.showNotification('Lock In DCR!', {
-        body: 'Rest over — next set is waiting.',
-        icon: './icon-192.png',
-        badge: './icon-192.png',
-        vibrate: [60, 70, 60, 70, 110],
-        tag: 'dcr-rest',
-        renotify: true,
-      }).catch(() => {});
-    }, Math.max(0, msg.delay || 0));
+    }
+    if (self.__resolveRestTimer) {
+      self.__resolveRestTimer();
+      self.__resolveRestTimer = null;
+    }
+
+    const delay = Math.max(0, msg.delay || 0);
+    const promise = new Promise(resolve => {
+      self.__resolveRestTimer = resolve;
+      self.__restTimer = setTimeout(() => {
+        self.__restTimer = null;
+        self.__resolveRestTimer = null;
+        self.registration.showNotification('Lock In DCR!', {
+          body: 'Rest over — next set is waiting.',
+          icon: './icon-192.png',
+          badge: './icon-192.png',
+          vibrate: [200, 100, 200, 100, 200, 100, 400],
+          tag: 'dcr-rest',
+          renotify: true,
+        }).then(resolve).catch(resolve);
+      }, delay);
+    });
+    e.waitUntil(promise);
   }
+
   if (type === 'CANCEL_NOTIFICATION') {
-    if (self.__restTimer) { clearTimeout(self.__restTimer); self.__restTimer = null; }
-    self.registration.getNotifications({ tag: 'dcr-rest' })
-      .then(ns => ns.forEach(n => n.close()))
-      .catch(() => {});
+    if (self.__restTimer) {
+      clearTimeout(self.__restTimer);
+      self.__restTimer = null;
+    }
+    if (self.__resolveRestTimer) {
+      self.__resolveRestTimer();
+      self.__resolveRestTimer = null;
+    }
+    e.waitUntil(
+      self.registration.getNotifications({ tag: 'dcr-rest' })
+        .then(ns => ns.forEach(n => n.close()))
+        .catch(() => {})
+    );
   }
 });
 

@@ -4849,7 +4849,7 @@ function saveSettings(s) { LS.set('dcrgym_settings', s); }
 // Schema-versioned, non-destructive, with rolling last-good backup.
 // History must survive every app update. Period.
 const SCHEMA_VERSION = 2;
-const APP_BUILD = '2026.06.22 · ota-11 · finish-resume-pill-fix';
+const APP_BUILD = '2026.06.23 · ota-12 · rest-timer-alert-upgrade';
 
 function migrateStorage() {
   const v = LS.get('dcrgym_schema_version', 1);
@@ -5555,19 +5555,22 @@ function playSound(type) {
 
     if (type === 'set') {
       // Soft glass tick — a fingernail on crystal
-      _voice(ctx, { freq: 1320, vol: 0.055, decay: 0.085, cutoff: 5200 });
-      _voice(ctx, { freq: 2640, vol: 0.018, decay: 0.055, cutoff: 6000 });
+      _voice(ctx, { freq: 1320, vol: 0.25, decay: 0.085, cutoff: 5200 });
+      _voice(ctx, { freq: 2640, vol: 0.08, decay: 0.055, cutoff: 6000 });
     } else if (type === 'chime') {
-      // Warm two-note marimba — E5 → A5, felt mallet
-      _voice(ctx, { freq: 659.3,  type: 'triangle', vol: 0.085, decay: 0.34, cutoff: 2600 });
-      _voice(ctx, { freq: 1318.5, vol: 0.022, decay: 0.20, cutoff: 3400 });
-      _voice(ctx, { freq: 880,    type: 'triangle', vol: 0.095, at: 0.17, decay: 0.46, cutoff: 2600 });
-      _voice(ctx, { freq: 1760,   vol: 0.024, at: 0.17, decay: 0.26, cutoff: 3400 });
+      // Warm two-note marimba — E5 → A5, felt mallet (double-chime for background prominence)
+      for (let i = 0; i < 2; i++) {
+        const delay = i * 0.8;
+        _voice(ctx, { freq: 659.3,  type: 'triangle', vol: 0.45, at: delay + 0, decay: 0.40, cutoff: 2600 });
+        _voice(ctx, { freq: 1318.5, vol: 0.15, at: delay + 0, decay: 0.25, cutoff: 3400 });
+        _voice(ctx, { freq: 880,    type: 'triangle', vol: 0.50, at: delay + 0.17, decay: 0.50, cutoff: 2600 });
+        _voice(ctx, { freq: 1760,   vol: 0.15, at: delay + 0.17, decay: 0.30, cutoff: 3400 });
+      }
     } else if (type === 'finish') {
       // Muted swell — three stacked warm partials, slow bloom
-      _voice(ctx, { freq: 440,  type: 'triangle', vol: 0.075, attack: 0.10, decay: 0.70, cutoff: 1900 });
-      _voice(ctx, { freq: 554.4, type: 'triangle', vol: 0.055, at: 0.06, attack: 0.10, decay: 0.66, cutoff: 2100 });
-      _voice(ctx, { freq: 659.3, type: 'sine',     vol: 0.045, at: 0.12, attack: 0.10, decay: 0.62, cutoff: 2300 });
+      _voice(ctx, { freq: 440,  type: 'triangle', vol: 0.35, attack: 0.10, decay: 0.70, cutoff: 1900 });
+      _voice(ctx, { freq: 554.4, type: 'triangle', vol: 0.25, at: 0.06, attack: 0.10, decay: 0.66, cutoff: 2100 });
+      _voice(ctx, { freq: 659.3, type: 'sine',     vol: 0.20, at: 0.12, attack: 0.10, decay: 0.62, cutoff: 2300 });
     }
   } catch(e){}
 }
@@ -5817,7 +5820,7 @@ function haptic(type) {
     tick:      8,                              // feather: taps, toggles
     set:       [14, 40, 22],                   // crisp double-pulse: set logged
     exercise:  [16, 50, 16, 50, 32],           // rising triple: exercise complete
-    restDone:  [60, 70, 60, 70, 110],          // insistent: rest expired
+    restDone:  [200, 100, 200, 100, 200, 100, 400], // insistent: rest expired
     finish:    [24, 60, 24, 60, 24, 60, 90],   // celebration wave
     milestone: [30, 70, 30, 70, 30, 70, 150],  // long milestone wave
   };
@@ -11502,6 +11505,9 @@ function bootstrapApp() {
   // Updates flow over the air: network-first navigations get new builds on
   // launch; if a deploy lands while the app is OPEN, the chip appears.
   if ('serviceWorker' in navigator) {
+    if ('Notification' in window) {
+      ST.notifEnabled = Notification.permission === 'granted';
+    }
     navigator.serviceWorker.register('sw.js').then(reg => {
       ST.swReg = reg;
       initUpdateWatcher(reg);
