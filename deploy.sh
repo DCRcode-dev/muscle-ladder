@@ -18,7 +18,7 @@ else
 fi
 
 echo "📦 Staging app files..."
-git add index.html programs.js manifest.json sw.js icon-192.png icon-512.png apps-script.gs appsscript.json .gitignore deploy.sh SETUP.md 2>/dev/null || true
+git add -A 2>/dev/null || true   # .gitignore excludes Workouts/, _Archive/, junk
 
 echo "📝 Committing: $MSG"
 git commit -m "$MSG" || echo "Nothing new to commit"

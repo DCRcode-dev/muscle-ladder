@@ -4672,25 +4672,39 @@ EXERCISE_LIBRARY.forEach(it => {
 
 
 // ── Utility functions ────────────────────────────────────────────────────────
+function stripParentheticals(s) {
+  return (s || '').replace(/\s*\([^)]*\)/g, '').trim();
+}
 function normalizeEx(name) {
   return (name || '').toLowerCase().replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
 }
 function resolveAlias(name) {
-  const n = normalizeEx(name);
-  return EX_ALIASES[n] || n;
+  const raw = stripParentheticals(stripSuperset(name));
+  const n = normalizeEx(raw);
+  const mapped = EX_ALIASES[n] || n;
+  return normalizeEx(mapped);
 }
 function stripSuperset(name) {
   return (name || '').replace(/^Superset \d+:\s*/i, '').trim();
 }
 function exercisesMatch(a, b) {
-  a = resolveAlias(stripSuperset(a));
-  b = resolveAlias(stripSuperset(b));
-  if (a === b) return true;
-  if (a.includes(b) || b.includes(a)) return true;
-  // strip parentheticals
-  const strip = s => s.replace(/\s*\([^)]*\)/g,'').trim();
-  if (strip(a) === strip(b)) return true;
-  if (strip(a).includes(strip(b)) || strip(b).includes(strip(a))) return true;
+  if (!a || !b) return false;
+  const rawA = stripSuperset(a);
+  const rawB = stripSuperset(b);
+  const normA = normalizeEx(rawA);
+  const normB = normalizeEx(rawB);
+  if (normA === normB) return true;
+
+  const aliasA = resolveAlias(rawA);
+  const aliasB = resolveAlias(rawB);
+  if (aliasA === aliasB) return true;
+  if (aliasA.length >= 4 && aliasB.length >= 4 && (aliasA.includes(aliasB) || aliasB.includes(aliasA))) return true;
+
+  const noParA = normalizeEx(stripParentheticals(rawA));
+  const noParB = normalizeEx(stripParentheticals(rawB));
+  if (noParA === noParB) return true;
+  if (noParA.length >= 4 && noParB.length >= 4 && (noParA.includes(noParB) || noParB.includes(noParA))) return true;
+
   return false;
 }
 function getMuscle(name) {
@@ -4712,12 +4726,29 @@ function formatDuration(seconds) {
   const s = seconds % 60;
   return `${m}:${s.toString().padStart(2,'0')}`;
 }
-function formatKg(kg) {
-  return Number.isInteger(kg) ? `${kg}` : kg.toFixed(1);
+function getWeightUnit() {
+  const s = getSettings();
+  return (s && s.weightUnit) ? s.weightUnit : 'lb';
 }
-function plateCalc(totalKg, barKg = 20) {
-  const available = [25,20,15,10,5,2.5,1.25];
-  let perSide = (totalKg - barKg) / 2;
+function formatKg(val) {
+  if (val == null || isNaN(val)) return '0';
+  return Number.isInteger(val) ? `${val}` : val.toFixed(1);
+}
+function plateCalc(totalW, barW = null) {
+  const unit = getWeightUnit();
+  if (barW === null) barW = unit === 'lb' ? 45 : 20;
+  const available = unit === 'lb' ? [45, 35, 25, 10, 5, 2.5] : [25, 20, 15, 10, 5, 2.5, 1.25];
+  let perSide = (totalW - barW) / 2;
+  if (perSide < 0) return null;
+  const plates = [];
+  for (const p of available) {
+    while (perSide >= p - 0.001) {
+      plates.push(p);
+      perSide -= p;
+    }
+  }
+  return plates;
+}
   if (perSide < 0) return null;
   const plates = [];
   for (const p of available) {
@@ -4842,17 +4873,101 @@ function getNotes() { return LS.get('dcrgym_notes', {}); }
 function saveNotes(n) { LS.set('dcrgym_notes', n); }
 function getRestTimes() { return LS.get('dcrgym_rest', {}); }
 function saveRestTimes(r) { LS.set('dcrgym_rest', r); }
-function getSettings() { return LS.get('dcrgym_settings', {sound:true,sheets:'https://script.google.com/macros/s/AKfycbxcAKZDYOzbSJ1a5OjqYRo9OyL9OIhEhoos8a4aQE5MB68atj7XAWQeyTuulmB6UFUt/exec',weightUnit:'kg'}); }
+function getSettings() { return LS.get('dcrgym_settings', {sound:true,sheets:'https://script.google.com/macros/s/AKfycbxcAKZDYOzbSJ1a5OjqYRo9OyL9OIhEhoos8a4aQE5MB68atj7XAWQeyTuulmB6UFUt/exec',weightUnit:'lb'}); }
 function saveSettings(s) { LS.set('dcrgym_settings', s); }
+
+const INITIAL_MEASUREMENTS = [
+  {
+    id: 'm_1787691068137',
+    title: 'Measurement #1',
+    date: '2026-08-25',
+    displayDate: '25-8-26 (25th of August 2026)',
+    clientName: 'Daniel Cruz',
+    height: "5'7\"",
+    age: 30,
+    bodyFat: 7,
+    weight: 146,
+    chest: 34.5,
+    bicepsR: 13.5,
+    bicepsL: 13.0,
+    waist: 29.0,
+    hips: 35.0,
+    thighR: 19.5,
+    thighL: 19.0,
+    calvesR: 13.5,
+    calvesL: 13.5,
+    stepTestHR: 101,
+    pushups1Min: 37,
+    crunches1Min: 35,
+    squats1Min: 39,
+    plankTime: '3:05',
+    sitAndReach: 4.5
+  }
+];
+
+function getMeasurements() {
+  const m = LS.get('dcrgym_measurements', null);
+  if (!m || !Array.isArray(m) || m.length === 0) {
+    LS.set('dcrgym_measurements', INITIAL_MEASUREMENTS);
+    return INITIAL_MEASUREMENTS;
+  }
+  return m;
+}
+function saveMeasurements(m) { LS.set('dcrgym_measurements', m); }
 
 // ── Bulletproof persistence core ─────────────────────────────────────────────
 // Schema-versioned, non-destructive, with rolling last-good backup.
 // History must survive every app update. Period.
-const SCHEMA_VERSION = 2;
-const APP_BUILD = '2026.06.23 · ota-12 · rest-timer-alert-upgrade';
+const SCHEMA_VERSION = 3;
+const APP_BUILD = '2026.08.25 · ota-13 · kg-to-lbs-and-measurements';
+
+function convertHistoryWeightsToLbs(hist) {
+  if (!Array.isArray(hist)) return 0;
+  let count = 0;
+  for (const w of hist) {
+    if (!w || !w.sets) continue;
+    for (const sets of Object.values(w.sets)) {
+      if (!Array.isArray(sets)) continue;
+      for (const s of sets) {
+        if (s && typeof s.w === 'number' && s.w > 0) {
+          s.w = Math.round(s.w * 2.20462 * 2) / 2;
+          count++;
+        }
+      }
+    }
+  }
+  return count;
+}
+
+function convertHistoryUnits(targetUnit) {
+  const currentHist = getHistory();
+  if (!currentHist || currentHist.length === 0) return;
+  const factor = targetUnit === 'lb' ? 2.20462 : (1 / 2.20462);
+  for (const w of currentHist) {
+    if (!w || !w.sets) continue;
+    for (const sets of Object.values(w.sets)) {
+      if (!Array.isArray(sets)) continue;
+      for (const s of sets) {
+        if (s && typeof s.w === 'number' && s.w > 0) {
+          s.w = targetUnit === 'lb'
+            ? Math.round(s.w * factor * 2) / 2
+            : Math.round(s.w * factor * 10) / 10;
+        }
+      }
+    }
+  }
+  saveHistory(currentHist);
+  const settings = getSettings();
+  settings.weightUnit = targetUnit;
+  saveSettings(settings);
+}
 
 function migrateStorage() {
   const v = LS.get('dcrgym_schema_version', 1);
+
+  // Ensure body measurements are initialized
+  getMeasurements();
+
   if (v >= SCHEMA_VERSION) return;
 
   // Rolling last-good backup BEFORE any mutation — recoverable from Settings
@@ -4862,9 +4977,7 @@ function migrateStorage() {
   }
 
   // v1 → v2: backfill _name onto every working set so exercise identity is a
-  // stored fact, never a derived guess. Resolves via program structure (the
-  // only correct source for legacy entries). Unknown keys are left untouched —
-  // non-destructive by design.
+  // stored fact, never a derived guess.
   if (v < 2) {
     let stamped = 0;
     for (const w of hist) {
@@ -4883,6 +4996,38 @@ function migrateStorage() {
       }
     }
     if (stamped > 0) saveHistory(hist);
+  }
+
+  // v2 → v3: convert logged weights from kg to lbs & set default weightUnit to 'lb'
+  if (v < 3) {
+    const currentHist = getHistory();
+    const convertedCount = convertHistoryWeightsToLbs(currentHist);
+    if (convertedCount > 0) saveHistory(currentHist);
+
+    // Convert live active workout if present
+    const liveWorkout = LS.get('dcrgym_current_workout');
+    if (liveWorkout && liveWorkout.sets) {
+      for (const sets of Object.values(liveWorkout.sets)) {
+        if (!Array.isArray(sets)) continue;
+        for (const s of sets) {
+          if (s && typeof s.w === 'number' && s.w > 0) {
+            s.w = Math.round(s.w * 2.20462 * 2) / 2;
+          }
+        }
+      }
+      if (liveWorkout.drafts) {
+        for (const draft of Object.values(liveWorkout.drafts)) {
+          if (draft && draft.w !== '' && !isNaN(parseFloat(draft.w))) {
+            draft.w = String(Math.round(parseFloat(draft.w) * 2.20462 * 2) / 2);
+          }
+        }
+      }
+      LS.set('dcrgym_current_workout', liveWorkout);
+    }
+
+    const settings = getSettings();
+    settings.weightUnit = 'lb';
+    saveSettings(settings);
   }
 
   LS.set('dcrgym_schema_version', SCHEMA_VERSION);
@@ -7033,6 +7178,7 @@ function selectProgramFromBrowser(id) {
 function exerciseCardHTML(ex, key, i, isAddition) {
   const notes = getNotes();
   const restTimes = getRestTimes();
+  const unit = getWeightUnit();
   const name = isAddition ? liveExName(key, ex) : stripSuperset(ex.name);
   const isExpanded = ST.expandedCards.has(key);
   const isCompleted = ST.completedCards.has(key);
@@ -7076,12 +7222,13 @@ function exerciseCardHTML(ex, key, i, isAddition) {
   }
 
   let setRows = '';
+  const unit = getWeightUnit();
   for (let si = 0; si < totalSets; si++) {
     const logged = loggedSets[si];
     const lastSet = lastPerf && (lastPerf[si] != null ? lastPerf[si] : lastPerf[lastPerf.length - 1]);
     const draft = !logged && ST.workoutDrafts && ST.workoutDrafts[key + '-' + si];
-    const preW = logged ? logged.w : (draft && draft.w !== '' ? draft.w : (lastSet != null ? lastSet.w : ''));
-    const preR = logged ? logged.r : (draft && draft.r !== '' ? draft.r : (lastSet != null ? lastSet.r : ''));
+    const preW = logged ? logged.w : (draft && draft.w !== '' ? draft.w : (lastSet != null ? lastSet.w : (suggestion ? suggestion.w : '')));
+    const preR = logged ? logged.r : (draft && draft.r !== '' ? draft.r : (lastSet != null ? lastSet.r : (ex && ex.reps ? (parseInt((ex.reps.match(/(\d+)$/) || ['', '8'])[1]) || 8) : '')));
     const isLastSet = si === totalSets - 1;
     const tech = isLastSet && ex.lastSetTechnique ? `<span class="technique-badge">${ex.lastSetTechnique}</span>` : '';
     const isLogged = !!logged;
@@ -7094,7 +7241,7 @@ function exerciseCardHTML(ex, key, i, isAddition) {
       if (absDiff >= 0.5) {
         const arrow   = diff > 0 ? '↑' : '↓';
         const cls     = diff > 0 ? 'trend-arrow-up' : 'trend-arrow-down';
-        const diffStr = (diff > 0 ? '+' : '') + diff.toFixed(1) + ' kg vs avg';
+        const diffStr = (diff > 0 ? '+' : '') + diff.toFixed(1) + ' ' + unit + ' vs avg';
         trendHtml = `<div class="set-trend">
           <span class="${cls}">${arrow}</span>
           <span>${diffStr}</span>
@@ -7106,7 +7253,7 @@ function exerciseCardHTML(ex, key, i, isAddition) {
     <div class="set-row" id="setrow-${key}-${si}">
       <div class="set-num">${si+1}</div>
       <input class="set-input${isLogged?' logged':''}" id="wi-${key}-${si}" type="text" inputmode="none"
-        value="${preW}" placeholder="kg" autocomplete="off"
+        value="${preW}" placeholder="${unit}" autocomplete="off"
         onclick="openNumpad(this,'${key}',${si},${i},'w')"
         oninput="markDraft('${key}',${si})"
         ${barbell?`onfocus="showPlate('${key}',${si})" onblur="hidePlate('${key}',${si})"`:''}>
@@ -7128,13 +7275,13 @@ function exerciseCardHTML(ex, key, i, isAddition) {
   const wuDismissed = ST.dismissedWarmups.has(normalizeEx(name));
   const wuLogged = ST.workoutSets[wuKey] && ST.workoutSets[wuKey][0];
   const wuDraft = !wuLogged && ST.workoutDrafts && ST.workoutDrafts[key + '-wu'];
-  const wuPreW = wuLogged ? wuLogged.w : (wuDraft && wuDraft.w !== '' ? wuDraft.w : (lastPerf && lastPerf[0] ? Math.round((lastPerf[0].w || 0) * 0.5) : ''));
+  const wuPreW = wuLogged ? wuLogged.w : (wuDraft && wuDraft.w !== '' ? wuDraft.w : (lastPerf && lastPerf[0] ? Math.round((lastPerf[0].w || 0) * 0.5) : (suggestion ? Math.round(suggestion.w * 0.5) : '')));
   const wuPreR = wuLogged ? wuLogged.r : (wuDraft && wuDraft.r !== '' ? wuDraft.r : '');
   const warmupRowHtml = (!wuDismissed) ? `
     <div class="warmup-row" id="wurow-${key}">
       <span class="warmup-label">warm-up</span>
       <input class="warmup-input" id="wuwi-${key}" type="text" inputmode="none"
-        value="${wuPreW}" placeholder="kg" autocomplete="off"
+        value="${wuPreW}" placeholder="${unit}" autocomplete="off"
         onclick="openNumpad(this,'${key}',0,${i},'w',true)" oninput="markDraftWu('${key}')">
       <span class="warmup-sep">×</span>
       <input class="warmup-input" id="wuri-${key}" type="text" inputmode="none"
@@ -10747,17 +10894,35 @@ function renderSettings() {
   el.innerHTML = `
   <div class="screen-content">
     <div class="page-header"><h1>Settings</h1></div>
+
     <div class="settings-section">
       <div class="settings-section-title">Profile</div>
       <div class="settings-row"><label>Weight unit</label>
         <select onchange="saveSetting('weightUnit',this.value)" style="border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:13px;background:var(--bg)">
-          <option value="kg" ${s.weightUnit!=='lb'?'selected':''}>kg</option>
           <option value="lb" ${s.weightUnit==='lb'?'selected':''}>lb</option>
+          <option value="kg" ${s.weightUnit==='kg'?'selected':''}>kg</option>
         </select>
       </div>
     </div>
+
+    <!-- ── Body Measurements & Assessment Log ── -->
+    <div class="settings-section">
+      <div class="settings-section-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Body Measurements & Assessment</span>
+        <button onclick="openAddMeasurementModal()" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer">+ Add New</button>
+      </div>
+      <div style="font-size:11.5px;color:var(--muted);margin-top:2px;margin-bottom:8px">Logged body part circumferences and gym physical fitness evaluations:</div>
+      ${renderMeasurementListHTML()}
+    </div>
+
     <div class="settings-section">
       <div class="settings-section-title">Data</div>
+      <div class="settings-row"><label>Convert History Units</label>
+        <div style="display:flex;gap:8px">
+          <button onclick="convertHistoryUnits('lb');renderSettings();noticeSheet('Units Converted','All historical weights converted to lbs.');" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer">Convert to lbs</button>
+          <button onclick="convertHistoryUnits('kg');renderSettings();noticeSheet('Units Converted','All historical weights converted to kg.');" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer">Convert to kg</button>
+        </div>
+      </div>
       <div class="settings-row"><label>Import Strong CSV</label>
         <input type="file" accept=".csv" onchange="importStrongCSV(this)" style="font-size:13px;max-width:160px">
       </div>
@@ -10805,6 +10970,169 @@ function renderSettings() {
       </div>
     </div>
   </div>`;
+}
+
+function renderMeasurementListHTML() {
+  const list = getMeasurements();
+  if (!list || list.length === 0) {
+    return `<div style="padding:12px;font-size:13px;color:var(--muted)">No measurements recorded yet.</div>`;
+  }
+
+  return list.map((m, idx) => {
+    return `
+    <div style="background:var(--card-bg, #fff);border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:10px;box-shadow:0 1px 3px rgba(0,0,0,0.05)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div>
+          <strong style="font-size:15px;color:var(--charcoal)">${m.title || `Measurement #${idx+1}`}</strong>
+          <div style="font-size:12px;color:var(--muted)">${m.displayDate || m.date}${m.clientName ? ` · ${m.clientName}` : ''}</div>
+        </div>
+        <button onclick="deleteMeasurement('${m.id}')" style="background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:4px" title="Delete">✕</button>
+      </div>
+
+      <!-- Quick stats summary -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+        ${m.weight ? `<span style="background:rgba(42,36,33,0.06);padding:3px 8px;border-radius:6px;font-size:12px;font-weight:600">${m.weight} lbs</span>` : ''}
+        ${m.bodyFat ? `<span style="background:rgba(42,36,33,0.06);padding:3px 8px;border-radius:6px;font-size:12px;font-weight:600">${m.bodyFat}% Body Fat</span>` : ''}
+        ${m.height ? `<span style="background:rgba(42,36,33,0.06);padding:3px 8px;border-radius:6px;font-size:12px">${m.height}</span>` : ''}
+        ${m.age ? `<span style="background:rgba(42,36,33,0.06);padding:3px 8px;border-radius:6px;font-size:12px">Age ${m.age}</span>` : ''}
+      </div>
+
+      <!-- Body Measurements Grid -->
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:6px">Body Part Circumferences (Inches)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:13px;margin-bottom:12px">
+        <div>Pecho (Chest): <strong>${m.chest ?? '—'}"</strong></div>
+        <div>Biceps (R/L): <strong>${m.bicepsR ?? '—'}" / ${m.bicepsL ?? '—'}"</strong></div>
+        <div>Cintura (Waist): <strong>${m.waist ?? '—'}"</strong></div>
+        <div>Cadera (Hips): <strong>${m.hips ?? '—'}"</strong></div>
+        <div>Muslo 5" (Thighs): <strong>${m.thighR ?? '—'}" / ${m.thighL ?? '—'}"</strong></div>
+        <div>Pantorrillas (Calves): <strong>${m.calvesR ?? '—'}" / ${m.calvesL ?? '—'}"</strong></div>
+      </div>
+
+      <!-- Fitness Assessment Grid -->
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:6px">Physical Fitness Assessment</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:13px">
+        <div>3-Min Step/Treadmill: <strong>${m.stepTestHR ?? '—'} bpm</strong></div>
+        <div>Push-ups (1 min): <strong>${m.pushups1Min ?? '—'} reps</strong></div>
+        <div>Abdominales (1 min): <strong>${m.crunches1Min ?? '—'} reps</strong></div>
+        <div>Sentadillas (1 min): <strong>${m.squats1Min ?? '—'} reps</strong></div>
+        <div>Plancha Estática: <strong>${m.plankTime ?? '—'}</strong></div>
+        <div>Sentarse y Alcanzar: <strong>${m.sitAndReach ?? '—'}"</strong></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openAddMeasurementModal() {
+  const list = getMeasurements();
+  const nextNum = list.length + 1;
+  const todayStr = '2026-08-25';
+  
+  openSheet(`
+    <div style="padding:16px">
+      <h2 style="font-size:18px;margin-bottom:12px;color:var(--charcoal)">Add Measurement #${nextNum}</h2>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;max-height:70vh;overflow-y:auto;padding-right:4px">
+        <div>
+          <label style="display:block;font-weight:600;margin-bottom:2px">Title</label>
+          <input id="m-title" type="text" value="Measurement #${nextNum}" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:13px">
+        </div>
+        <div>
+          <label style="display:block;font-weight:600;margin-bottom:2px">Date (Call out: August 25, 2026)</label>
+          <input id="m-date" type="date" value="${todayStr}" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:13px">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><label style="font-weight:600">Weight (lbs)</label><input id="m-weight" type="number" step="0.5" placeholder="146" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px"></div>
+          <div><label style="font-weight:600">Body Fat %</label><input id="m-bf" type="number" step="0.1" placeholder="7" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><label style="font-weight:600">Height</label><input id="m-height" type="text" placeholder="5'7&quot;" value="5'7&quot;" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px"></div>
+          <div><label style="font-weight:600">Age</label><input id="m-age" type="number" placeholder="30" value="30" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px"></div>
+        </div>
+
+        <div style="font-weight:700;margin-top:8px;color:var(--muted);text-transform:uppercase;font-size:11px">Body Circumferences (in)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><label style="font-size:12px">Pecho (Chest)</label><input id="m-chest" type="number" step="0.25" placeholder="34.5" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:6px"></div>
+          <div><label style="font-size:12px">Cintura (Waist)</label><input id="m-waist" type="number" step="0.25" placeholder="29.0" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:6px"></div>
+          <div><label style="font-size:12px">Biceps Right</label><input id="m-bic-r" type="number" step="0.25" placeholder="13.5" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:6px"></div>
+          <div><label style="font-size:12px">Biceps Left</label><input id="m-bic-l" type="number" step="0.25" placeholder="13.0" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:6px"></div>
+          <div><label style="font-size:12px">Cadera (Hips)</label><input id="m-hips" type="number" step="0.25" placeholder="35.0" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:6px"></div>
+          <div><label style="font-size:12px">Muslo R (Thigh 5")</label><input id="m-thigh-r" type="number" step="0.25" placeholder="19.5" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:6px"></div>
+          <div><label style="font-size:12px">Muslo L (Thigh 5")</label><input id="m-thigh-l" type="number" step="0.25" placeholder="19.0" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:6px"></div>
+          <div><label style="font-size:12px">Pantorrillas R (Calf)</label><input id="m-calf-r" type="number" step="0.25" placeholder="13.5" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:6px"></div>
+        </div>
+
+        <div style="font-weight:700;margin-top:8px;color:var(--muted);text-transform:uppercase;font-size:11px">Fitness Evaluation</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><label style="font-size:12px">3-Min Step/Tread HR</label><input id="m-hr" type="number" placeholder="101" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:6px"></div>
+          <div><label style="font-size:12px">Push-ups (1 min)</label><input id="m-pushups" type="number" placeholder="37" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:6px"></div>
+          <div><label style="font-size:12px">Crunches (1 min)</label><input id="m-crunches" type="number" placeholder="35" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:6px"></div>
+          <div><label style="font-size:12px">Squats (1 min)</label><input id="m-squats" type="number" placeholder="39" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:6px"></div>
+          <div><label style="font-size:12px">Static Plank</label><input id="m-plank" type="text" placeholder="3:05" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:6px"></div>
+          <div><label style="font-size:12px">Sit & Reach</label><input id="m-reach" type="number" step="0.1" placeholder="4.5" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:6px"></div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:16px">
+          <button onclick="saveNewMeasurementModal()" style="flex:1;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:10px;font-weight:600;cursor:pointer">Save Measurement</button>
+          <button onclick="closeSheet()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:10px 16px;cursor:pointer">Cancel</button>
+        </div>
+      </div>
+    </div>
+  `);
+}
+
+function saveNewMeasurementModal() {
+  const title = (document.getElementById('m-title')?.value || '').trim() || 'Measurement';
+  const date = document.getElementById('m-date')?.value || '2026-08-25';
+  const parts = date.split('-');
+  const displayDate = `${parts[2] || '25'}-${parts[1] || '08'}-${(parts[0] || '2026').slice(2)} (${date})`;
+
+  const item = {
+    id: 'm_' + Date.now(),
+    title,
+    date,
+    displayDate,
+    clientName: 'Daniel Cruz',
+    height: document.getElementById('m-height')?.value || "5'7\"",
+    age: parseInt(document.getElementById('m-age')?.value) || 30,
+    weight: parseFloat(document.getElementById('m-weight')?.value) || null,
+    bodyFat: parseFloat(document.getElementById('m-bf')?.value) || null,
+    chest: parseFloat(document.getElementById('m-chest')?.value) || null,
+    waist: parseFloat(document.getElementById('m-waist')?.value) || null,
+    hips: parseFloat(document.getElementById('m-hips')?.value) || null,
+    bicepsR: parseFloat(document.getElementById('m-bic-r')?.value) || null,
+    bicepsL: parseFloat(document.getElementById('m-bic-l')?.value) || null,
+    thighR: parseFloat(document.getElementById('m-thigh-r')?.value) || null,
+    thighL: parseFloat(document.getElementById('m-thigh-l')?.value) || null,
+    calvesR: parseFloat(document.getElementById('m-calf-r')?.value) || null,
+    calvesL: parseFloat(document.getElementById('m-calf-l')?.value) || null,
+    stepTestHR: parseInt(document.getElementById('m-hr')?.value) || null,
+    pushups1Min: parseInt(document.getElementById('m-pushups')?.value) || null,
+    crunches1Min: parseInt(document.getElementById('m-crunches')?.value) || null,
+    squats1Min: parseInt(document.getElementById('m-squats')?.value) || null,
+    plankTime: document.getElementById('m-plank')?.value || null,
+    sitAndReach: parseFloat(document.getElementById('m-reach')?.value) || null,
+  };
+
+  const list = getMeasurements();
+  list.unshift(item);
+  saveMeasurements(list);
+  closeSheet();
+  renderSettings();
+  noticeSheet('Saved', `${title} has been logged.`);
+}
+
+function deleteMeasurement(id) {
+  confirmSheet({
+    title: 'Delete Measurement?',
+    body: 'Are you sure you want to remove this measurement record?',
+    confirmLabel: 'Delete',
+    destructive: true,
+    onConfirm: () => {
+      let list = getMeasurements();
+      list = list.filter(m => m.id !== id);
+      saveMeasurements(list);
+      renderSettings();
+    }
+  });
 }
 
 function unblacklistExercise(exName) {
