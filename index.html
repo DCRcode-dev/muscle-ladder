@@ -5120,7 +5120,7 @@ function saveMeasurements(m) { LS.set('dcrgym_measurements', m); }
 // Schema-versioned, non-destructive, with rolling last-good backup.
 // History must survive every app update. Period.
 const SCHEMA_VERSION = 3;
-const APP_BUILD = '2026.09.01 · ota-18 · visual-progress-and-muscle-graph-redesign';
+const APP_BUILD = '2026.09.01 · ota-19 · remove-workout-log-paragraphs';
 
 function convertHistoryWeightsToLbs(hist) {
   if (!Array.isArray(hist)) return 0;
@@ -10216,12 +10216,6 @@ function closeCalPopup() {
   if (!popup) return;
   popup.classList.remove('visible');
   setTimeout(() => { popup.style.display = 'none'; }, 280);
-}
-
-function renderWorkoutsCalendarView() {
-  // Insight card pinned above calendar if a post-workout card exists
-  const insightHTML = renderInsightCardHTML(getLastInsightCard());
-  return insightHTML + renderFiveWeekCalendar();
 }
 
 
