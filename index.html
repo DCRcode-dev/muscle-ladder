@@ -1732,59 +1732,127 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
 .cal-day-done .cal-day-num   { color: rgba(255,255,255,0.94); }
 
 /* Calendar day popup */
+/* ── Calendar / Workout Detail Popup (Clean, Modern, Luxury) ── */
 #cal-popup {
   position: fixed; inset: 0;
-  background: rgba(36,28,22,0.46);
-  backdrop-filter: blur(20px) saturate(1.25);
-  -webkit-backdrop-filter: blur(20px) saturate(1.25);
-  z-index: 650; display: none; align-items: center; justify-content: center;
-  padding: 32px 24px; opacity: 0; transition: opacity 280ms ease;
+  background: oklch(8% 0.012 260 / 0.54);
+  backdrop-filter: blur(28px) saturate(1.8);
+  -webkit-backdrop-filter: blur(28px) saturate(1.8);
+  z-index: 700; display: none; align-items: center; justify-content: center;
+  padding: 24px; opacity: 0; transition: opacity 280ms ease;
 }
 #cal-popup.visible { opacity: 1; }
 #cal-popup-panel {
-  width: 100%; max-width: 340px;
-  background: linear-gradient(150deg, #F4ECDD 0%, #E8DAC4 100%);
-  border: 1px solid rgba(42,36,33,0.12);
+  width: 100%; max-width: 380px; max-height: 88vh;
+  overflow-y: auto; -webkit-overflow-scrolling: touch;
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
   border-radius: 28px;
-  box-shadow: 0 30px 80px rgba(46,34,24,0.34),
-              inset 0 1.5px 0 rgba(255,255,255,0.55),
-              inset 0 -1px 0 rgba(120,96,64,0.10);
-  padding: 28px 24px 32px;
-  transform: translateY(24px) scale(0.95);
-  transition: transform var(--dur-slow) var(--ease);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+  padding: 24px 20px 22px;
+  transform: scale(0.90); transform-origin: center center;
+  transition: transform var(--dur-slow) var(--spring-snappy);
   position: relative;
+  color: var(--text-primary);
 }
-#cal-popup.visible #cal-popup-panel { transform: translateY(0) scale(1); }
+#cal-popup.visible #cal-popup-panel { transform: scale(1); }
 .cal-popup-close {
   position: absolute; top: 16px; right: 16px;
-  width: 28px; height: 28px; border-radius: 50%;
-  background: rgba(42,36,33,0.10); border: 1px solid rgba(42,36,33,0.08);
-  cursor: pointer; font-size: 13px; color: var(--charcoal);
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--surface-sunken); border: 1px solid var(--border-subtle);
+  cursor: pointer; font-size: 14px; color: var(--text-secondary);
   display: flex; align-items: center; justify-content: center;
+  transition: transform var(--dur-fast) var(--ease);
 }
-.cal-popup-date {
-  font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase;
-  color: rgba(42,36,33,0.58); margin-bottom: 6px;
-}
+.cal-popup-close:active { transform: scale(0.92); }
+.cal-popup-head { padding-right: 36px; margin-bottom: 12px; }
 .cal-popup-session {
   font-family: var(--font-hero); font-style: italic;
-  font-size: 28px; font-weight: 600;
-  color: var(--charcoal); line-height: 1.1; margin-bottom: 4px;
+  font-size: 26px; font-weight: 600; color: var(--text-primary); line-height: 1.1;
+}
+.cal-popup-date {
+  font-size: 11px; color: var(--text-tertiary);
+  font-weight: 600; margin-top: 4px; display: flex; align-items: center; gap: 6px;
 }
 .cal-popup-prog {
-  font-size: 10px; color: rgba(42,36,33,0.52);
-  text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 20px;
+  display: inline-block; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--accent-kinetic); background: rgba(240, 78, 35, 0.10);
+  border: 1px solid rgba(240, 78, 35, 0.20);
+  padding: 2px 8px; border-radius: 8px; margin-top: 6px;
 }
-.cal-popup-stats { display: flex; gap: 10px; }
+.cal-popup-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 14px 0 16px; }
 .cal-popup-stat {
-  flex: 1; background: #FBF6EC;
-  border-radius: 12px; padding: 12px 10px;
-  border: 1px solid rgba(42,36,33,0.08); text-align: center;
+  background: var(--surface-sunken); border: 1px solid var(--border-subtle);
+  border-radius: 14px; padding: 10px 8px; text-align: center;
 }
-.cal-popup-stat-val { font-size: 16px; font-weight: 700; color: var(--charcoal); font-variant-numeric: tabular-nums; }
+.cal-popup-stat-val { font-family: var(--font-mono); font-size: 15px; font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums lining-nums; }
 .cal-popup-stat-lbl {
-  font-size: 9px; color: rgba(42,36,33,0.58);
-  text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px;
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--text-tertiary); margin-top: 2px;
+}
+.cal-ex-list { display: flex; flex-direction: column; gap: 8px; max-height: 240px; overflow-y: auto; margin-bottom: 16px; padding-right: 2px; }
+.cal-ex-row {
+  background: var(--surface-sunken); border: 1px solid var(--border-subtle);
+  border-radius: 14px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.cal-ex-check {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: rgba(16, 185, 129, 0.15); color: var(--accent-success);
+  font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.cal-ex-name { font-size: 13px; font-weight: 600; color: var(--text-primary); flex: 1; }
+.cal-ex-sub { display: block; font-size: 10px; color: var(--text-tertiary); font-weight: normal; margin-top: 1px; }
+.cal-ex-vol {
+  font-family: var(--font-mono); font-size: 12px; font-weight: 700;
+  color: var(--accent-kinetic); font-variant-numeric: tabular-nums lining-nums; flex-shrink: 0;
+}
+.cal-popup-actions { display: flex; flex-direction: column; gap: 8px; }
+
+/* ── Visual Workout Preview Sheet Styling ── */
+.preview-sheet-hero {
+  display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px;
+}
+.preview-sheet-title {
+  font-family: var(--font-hero); font-style: italic;
+  font-size: 26px; font-weight: 600; color: var(--text-primary); line-height: 1.1;
+}
+.preview-sheet-meta {
+  font-size: 11.5px; color: var(--text-tertiary); font-weight: 500;
+}
+.preview-muscle-chips {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px;
+}
+.preview-muscle-chip {
+  padding: 3px 9px; border-radius: 10px; font-size: 10px;
+  font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.preview-card-list {
+  display: flex; flex-direction: column; gap: 10px; max-height: 340px;
+  overflow-y: auto; -webkit-overflow-scrolling: touch; margin: 10px 0 18px; padding-right: 2px;
+}
+.preview-movement-card {
+  background: var(--surface-card); border: 1px solid var(--border-subtle);
+  border-radius: 16px; padding: 12px 14px; box-shadow: var(--shadow-sm);
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.preview-mc-num {
+  width: 26px; height: 26px; border-radius: 8px;
+  background: var(--surface-sunken); border: 1px solid var(--border-subtle);
+  font-family: var(--font-mono); font-size: 12px; font-weight: 700;
+  color: var(--text-secondary); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  margin-top: 2px;
+}
+.preview-mc-info { flex: 1; min-width: 0; }
+.preview-mc-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.preview-mc-name { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+.preview-mc-target {
+  font-family: var(--font-mono); font-size: 12px; color: var(--accent-kinetic);
+  font-weight: 600; margin-bottom: 4px;
+}
+.preview-mc-last {
+  font-size: 11px; color: var(--text-tertiary); background: var(--surface-sunken);
+  border-radius: 8px; padding: 4px 8px; display: inline-block;
 }
 
 /* ── Liquid glass progress graph modal ── */
@@ -5120,7 +5188,7 @@ function saveMeasurements(m) { LS.set('dcrgym_measurements', m); }
 // Schema-versioned, non-destructive, with rolling last-good backup.
 // History must survive every app update. Period.
 const SCHEMA_VERSION = 3;
-const APP_BUILD = '2026.09.01 · ota-19 · remove-workout-log-paragraphs';
+const APP_BUILD = '2026.09.01 · ota-20 · visual-workout-preview-and-calendar-edit-upgrade';
 
 function convertHistoryWeightsToLbs(hist) {
   if (!Array.isArray(hist)) return 0;
@@ -10140,25 +10208,36 @@ function openCalDay(id, dateStr) {
   const sessName = w.sessionName || 'Workout';
   const dur = formatDuration(w.duration || 0);
   const vol = Math.round(Object.values(w.sets || {}).flat().filter(Boolean).reduce((s, x) => s + (x.w||0)*(x.r||0), 0));
-
-  const sets = w.sets || {};
   const prog = PROGRAMS.find(p => p.id === w.programId);
   const sess = prog && prog.sessions.find(s => s.id === w.sessionId);
+  const unit = getWeightUnit();
 
-  // One log row — "✓ Name  n × reps", with a "→ from X" badge when substituted
-  const rowFor = (name, setArr, subFrom) => {
-    const done = (setArr || []).filter(Boolean);
+  const sets = w.sets || {};
+  let completedExCount = 0;
+  let rowsHTML = '';
+
+  const renderExRow = (name, setArr, subFrom) => {
+    const done = (setArr || []).filter(s => s && s.r > 0);
     if (done.length === 0) return '';
-    const reps = done[0] ? done[0].r : '';
-    return `<div class="cal-ex-row">
-      <span class="cal-ex-check">✓</span>
-      <span class="cal-ex-name">${name}${subFrom ? `<span class="cal-ex-sub">→ from ${subFrom}</span>` : ''}</span>
-      <span class="cal-ex-vol">${done.length} × ${reps}</span>
-    </div>`;
+    completedExCount++;
+    const muscle = getMuscle(name);
+    const topSet = [...done].sort((a,b) => (b.w * (1 + b.r/30)) - (a.w * (1 + a.r/30)))[0];
+    const topText = topSet ? `${topSet.w} ${unit} × ${topSet.r}` : `${done.length} sets`;
+    return `
+      <div class="cal-ex-row" onclick="showProgressGraph(event, '${name.replace(/'/g, "\\'")}')" style="cursor:pointer;">
+        <span class="cal-ex-check">✓</span>
+        <div class="cal-ex-name">
+          <div>${name}</div>
+          ${subFrom ? `<span class="cal-ex-sub">Substituted from ${subFrom}</span>` : `<span class="cal-ex-sub">${muscle}</span>`}
+        </div>
+        <div style="text-align:right;">
+          <div class="cal-ex-vol">${done.length} sets</div>
+          <div style="font-size:10.5px;color:var(--text-tertiary);">${topText}</div>
+        </div>
+      </div>
+    `;
   };
 
-  // Programmed exercises in their original order; detect substitutions via _name
-  let progRows = '';
   if (sess) {
     sess.exercises.forEach((ex, i) => {
       const key = `${w.sessionId}_${i}`;
@@ -10167,46 +10246,54 @@ function openCalDay(id, dateStr) {
       const programmed = stripSuperset(ex.name);
       const stamped = (setArr.find(s => s && s._name) || {})._name || programmed;
       const subFrom = (normalizeEx(stamped) !== normalizeEx(programmed)) ? programmed : null;
-      progRows += rowFor(stamped, setArr, subFrom);
+      rowsHTML += renderExRow(stamped, setArr, subFrom);
     });
   }
 
-  // Accessory additions (add_* keys), in id order
+  // Accessories
   const addKeys = Object.keys(sets)
     .filter(k => k.indexOf('add_') === 0 && !k.endsWith('_wu'))
     .sort((a, b) => parseInt(a.slice(4)) - parseInt(b.slice(4)));
-  let addRows = '';
   for (const key of addKeys) {
     const setArr = sets[key];
     if (!Array.isArray(setArr)) continue;
     const nm = (setArr.find(s => s && s._name) || {})._name || 'Added exercise';
-    addRows += rowFor(nm, setArr, null);
+    rowsHTML += renderExRow(nm, setArr, null);
   }
 
-  const listHTML = (progRows || addRows) ? `
-    <div class="cal-ex-list">
-      ${progRows ? `<div class="cal-ex-group-lbl">programmed</div>${progRows}` : ''}
-      ${addRows ? `<div class="cal-ex-group-lbl cal-ex-group-add">✚ additions</div>${addRows}` : ''}
-    </div>` : '';
+  const volStr = vol.toLocaleString();
+  const progName = prog ? prog.name : 'Custom Routine';
 
-  const unit = getWeightUnit();
   document.getElementById('cal-popup-content').innerHTML = `
-    <div class="cal-popup-date">${dateStr}</div>
-    <div class="cal-popup-session">routine // ${sessName.toLowerCase()}</div>
+    <div class="cal-popup-head">
+      <div class="cal-popup-session">${sessName}</div>
+      <div class="cal-popup-date">📅 ${dateStr}</div>
+      <span class="cal-popup-prog">${progName}</span>
+    </div>
+
     <div class="cal-popup-stats">
       <div class="cal-popup-stat">
         <div class="cal-popup-stat-val">${dur}</div>
         <div class="cal-popup-stat-lbl">Duration</div>
       </div>
       <div class="cal-popup-stat">
-        <div class="cal-popup-stat-val">${vol} ${unit}</div>
-        <div class="cal-popup-stat-lbl">Volume</div>
+        <div class="cal-popup-stat-val">${volStr} ${unit}</div>
+        <div class="cal-popup-stat-lbl">Tonnage</div>
+      </div>
+      <div class="cal-popup-stat">
+        <div class="cal-popup-stat-val">${completedExCount}</div>
+        <div class="cal-popup-stat-lbl">Exercises</div>
       </div>
     </div>
-    ${listHTML}
-    <div style="margin-top:20px; display:flex; gap:10px;">
-      <button class="btn btn-primary" style="flex:1; padding:10px; font-size:13px;" onclick="closeCalPopup(); editCompletedWorkout('${w.id || w.endTime}')">Edit Workout</button>
-    </div>`;
+
+    <div style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:8px;">Completed Movements</div>
+    <div class="cal-ex-list">${rowsHTML || '<div style="padding:12px;color:var(--text-tertiary);text-align:center;font-size:12px;">No logged sets found.</div>'}</div>
+
+    <div class="cal-popup-actions">
+      <button class="btn btn-primary" style="width:100%;font-size:14px;padding:12px;" onclick="closeCalPopup(); editCompletedWorkout('${w.id || w.endTime}')">Edit Workout & Sets</button>
+      <button class="btn btn-sheet-ghost" style="width:100%;font-size:12px;" onclick="closeCalPopup(); ST.editingWorkoutId='${w.id || w.endTime}'; ST.workoutStart=${w.startTime || w.endTime}; ST.durationSecs=${w.duration || 0}; editWorkoutDateTime()">Change Date, Time or Delete</button>
+    </div>
+  `;
   popup.style.display = 'flex';
   requestAnimationFrame(() => popup.classList.add('visible'));
 }
@@ -10800,27 +10887,54 @@ function previewSession(progId, sessId) {
   if (!sess) return;
   const restTimes = getRestTimes();
   const unit = getWeightUnit();
+
+  // Find all targeted muscle groups for visual badges
+  const musclesInSession = [...new Set(sess.exercises.map(ex => getMuscle(stripSuperset(ex.name))).filter(m => m !== 'Other'))];
+  const muscleChipsHTML = musclesInSession.map(muscle => {
+    const c = MUSCLE_COLORS[muscle] || { bg: 'rgba(240,78,35,0.12)', color: 'var(--accent-kinetic)' };
+    return `<span class="preview-muscle-chip" style="background:${c.bg};color:${c.color};">${muscle}</span>`;
+  }).join('');
+
+  let totalEstSets = 0;
   const rows = sess.exercises.map((ex, i) => {
     const name = stripSuperset(ex.name);
     const muscle = getMuscle(name);
-    const c = MUSCLE_COLORS[muscle] || MUSCLE_COLORS.Other;
+    const c = MUSCLE_COLORS[muscle] || { bg: 'rgba(0,0,0,0.06)', color: 'var(--text-secondary)' };
     const restSec = restTimes[normalizeEx(name)] || parseRestSeconds(ex.rest);
+    const setsCount = ex.workingSets || 3;
+    totalEstSets += setsCount;
     const last = getLastPerformance(name);
-    const lastText = last && last[0] ? `${last[0].w} ${unit} × ${last[0].r}` : '—';
-    return `<div style="display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)">
-      <div style="flex:1">
-        <div style="font-size:14px;font-weight:600;margin-bottom:3px">${name}</div>
-        <div style="font-size:12px;color:var(--muted)">${ex.workingSets||3} × ${ex.reps} · ${formatDuration(restSec)} rest · Last: ${lastText}</div>
+    const lastText = last && last[0] ? `${last[0].w} ${unit} × ${last[0].r}` : 'No previous log';
+
+    return `
+      <div class="preview-movement-card" onclick="showProgressGraph(event, '${name.replace(/'/g, "\\'")}')" style="cursor:pointer;">
+        <div class="preview-mc-num">${i + 1}</div>
+        <div class="preview-mc-info">
+          <div class="preview-mc-head">
+            <div class="preview-mc-name">${name}</div>
+            <span class="preview-muscle-chip" style="background:${c.bg};color:${c.color};font-size:9.5px;padding:2px 7px;">${muscle}</span>
+          </div>
+          <div class="preview-mc-target">${setsCount} Working Sets × ${ex.reps} reps · ⏱ ${formatDuration(restSec)} rest</div>
+          <div class="preview-mc-last">Last: <strong>${lastText}</strong></div>
+        </div>
+        <span style="color:var(--text-tertiary);font-size:14px;margin-top:2px;">↗</span>
       </div>
-      <span class="muscle-badge" style="background:${c.bg};color:${c.color};flex-shrink:0">${muscle}</span>
-    </div>`;
+    `;
   }).join('');
+
   openSheet(`
-    <div class="bs-title">${sess.name}</div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:12px">${sess.exercises.length} exercises · ${prog.name}</div>
-    ${rows}
-    <div style="margin-top:20px">
-      <button class="btn btn-primary" onclick="closeSheet();startWorkoutFromHome('${progId}','${sessId}')">Start This Workout</button>
+    <div class="preview-sheet-hero">
+      <div class="preview-sheet-title">${sess.name}</div>
+      <div class="preview-sheet-meta">${prog.name} · ${sess.exercises.length} Movements · ${totalEstSets} Total Sets</div>
+      <div class="preview-muscle-chips">${muscleChipsHTML}</div>
+    </div>
+
+    <div style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-tertiary);margin:14px 0 8px;">Upcoming Movements · Tap for Progression Curve</div>
+    <div class="preview-card-list">${rows}</div>
+
+    <div style="margin-top:14px; display:flex; flex-direction:column; gap:8px;">
+      <button class="btn btn-primary" style="width:100%;font-size:15px;padding:14px;" onclick="closeSheet();startWorkoutFromHome('${progId}','${sessId}')">Start This Workout →</button>
+      <button class="btn btn-sheet-ghost" onclick="closeSheet()">Back</button>
     </div>
   `);
 }
