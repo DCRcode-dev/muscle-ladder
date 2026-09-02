@@ -1137,9 +1137,19 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
-  padding: 4px 6px;
+  padding: 6px 8px;
   border-radius: 14px;
-  transition: background var(--dur-smooth) var(--ease);
+  border: 1px solid transparent;
+  transition: all var(--dur-smooth) var(--spring-snappy);
+}
+.set-row.active-focus {
+  background: rgba(240, 78, 35, 0.05);
+  border: 1.5px solid var(--accent-kinetic);
+  box-shadow: 0 0 0 3px rgba(240, 78, 35, 0.12), var(--shadow-sm);
+}
+.set-row.active-focus .set-num {
+  color: var(--accent-kinetic);
+  font-weight: 700;
 }
 .set-input { min-width: 0; flex: 1 1 0; box-sizing: border-box; }
 .set-num {
@@ -1239,6 +1249,60 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
 }
 .trend-arrow-up   { color: #C4944A; font-size: 11px; font-weight: 700; }
 .trend-arrow-down { color: #C4876E; font-size: 11px; font-weight: 700; }
+
+/* PR Celebration Badge */
+.pr-toast {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.18), rgba(240, 78, 35, 0.15));
+  border: 1px solid rgba(234, 179, 8, 0.45);
+  color: #B45309; border-radius: 20px;
+  padding: 4px 12px; font-size: 11px; font-weight: 700;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  margin: 4px 0 6px 30px;
+  animation: prToastIn 400ms var(--spring-snappy) forwards;
+}
+@keyframes prToastIn {
+  from { opacity: 0; transform: translateY(6px) scale(0.92); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Form Cue Dossier styling */
+.cue-dossier-hero { margin-bottom: 16px; }
+.cue-dossier-title { font-family: var(--font-hero); font-style: italic; font-size: 26px; font-weight: 600; color: var(--text-primary); }
+.cue-card {
+  background: var(--surface-card); border: 1px solid var(--border-subtle);
+  border-radius: 16px; padding: 14px 16px; margin-bottom: 10px; box-shadow: var(--shadow-sm);
+}
+.cue-card-head {
+  display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-secondary); margin-bottom: 6px;
+}
+.cue-card-body { font-size: 13px; line-height: 1.5; color: var(--text-primary); }
+
+/* Substitution Sheet Styling */
+.subs-filter-bar { display: flex; gap: 6px; overflow-x: auto; padding: 4px 0 12px; margin-bottom: 8px; -webkit-overflow-scrolling: touch; }
+.subs-tab-btn {
+  padding: 7px 14px; border-radius: 20px; font-size: 11.5px; font-weight: 600;
+  border: 1px solid var(--border-subtle); background: var(--surface-card);
+  color: var(--text-secondary); cursor: pointer; white-space: nowrap;
+  transition: all var(--dur-fast);
+}
+.subs-tab-btn.active {
+  background: var(--accent-kinetic); color: #fff; border-color: var(--accent-kinetic);
+}
+.sub-card {
+  background: var(--surface-card); border: 1px solid var(--border-subtle);
+  border-radius: 16px; margin-bottom: 8px; padding: 12px 14px;
+  box-shadow: var(--shadow-sm); transition: transform var(--dur-fast);
+}
+.sub-card-header { display: flex; justify-content: space-between; align-items: center; }
+.sub-card-name { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+.sub-card-tag { font-size: 10px; font-weight: 700; text-transform: uppercase; background: rgba(240,78,35,0.1); color: var(--accent-kinetic); padding: 2px 7px; border-radius: 8px; }
+.sub-card-detail { font-size: 11.5px; color: var(--text-tertiary); margin: 6px 0 10px; }
+.sub-use-btn {
+  width: 100%; padding: 10px; border-radius: 12px; border: none;
+  background: var(--accent-kinetic); color: #fff; font-size: 13px; font-weight: 700; cursor: pointer;
+}
 
 /* Plate calculator */
 .plate-popover {
@@ -5188,7 +5252,7 @@ function saveMeasurements(m) { LS.set('dcrgym_measurements', m); }
 // Schema-versioned, non-destructive, with rolling last-good backup.
 // History must survive every app update. Period.
 const SCHEMA_VERSION = 3;
-const APP_BUILD = '2026.09.01 · ota-20 · visual-workout-preview-and-calendar-edit-upgrade';
+const APP_BUILD = '2026.09.01 · ota-21 · active-focus-pr-celebrations-and-subs-upgrade';
 
 function convertHistoryWeightsToLbs(hist) {
   if (!Array.isArray(hist)) return 0;
@@ -7546,7 +7610,6 @@ function exerciseCardHTML(ex, key, i, isAddition) {
   const isExpanded = ST.expandedCards.has(key);
   const isCompleted = ST.completedCards.has(key);
   const muscle = getMuscle(name);
-  const barbell = isBarbell(name);
   const cueAvail = !!FORM_CUES[normalizeEx(name)];
   const travel = !isAddition && ST.travelMode && TRAVEL_MAP[normalizeEx(name)];
   const displayName = liveExName(key, ex);
@@ -7562,16 +7625,27 @@ function exerciseCardHTML(ex, key, i, isAddition) {
   const lastPerfFull = getLastPerformanceFull(displayName);
   const lastPerf = lastPerfFull ? lastPerfFull.sets : null;
 
+  // Active focus spotlight: find first unlogged set row
+  let activeFocusIdx = -1;
+  if (isExpanded && !isCompleted) {
+    for (let idx = 0; idx < totalSets; idx++) {
+      if (!loggedSets[idx] || !loggedSets[idx].r) {
+        activeFocusIdx = idx;
+        break;
+      }
+    }
+  }
+
   // Overload nudge check
   let overloadNudge = '';
   if (loggedSets.length === totalSets && totalSets > 0) {
     const topRep = parseInt((reps.match(/(\d+)$/) || ['',reps])[1]);
-    if (!isNaN(topRep) && loggedSets.every(s => s.r >= topRep)) {
+    if (!isNaN(topRep) && loggedSets.every(s => s && s.r >= topRep)) {
       overloadNudge = `<div class="overload-nudge">⬆ All sets hit ${topRep} reps — increase weight next session!</div>`;
     }
   }
 
-  // ── Build set rows with trend micro-indicators ───────────────────────────
+  // ── Build set rows with trend micro-indicators & active focus ─────────────
   let histAvgW = null;
   if (lastPerf && lastPerf.length > 0) {
     const wArr = lastPerf.filter(s => s && s.w > 0).map(s => s.w);
@@ -7583,12 +7657,21 @@ function exerciseCardHTML(ex, key, i, isAddition) {
     const logged = loggedSets[si];
     const lastSet = lastPerf && (lastPerf[si] != null ? lastPerf[si] : lastPerf[lastPerf.length - 1]);
     const draft = !logged && ST.workoutDrafts && ST.workoutDrafts[key + '-' + si];
-    const preW = logged ? logged.w : (draft && draft.w !== '' ? draft.w : (lastSet != null && lastSet.w != null ? lastSet.w : ''));
-    const preR = logged ? logged.r : (draft && draft.r !== '' ? draft.r : (lastSet != null && lastSet.r != null ? lastSet.r : (ex && ex.reps ? (parseInt((ex.reps.match(/(\d+)$/) || ['', '8'])[1]) || 8) : '')));
+    const prevLoggedThisSession = si > 0 && loggedSets[si - 1] ? loggedSets[si - 1] : null;
+
+    // Reliable previous weight & reps pre-fill
+    const preW = logged ? logged.w : (draft && draft.w !== '' ? draft.w : (lastSet != null && lastSet.w != null ? lastSet.w : (prevLoggedThisSession ? prevLoggedThisSession.w : '')));
+    const preR = logged ? logged.r : (draft && draft.r !== '' ? draft.r : (lastSet != null && lastSet.r != null ? lastSet.r : (prevLoggedThisSession ? prevLoggedThisSession.r : (ex && ex.reps ? (parseInt((ex.reps.match(/(\d+)$/) || ['', '8'])[1]) || 8) : 8))));
+
     const isLastSet = si === totalSets - 1;
     const tech = isLastSet && ex.lastSetTechnique ? `<span class="technique-badge">${ex.lastSetTechnique}</span>` : '';
     const isLogged = !!logged;
-    const plateHtml = barbell && isExpanded && ST.openPlate === `${key}_${si}` ? renderPlatePopover(preW || 0) : '';
+    const isActiveFocus = si === activeFocusIdx;
+
+    let prHtml = '';
+    if (isLogged && logged._isPR) {
+      prHtml = `<div class="pr-toast">✦ New Record · ${logged.w} ${unit} × ${logged.r}</div>`;
+    }
 
     let trendHtml = '';
     if (!isLogged && histAvgW !== null && preW !== '' && Number(preW) > 0) {
@@ -7606,13 +7689,12 @@ function exerciseCardHTML(ex, key, i, isAddition) {
     }
 
     setRows += `
-    <div class="set-row" id="setrow-${key}-${si}">
+    <div class="set-row${isActiveFocus ? ' active-focus' : ''}" id="setrow-${key}-${si}">
       <div class="set-num">${si+1}</div>
       <input class="set-input${isLogged?' logged':''}" id="wi-${key}-${si}" type="text" readonly inputmode="none"
         value="${preW}" placeholder="${unit}" autocomplete="off"
         onclick="openNumpad(this,'${key}',${si},${i},'w')"
-        oninput="markDraft('${key}',${si})"
-        ${barbell?`onfocus="showPlate('${key}',${si})" onblur="hidePlate('${key}',${si})"`:''}>
+        oninput="markDraft('${key}',${si})">
       <div class="set-sep">×</div>
       <input class="set-input${isLogged?' logged':''}" id="ri-${key}-${si}" type="text" readonly inputmode="none"
         value="${preR}" placeholder="reps" autocomplete="off"
@@ -7621,9 +7703,9 @@ function exerciseCardHTML(ex, key, i, isAddition) {
       <button class="set-log-btn${isLogged?' logged':''}" onclick="${isLogged ? `unlogSet('${key}',${si},${i})` : `logSet('${key}',${si},${i})`}"
         >${isLogged ? checkSVG() : '→'}</button>
     </div>
+    ${prHtml}
     ${trendHtml}
-    ${tech ? `<div style="padding-left:30px;margin-bottom:6px">${tech}</div>` : ''}
-    ${plateHtml}`;
+    ${tech ? `<div style="padding-left:30px;margin-bottom:6px">${tech}</div>` : ''}`;
   }
 
   // Warm-up set row — one interactive row; hidden if user dismissed for this exercise
@@ -7922,27 +8004,24 @@ function setTravel(on) {
   renderWorkout();
 }
 
-function showPlate(key, si) {
-  ST.openPlate = key + '_' + si;
-  const wi = document.getElementById('wi-' + key + '-' + si);
-  const val = wi ? wi.value : 0;
-  const row = document.getElementById('setrow-' + key + '-' + si);
-  if (!row) return;
-  let pop = row.nextElementSibling;
-  if (pop && pop.classList.contains('plate-popover')) pop.remove();
-  const html = renderPlatePopover(val);
-  const div = document.createElement('div');
-  div.innerHTML = html;
-  row.insertAdjacentElement('afterend', div.firstElementChild);
-}
-
-function hidePlate(key, si) {
-  setTimeout(() => {
-    const row = document.getElementById('setrow-' + key + '-' + si);
-    if (!row) return;
-    const pop = row.nextElementSibling;
-    if (pop && pop.classList.contains('plate-popover')) pop.remove();
-  }, 200);
+function getHistoricalBestE1RM(name) {
+  const norm = normalizeEx(name);
+  let best = 0;
+  for (const w of getHistory()) {
+    if (!w.sets) continue;
+    for (const sets of Object.values(w.sets)) {
+      if (!Array.isArray(sets)) continue;
+      for (const s of sets) {
+        if (!s || !s.w || !s.r || s.w <= 0 || s.r <= 0) continue;
+        const sName = normalizeEx(s._name || '');
+        if (sName === norm) {
+          const e1rm = s.w * (1 + s.r / 30);
+          if (e1rm > best) best = e1rm;
+        }
+      }
+    }
+  }
+  return best;
 }
 
 function logSet(key, si, exIdx) {
@@ -7979,9 +8058,13 @@ function logSet(key, si, exIdx) {
   }
 
   if (!ST.workoutSets[key]) ST.workoutSets[key] = [];
-  // _name stamped at write time — exercise identity is a stored fact, never a
-  // derived guess. Travel-swap and substitution aware.
-  ST.workoutSets[key][si] = { w, r, ts: Date.now(), _name: liveExName(key, ex) };
+  
+  const exName = liveExName(key, ex);
+  const curE1rm = w * (1 + r / 30);
+  const prevBestE1rm = getHistoricalBestE1RM(exName);
+  const isPR = prevBestE1rm > 0 && curE1rm > (prevBestE1rm + 0.5);
+
+  ST.workoutSets[key][si] = { w, r, ts: Date.now(), _name: exName, _isPR: isPR };
 
   // Draft for this set is now committed — clear it
   if (ST.workoutDrafts) delete ST.workoutDrafts[key + '-' + si];
@@ -7990,17 +8073,44 @@ function logSet(key, si, exIdx) {
   saveNow();
 
   // Haptic
-  haptic('set');
+  if (isPR) {
+    if (navigator.vibrate) navigator.vibrate([40, 60, 80]);
+  } else {
+    haptic('set');
+  }
   playSound('set');
 
   // Update UI for this set row
   wi.classList.add('logged');
   ri.classList.add('logged');
-  const btn = wi.closest('.set-row') && wi.closest('.set-row').querySelector('.set-log-btn');
-  if (btn) { btn.classList.add('logged'); btn.innerHTML = checkSVG(); }
-
-  // Ripple
   const row = document.getElementById('setrow-' + key + '-' + si);
+  if (row) {
+    row.classList.remove('active-focus');
+    const btn = row.querySelector('.set-log-btn');
+    if (btn) { btn.classList.add('logged'); btn.innerHTML = checkSVG(); }
+
+    if (isPR) {
+      const nextEl = row.nextElementSibling;
+      if (!nextEl || !nextEl.classList.contains('pr-toast')) {
+        const prToast = document.createElement('div');
+        prToast.className = 'pr-toast';
+        prToast.innerHTML = `✦ New Record · ${w} ${getWeightUnit()} × ${r}`;
+        row.insertAdjacentElement('afterend', prToast);
+      }
+    }
+  }
+
+  // Auto-advance active focus to next unlogged set in this card
+  const totalSets = effSetCount(key, ex);
+  for (let nextSi = si + 1; nextSi < totalSets; nextSi++) {
+    const nextRow = document.getElementById('setrow-' + key + '-' + nextSi);
+    const nextWi = document.getElementById('wi-' + key + '-' + nextSi);
+    if (nextRow && nextWi && !nextWi.classList.contains('logged')) {
+      nextRow.classList.add('active-focus');
+      break;
+    }
+  }
+  // Ripple
   if (row) {
     const ripple = document.createElement('div');
     ripple.className = 'set-ripple';
@@ -8013,7 +8123,6 @@ function logSet(key, si, exIdx) {
   updateProgressBadge();
 
   // Check if exercise complete
-  const totalSets = effSetCount(key, ex);
   const loggedSets = ST.workoutSets[key] || [];
   const doneCount = loggedSets.filter(Boolean).length;
 
@@ -8161,6 +8270,14 @@ function unlogSet(key, si, exIdx) {
     btn.textContent = '→';
     btn.onclick = () => logSet(key, si, exIdx);
   }
+  if (row) {
+    const prToast = row.nextElementSibling;
+    if (prToast && prToast.classList.contains('pr-toast')) prToast.remove();
+    // Clear other focus in card and focus this row
+    const card = document.getElementById('excard-' + key);
+    if (card) card.querySelectorAll('.set-row').forEach(r => r.classList.remove('active-focus'));
+    row.classList.add('active-focus');
+  }
 
   // Un-complete the card if it was marked done; re-expand so user can see sets
   const isAdd = typeof key === 'string' && key.indexOf('add_') === 0;
@@ -8263,21 +8380,52 @@ function saveSessionNote(key, nameKey, text) {
 }
 
 function showCue(e, key, exIdx) {
-  e.stopPropagation();
-  // Resolve the EFFECTIVE exercise — a subbed slot shows the sub's cues, an
-  // addition shows its own; falls back gracefully when no cues exist.
+  if (e && e.stopPropagation) e.stopPropagation();
   const slot = slotForKey(key);
   if (!slot) return;
   const ex = slot.ex;
   const name = liveExName(key, ex);
+  const muscle = getMuscle(name);
   const cue = FORM_CUES[normalizeEx(name)];
+  
   const content = cue ? `
-    <div class="cue-section"><h4>Setup</h4><p>${cue.setup}</p></div>
-    <div class="cue-section"><h4>Execution</h4><p>${cue.execution}</p></div>
-    <div class="cue-section"><h4>Common Mistakes</h4><p>${cue.mistakes}</p></div>
-    <div class="cue-tip">💡 DCR Tip: ${cue.tip}</div>
-  ` : `<p style="color:var(--muted);font-style:italic">No specific cues yet — focus on controlled reps and good form.</p>`;
-  openSheet(`<div class="bs-title">${name}</div>${content}`);
+    <div class="cue-card">
+      <div class="cue-card-head">🎯 Target Biomechanics</div>
+      <div class="cue-card-body">Primary focus: <strong>${muscle}</strong>. Maintain controlled tempo and progressive mechanical tension throughout full range.</div>
+    </div>
+    <div class="cue-card">
+      <div class="cue-card-head">📐 Setup & Stance</div>
+      <div class="cue-card-body">${cue.setup}</div>
+    </div>
+    <div class="cue-card">
+      <div class="cue-card-head">⚡ Movement Execution</div>
+      <div class="cue-card-body">${cue.execution}</div>
+    </div>
+    <div class="cue-card">
+      <div class="cue-card-head">⚠️ Common Mistakes</div>
+      <div class="cue-card-body">${cue.mistakes}</div>
+    </div>
+    <div class="cue-card" style="background:rgba(240,78,35,0.06);border:1px solid rgba(240,78,35,0.22);">
+      <div class="cue-card-head" style="color:var(--accent-kinetic);">💡 Pro Execution Tip</div>
+      <div class="cue-card-body">${cue.tip}</div>
+    </div>
+  ` : `
+    <div class="cue-card">
+      <div class="cue-card-head">🎯 Target Muscle</div>
+      <div class="cue-card-body">Primary focus: <strong>${muscle}</strong>. Focus on strict form, full range of motion, and controlled 2-3s eccentrics.</div>
+    </div>
+  `;
+
+  openSheet(`
+    <div class="cue-dossier-hero">
+      <div class="cue-dossier-title">${name}</div>
+      <div style="font-size:12px;color:var(--text-tertiary);margin-top:4px;">Technique & Execution Guide · ${muscle}</div>
+    </div>
+    ${content}
+    <div style="margin-top:14px;">
+      <button class="btn btn-sheet-ghost" style="width:100%;" onclick="closeSheet()">Close Dossier</button>
+    </div>
+  `);
 }
 
 // ── Exercise picker sheet — substitution (Decisions 1,2,3) & additions (4,5,6,7).
@@ -8343,18 +8491,26 @@ function subsSheetHTML() {
   }).join('');
 
   return `
-    <div class="bs-title">Swap ${name}</div>
-    <div class="bs-sub" style="margin-bottom:12px;font-size:12px;color:var(--muted)">Target: <strong style="color:var(--charcoal)">${subMuscle}</strong> · ${exInfo.muscle}</div>
-    ${activeSub ? `<button class="btn btn-sheet-secondary" style="margin-bottom:14px" onclick="revertSubstitution('${ctx.key}')">↩ Back to ${name}</button>` : ''}
+    <div class="cue-dossier-hero" style="margin-bottom:12px;">
+      <div class="cue-dossier-title">Swap ${name}</div>
+      <div style="font-size:12px;color:var(--text-tertiary);margin-top:4px;">
+        Target: <strong style="color:var(--accent-kinetic)">${subMuscle}</strong> · ${exInfo.muscle}
+      </div>
+    </div>
+
+    ${activeSub ? `<button class="btn btn-sheet-secondary" style="margin-bottom:14px;width:100%;" onclick="revertSubstitution('${ctx.key}')">↩ Revert back to ${name}</button>` : ''}
+
     ${nippardSubs.length ? `
-      <div class="bs-section-lbl">Program Recommended</div>
-      <div class="lib-section" style="margin-bottom:14px">${nippardHtml}</div>` : ''}
+      <div style="font-size:10.5px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-tertiary);margin:12px 0 8px;">Program Recommended</div>
+      <div class="lib-section" style="margin-bottom:12px">${nippardHtml}</div>` : ''}
+
     ${exactSubs.length ? `
-      <div class="bs-section-lbl">Exact Muscle Substitutes (${subMuscle})</div>
-      <div class="lib-section" style="margin-bottom:14px">${exactHtml}</div>` : ''}
-    <div class="bs-section-lbl">All Exercises (${EXERCISE_LIBRARY.length})</div>
+      <div style="font-size:10.5px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-tertiary);margin:12px 0 8px;">Exact Biomechanical Substitutes (${subMuscle})</div>
+      <div class="lib-section" style="margin-bottom:12px">${exactHtml}</div>` : ''}
+
+    <div style="font-size:10.5px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-tertiary);margin:14px 0 8px;">Search All Exercises (${EXERCISE_LIBRARY.length})</div>
     <input class="bs-search" id="lib-search" type="text" placeholder="Search by name, muscle, equipment…" autocomplete="off" oninput="filterLib(this.value)">
-    <div id="lib-list">${libListHTML('')}</div>
+    <div id="lib-list" style="margin-top:10px;">${libListHTML('')}</div>
   `;
 }
 
@@ -9166,15 +9322,37 @@ function showFinish() {
   const sessId = s.sessionId || ST.currentSession;
   const prog = PROGRAMS.find(p => p.id === progId);
   const sess = prog && prog.sessions.find(ss => ss.id === sessId);
+  const unit = getWeightUnit();
 
-  // Build the program session table
+  // Extract session stats & PRs from the completed workout entry
   const hist = getHistory();
+  const lastEntry = hist[hist.length - 1];
+  let totalVol = 0;
+  let totalSetsDone = 0;
+  const prsHit = [];
+  if (lastEntry && lastEntry.sets) {
+    for (const [k, sets] of Object.entries(lastEntry.sets)) {
+      if (!Array.isArray(sets)) continue;
+      for (const st of sets) {
+        if (st && st.w > 0 && st.r > 0) {
+          totalVol += (st.w * st.r);
+          totalSetsDone++;
+          if (st._isPR) {
+            prsHit.push(`${st._name || 'Movement'} · ${st.w} ${unit} × ${st.r}`);
+          }
+        }
+      }
+    }
+  }
+
+  const volStr = Math.round(totalVol).toLocaleString();
+  const durText = formatDuration(s.duration || 0);
+
+  // Program session timeline
   const weekStart = (() => { const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()-d.getDay()); return d.getTime(); })();
   const msPerDay = 86400000;
-
-  // Sessions done this week (excluding the one just finished)
   const doneThisWeek = {};
-  for (const w of hist.slice(0, -1)) { // exclude the entry we just added
+  for (const w of hist.slice(0, -1)) {
     if (w.programId !== (prog && prog.id) || w.endTime < weekStart) continue;
     if (!doneThisWeek[w.sessionId] || w.endTime > doneThisWeek[w.sessionId]) {
       doneThisWeek[w.sessionId] = w.endTime;
@@ -9189,7 +9367,7 @@ function showFinish() {
         <div class="fr-icon">✦</div>
         <div class="fr-info">
           <div class="fr-name">${ps.name}</div>
-          <div class="fr-date">Just completed · ${formatDuration(s.duration||0)}</div>
+          <div class="fr-date">Just completed · ${durText}</div>
         </div>
       </div>`;
     } else if (priorDone) {
@@ -9207,26 +9385,20 @@ function showFinish() {
         <div class="fr-icon">·</div>
         <div class="fr-info">
           <div class="fr-name">${ps.name}</div>
-          <div class="fr-date">${ps.exercises.length} exercises</div>
+          <div class="fr-date">${ps.exercises.length} movements</div>
         </div>
       </div>`;
     }
   }).join('') : '';
 
-  // Stats — volume display removed per UI spec (III)
-  const unit = getWeightUnit();
-  const durText  = formatDuration(s.duration || 0);
-  const gainText = s.biggestGain ? '+'+s.biggestGain.gain+' '+unit : '—';
-  const gainLabel = s.biggestGain ? s.biggestGain.name : 'Top gain';
-
-  // Set compliance %
-  const prog2 = PROGRAMS.find(p => p.id === progId);
-  const sess2 = prog2 && prog2.sessions.find(ss => ss.id === sessId);
-  let compliancePct = '—';
-  if (sess2) {
-    const total   = sess2.exercises.length;
-    const done    = sess2.exercises.filter((_,i) => ST.completedCards.has(`${sess2.id}_${i}`)).length;
-    compliancePct = total > 0 ? Math.round((done / total) * 100) + '%' : '—';
+  let prSectionHTML = '';
+  if (prsHit.length > 0) {
+    prSectionHTML = `
+      <div style="margin: 0 auto 16px; padding: 14px 18px; border-radius: 18px; background: linear-gradient(135deg, rgba(234,179,8,0.15), rgba(240,78,35,0.12)); border: 1px solid rgba(234,179,8,0.38); max-width: 340px; text-align: left;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #B45309; margin-bottom: 6px;">✦ New Records Established</div>
+        ${prsHit.map(pr => `<div style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px;">• ${pr}</div>`).join('')}
+      </div>
+    `;
   }
 
   // e1RM delta badge
@@ -9234,44 +9406,35 @@ function showFinish() {
   if (s.e1rmDelta !== null && s.e1rmDelta !== undefined) {
     const up = s.e1rmDelta >= 0;
     e1rmBadgeHTML = `
-      <div style="margin:0 auto 18px;padding:12px 20px;border-radius:14px;
-        background:${up ? 'oklch(72.3% 0.190 145 / 0.08)' : 'oklch(48% 0.130 35 / 0.08)'};
-        border:1px solid ${up ? 'oklch(72.3% 0.190 145 / 0.25)' : 'oklch(48% 0.130 35 / 0.25)'};
-        text-align:center;max-width:320px">
-        <div style="font-family:var(--font-body);font-size:26px;font-weight:300;font-variant-numeric:tabular-nums lining-nums;
-          color:${up ? 'var(--green)' : 'var(--terracotta)'};letter-spacing:-0.5px">
+      <div style="margin:0 auto 16px;padding:10px 18px;border-radius:14px;
+        background:${up ? 'rgba(16, 185, 129, 0.08)' : 'rgba(239, 68, 68, 0.08)'};
+        border:1px solid ${up ? 'rgba(16, 185, 129, 0.25)' : 'rgba(239, 68, 68, 0.25)'};
+        text-align:center;max-width:340px">
+        <div style="font-family:var(--font-mono);font-size:22px;font-weight:700;
+          color:${up ? 'var(--accent-success)' : 'var(--accent-destructive)'};">
           ${up ? '▲' : '▼'} ${up ? '+' : ''}${s.e1rmDelta}%
         </div>
-        <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:12px;
-          color:oklch(60% 0.018 55);margin-top:3px">e1RM vs previous session</div>
-      </div>`;
-  } else if (s.curE1RM > 0) {
-    e1rmBadgeHTML = `
-      <div style="margin:0 auto 18px;padding:10px 20px;border-radius:14px;
-        background:oklch(91.2% 0.012 72 / 0.6);border:1px solid oklch(78% 0.030 60 / 0.4);
-        text-align:center;max-width:320px">
-        <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;
-          color:oklch(60% 0.018 55)">Baseline Established · ${s.curE1RM} ${unit} e1RM</div>
+        <div style="font-size:11px;color:var(--text-tertiary);margin-top:2px;">Progression Delta vs Previous Session</div>
       </div>`;
   }
 
   const el = document.createElement('div');
   el.id = 'finish-screen';
   el.innerHTML = `
-    <div class="finish-headline">Done.</div>
-    <div class="finish-session-label">${sess ? sess.name : 'Session'} complete</div>
+    <div class="finish-headline">Session Complete.</div>
+    <div class="finish-session-label">${sess ? sess.name : 'Workout'} · ${prog ? prog.name : ''}</div>
+    ${prSectionHTML}
     ${e1rmBadgeHTML}
-    <div class="finish-stats-row">
+    <div class="finish-stats-row" style="margin-bottom: 18px;">
       <div class="finish-stat"><div class="finish-stat-val">${durText}</div><div class="finish-stat-lbl">Duration</div></div>
-      <div class="finish-stat"><div class="finish-stat-val" ${compliancePct !== '—' ? `data-count="${parseInt(compliancePct)}" data-suffix="%"` : ''}>${compliancePct}</div><div class="finish-stat-lbl">Compliance</div></div>
-      <div class="finish-stat"><div class="finish-stat-val" style="font-size:14px;line-height:1.2">${gainText}</div><div class="finish-stat-lbl">${gainLabel.split(' ')[0]}</div></div>
+      <div class="finish-stat"><div class="finish-stat-val">${volStr} ${unit}</div><div class="finish-stat-lbl">Tonnage</div></div>
+      <div class="finish-stat"><div class="finish-stat-val">${totalSetsDone}</div><div class="finish-stat-lbl">Sets Logged</div></div>
     </div>
     ${prog ? `<div class="finish-plan-table">${tableRows}</div>` : ''}
-    <button class="btn btn-primary" style="max-width:360px;width:100%" onclick="dismissFinish()">Back to Home</button>
+    <button class="btn btn-primary" style="max-width:360px;width:100%;font-size:15px;padding:14px;" onclick="dismissFinish()">Back to Home</button>
   `;
   document.body.appendChild(el);
   requestAnimationFrame(() => tickStats(el));
-  launchConfetti(false);
 }
 
 function dismissFinish() {
