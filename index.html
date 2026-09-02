@@ -663,57 +663,120 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
   color: #fff; font-size: 13px; font-weight: 600;
 }
 
-/* ── Workout header ── */
+/* ── Workout header (Ultra-Luxury iPhone Frosted Masthead) ── */
 #workout-header {
-  /* The cockpit — the high-focus biometric telemetry header. */
-  background: var(--surface-glass-dark);
-  backdrop-filter: blur(20px) saturate(1.4);
-  -webkit-backdrop-filter: blur(20px) saturate(1.4);
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  color: #FAF7F2;
+  background: rgba(250, 247, 242, 0.88);
+  backdrop-filter: blur(24px) saturate(1.5);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-primary);
   position: sticky; top: 0; z-index: 50;
-  padding: calc(env(safe-area-inset-top, 0px) + 16px) 20px 14px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+  padding: calc(env(safe-area-inset-top, 0px) + 8px) 18px 14px;
+  box-shadow: 0 4px 20px rgba(42, 36, 33, 0.04);
+}
+.wh-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.wh-exit-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 15px;
+  cursor: pointer;
+  padding: 4px 8px 4px 0;
+  flex-shrink: 0;
+  font-family: var(--font-body);
+  width: 44px;
+  text-align: left;
+  transition: opacity var(--dur-fast);
+}
+.wh-exit-btn:active { opacity: 0.6; }
+.wh-title-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+.wh-mode-tag {
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  color: var(--text-tertiary);
+  margin-bottom: 2px;
+  font-weight: 700;
 }
 .wh-session {
-  font-family: var(--font-hero) !important; font-style: italic !important;
-  font-size: 1.5rem !important; text-align: center !important;
-  color: rgba(250,247,242,0.85) !important; flex: 1; margin-bottom: 0 !important;
-  letter-spacing: -0.01em;
+  font-family: var(--font-hero) !important;
+  font-style: italic !important;
+  font-size: 1.45rem !important;
+  font-weight: 600 !important;
+  text-align: center !important;
+  color: var(--text-primary) !important;
+  flex: none !important;
+  margin-bottom: 0 !important;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
 }
-.wh-top { display: flex; align-items: center; justify-content: space-between; }
+.wh-date-chip {
+  font-size: 11px;
+  color: var(--accent-kinetic);
+  margin-top: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  padding: 2px 10px;
+  border-radius: 20px;
+  box-shadow: var(--shadow-sm);
+}
+.wh-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+}
 .wh-duration {
   font-family: var(--font-mono);
-  font-size: 36px; font-weight: 300; color: #FAF7F2; line-height: 1;
+  font-size: 32px;
+  font-weight: 400;
+  color: var(--text-primary);
+  line-height: 1;
   font-variant-numeric: tabular-nums lining-nums;
   letter-spacing: -0.02em;
 }
 .wh-progress { display: flex; gap: 4px; margin-top: 12px; }
 .wh-seg {
-  flex: 1; height: 3.5px; background: rgba(250,247,242,0.16);
+  flex: 1; height: 3px; background: var(--border-subtle);
   border-radius: 2px; transition: background 300ms var(--ease);
 }
 .wh-seg.done { background: var(--accent-kinetic); }
-.wh-seg.active { background: rgba(240,78,35,0.6); }
+.wh-seg.active { background: rgba(240,78,35,0.4); }
 .wh-pct-badge {
-  width: 52px; height: 52px; border-radius: 50%;
-  background: rgba(250,247,242,0.06); border: 1.5px solid rgba(250,247,242,0.18);
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--surface-card); border: 1px solid var(--border-subtle);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   transition: all 450ms var(--ease-spring); flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
 }
 .wh-pct-badge.complete {
-  background: var(--accent-kinetic); border-color: var(--accent-kinetic);
-  box-shadow: 0 0 18px rgba(240,78,35,0.55);
+  background: var(--accent-success); border-color: var(--accent-success);
+  box-shadow: 0 0 16px rgba(34,197,94,0.35);
 }
 .wh-pct-num {
   font-family: var(--font-mono);
-  font-size: 15px; font-weight: 600; color: #FAF7F2;
+  font-size: 15px; font-weight: 700; color: var(--text-primary);
   line-height: 1; letter-spacing: -0.5px;
   font-variant-numeric: tabular-nums lining-nums;
 }
 .wh-pct-unit {
-  font-size: 9px; color: rgba(250,247,242,0.55);
-  letter-spacing: 0.08em; margin-top: 2px; text-transform: uppercase;
+  font-size: 8.5px; color: var(--text-tertiary);
+  letter-spacing: 0.08em; margin-top: 2px; text-transform: uppercase; font-weight: 600;
 }
 .wh-pct-badge.complete .wh-pct-num,
 .wh-pct-badge.complete .wh-pct-unit { color: #fff !important; }
@@ -722,19 +785,20 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 .travel-toggle-row {
   display: flex; align-items: center; justify-content: space-between;
   margin: 12px 0 0; padding-top: 10px;
-  border-top: 1px solid rgba(250,247,242,0.08);
+  border-top: 1px solid var(--border-subtle);
 }
-.travel-toggle-lbl { font-size: 12px; color: rgba(250,247,242,0.5); }
+.travel-toggle-lbl { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
 .toggle-switch { position: relative; width: 40px; height: 22px; }
 .toggle-switch input { opacity: 0; width: 0; height: 0; }
 .toggle-slider {
-  position: absolute; inset: 0; background: rgba(42,36,33,0.2);
+  position: absolute; inset: 0; background: rgba(42,36,33,0.14);
   border-radius: 11px; cursor: pointer; transition: background 200ms;
 }
 .toggle-slider::before {
   content: ''; position: absolute; width: 16px; height: 16px;
   left: 3px; top: 3px; background: #fff;
   border-radius: 8px; transition: transform 200ms;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
 }
 .toggle-switch input:checked + .toggle-slider { background: var(--accent-kinetic); }
 .toggle-switch input:checked + .toggle-slider::before { transform: translateX(18px); }
@@ -4852,7 +4916,7 @@ function saveMeasurements(m) { LS.set('dcrgym_measurements', m); }
 // Schema-versioned, non-destructive, with rolling last-good backup.
 // History must survive every app update. Period.
 const SCHEMA_VERSION = 3;
-const APP_BUILD = '2026.09.01 · ota-16 · fix-session-start-and-warmup-runtime';
+const APP_BUILD = '2026.09.01 · ota-17 · luxury-iphone-header-and-numpad-fix';
 
 function convertHistoryWeightsToLbs(hist) {
   if (!Array.isArray(hist)) return 0;
@@ -5167,6 +5231,12 @@ function markDraftWu(key) {
 let NP = { el: null, key: null, si: null, exIdx: null, field: 'w', isWu: false, fresh: true };
 
 function openNumpad(inputEl, key, si, exIdx, field, isWu = false) {
+  if (document.activeElement && typeof document.activeElement.blur === 'function') {
+    document.activeElement.blur();
+  }
+  if (inputEl && typeof inputEl.blur === 'function') {
+    inputEl.blur();
+  }
   NP = { el: inputEl, key, si, exIdx, field, isWu, fresh: true };
   document.querySelectorAll('.np-focus').forEach(e => e.classList.remove('np-focus'));
   inputEl.classList.add('np-focus');
@@ -5934,16 +6004,16 @@ function Maps(to, data={}) {
   else if (to === 'settings')    renderSettings();
   else if (to === 'workouts-browser') renderWorkoutsBrowser();
 
-  // Status bar melts into the screen — charcoal cockpit in workout, cream elsewhere
+  // Status bar melts seamlessly into the screen across all screens
   const themeMeta = document.querySelector('meta[name="theme-color"]');
-  if (themeMeta) themeMeta.setAttribute('content', to === 'workout' ? '#1A1A1A' : '#FAF7F2');
+  if (themeMeta) themeMeta.setAttribute('content', '#FAF7F2');
 
   // Nav stays visible during workouts — browse history/weights mid-rest freely.
   // The live session keeps running; the workout pill brings you back.
   const nav = document.getElementById('bottom-nav');
   if (nav) nav.style.display = 'flex';
   document.querySelectorAll('.nav-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.nav === to);
+    b.classList.toggle('active', b.dataset && b.dataset.nav === to);
   });
 
   updateWorkoutPill();
@@ -7187,13 +7257,13 @@ function exerciseCardHTML(ex, key, i, isAddition) {
     setRows += `
     <div class="set-row" id="setrow-${key}-${si}">
       <div class="set-num">${si+1}</div>
-      <input class="set-input${isLogged?' logged':''}" id="wi-${key}-${si}" type="text" inputmode="none"
+      <input class="set-input${isLogged?' logged':''}" id="wi-${key}-${si}" type="text" readonly inputmode="none"
         value="${preW}" placeholder="${unit}" autocomplete="off"
         onclick="openNumpad(this,'${key}',${si},${i},'w')"
         oninput="markDraft('${key}',${si})"
         ${barbell?`onfocus="showPlate('${key}',${si})" onblur="hidePlate('${key}',${si})"`:''}>
       <div class="set-sep">×</div>
-      <input class="set-input${isLogged?' logged':''}" id="ri-${key}-${si}" type="text" inputmode="none"
+      <input class="set-input${isLogged?' logged':''}" id="ri-${key}-${si}" type="text" readonly inputmode="none"
         value="${preR}" placeholder="reps" autocomplete="off"
         onclick="openNumpad(this,'${key}',${si},${i},'r')"
         oninput="markDraft('${key}',${si})">
@@ -7215,11 +7285,11 @@ function exerciseCardHTML(ex, key, i, isAddition) {
   const warmupRowHtml = (!wuDismissed) ? `
     <div class="warmup-row" id="wurow-${key}">
       <span class="warmup-label">warm-up</span>
-      <input class="warmup-input" id="wuwi-${key}" type="text" inputmode="none"
+      <input class="warmup-input" id="wuwi-${key}" type="text" readonly inputmode="none"
         value="${wuPreW}" placeholder="${unit}" autocomplete="off"
         onclick="openNumpad(this,'${key}',0,${i},'w',true)" oninput="markDraftWu('${key}')">
       <span class="warmup-sep">×</span>
-      <input class="warmup-input" id="wuri-${key}" type="text" inputmode="none"
+      <input class="warmup-input" id="wuri-${key}" type="text" readonly inputmode="none"
         value="${wuPreR}" placeholder="reps" autocomplete="off"
         onclick="openNumpad(this,'${key}',0,${i},'r',true)" oninput="markDraftWu('${key}')">
       <button class="warmup-dismiss" onclick="dismissWarmup(event,'${key}','${normalizeEx(name)}')" title="Remove warm-up">✕</button>
@@ -7311,15 +7381,13 @@ function renderWorkout() {
 
   el.innerHTML = `
   <div id="workout-header${ST.travelLocked?' travel-locked':''}">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-      <button onclick="cancelWorkout()" style="background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;padding:4px 8px 4px 0;flex-shrink:0;font-family:var(--font-body);width:44px;text-align:left">✕</button>
-      <div style="display:flex;flex-direction:column;align-items:center;flex:1;min-width:0;">
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:rgba(250,247,242,0.42);margin-bottom:2px;">
-          ${headerModeLabel}
-        </div>
-        <div class="wh-session" style="margin-bottom:0 !important;font-size:1.3rem !important;flex:none !important;line-height:1.1;">${sess.name}</div>
+    <div class="wh-top-bar">
+      <button onclick="cancelWorkout()" class="wh-exit-btn" aria-label="Exit workout">✕</button>
+      <div class="wh-title-group">
+        <div class="wh-mode-tag">${headerModeLabel}</div>
+        <div class="wh-session">${sess.name}</div>
         ${showDateHeader ? `
-          <div style="font-size:11px;color:var(--accent);margin-top:4px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.08);padding:2px 8px;border-radius:20px;" onclick="editWorkoutDateTime()">
+          <div class="wh-date-chip" onclick="editWorkoutDateTime()">
             📅 ${new Date(ST.workoutStart).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} <span style="font-size:9px;opacity:0.8;">(edit)</span>
           </div>
         ` : ''}
@@ -7480,12 +7548,12 @@ function toggleCard(key) {
     }
   });
 
-  // Auto-focus first unlogged weight input on expand
+  // Auto-highlight first unlogged weight input on expand without summoning system keyboard
   if (nowExpanded) {
     setTimeout(() => {
       const inputs = card.querySelectorAll('.set-input:not(.logged)');
       for (const inp of inputs) {
-        if (inp.id && inp.id.startsWith('wi-')) { inp.focus(); inp.select(); break; }
+        if (inp.id && inp.id.startsWith('wi-')) { break; }
       }
     }, 320);
   }
@@ -7540,7 +7608,7 @@ function logSet(key, si, exIdx) {
   if (!wi || !ri) return;
   const w = parseFloat(wi.value) || 0;
   const r = parseInt(ri.value) || 0;
-  if (r === 0) { ri.focus(); return; }
+  if (r === 0) { openNumpad(ri, key, si, exIdx, 'r'); return; }
 
   // Lock travel mode after first set
   const wasLocked = ST.travelLocked;
@@ -7697,7 +7765,7 @@ function logWarmup(key) {
   if (!wuwi || !wuri) return;
   const w = parseFloat(wuwi.value) || 0;
   const r = parseInt(wuri.value) || 0;
-  if (!r) { wuri.focus(); return; }
+  if (!r) { openNumpad(wuri, key, 0, 0, 'r', true); return; }
   const wuKey = key + '_wu';
   if (!ST.workoutSets[wuKey]) ST.workoutSets[wuKey] = [];
   // No _name on warm-ups — they must stay invisible to the prefill engine
