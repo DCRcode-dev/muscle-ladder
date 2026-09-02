@@ -4852,7 +4852,7 @@ function saveMeasurements(m) { LS.set('dcrgym_measurements', m); }
 // Schema-versioned, non-destructive, with rolling last-good backup.
 // History must survive every app update. Period.
 const SCHEMA_VERSION = 3;
-const APP_BUILD = '2026.09.01 · ota-15 · ultra-premium-design-system-elevation';
+const APP_BUILD = '2026.09.01 · ota-16 · fix-session-start-and-warmup-runtime';
 
 function convertHistoryWeightsToLbs(hist) {
   if (!Array.isArray(hist)) return 0;
@@ -7210,7 +7210,7 @@ function exerciseCardHTML(ex, key, i, isAddition) {
   const wuDismissed = ST.dismissedWarmups.has(normalizeEx(name));
   const wuLogged = ST.workoutSets[wuKey] && ST.workoutSets[wuKey][0];
   const wuDraft = !wuLogged && ST.workoutDrafts && ST.workoutDrafts[key + '-wu'];
-  const wuPreW = wuLogged ? wuLogged.w : (wuDraft && wuDraft.w !== '' ? wuDraft.w : (lastPerf && lastPerf[0] ? Math.round((lastPerf[0].w || 0) * 0.5) : (suggestion ? Math.round(suggestion.w * 0.5) : '')));
+  const wuPreW = wuLogged ? wuLogged.w : (wuDraft && wuDraft.w !== '' ? wuDraft.w : (lastPerf && lastPerf[0] && lastPerf[0].w != null ? Math.round(Number(lastPerf[0].w) * 0.5) : ''));
   const wuPreR = wuLogged ? wuLogged.r : (wuDraft && wuDraft.r !== '' ? wuDraft.r : '');
   const warmupRowHtml = (!wuDismissed) ? `
     <div class="warmup-row" id="wurow-${key}">
@@ -8910,8 +8910,10 @@ let confettiParticles = [];
 
 function launchConfetti(dramatic) {
   const canvas = document.getElementById('confetti-canvas');
+  if (!canvas || !canvas.getContext) return;
   canvas.style.display = 'block';
   const ctx = canvas.getContext('2d');
+  if (!ctx) return;
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
   const colors = ['#F04E23','#FFB347','#FAF7F2','#1A1A1A','#F59E0B'];

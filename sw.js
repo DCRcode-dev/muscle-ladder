@@ -1,5 +1,5 @@
 
-const CACHE = 'dcr-gym-v20';
+const CACHE = 'dcr-gym-v21';
 const ASSETS = ['./index.html', './programs.js', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
