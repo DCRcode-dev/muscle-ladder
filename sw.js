@@ -1,5 +1,5 @@
 
-const CACHE = 'dcr-gym-v26';
+const CACHE = 'dcr-gym-v27';
 const ASSETS = ['./index.html', './programs.js', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -85,7 +85,7 @@ self.addEventListener('message', e => {
           body: 'Rest over — next set is waiting.',
           icon: './icon-192.png',
           badge: './icon-192.png',
-          vibrate: [200, 100, 200, 100, 200, 100, 400],
+          vibrate: [300, 100, 300, 100, 300, 100, 400],
           tag: 'dcr-rest',
           renotify: true,
         }).then(resolve).catch(resolve);
