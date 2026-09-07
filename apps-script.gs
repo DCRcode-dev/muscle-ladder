@@ -389,6 +389,7 @@ const SHEET_NAME_FITBIT = 'FitbitData';
 const GH_OAUTH_SCOPES   = [
   'https://www.googleapis.com/auth/googlehealth.sleep.readonly',
   'https://www.googleapis.com/auth/googlehealth.health_metrics_and_measurements.readonly',
+  'https://www.googleapis.com/auth/googlehealth.activity_and_fitness.readonly',
 ].join(' ');
 
 function ghProp_(k) { return PropertiesService.getScriptProperties().getProperty(k) || ''; }
@@ -592,11 +593,14 @@ function fitbitGetLatestData(params) {
     let workoutCardio = null;
     const reqDate = params.date || today;
     try {
-      const azmPoints = healthList_('daily-active-zone-minutes', 'dailyActiveZoneMinutes.date >= "' + reqDate + '"', 10, 1);
+      let azmPoints = healthList_('active-zone-minutes', 'active_zone_minutes.date >= "' + reqDate + '"', 10, 1);
+      if (!azmPoints || !azmPoints.length) {
+        azmPoints = healthList_('daily-active-zone-minutes', 'dailyActiveZoneMinutes.date >= "' + reqDate + '"', 10, 1);
+      }
       if (azmPoints && azmPoints.length) {
         let peak = 0, cardio = 0, fatBurn = 0;
         azmPoints.forEach(function(pt) {
-          const node = pt.dailyActiveZoneMinutes || pt;
+          const node = pt.activeZoneMinutes || pt.dailyActiveZoneMinutes || pt;
           if (node) {
             peak += healthNum_(node.peakMinutes || node.peak) || 0;
             cardio += healthNum_(node.cardioMinutes || node.cardio) || 0;
@@ -609,7 +613,7 @@ function fitbitGetLatestData(params) {
             cardioLoad: cLoad,
             zones: { peak: peak, cardio: cardio, fatBurn: fatBurn },
             date: reqDate,
-            source: 'fitbit-azm'
+            source: 'fitbit-synced'
           };
         }
       }

@@ -10285,7 +10285,7 @@ function renderWorkoutsCalendarView() {
         <div class="whfc-ribbon">
           <span>⏱ ${durStr}</span>
           <span>🏋️ ${volStr} ${unit}</span>
-          ${w.cardioLoad ? `<span style="color:#C9921A;font-weight:600;">⚡ ${w.cardioLoad} Cardio</span>` : `<button class="btn-sheet-ghost" style="font-size:9.5px;padding:2px 7px;border-radius:8px;" onclick="event.stopPropagation();syncSinglePastWorkout('${w.id || w.endTime}')">⟳ Sync Cardio</button>`}
+          ${w.cardioLoad ? `<button class="btn-sheet-ghost" style="font-size:10px;padding:2px 8px;border-radius:8px;color:#C9921A;border-color:rgba(201,146,26,0.25);" onclick="event.stopPropagation();promptEditCardioLoad('${w.id || w.endTime}', ${w.cardioLoad})">⚡ ${w.cardioLoad} Cardio ✎</button>` : `<button class="btn-sheet-ghost" style="font-size:9.5px;padding:2px 7px;border-radius:8px;" onclick="event.stopPropagation();syncSinglePastWorkout('${w.id || w.endTime}')">⟳ Sync Cardio</button>`}
           ${w.travelMode ? '<span style="color:var(--accent-kinetic)">✈ Travel</span>' : ''}
         </div>
         ${exNames.length > 0 ? `
@@ -10524,9 +10524,23 @@ async function syncSinglePastWorkout(workoutId) {
   const hist = getHistory();
   const w = hist.find(x => String(x.id) === String(workoutId) || String(x.endTime) === String(workoutId));
   if (!w) return;
-  await syncWorkoutCardioLoad(w);
+  const ok = await syncWorkoutCardioLoad(w);
   if (ST.screen === 'history') renderHistory();
   else if (ST.screen === 'strain') renderStrain();
+
+  if (!ok || w.cardioSource === 'calibrated-estimate') {
+    confirmSheet({
+      title: 'Fitbit Cardio Load',
+      body: `Live sync could not reach your Fitbit activity log for this session (Google Apps Script requires 'Who has access: Anyone' in Deploy settings). Would you like to enter your exact Cardio Load from the Fitbit app?`,
+      confirmLabel: 'Enter Score',
+      cancelLabel: 'Close',
+      onConfirm: () => {
+        promptEditCardioLoad(workoutId, w.cardioLoad);
+      }
+    });
+  } else {
+    noticeSheet('Cardio Load Synced', `Updated Cardio Load to ${w.cardioLoad} from Fitbit.`);
+  }
 }
 
 function clickOpenCalDay(timestamp, dateStr) {
@@ -10943,25 +10957,47 @@ async function fetchFitbitData(force, interactive) {
 }
 
 function calculateWorkoutCardioLoad(w) {
-  if (!w) return 50;
-  const durMin = (w.duration || 3600) / 60;
+  if (!w) return 45;
   let totalSets = 0;
+  let totalVol = 0;
+  let compoundSets = 0;
+
   if (w.sets) {
-    for (const sArr of Object.values(w.sets)) {
-      if (Array.isArray(sArr)) totalSets += sArr.filter(s => s && s.r > 0).length;
+    for (const [key, sArr] of Object.entries(w.sets)) {
+      if (key.endsWith('_wu') || !Array.isArray(sArr)) continue;
+      const isCompound = /press|squat|deadlift|row|lunge|pullup|chinup/i.test(key);
+      for (const s of sArr) {
+        if (s && s.r > 0) {
+          totalSets++;
+          if (isCompound) compoundSets++;
+          if (s.w > 0) totalVol += (s.w * s.r);
+        }
+      }
     }
   }
+
+  // Duration: actual duration if recorded (> 5 min), else estimate based on working sets
+  const durMin = (w.duration && w.duration > 300) ? Math.round(w.duration / 60) : Math.max(25, totalSets * 2.5);
+
+  // Volume factor based on actual tonnage moved
+  const volFactor = Math.min(18, Math.round(totalVol / 1500));
+  // Compound sets produce higher cardiovascular demand than isolated movements
+  const setScore = (compoundSets * 2.2) + ((totalSets - compoundSets) * 1.3);
+  // Intensity density: work performed relative to session duration
+  const density = (totalSets / Math.max(15, durMin)) * 14;
+
   const bio = w.biometrics || {};
-  const rhr = bio.restingHR || (ST.fitbit && ST.fitbit.restingHR) || 60;
-  const readiness = bio.readiness || (ST.fitbit && ST.fitbit.readinessScore) || 75;
-  const load = Math.round(durMin * 0.45 + totalSets * 1.6 + (100 - readiness) * 0.2 + (rhr - 50) * 0.3);
-  return Math.min(100, Math.max(15, load));
+  const rhr = bio.restingHR || (ST.fitbit && ST.fitbit.restingHR);
+  const rhrMod = rhr ? Math.round((rhr - 60) * 0.25) : 0;
+
+  const rawLoad = Math.round(setScore + density + volFactor + rhrMod);
+  return Math.min(100, Math.max(18, rawLoad));
 }
 
 async function syncWorkoutCardioLoad(workoutEntry) {
-  if (!workoutEntry) return;
+  if (!workoutEntry) return false;
   const s = getSettings();
-  if (!s.sheets) return;
+  if (!s.sheets) return false;
 
   const dateStr = ghLocalDate(workoutEntry.endTime || workoutEntry.startTime);
   const startMs = workoutEntry.startTime || (workoutEntry.endTime - (workoutEntry.duration || 3600) * 1000);
@@ -10970,7 +11006,14 @@ async function syncWorkoutCardioLoad(workoutEntry) {
   try {
     const url = `${s.sheets}?action=getFitbit&date=${dateStr}&start=${startMs}&end=${endMs}&force=1`;
     const res = await fetch(url, { method: 'GET' });
-    const data = await res.json();
+    const text = await res.text();
+    let data = null;
+    try {
+      data = JSON.parse(text);
+    } catch(err) {
+      console.warn('[DCR Gym] Google Apps Script returned non-JSON response.');
+      return false;
+    }
 
     if (data && data.ok) {
       if (data.fitbit) Object.assign(ST.fitbit, data.fitbit);
@@ -11017,10 +11060,56 @@ async function syncWorkoutCardioLoad(workoutEntry) {
           <div style="font-size:11.5px;color:var(--text-secondary);margin-top:2px;">Matched to your workout duration & cardiovascular load.</div>
         `;
       }
+      return true;
     }
+    return false;
   } catch(err) {
     console.warn('[DCR Gym] Cardio load sync notice:', err && err.message);
+    return false;
   }
+}
+
+function promptEditCardioLoad(workoutId, currentVal) {
+  const hist = getHistory();
+  const w = hist.find(x => String(x.id) === String(workoutId) || String(x.endTime) === String(workoutId));
+  if (!w) return;
+  const sessName = w.sessionName || 'Workout';
+  const val = currentVal || w.cardioLoad || '';
+
+  openSheet(`
+    <div class="bs-title">Set Fitbit Cardio Load</div>
+    <div style="font-size:12.5px;color:var(--text-secondary);margin-bottom:14px;line-height:1.4;">
+      Enter the exact <strong>Cardio Load</strong> recorded in your Fitbit app for this <strong>${sessName}</strong> session.
+    </div>
+    <div style="margin-bottom:16px;">
+      <input type="number" id="edit-cardio-load-input" pattern="[0-9]*" inputmode="numeric" 
+        style="width:100%;font-family:var(--font-mono);font-size:26px;font-weight:700;text-align:center;border:1px solid var(--border);border-radius:14px;padding:12px;background:rgba(255,255,255,0.7);color:var(--text-primary);box-sizing:border-box;"
+        value="${val}" placeholder="e.g. 54" autofocus>
+      <div style="font-size:11px;color:var(--text-tertiary);margin-top:6px;text-align:center;">Found in Fitbit app → Today → Activity / Exercise summary</div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-primary" style="flex:1;padding:12px;font-size:14px;border-radius:12px;" onclick="saveCardioLoadValue('${workoutId}')">Save Cardio Load</button>
+      <button class="btn btn-sheet-ghost" style="padding:12px 16px;border-radius:12px;font-size:13px;" onclick="closeSheet()">Cancel</button>
+    </div>
+  `);
+}
+
+function saveCardioLoadValue(workoutId) {
+  const input = document.getElementById('edit-cardio-load-input');
+  if (!input) return;
+  const val = parseInt(input.value);
+  if (isNaN(val) || val < 0) return;
+
+  const hist = getHistory();
+  const match = hist.find(w => String(w.id) === String(workoutId) || String(w.endTime) === String(workoutId));
+  if (match) {
+    match.cardioLoad = val;
+    match.cardioSource = 'user-logged';
+    saveHistory(hist);
+  }
+  closeSheet();
+  if (ST.screen === 'strain') renderStrain();
+  else if (ST.screen === 'history') renderHistory();
 }
 
 function setStrainProgram(progId) {
@@ -11220,16 +11309,21 @@ function renderStrain() {
             }
           }
 
+          const isUserLogged = w.cardioSource === 'user-logged';
+          const isSynced = w.cardioSource === 'fitbit-synced' || w.cardioSource === 'fitbit-azm';
+          const sourceText = isSynced ? '✓ Fitbit Synced' : (isUserLogged ? '✎ Manual Fitbit Entry' : 'Estimated · Tap ✎ to set');
+          const sourceColor = isSynced ? '#28A745' : (isUserLogged ? 'var(--accent-kinetic)' : 'var(--muted)');
+
           return `
             <div class="strain-entry-card">
               <div class="sec-head">
                 <div>
                   <div class="sec-date">📅 ${dateStr} · ⏱ ${durStr}</div>
-                  <div style="font-size:11px;color:var(--muted);margin-top:2px;">${readiness}</div>
+                  <div style="font-size:11px;color:${sourceColor};margin-top:2px;font-weight:500;">${sourceText}</div>
                 </div>
                 <div style="display:flex;align-items:center;gap:6px;">
-                  <span class="sec-cardio-pill" style="background:rgba(240,78,35,0.12);color:var(--accent-kinetic);">⚡ ${cLoad} Cardio Load</span>
-                  <button class="btn-sheet-ghost" style="font-size:10px;padding:3px 8px;border-radius:8px;" onclick="syncSinglePastWorkout('${w.id || w.endTime}')">⟳</button>
+                  <button class="sec-cardio-pill" style="background:rgba(240,78,35,0.12);color:var(--accent-kinetic);border:none;cursor:pointer;" onclick="promptEditCardioLoad('${w.id || w.endTime}', ${cLoad})" title="Tap to enter exact Fitbit score">⚡ ${cLoad} Cardio Load ✎</button>
+                  <button class="btn-sheet-ghost" style="font-size:10px;padding:3px 8px;border-radius:8px;" onclick="syncSinglePastWorkout('${w.id || w.endTime}')" title="Sync from Fitbit">⟳</button>
                 </div>
               </div>
               <div class="sec-ex-list">
