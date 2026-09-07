@@ -2459,8 +2459,8 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
     Workouts
   </button>
   <button class="nav-btn" data-nav="strain" onclick="Maps('strain')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-    Strain
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+    Cardio Load
   </button>
   <button class="nav-btn" data-nav="history" onclick="Maps('history')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
@@ -10494,7 +10494,7 @@ function deleteCompletedWorkout(workoutId) {
 
   confirmSheet({
     title: 'Delete this workout?',
-    body: `Are you sure you want to permanently delete <strong>${name}</strong> (${dateStr})? This cannot be undone and will remove it from all logs and strain telemetry.`,
+    body: `Are you sure you want to permanently delete <strong>${name}</strong> (${dateStr})? This cannot be undone and will remove it from all logs and cardio load history.`,
     confirmLabel: 'Delete Workout',
     cancelLabel: 'Keep Workout',
     destructive: true,
@@ -11076,16 +11076,16 @@ function renderStrain() {
     chartHTML = `
       <div style="padding: 28px 16px; text-align: center;">
         <div style="font-family: var(--font-hero); font-style: italic; font-size: 1.2rem; color: var(--text-secondary); margin-bottom: 6px;">No ${sess.name} sessions logged yet</div>
-        <div style="font-size: 12px; color: var(--text-tertiary); max-width: 260px; margin: 0 auto 16px;">Complete this routine to begin tracking week-by-week cardio load progression.</div>
+        <div style="font-size: 12px; color: var(--text-tertiary); max-width: 260px; margin: 0 auto 16px;">Complete this workout to start tracking and comparing your cardio load week by week.</div>
         <button class="btn btn-primary" style="padding: 10px 18px; font-size: 13px; border-radius: 12px;" onclick="previewSession('${activeProgId}', '${activeSessId}')">Preview & Start Routine</button>
       </div>
     `;
     adviceHTML = `
       <div class="strain-advice-card">
-        <span class="strain-advice-badge strain-badge-optimal">TARGET CONSTANT STRAIN</span>
-        <div style="font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">Progression Strategy</div>
+        <span class="strain-advice-badge strain-badge-optimal">FITBIT CARDIO LOAD</span>
+        <div style="font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">Cardio Load Tracking</div>
         <div style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.45;">
-          Aim to maintain steady cardiovascular and muscular strain (~60–75) across each week for this routine. When cardio load drops, it indicates your body has adapted to the weight, signaling the need to add 2.5–5 lbs to your working sets.
+          Cardio load measures the cardiovascular demand of your workout based on your heart rate and Active Zone Minutes. Once you complete ${sess.name}, your score will appear here to compare across weeks.
         </div>
       </div>
     `;
@@ -11093,32 +11093,27 @@ function renderStrain() {
     // Generate Week-by-Week Bar Chart
     const barWidth = 28;
     const chartHeight = 130;
-    const maxVal = 100;
     const count = recent.length;
     const svgWidth = Math.max(300, count * 52);
 
-    // Constant strain corridor Y positions (target 60-75)
-    const yTopZone = chartHeight - (75 / maxVal) * chartHeight;
-    const yBottomZone = chartHeight - (60 / maxVal) * chartHeight;
-    const zoneHeight = yBottomZone - yTopZone;
+    const values = recent.map(w => w.cardioLoad || calculateWorkoutCardioLoad(w));
+    const maxVal = Math.max(80, ...values, 100);
+    const avgLoad = Math.round(values.reduce((a, b) => a + b, 0) / count);
+    const avgY = chartHeight - (avgLoad / maxVal) * chartHeight;
 
     const barsSVG = recent.map((w, idx) => {
-      const cLoad = w.cardioLoad || calculateWorkoutCardioLoad(w);
-      const barH = (cLoad / maxVal) * chartHeight;
+      const cLoad = values[idx];
+      const barH = Math.max(10, (cLoad / maxVal) * chartHeight);
       const x = 30 + idx * 48;
       const y = chartHeight - barH;
       const d = new Date(w.endTime || w.startTime);
       const dateLbl = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       const isLatest = idx === count - 1;
-
-      // Color logic: green (60-75 in zone), orange (<60 dropping/adapted), red (>80 overreach)
-      let barColor = '#28A745';
-      if (cLoad < 60) barColor = '#D97706';
-      else if (cLoad > 80) barColor = '#DC3545';
+      const barColor = isLatest ? 'var(--accent-kinetic)' : '#C9921A';
 
       return `
         <g>
-          <rect x="${x}" y="${y}" width="${barWidth}" height="${barH}" rx="5" fill="${barColor}" opacity="${isLatest ? '1' : '0.78'}"/>
+          <rect x="${x}" y="${y}" width="${barWidth}" height="${barH}" rx="6" fill="${barColor}" opacity="${isLatest ? '1' : '0.75'}"/>
           <text x="${x + barWidth/2}" y="${Math.max(14, y - 6)}" text-anchor="middle" font-family="var(--font-mono)" font-size="11" font-weight="700" fill="${barColor}">${cLoad}</text>
           <text x="${x + barWidth/2}" y="${chartHeight + 16}" text-anchor="middle" font-family="var(--font-mono)" font-size="9" fill="var(--text-tertiary)">W${idx + 1}</text>
           <text x="${x + barWidth/2}" y="${chartHeight + 28}" text-anchor="middle" font-size="8.5" fill="var(--text-tertiary)">${dateLbl}</text>
@@ -11126,65 +11121,68 @@ function renderStrain() {
       `;
     }).join('');
 
+    const latest = recent[count - 1];
+    const latestLoad = values[count - 1];
+    const prev = count >= 2 ? recent[count - 2] : null;
+    const prevLoad = prev ? values[count - 2] : null;
+    const delta = prev !== null ? latestLoad - prevLoad : null;
+
     chartHTML = `
       <div class="strain-chart-card">
         <div class="strain-chart-head">
           <div>
-            <div class="strain-chart-title">Cardio Load Progression</div>
-            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">Same Routine (${sess.name}) Week-by-Week</div>
+            <div class="strain-chart-title">Cardio Load History</div>
+            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">${sess.name} Week-by-Week</div>
           </div>
-          <div style="font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: var(--text-primary);">
-            Latest: <span style="color:var(--accent-kinetic);">${recent[count - 1].cardioLoad || calculateWorkoutCardioLoad(recent[count - 1])}</span>
+          <div style="text-align:right;">
+            <div style="font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--text-primary);">
+              Latest: <span style="color:var(--accent-kinetic);">${latestLoad}</span>
+            </div>
+            ${delta !== null ? `<div style="font-size:11px;font-family:var(--font-mono);font-weight:600;color:${delta >= 0 ? 'var(--accent-kinetic)' : '#28A745'};margin-top:2px;">${delta >= 0 ? '+' : ''}${delta} vs previous</div>` : ''}
           </div>
         </div>
 
         <div class="strain-chart-svg-wrap" style="overflow-x:auto;">
           <svg viewBox="0 0 ${svgWidth} ${chartHeight + 36}" style="width:100%;min-width:${svgWidth}px;height:166px;overflow:visible;">
-            <!-- Target Constant Strain Corridor (60 - 75) -->
-            <rect x="10" y="${yTopZone}" width="${svgWidth - 20}" height="${zoneHeight}" fill="rgba(40,167,69,0.08)" rx="4"/>
-            <line x1="10" y1="${yTopZone}" x2="${svgWidth - 10}" y2="${yTopZone}" stroke="rgba(40,167,69,0.25)" stroke-dasharray="3,3"/>
-            <line x1="10" y1="${yBottomZone}" x2="${svgWidth - 10}" y2="${yBottomZone}" stroke="rgba(40,167,69,0.25)" stroke-dasharray="3,3"/>
-            <text x="${svgWidth - 14}" y="${yTopZone + 12}" text-anchor="end" font-size="8" font-family="var(--font-mono)" fill="#28A745" font-weight="700">OPTIMAL STRAIN ZONE (60–75)</text>
+            <!-- Average Cardio Load line -->
+            <line x1="10" y1="${avgY}" x2="${svgWidth - 10}" y2="${avgY}" stroke="rgba(42,36,33,0.18)" stroke-dasharray="3,3"/>
+            <text x="${svgWidth - 14}" y="${avgY - 4}" text-anchor="end" font-size="8" font-family="var(--font-mono)" fill="var(--text-tertiary)">AVG: ${avgLoad}</text>
 
             ${barsSVG}
           </svg>
         </div>
 
-        <div class="strain-zone-legend">
-          <span><span class="strain-zone-dot" style="background:#28A745;"></span>Constant Strain (60–75)</span>
-          <span><span class="strain-zone-dot" style="background:#D97706;"></span>Under-Stimulus / Adapted (&lt;60)</span>
-          <span><span class="strain-zone-dot" style="background:#DC3545;"></span>High Fatigue (&gt;80)</span>
+        <div style="display:flex;align-items:center;gap:12px;font-size:10.5px;color:var(--text-tertiary);margin-top:10px;">
+          <span><span class="strain-zone-dot" style="background:var(--accent-kinetic);"></span>Latest Session</span>
+          <span><span class="strain-zone-dot" style="background:#C9921A;"></span>Previous Sessions</span>
+          <span style="margin-left:auto;font-family:var(--font-mono);">Avg: ${avgLoad}</span>
         </div>
       </div>
     `;
 
-    // AI Adaptive Overload Coaching
-    const latest = recent[count - 1];
-    const latestLoad = latest.cardioLoad || calculateWorkoutCardioLoad(latest);
-    const prev = count >= 2 ? recent[count - 2] : null;
-    const prevLoad = prev ? (prev.cardioLoad || calculateWorkoutCardioLoad(prev)) : latestLoad;
-    const delta = latestLoad - prevLoad;
-
+    // Direct comparison card
     let badgeClass = 'strain-badge-optimal';
-    let badgeText = 'CONSTANT STRAIN · OPTIMAL';
-    let titleText = 'Steady Progressive Stimulus';
-    let bodyText = `Your cardio load on ${sess.name} is holding consistent at ${latestLoad}, directly inside the optimal progressive overload corridor. Continue with your scheduled progression.`;
+    let badgeText = 'STEADY CARDIO LOAD';
+    let titleText = 'Consistent Cardio Load';
+    let bodyText = `Your cardio load on ${sess.name} is holding steady at ${latestLoad}, closely matching your previous session (${prevLoad}).`;
 
-    if (count >= 2 && delta <= -6) {
-      badgeClass = 'strain-badge-drop';
-      badgeText = `STRAIN DROPPING (${delta}) · PUSH HARDER`;
-      titleText = 'Physiological Adaptation Detected';
-      bodyText = `Cardio load on ${sess.name} dropped from ${prevLoad} to ${latestLoad}. Your muscular and cardiovascular systems have adapted to this load and are experiencing less strain. <strong>Action</strong>: Increase working weight by 2.5–5 lbs on your primary lifts or add 1 working set next session to restore progressive overload.`;
-    } else if (latestLoad < 60) {
-      badgeClass = 'strain-badge-drop';
-      badgeText = 'LOW CARDIO LOAD · INCREASE INTENSITY';
-      titleText = 'Sub-Optimal Training Stimulus';
-      bodyText = `Cardio load of ${latestLoad} is below your target constant strain threshold. Push closer to muscular failure or tighten rest intervals to stimulate hypertrophy.`;
-    } else if (latestLoad > 80) {
-      badgeClass = 'strain-badge-high';
-      badgeText = `ELEVATED STRAIN (${latestLoad}) · EXTRA RECOVERY`;
-      titleText = 'High Autonomic Exertion';
-      bodyText = `Cardio load reached ${latestLoad}, placing high demands on your central nervous system. Allow at least 48 hours before your next heavy session and prioritize restorative sleep tonight.`;
+    if (delta !== null) {
+      if (delta <= -4) {
+        badgeClass = 'strain-badge-drop';
+        badgeText = `LOWER CARDIO LOAD (-${Math.abs(delta)})`;
+        titleText = 'Lower Heart Rate / Exertion';
+        bodyText = `Cardio load on ${sess.name} was ${Math.abs(delta)} points lower than your previous session (${latestLoad} vs ${prevLoad}). Your cardiovascular system handled this workout with less demand. If you want to increase progressive stimulus, consider adding 2.5–5 lbs to your primary lifts or an extra rep.`;
+      } else if (delta >= 4) {
+        badgeClass = 'strain-badge-high';
+        badgeText = `HIGHER CARDIO LOAD (+${delta})`;
+        titleText = 'Increased Heart Rate / Exertion';
+        bodyText = `Cardio load on ${sess.name} increased from ${prevLoad} to ${latestLoad} (+${delta}), indicating higher intensity or cardiovascular output during this workout.`;
+      }
+    } else {
+      badgeClass = 'strain-badge-optimal';
+      badgeText = 'BASELINE SESSION';
+      titleText = 'Initial Session Recorded';
+      bodyText = `Recorded cardio load for ${sess.name}: ${latestLoad}. Complete this routine again next week to compare your progress.`;
     }
 
     adviceHTML = `
@@ -11198,7 +11196,7 @@ function renderStrain() {
     // History instances showing exact exercises and weights
     historyFeedHTML = `
       <div style="padding: 6px 16px 8px; font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-tertiary); font-weight: 700;">
-        ${sess.name} Session History & Logged Exercises
+        ${sess.name} Past Workouts & Logged Exercises
       </div>
       <div class="strain-history-feed">
         ${recent.slice().reverse().map((w, idx) => {
@@ -11230,7 +11228,7 @@ function renderStrain() {
                   <div style="font-size:11px;color:var(--muted);margin-top:2px;">${readiness}</div>
                 </div>
                 <div style="display:flex;align-items:center;gap:6px;">
-                  <span class="sec-cardio-pill" style="background:rgba(40,167,69,0.12);color:#28A745;">⚡ ${cLoad} Strain</span>
+                  <span class="sec-cardio-pill" style="background:rgba(240,78,35,0.12);color:var(--accent-kinetic);">⚡ ${cLoad} Cardio Load</span>
                   <button class="btn-sheet-ghost" style="font-size:10px;padding:3px 8px;border-radius:8px;" onclick="syncSinglePastWorkout('${w.id || w.endTime}')">⟳</button>
                 </div>
               </div>
@@ -11257,8 +11255,8 @@ function renderStrain() {
     <div class="screen-content strain-container">
       <div class="strain-header">
         <div>
-          <div class="strain-title">Strain & Cardio</div>
-          <div class="strain-subtitle">Measuring workout cardio load progression</div>
+          <div class="strain-title">Cardio Load</div>
+          <div class="strain-subtitle">Compare Fitbit cardio load across ${sess.name} sessions</div>
         </div>
         <button class="strain-sync-btn" onclick="fetchFitbitData(true, true)">
           <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${fb.connected?'#28A745':'#D97706'};"></span>
@@ -11279,7 +11277,7 @@ function renderStrain() {
       <!-- Week-by-Week Progression Chart -->
       ${chartHTML}
 
-      <!-- AI Adaptive Progression Directive -->
+      <!-- Comparison Directive -->
       ${adviceHTML}
 
       <!-- Session History Feed with Exact Logged Exercises -->
@@ -11808,6 +11806,12 @@ function previewSession(progId, sessId) {
   const sess = prog && prog.sessions.find(s => s.id === sessId);
   if (!sess) return;
 
+  const musclesInSession = [...new Set(sess.exercises.map(ex => getMuscle(stripSuperset(ex.name))).filter(m => m && m !== 'Other'))];
+  const muscleChipsHTML = musclesInSession.map(muscle => {
+    const c = MUSCLE_COLORS[muscle] || { bg: 'rgba(240,78,35,0.12)', color: 'var(--accent-kinetic)' };
+    return `<span style="font-size:10px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;padding:3px 9px;border-radius:8px;background:${c.bg};color:${c.color};display:inline-block;">${muscle}</span>`;
+  }).join('');
+
   const exList = sess.exercises.map((ex, i) => {
     const name = stripSuperset(ex.name);
     return `
@@ -11819,17 +11823,23 @@ function previewSession(progId, sessId) {
   }).join('');
 
   openSheet(`
-    <div style="max-height:50vh;overflow:hidden;display:flex;flex-direction:column;box-sizing:border-box;">
-      <div style="margin-bottom:8px;">
-        <div style="font-size:9.5px;font-family:var(--font-mono);letter-spacing:0.08em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:2px;">${prog ? prog.name : 'Workout Plan'}</div>
-        <div style="font-family:var(--font-hero);font-style:italic;font-size:19px;font-weight:600;color:var(--text-primary);line-height:1.2;">${sess.name}</div>
+    <div style="max-height:54vh;overflow:hidden;display:flex;flex-direction:column;box-sizing:border-box;">
+      <div style="margin-bottom:8px;flex-shrink:0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+          <span style="font-size:9.5px;font-family:var(--font-mono);letter-spacing:0.08em;text-transform:uppercase;color:var(--text-tertiary);">${prog ? prog.name : 'Workout Plan'}</span>
+          <span style="font-size:10px;font-family:var(--font-mono);color:var(--text-tertiary);">${sess.exercises.length} Exercises</span>
+        </div>
+        <div style="font-family:var(--font-hero);font-style:italic;font-size:19px;font-weight:600;color:var(--text-primary);line-height:1.2;margin-bottom:6px;">${sess.name}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px;">
+          ${muscleChipsHTML}
+        </div>
       </div>
-      <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;margin-bottom:10px;">
+      <div style="flex:1;overflow-y:auto;display:flex;flex-direction:column;margin-bottom:8px;-webkit-overflow-scrolling:touch;">
         ${exList}
       </div>
       <div style="display:flex;gap:8px;padding-top:4px;flex-shrink:0;">
-        <button class="btn btn-primary" style="flex:1;font-size:13.5px;padding:10px 14px;border-radius:12px;" onclick="closeSheet();startWorkoutFromHome('${progId}','${sessId}')">Start Workout</button>
-        <button class="btn btn-sheet-ghost" style="padding:10px 16px;border-radius:12px;font-size:13px;" onclick="closeSheet()">Close</button>
+        <button class="btn btn-primary" style="flex:1;font-size:13.5px;padding:11px 14px;border-radius:12px;" onclick="closeSheet();startWorkoutFromHome('${progId}','${sessId}')">Start Workout</button>
+        <button class="btn btn-sheet-ghost" style="padding:11px 16px;border-radius:12px;font-size:13px;" onclick="closeSheet()">Close</button>
       </div>
     </div>
   `);
