@@ -1626,168 +1626,179 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
 }
 .hist-tab.active { color: var(--text-primary); }
 
-/* ── Progress Hero Ribbon ── */
-.progress-hero-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  margin: 8px 16px 16px;
+/* ── Workout History & Calendar Screen ── */
+.history-screen-wrap {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  padding-bottom: calc(var(--nav-h) + 36px);
 }
-.progress-hero-card {
+.hist-summary-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
   background: var(--surface-card);
   border: 1px solid var(--border-subtle);
   border-radius: 18px;
-  padding: 14px 16px;
+  padding: 14px 12px;
+  margin: 0 16px 16px;
   box-shadow: var(--shadow-sm);
+  box-sizing: border-box;
+}
+.hist-stat-item {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+  flex: 1;
+  min-width: 0;
 }
-.phc-lbl {
+.hsi-label {
   font-size: 9.5px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--text-tertiary);
-  margin-bottom: 4px;
+  margin-bottom: 3px;
+  white-space: nowrap;
 }
-.phc-val {
+.hsi-val {
   font-family: var(--font-mono);
-  font-size: 23px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--text-primary);
-  line-height: 1.1;
+  line-height: 1.15;
   font-variant-numeric: tabular-nums lining-nums;
-  letter-spacing: -0.02em;
+  white-space: nowrap;
 }
-.phc-sub {
-  font-size: 11px;
-  color: var(--text-secondary);
-  margin-top: 4px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
+.hist-stat-sep {
+  width: 1px;
+  height: 22px;
+  background: var(--border-subtle);
 }
-.phc-up { color: var(--accent-success); font-weight: 600; }
 
-/* ── Volume Progression Chart Card ── */
-.progress-chart-card {
+/* ── Calendar Card ── */
+.cal-card {
   background: var(--surface-card);
   border: 1px solid var(--border-subtle);
   border-radius: 20px;
-  padding: 16px 18px 12px;
+  padding: 16px 14px;
+  margin: 0 16px 18px;
   box-shadow: var(--shadow-sm);
-  margin: 0 16px 16px;
+  box-sizing: border-box;
+  width: auto;
+  max-width: 100%;
 }
-.pcc-head {
+.cal-card-head {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   margin-bottom: 12px;
+  padding: 0 4px;
 }
-.pcc-title {
-  font-size: 13px;
-  font-weight: 700;
+.cal-card-title {
+  font-family: var(--font-hero);
+  font-style: italic;
+  font-size: 17px;
+  font-weight: 600;
   color: var(--text-primary);
   letter-spacing: -0.01em;
 }
-.pcc-meta {
+.cal-card-legend {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-size: 11px;
   color: var(--text-tertiary);
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums lining-nums;
+}
+.cal-legend-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-right: 4px;
+}
+.cal-legend-dot.done {
+  background: var(--accent-kinetic);
+}
+.cal-legend-dot.rest {
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-subtle);
 }
 
-/* ── Muscle Balance Cards (Progress Tab) ── */
-.muscle-balance-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 0 16px 24px;
+/* 7-Column Calendar Grid — ZERO horizontal scroll */
+.cal-grid-7 {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  width: 100%;
+  box-sizing: border-box;
 }
-.muscle-balance-card {
-  background: var(--surface-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: 18px;
-  padding: 14px 16px;
-  box-shadow: var(--shadow-sm);
-  cursor: pointer;
-  transition: transform 140ms var(--spring-snappy), border-color 140ms;
-}
-.muscle-balance-card:active {
-  transform: scale(0.98);
-  border-color: var(--accent-kinetic);
-}
-.mbc-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-.mbc-name {
-  font-size: 15.5px;
+.cal-dow-cell {
+  text-align: center;
+  font-size: 10px;
   font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: -0.01em;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.mbc-status-chip {
-  padding: 3px 8px;
-  border-radius: 10px;
-  font-size: 9.5px;
-  font-weight: 700;
+  color: var(--text-tertiary);
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  padding-bottom: 4px;
 }
-.mbc-status-optimal {
-  background: rgba(16, 185, 129, 0.12);
-  color: #10B981;
-  border: 1px solid rgba(16, 185, 129, 0.25);
+.cal-day-cell {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  position: relative;
+  cursor: pointer;
+  transition: transform 140ms var(--spring-snappy), background 140ms ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  min-width: 0;
+  box-sizing: border-box;
 }
-.mbc-status-ontrack {
-  background: rgba(240, 78, 35, 0.10);
-  color: var(--accent-kinetic);
-  border: 1px solid rgba(240, 78, 35, 0.22);
+.cal-day-blank {
+  background: transparent;
+  cursor: default;
 }
-.mbc-status-pending {
-  background: rgba(0, 0, 0, 0.04);
-  color: var(--text-tertiary);
+.cal-day-open {
+  background: var(--surface-sunken);
   border: 1px solid var(--border-subtle);
 }
-.mbc-metrics-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  color: var(--text-secondary);
-  margin-bottom: 8px;
+.cal-day-open:active {
+  transform: scale(0.90);
+  background: var(--border-subtle);
+}
+.cal-day-done {
+  background: var(--accent-kinetic);
+  box-shadow: 0 2px 8px rgba(240, 78, 35, 0.32);
+  color: #fff;
+}
+.cal-day-done:active {
+  transform: scale(0.88);
+}
+.cal-day-today {
+  box-shadow: 0 0 0 2px var(--accent-kinetic);
+}
+.cal-day-num {
+  font-size: clamp(10px, 2.7vw, 13px);
+  font-weight: 600;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums lining-nums;
+  line-height: 1;
 }
-.mbc-track {
-  width: 100%;
-  height: 6px;
-  background: var(--surface-sunken);
-  border-radius: 3px;
-  overflow: hidden;
-  margin-bottom: 8px;
-}
-.mbc-fill {
-  height: 100%;
-  border-radius: 3px;
-  background: var(--accent-kinetic);
-  transition: width 400ms var(--ease);
-}
-.mbc-fill.complete {
-  background: var(--accent-success);
-}
-.mbc-driver-hint {
-  font-size: 11px;
+.cal-day-blank .cal-day-num { color: rgba(42, 36, 33, 0.16); }
+.cal-day-open .cal-day-num { color: var(--text-tertiary); }
+.cal-day-done .cal-day-num { color: #fff; font-weight: 700; }
+
+.recent-feed-header {
+  padding: 0 20px 8px;
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   color: var(--text-tertiary);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  font-weight: 700;
 }
 
 /* ── Workout History Feed Cards ── */
@@ -1939,44 +1950,6 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   border-radius: 4px;
 }
 
-/* ── 5-Week Calendar (Workouts tab) ── */
-.cal-section { padding: 0 16px 16px; }
-.cal-section-hdr {
-  font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--text-tertiary); margin-bottom: 12px; font-weight: 700;
-}
-.cal-dow-header { display: flex; gap: 5px; padding: 0 0 8px 31px; }
-.cal-dow-cell {
-  flex: 1; text-align: center; font-size: 9px;
-  color: var(--text-tertiary); letter-spacing: 0.06em; text-transform: uppercase;
-  font-variant-numeric: tabular-nums;
-}
-.cal-grid { display: flex; flex-direction: column; gap: 5px; }
-.cal-week-row { display: flex; align-items: center; gap: 5px; }
-.cal-week-lbl {
-  font-size: 7.5px; color: var(--text-tertiary); width: 26px; flex-shrink: 0;
-  letter-spacing: 0.04em; text-transform: uppercase; text-align: right; font-weight: 600;
-}
-.cal-days-row { display: flex; gap: 5px; flex: 1; min-width: 0; }
-.cal-day-cell {
-  flex: 1; aspect-ratio: 1;
-  display: flex; align-items: center; justify-content: center;
-  border-radius: 50%; position: relative; cursor: default;
-  transition: transform 150ms ease; min-width: 0;
-}
-.cal-day-blank  { background: transparent; }
-.cal-day-open   { background: var(--surface-sunken); border: 1px solid var(--border-subtle); }
-.cal-day-done   {
-  background: var(--accent-kinetic);
-  box-shadow: 0 2px 8px rgba(240,78,35,0.30); cursor: pointer; color: #fff;
-}
-.cal-day-done:active { transform: scale(0.86); }
-.cal-day-num {
-  font-size: clamp(9px, 2.4vw, 13px); font-weight: 600;
-  font-variant-numeric: tabular-nums; line-height: 1;
-}
-.cal-day-blank .cal-day-num  { color: rgba(42,36,33,0.13); }
-.cal-day-open .cal-day-num   { color: rgba(42,36,33,0.24); }
 .cal-day-done .cal-day-num   { color: rgba(255,255,255,0.94); }
 
 /* Calendar day popup */
@@ -2431,8 +2404,8 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   </button>
 
   <button class="nav-btn" data-nav="history" onclick="Maps('history')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-    Progress
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    History
   </button>
 </nav>
 <!-- ── Rest Island — global floating capsule, follows you to every screen ── -->
@@ -4041,7 +4014,7 @@ function saveMeasurements(m) { LS.set('dcrgym_measurements', m); idbSet('dcrgym_
 // Schema-versioned, non-destructive, with rolling last-good backup.
 // History must survive every app update. Period.
 const SCHEMA_VERSION = 3;
-const APP_BUILD = '2026.09.30 · ota-23 · ultra-premium-ui-elevation';
+const APP_BUILD = '2026.09.30 · ota-24 · streamlined-history-calendar';
 
 function convertHistoryWeightsToLbs(hist) {
   if (!Array.isArray(hist)) return 0;
@@ -8769,7 +8742,6 @@ function renderWeeklyVolumeChart(weeks) {
 function renderHistory() {
   const el = document.getElementById('screen-history');
   if (!el) return;
-  const tab = ST.histTab || 'progress';
   const hist = getHistory();
   const unit = getWeightUnit();
 
@@ -8792,286 +8764,49 @@ function renderHistory() {
   const progId = ST.defaultProgram || ST.currentProgram;
   const weekStartMs = (() => { const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() - d.getDay()); return d.getTime(); })();
   const doneThisWeek = new Set(hist.filter(w => w.programId === progId && w.endTime >= weekStartMs).map(w => w.sessionId));
-  const progObj = progId ? PROGRAMS.find(p => p.id === progId) : null;
-  const targetSess = progObj ? progObj.sessions.length : 4;
-  const compliancePct = Math.min(100, Math.round((doneThisWeek.size / Math.max(targetSess, 1)) * 100));
-
-  // Volume progression
-  const weeksVol = getWeeklyVolumeProgression(6);
-  const currentWkVol = weeksVol[weeksVol.length - 1].volume;
-  const prevWkVol = weeksVol[weeksVol.length - 2].volume;
-  const volGrowthPct = prevWkVol > 0 ? Math.round(((currentWkVol - prevWkVol) / prevWkVol) * 100) : 0;
 
   // Format Total Tonnage
   const tonnageStr = totalTonnage >= 1000000
     ? (totalTonnage / 1000000).toFixed(1) + 'M'
     : (totalTonnage >= 1000 ? (totalTonnage / 1000).toFixed(1) + 'k' : totalTonnage);
 
-  let bodyHTML = '';
-  try {
-    bodyHTML = tab === 'progress' ? renderProgressGauges() : renderWorkoutsCalendarView();
-  } catch(err) {
-    console.error('[DCR Gym] renderHistory tab error:', err);
-    bodyHTML = `<div style="padding:32px 20px;text-align:center">
-      <div style="font-family:var(--font-serif);font-style:italic;font-size:18px;color:var(--text-secondary);margin-bottom:12px">Display error</div>
-      <div style="font-size:13px;color:var(--muted);margin-bottom:16px">${err.message}</div>
-      <button onclick="setHistTab('workouts')" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;margin-right:8px">View Workouts</button>
-    </div>`;
-  }
+  const calHTML = renderFiveWeekCalendar();
+  const feedHTML = renderRecentWorkoutsFeed();
 
   el.innerHTML = `
-  <div class="screen-content progress-container">
-    <div class="page-header" style="padding: calc(env(safe-area-inset-top, 0px) + 24px) 16px 12px;">
-      <h1 style="font-family:var(--font-hero);font-style:italic;font-size:2rem;font-weight:600;letter-spacing:-0.015em;color:var(--text-primary)">Progress & Analytics</h1>
+  <div class="screen-content history-screen-wrap">
+    <div style="padding: calc(env(safe-area-inset-top, 0px) + 24px) 20px 10px;">
+      <div style="font-size: 0.65rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 4px; font-weight: 700;">Training Log</div>
+      <h1 style="font-family: var(--font-hero); font-style: italic; font-size: 2.1rem; font-weight: 600; color: var(--text-primary); line-height: 1.1; letter-spacing: -0.015em; margin: 0;">History</h1>
     </div>
 
-    <!-- ── Master Biometric Telemetry Ribbon ── -->
-    <div class="progress-hero-grid">
-      <div class="progress-hero-card">
-        <div class="phc-lbl">Total Volume</div>
-        <div class="phc-val">${tonnageStr} <span style="font-size:12px;font-weight:500;color:var(--text-tertiary)">${unit}</span></div>
-        <div class="phc-sub">${volGrowthPct !== 0 ? `<span class="${volGrowthPct > 0 ? 'phc-up' : ''}">${volGrowthPct > 0 ? '▲ +' : '▼ '}${volGrowthPct}%</span> vs prev wk` : 'Lifetime tracked'}</div>
+    <!-- Quick 3-Stat Summary Bar -->
+    <div class="hist-summary-card">
+      <div class="hist-stat-item">
+        <span class="hsi-label">Total Workouts</span>
+        <span class="hsi-val">${totalWorkouts}</span>
       </div>
-      <div class="progress-hero-card">
-        <div class="phc-lbl">Workouts Logged</div>
-        <div class="phc-val">${totalWorkouts} <span style="font-size:12px;font-weight:500;color:var(--text-tertiary)">sessions</span></div>
-        <div class="phc-sub">${doneThisWeek.size} done this week</div>
+      <div class="hist-stat-sep"></div>
+      <div class="hist-stat-item">
+        <span class="hsi-label">This Week</span>
+        <span class="hsi-val">${doneThisWeek.size}</span>
       </div>
-      <div class="progress-hero-card">
-        <div class="phc-lbl">Weekly Compliance</div>
-        <div class="phc-val">${compliancePct}%</div>
-        <div class="phc-sub">${doneThisWeek.size} of ${targetSess} routines</div>
-      </div>
-      <div class="progress-hero-card">
-        <div class="phc-lbl">Strength Routine</div>
-        <div class="phc-val">${progObj ? progObj.name.split(' ')[0] : 'Custom'}</div>
-        <div class="phc-sub">${progObj ? progObj.daysPerWeek + ' Days/Wk Target' : 'Active Track'}</div>
+      <div class="hist-stat-sep"></div>
+      <div class="hist-stat-item">
+        <span class="hsi-label">Volume Moved</span>
+        <span class="hsi-val">${tonnageStr} <span style="font-size:10px;font-weight:500;color:var(--text-tertiary)">${unit}</span></span>
       </div>
     </div>
 
-    <!-- ── 6-Week Volume Progression Chart ── -->
-    <div class="progress-chart-card">
-      <div class="pcc-head">
-        <div class="pcc-title">Weekly Tonnage Progression</div>
-        <div class="pcc-meta">${currentWkVol > 0 ? (currentWkVol / 1000).toFixed(1) + 'k ' + unit + ' this week' : '6-Week Trend'}</div>
-      </div>
-      ${renderWeeklyVolumeChart(weeksVol)}
-    </div>
+    <!-- Calendar View -->
+    ${calHTML}
 
-    <!-- ── Segmented Control ── -->
-    <div class="history-tabs">
-      <button class="hist-tab ${tab==='progress'?'active':''}" onclick="setHistTab('progress')">Muscles & Volume</button>
-      <button class="hist-tab ${tab==='workouts'?'active':''}" onclick="setHistTab('workouts')">Workouts & Log</button>
-    </div>
-
-    <div id="hist-body">
-      ${bodyHTML}
+    <!-- Recent Workouts Feed -->
+    <div class="recent-feed-header">Recent Workouts</div>
+    <div class="workout-history-feed">
+      ${feedHTML}
     </div>
   </div>`;
-}
-
-function renderProgressGauges() {
-  const progId = ST.defaultProgram || ST.currentProgram;
-  const prog = progId ? PROGRAMS.find(p => p.id === progId) : null;
-  const unit = getWeightUnit();
-
-  if (!prog) {
-    return `<div class="empty-state" style="padding:32px 16px;text-align:center;">
-      <div class="empty-title" style="font-family:var(--font-hero);font-style:italic;font-size:22px;color:var(--text-primary)">No Active Program</div>
-      <div class="empty-sub" style="font-size:13px;color:var(--text-secondary);margin:8px 0 16px">Select a workout routine to track weekly muscle volume.</div>
-      <button class="btn btn-primary" style="width:200px;margin:0 auto;" onclick="Maps('prog')">Choose Program</button>
-    </div>`;
-  }
-
-  // ── Scheduled sets per muscle across the full program week ──
-  const scheduledSets = {};
-  for (const sess of prog.sessions) {
-    for (const ex of sess.exercises) {
-      const muscle = getMuscle(stripSuperset(ex.name));
-      if (muscle === 'Other') continue;
-      scheduledSets[muscle] = (scheduledSets[muscle] || 0) + (ex.workingSets || 3);
-    }
-  }
-
-  // ── Completed sets this week per muscle ──
-  const weekStart = (() => { const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() - d.getDay()); return d.getTime(); })();
-  const completedSets = {};
-  for (const w of getHistory()) {
-    if (w.programId !== progId || w.endTime < weekStart || !w.sets) continue;
-    const wp = PROGRAMS.find(p => p.id === w.programId);
-    if (!wp) continue;
-    const ws = wp.sessions.find(s => s.id === w.sessionId);
-    if (!ws) continue;
-    for (const [key, sets] of Object.entries(w.sets)) {
-      const exIdx = parseInt(key.split('_').pop());
-      const ex = ws.exercises[exIdx];
-      if (!ex) continue;
-      const muscle = getMuscle(stripSuperset(ex.name));
-      if (muscle === 'Other') continue;
-      completedSets[muscle] = (completedSets[muscle] || 0) + (sets || []).filter(Boolean).length;
-    }
-  }
-
-  const sortedMuscles = Object.keys(scheduledSets).sort((a, b) => {
-    const pa = (completedSets[a] || 0) / (scheduledSets[a] || 1);
-    const pb = (completedSets[b] || 0) / (scheduledSets[b] || 1);
-    return pb - pa;
-  });
-
-  if (!sortedMuscles.length) {
-    return `<div style="padding:24px 20px;font-size:13px;color:var(--text-secondary);font-style:italic">No programmed muscle groups found.</div>`;
-  }
-
-  const cardsHTML = sortedMuscles.map(muscle => {
-    const scheduled = scheduledSets[muscle] || 6;
-    const completed = completedSets[muscle] || 0;
-    const pct = Math.min(100, Math.round((completed / scheduled) * 100));
-    const isOptimal = pct >= 100;
-    const isOnTrack = pct >= 50;
-    const statusClass = isOptimal ? 'mbc-status-optimal' : (isOnTrack ? 'mbc-status-ontrack' : 'mbc-status-pending');
-    const statusText = isOptimal ? 'Optimal' : (isOnTrack ? `${completed}/${scheduled} On Track` : `${scheduled - completed} Left`);
-
-    // Top driver & e1RM for this muscle
-    const { weeks, driver } = getEpleyOverloadByMuscle(muscle, 5);
-    const peak = Math.max(...weeks.map(w => w.value), 0);
-    const driverText = driver ? `${driver.name} · ${driver.e1rm} ${unit} e1RM` : 'Tap to inspect strength curve ↗';
-
-    return `
-      <div class="muscle-balance-card" onclick="openMuscleGraph(null, '${muscle}')">
-        <div class="mbc-top">
-          <div class="mbc-name">
-            <span>${muscle}</span>
-          </div>
-          <span class="mbc-status-chip ${statusClass}">${statusText}</span>
-        </div>
-        <div class="mbc-metrics-row">
-          <span>Weekly Sets: <strong>${completed} / ${scheduled}</strong></span>
-          <span>${peak > 0 ? `Peak e1RM: <strong>${peak} ${unit}</strong>` : `${pct}% Met`}</span>
-        </div>
-        <div class="mbc-track">
-          <div class="mbc-fill${isOptimal ? ' complete' : ''}" style="width: ${pct}%;"></div>
-        </div>
-        <div class="mbc-driver-hint">
-          <span>${driverText}</span>
-          <span style="color:var(--accent-kinetic);font-weight:600;">Details →</span>
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  return `<div class="muscle-balance-list">${cardsHTML}</div>`;
-}
-
-function renderWorkoutsCalendarView() {
-  const calHTML = renderFiveWeekCalendar();
-  const hist = getHistory().slice().sort((a, b) => (b.endTime || 0) - (a.endTime || 0));
-  const unit = getWeightUnit();
-
-  if (hist.length === 0) {
-    return `${calHTML}<div style="padding:24px 20px;text-align:center;color:var(--text-tertiary);font-size:13px;font-style:italic">No workouts logged yet. Start your first session from the Home tab!</div>`;
-  }
-
-  const feedHTML = hist.slice(0, 15).map(w => {
-    const wid = String(w.id || w.endTime);
-    const dateStr = new Date(w.endTime || w.startTime).toLocaleDateString('en-US', {
-      weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
-    });
-    const durStr = formatDuration(w.duration || 0);
-    let vol = 0;
-    const exNames = [];
-    if (w.sets) {
-      for (const [k, sArr] of Object.entries(w.sets)) {
-        if (Array.isArray(sArr)) {
-          for (const s of sArr) {
-            if (s && s.w > 0 && s.r > 0) vol += (s.w * s.r);
-            if (s && s._name && !exNames.includes(s._name)) exNames.push(s._name);
-          }
-        }
-      }
-    }
-    const volStr = Math.round(vol).toLocaleString();
-
-    return `
-      <div class="wh-feed-card" id="hist-card-${wid}" onclick="toggleHistoryCard('${wid}')">
-        <div class="whfc-head">
-          <div>
-            <div class="whfc-title">${w.sessionName || 'Workout Session'}</div>
-            <div class="whfc-date">📅 ${dateStr}</div>
-          </div>
-          <div style="display:flex;gap:6px;align-items:center;" onclick="event.stopPropagation()">
-            <button class="btn-sheet-ghost" style="font-size:11px;padding:4px 10px;border-radius:12px;" onclick="editCompletedWorkout('${wid}')">Edit</button>
-            <button class="btn-sheet-ghost" style="font-size:11px;padding:4px 10px;border-radius:12px;color:#C04E2A;border-color:rgba(192,78,42,0.25);" onclick="deleteCompletedWorkout('${wid}')">Delete</button>
-            <span class="whfc-chevron">▼</span>
-          </div>
-        </div>
-        <div class="whfc-ribbon">
-          <span>⏱ ${durStr}</span>
-          <span>🏋️ ${volStr} ${unit}</span>
-          ${w.travelMode ? '<span style="color:var(--accent-kinetic)">✈ Travel</span>' : ''}
-        </div>
-        ${exNames.length > 0 ? `
-          <div class="whfc-ex-chips">
-            ${exNames.slice(0, 4).map(name => `<span class="whfc-chip">${name}</span>`).join('')}
-            ${exNames.length > 4 ? `<span class="whfc-chip">+${exNames.length - 4} more</span>` : ''}
-          </div>
-        ` : ''}
-        <div class="whfc-detail" id="hist-detail-${wid}">
-          ${renderHistoryCardDetails(w, unit)}
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  return `
-    ${calHTML}
-    <div style="padding: 12px 16px 8px; font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-tertiary); font-weight: 700;">Recent Workout Logs</div>
-    <div class="workout-history-feed">${feedHTML}</div>
-  `;
-}
-
-function renderHistoryCardDetails(w, unit) {
-  if (!w || !w.sets) return '<div style="color:var(--text-tertiary);font-size:12px;font-style:italic;">No sets logged</div>';
-  const exMap = {};
-  for (const [k, sArr] of Object.entries(w.sets)) {
-    if (!Array.isArray(sArr)) continue;
-    for (const s of sArr) {
-      if (!s || !s.r) continue;
-      const exName = s._name || 'Exercise';
-      if (!exMap[exName]) exMap[exName] = [];
-      exMap[exName].push(s);
-    }
-  }
-
-  const exEntries = Object.entries(exMap);
-  if (exEntries.length === 0) {
-    return '<div style="color:var(--text-tertiary);font-size:12px;font-style:italic;padding:4px 0;">No set records found.</div>';
-  }
-
-  return `
-    <div class="whfc-details-table">
-      ${exEntries.map(([name, sets]) => `
-        <div class="whfc-detail-ex">
-          <div class="whfc-detail-ex-name">${name}</div>
-          <div class="whfc-detail-sets">
-            ${sets.map((s, idx) => `
-              <span class="whfc-detail-set-chip">
-                <span class="whfc-set-idx">S${idx + 1}</span>
-                <span>${s.w} ${unit} × ${s.r}</span>
-                ${s._isPR ? '<span class="whfc-set-pr">PR</span>' : ''}
-              </span>
-            `).join('')}
-          </div>
-        </div>
-      `).join('')}
-    </div>
-  `;
-}
-
-function toggleHistoryCard(wid) {
-  const card = document.getElementById('hist-card-' + wid);
-  if (!card) return;
-  card.classList.toggle('expanded');
-  haptic('tick');
 }
 
 function renderFiveWeekCalendar() {
@@ -9094,56 +8829,110 @@ function renderFiveWeekCalendar() {
   weekEnd.setDate(today.getDate() + (6 - currentDow));
 
   const dows = ['S','M','T','W','T','F','S'];
+  const monthName = today.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
-  let weeksHTML = '';
+  let cellsHTML = '';
   for (let wk = 4; wk >= 0; wk--) {
-    const weekLabel = wk === 0 ? 'now' : `-${wk}w`;
-    let daysHTML = '';
     for (let dow = 0; dow < 7; dow++) {
       const d = new Date(weekEnd);
       d.setDate(weekEnd.getDate() - wk * 7 - (6 - dow));
       const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
       const dayNum = d.getDate();
       const isFuture = d > today;
+      const isToday = d.toDateString() === today.toDateString();
       const workouts = workoutByDay[key] || [];
       const hasWorkout = workouts.length > 0;
 
       if (isFuture) {
-        daysHTML += `<div class="cal-day-cell cal-day-blank"><span class="cal-day-num">${dayNum}</span></div>`;
+        cellsHTML += `<div class="cal-day-cell cal-day-blank"><span class="cal-day-num">${dayNum}</span></div>`;
       } else if (hasWorkout) {
         const w = workouts[0];
         const sessName = (w.sessionName || 'Workout').replace(/'/g, "\\'");
         const dateStr  = d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }).replace(/'/g, "\\'");
-        const dur  = formatDuration(w.duration || 0);
-        const vol  = Math.round(Object.values(w.sets || {}).flat().filter(Boolean).reduce((s, x) => s + (x.w||0)*(x.r||0), 0));
-        daysHTML += `<div class="cal-day-cell cal-day-done"
+        cellsHTML += `<div class="cal-day-cell cal-day-done${isToday ? ' cal-day-today' : ''}"
           onclick="openCalDay('${w.id || w.endTime}','${dateStr}')"
           title="${sessName}">
           <span class="cal-day-num">${dayNum}</span>
         </div>`;
       } else {
         const dateStrForClick = d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }).replace(/'/g, "\\'");
-        daysHTML += `<div class="cal-day-cell cal-day-open"
+        cellsHTML += `<div class="cal-day-cell cal-day-open${isToday ? ' cal-day-today' : ''}"
           onclick="clickOpenCalDay(${d.getTime()}, '${dateStrForClick}')"
-          style="cursor:pointer;"
           title="Log past workout">
           <span class="cal-day-num">${dayNum}</span>
         </div>`;
       }
     }
-    weeksHTML += `<div class="cal-week-row">
-      <div class="cal-week-lbl">${weekLabel}</div>
-      <div class="cal-days-row">${daysHTML}</div>
-    </div>`;
   }
 
-  return `<div class="cal-section">
-    <div class="cal-section-hdr">5-Week Training Calendar</div>
-    <div class="cal-dow-header">
-      ${dows.map(d => `<div class="cal-dow-cell">${d}</div>`).join('')}
+  return `
+    <div class="cal-card">
+      <div class="cal-card-head">
+        <div class="cal-card-title">${monthName}</div>
+        <div class="cal-card-legend">
+          <span><span class="cal-legend-dot done"></span>Workout</span>
+          <span><span class="cal-legend-dot rest"></span>Rest</span>
+        </div>
+      </div>
+      <div class="cal-grid-7" style="margin-bottom: 6px;">
+        ${dows.map(d => `<div class="cal-dow-cell">${d}</div>`).join('')}
+      </div>
+      <div class="cal-grid-7">
+        ${cellsHTML}
+      </div>
     </div>
-    <div class="cal-grid">${weeksHTML}</div>
-  </div>`;
+  `;
+}
+
+function renderRecentWorkoutsFeed() {
+  const hist = getHistory().slice().sort((a, b) => (b.endTime || 0) - (a.endTime || 0));
+  const unit = getWeightUnit();
+
+  if (hist.length === 0) {
+    return `<div style="padding:24px 20px;text-align:center;color:var(--text-tertiary);font-size:13px;font-style:italic">No workouts logged yet. Start your first session from the Home tab!</div>`;
+  }
+
+  return hist.slice(0, 15).map(w => {
+    const wid = String(w.id || w.endTime);
+    const dateStr = new Date(w.endTime || w.startTime).toLocaleDateString('en-US', {
+      weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+    });
+    const durStr = formatDuration(w.duration || 0);
+    let vol = 0;
+    const exNames = [];
+    if (w.sets) {
+      for (const [k, sArr] of Object.entries(w.sets)) {
+        if (Array.isArray(sArr)) {
+          for (const s of sArr) {
+            if (s && s.w > 0 && s.r > 0) vol += (s.w * s.r);
+            if (s && s._name && !exNames.includes(s._name)) exNames.push(s._name);
+          }
+        }
+      }
+    }
+    const volStr = Math.round(vol).toLocaleString();
+
+    return `
+      <div class="wh-feed-card" onclick="openCalDay('${wid}','${dateStr}')">
+        <div class="whfc-head">
+          <div style="flex:1;min-width:0;">
+            <div class="whfc-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${w.sessionName || 'Workout Session'}</div>
+            <div class="whfc-date">📅 ${dateStr}</div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;" onclick="event.stopPropagation()">
+            <button class="btn-sheet-ghost" style="font-size:11px;padding:4px 9px;border-radius:10px;" onclick="editCompletedWorkout('${wid}')">Edit</button>
+            <button class="btn-sheet-ghost" style="font-size:11px;padding:4px 9px;border-radius:10px;color:#C04E2A;border-color:rgba(192,78,42,0.25);" onclick="deleteCompletedWorkout('${wid}')">Delete</button>
+          </div>
+        </div>
+        <div class="whfc-ribbon">
+          <span>⏱ ${durStr}</span>
+          <span>🏋️ ${volStr} ${unit}</span>
+          ${exNames.length > 0 ? `<span>📋 ${exNames.length} exercises</span>` : ''}
+          ${w.travelMode ? '<span style="color:var(--accent-kinetic)">✈ Travel</span>' : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
 function editCompletedWorkout(workoutId) {
