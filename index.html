@@ -2142,218 +2142,6 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
 .prog-card-info h3 { font-size: 16px; font-weight: 600; color: var(--text-primary); letter-spacing: -0.01em; }
 .prog-card-info p { font-size: 12.5px; color: var(--text-secondary); margin-top: 3px; }
 
-/* ── Strain & Cardio Load Progression Tab ── */
-.strain-container {
-  padding-bottom: calc(var(--nav-h) + 28px);
-}
-.strain-header {
-  padding: calc(env(safe-area-inset-top, 0px) + 24px) 16px 14px;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-.strain-title {
-  font-family: var(--font-hero);
-  font-style: italic;
-  font-size: 2rem;
-  font-weight: 600;
-  letter-spacing: -0.015em;
-  color: var(--text-primary);
-  line-height: 1.1;
-}
-.strain-subtitle {
-  font-size: 12px;
-  color: var(--text-secondary);
-  margin-top: 4px;
-}
-.strain-sync-btn {
-  border: 1px solid var(--border);
-  background: var(--surface-card);
-  color: var(--text-secondary);
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  padding: 5px 10px;
-  border-radius: 12px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  white-space: nowrap;
-}
-.strain-prog-select-row {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  padding: 0 16px 12px;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-}
-.strain-prog-select-row::-webkit-scrollbar { display: none; }
-.strain-prog-pill {
-  flex-shrink: 0;
-  border: 1px solid var(--border);
-  background: var(--surface-card);
-  color: var(--text-secondary);
-  border-radius: 20px;
-  padding: 6px 14px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.16s ease;
-}
-.strain-prog-pill.active {
-  background: var(--charcoal);
-  color: #FAF7F2;
-  border-color: var(--charcoal);
-  box-shadow: var(--shadow-sm);
-}
-.strain-sess-pill {
-  flex-shrink: 0;
-  border: 1px solid var(--border-subtle);
-  background: rgba(42,36,33,0.03);
-  color: var(--text-secondary);
-  border-radius: 14px;
-  padding: 5px 12px;
-  font-size: 11.5px;
-  font-weight: 600;
-  cursor: pointer;
-}
-.strain-sess-pill.active {
-  background: var(--accent-kinetic);
-  color: #fff;
-  border-color: var(--accent-kinetic);
-  box-shadow: 0 2px 8px rgba(240,78,35,0.25);
-}
-.strain-chart-card {
-  background: var(--surface-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: 20px;
-  padding: 16px 18px 14px;
-  margin: 0 16px 14px;
-  box-shadow: var(--shadow-sm);
-}
-.strain-chart-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 12px;
-}
-.strain-chart-title {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-tertiary);
-}
-.strain-chart-svg-wrap {
-  width: 100%;
-  position: relative;
-}
-.strain-zone-legend {
-  display: flex;
-  gap: 12px;
-  font-size: 10px;
-  color: var(--text-tertiary);
-  margin-top: 10px;
-  flex-wrap: wrap;
-}
-.strain-zone-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  display: inline-block;
-  margin-right: 4px;
-}
-.strain-advice-card {
-  background: var(--surface-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: 20px;
-  padding: 16px 18px;
-  margin: 0 16px 14px;
-  box-shadow: var(--shadow-sm);
-  text-align: left;
-}
-.strain-advice-badge {
-  font-family: var(--font-mono);
-  font-size: 9.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding: 3px 9px;
-  border-radius: 8px;
-  display: inline-block;
-  margin-bottom: 8px;
-}
-.strain-badge-optimal { background: rgba(40, 167, 69, 0.12); color: #28A745; }
-.strain-badge-drop    { background: rgba(217, 119, 6, 0.14); color: #D97706; }
-.strain-badge-high    { background: rgba(220, 53, 69, 0.12); color: #DC3545; }
-.strain-history-feed {
-  padding: 0 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.strain-entry-card {
-  background: var(--surface-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: 18px;
-  padding: 14px 16px;
-  box-shadow: var(--shadow-sm);
-  text-align: left;
-}
-.sec-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.sec-date { font-size: 13px; font-weight: 600; color: var(--text-primary); }
-.sec-cardio-pill {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 700;
-  padding: 3px 9px;
-  border-radius: 10px;
-}
-.sec-ex-list {
-  margin-top: 10px;
-  border-top: 0.5px solid var(--border-subtle);
-  padding-top: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-.sec-ex-item {
-  font-size: 12px;
-  color: var(--text-secondary);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-/* ── Session picker ── */
-.session-list { padding: 0 16px; }
-.session-card {
-  background: var(--surface-card); border-radius: 20px; margin-bottom: 12px;
-  padding: 18px 20px; box-shadow: var(--shadow-sm); cursor: pointer;
-  display: flex; align-items: center; justify-content: space-between;
-  border: 1px solid var(--border-subtle);
-  transition: transform 160ms var(--spring-snappy), box-shadow 160ms;
-}
-.session-card:active { transform: scale(0.98); }
-.session-card h3 { font-size: 16px; font-weight: 600; color: var(--text-primary); letter-spacing: -0.01em; }
-.session-card p { font-size: 12.5px; color: var(--text-secondary); margin-top: 3px; }
-.sess-done-chip { font-size: 10.5px; color: var(--accent-success); background: oklch(72.3% 0.190 145 / 0.12); border-radius: 8px; padding: 3px 8px; font-weight: 600; }
-.sess-next-badge { font-size: 10px; color: #fff; background: var(--accent-kinetic); border-radius: 8px; padding: 3px 8px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
-.session-card.next-session { background: var(--surface-glass-dark); border-color: rgba(255,255,255,0.14); box-shadow: var(--shadow-lg); }
-.session-card.next-session h3 { color: #FAF7F2; }
-.session-card.next-session p { color: rgba(250,247,242,0.65); }
-.session-card.next-session .preview-btn { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.22); color: #FAF7F2; }
-.session-card.next-session .start-arrow { color: var(--accent-kinetic); }
-
-/* ── Back button ── */
-.back-btn { display: flex; align-items: center; gap: 6px; background: none; border: none; color: var(--text-secondary); font-size: 15px; font-weight: 500; cursor: pointer; padding: 8px 0; margin-bottom: 8px; }
 
 /* ── Settings ── */
 .settings-section { margin: 20px 16px; background: var(--surface-card); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-sm); border: 1px solid var(--border-subtle); }
@@ -2447,7 +2235,6 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   <div id="screen-history"          class="screen" style="display:none"></div>
   <div id="screen-settings"         class="screen" style="display:none"></div>
   <div id="screen-workouts-browser" class="screen" style="display:none"></div>
-  <div id="screen-strain"           class="screen" style="display:none"></div>
 </div>
 <nav id="bottom-nav" style="display:none">
   <button class="nav-btn" data-nav="home" onclick="Maps('home')">
@@ -2458,10 +2245,7 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
     Workouts
   </button>
-  <button class="nav-btn" data-nav="strain" onclick="Maps('strain')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-    Cardio Load
-  </button>
+
   <button class="nav-btn" data-nav="history" onclick="Maps('history')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
     Progress
@@ -2573,52 +2357,10 @@ const PROGRAMS = [
         name: "Full Body #1",
         exercises: [
           {
-            id: "leg_press", name: "Superset 1: Leg Press", superset: "A",
-            warmupSets: "2–3", workingSets: 3, reps: "6–8",
-            rest: "30–60 sec",
-            substitutions: ["Barbell Front Squat", "Dumbbell Lunge"],
-            notes: ""
-          },
-          {
-            id: "dumbbell_lateral_raise", name: "Superset 1: Dumbbell Lateral Raise", superset: "A",
-            warmupSets: "0–1", workingSets: 3, reps: "8–10",
-            rest: "30–60 sec",
-            substitutions: ["Cable Lateral Raise", "Machine Lateral Raise"],
-            notes: ""
-          },
-          {
-            id: "lat_pulldown", name: "Lat Pulldown", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "8–10",
+            id: "cable_crunch", name: "Cable Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "10",
             rest: "1–2 min",
-            substitutions: ["Pull-Up (Optional Assistance)", "Chin-Up"],
-            notes: ""
-          },
-          {
-            id: "barbell_romanian_deadlift", name: "Barbell Romanian Deadlift", superset: null,
-            warmupSets: "2–3", workingSets: 2, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["Dumbbell Romanian Deadlift", "Hip Thrust"],
-            notes: ""
-          },
-          {
-            id: "machine_chest_press", name: "Superset 2: Machine Chest Press", superset: "B",
-            warmupSets: "1–2", workingSets: 3, reps: "6–8",
-            rest: "1–2 min",
-            substitutions: ["Bench Press", "Flat Dumbbell Press"],
-            notes: ""
-          },
-          {
-            id: "standing_calf_raise", name: "Superset 2: Standing Calf Raise", superset: "B",
-            warmupSets: "0–1", workingSets: 3, reps: "6–8",
-            rest: "1–2 min",
-            substitutions: ["Seated Calf Raise", "Leg Press Calf Press"],
-            notes: ""
-          },
-          {
-            id: "machine_crunch", name: "Machine Crunch", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            substitutions: ["Machine Crunch", "Plate-Weighted Decline Sit-Up"],
             notes: ""
           },
         ]
@@ -2628,52 +2370,10 @@ const PROGRAMS = [
         name: "Full Body #2",
         exercises: [
           {
-            id: "seated_leg_curl", name: "Seated Leg Curl", superset: null,
-            warmupSets: "2", workingSets: 3, reps: "12–15",
+            id: "dragon_flag", name: "Dragon Flag", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "12",
             rest: "1–2 min",
-            substitutions: ["Lying Leg Curl", "Nordic Ham Curl"],
-            notes: ""
-          },
-          {
-            id: "hack_squat", name: "Hack Squat", superset: null,
-            warmupSets: "3–4", workingSets: 3, reps: "6–8",
-            rest: "3–4 min",
-            substitutions: ["Leg Press", "Dumbbell Lunge"],
-            notes: ""
-          },
-          {
-            id: "incline_dumbbell_press", name: "Incline Dumbbell Press", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["Incline Machine Chest Press", "Incline Barbell Bench Press"],
-            notes: ""
-          },
-          {
-            id: "chest_supported_t_bar_row", name: "Chest-Supported T-Bar Row", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["Pendlay Row", "Dumbbell Row"],
-            notes: ""
-          },
-          {
-            id: "ez_bar_biceps_curl", name: "Superset 1: EZ-Bar Biceps Curl", superset: "A",
-            warmupSets: "0–1", workingSets: 2, reps: "6–8",
-            rest: "30 sec",
-            substitutions: ["Standing Barbell Curl", "Dumbbell Biceps Curl"],
-            notes: ""
-          },
-          {
-            id: "ez_bar_skullcrusher", name: "Superset 1: EZ-Bar Skullcrusher", superset: "A",
-            warmupSets: "0–1", workingSets: 2, reps: "10–12",
-            rest: "30 sec",
-            substitutions: ["Dumbbell Skullcrusher", "Overhead Triceps Extension"],
-            notes: ""
-          },
-          {
-            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
+            substitutions: ["Hanging Leg Raise", "Roman Chair Leg Raise"],
             notes: ""
           },
         ]
@@ -2699,52 +2399,10 @@ const PROGRAMS = [
         name: "Full Body #1",
         exercises: [
           {
-            id: "barbell_back_squat", name: "Barbell Back Squat", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "3–5",
-            rest: "3–4 min",
-            substitutions: ["Leg Press", "Dumbbell Lunge"],
-            notes: ""
-          },
-          {
-            id: "chest_supported_t_bar_row", name: "Chest-Supported T-Bar Row", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["Dumbbell Row", "Cable Row"],
-            notes: ""
-          },
-          {
-            id: "glute_ham_raise", name: "Glute Ham Raise", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["45° Back Extension", "Lying Leg Curl"],
-            notes: ""
-          },
-          {
-            id: "dumbbell_lateral_raise", name: "Dumbbell Lateral Raise", superset: null,
-            warmupSets: "0–1", workingSets: 2, reps: "12–15",
+            id: "cable_crunch", name: "Cable Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "10",
             rest: "1–2 min",
-            substitutions: ["Cable Lateral Raise", "Machine Lateral Raise"],
-            notes: ""
-          },
-          {
-            id: "pec_deck", name: "Pec Deck", superset: null,
-            warmupSets: "0–1", workingSets: 2, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Dumbbell Fly", "Push-Up"],
-            notes: ""
-          },
-          {
-            id: "preacher_curl", name: "Preacher Curl", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["EZ-Bar Biceps Curl", "Dumbbell Biceps Curl"],
-            notes: ""
-          },
-          {
-            id: "machine_crunch", name: "Machine Crunch", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            substitutions: ["Machine Crunch", "Plate-Weighted Decline Sit-Up"],
             notes: ""
           },
         ]
@@ -2754,52 +2412,10 @@ const PROGRAMS = [
         name: "Full Body #2",
         exercises: [
           {
-            id: "bench_press", name: "Bench Press", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "3–5",
-            rest: "3–4 min",
-            substitutions: ["Machine Chest Press", "Flat Dumbbell Press"],
-            notes: ""
-          },
-          {
-            id: "leg_press", name: "Leg Press", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "6–8",
-            rest: "3–4 min",
-            substitutions: ["Barbell Front Squat", "Dumbbell Lunge"],
-            notes: ""
-          },
-          {
-            id: "pull_up_optional_assistance", name: "Pull-Up (Optional Assistance)", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["Lat Pulldown", "Chin-Up"],
-            notes: ""
-          },
-          {
-            id: "ez_bar_skullcrusher", name: "EZ-Bar Skullcrusher", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
+            id: "dragon_flag", name: "Dragon Flag", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "12",
             rest: "1–2 min",
-            substitutions: ["Dumbbell Skullcrusher", "Overhead Triceps Extension"],
-            notes: ""
-          },
-          {
-            id: "reverse_pec_deck", name: "Reverse Pec Deck", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Rope Facepull", "Reverse Cable Fly"],
-            notes: ""
-          },
-          {
-            id: "seated_calf_raise", name: "Seated Calf Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
-            rest: "1–2 min",
-            substitutions: ["Standing Calf Raise", "Leg Press Calf Press"],
-            notes: ""
-          },
-          {
-            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
+            substitutions: ["Hanging Leg Raise", "Roman Chair Leg Raise"],
             notes: ""
           },
         ]
@@ -2809,45 +2425,10 @@ const PROGRAMS = [
         name: "Full Body #3",
         exercises: [
           {
-            id: "deadlift", name: "Deadlift", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "3–5",
-            rest: "3–5 min",
-            substitutions: ["Romanian Deadlift", "Hip Thrust"],
-            notes: ""
-          },
-          {
-            id: "incline_dumbbell_press", name: "Incline Dumbbell Press", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["Incline Machine Chest Press", "Incline Barbell Bench Press"],
-            notes: ""
-          },
-          {
-            id: "seated_leg_curl", name: "Seated Leg Curl", superset: null,
-            warmupSets: "1–2", workingSets: 2, reps: "10–12",
+            id: "cable_crunch", name: "Cable Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "10",
             rest: "1–2 min",
-            substitutions: ["Lying Leg Curl", "Nordic Ham Curl"],
-            notes: ""
-          },
-          {
-            id: "lat_pulldown", name: "Lat Pulldown", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "10–12",
-            rest: "2–3 min",
-            substitutions: ["Pull-Up (Optional Assistance)", "Chin-Up"],
-            notes: ""
-          },
-          {
-            id: "leg_extension", name: "Leg Extension", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "10–12",
-            rest: "1–2 min",
-            substitutions: ["Goblet Squat", "Dumbbell Lunge"],
-            notes: ""
-          },
-          {
-            id: "machine_crunch", name: "Machine Crunch", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            substitutions: ["Machine Crunch", "Plate-Weighted Decline Sit-Up"],
             notes: ""
           },
         ]
@@ -2873,59 +2454,10 @@ const PROGRAMS = [
         name: "Upper #1",
         exercises: [
           {
-            id: "bench_press", name: "Bench Press", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "3–5",
-            rest: "3–4 min",
-            substitutions: ["Machine Chest Press", "Flat Dumbbell Press"],
-            notes: ""
-          },
-          {
-            id: "barbell_row", name: "Barbell Row", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["Pendlay Row", "Dumbbell Row"],
-            notes: ""
-          },
-          {
-            id: "dumbbell_lateral_raise", name: "Dumbbell Lateral Raise", superset: null,
-            warmupSets: "0–1", workingSets: 2, reps: "12–15",
+            id: "cable_crunch", name: "Cable Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "10",
             rest: "1–2 min",
-            substitutions: ["Cable Lateral Raise", "Machine Lateral Raise"],
-            notes: ""
-          },
-          {
-            id: "pull_up_optional_assistance", name: "Pull-Up (Optional Assistance)", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["Lat Pulldown", "Chin-Up"],
-            notes: ""
-          },
-          {
-            id: "pec_deck", name: "Pec Deck", superset: null,
-            warmupSets: "0–1", workingSets: 2, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Dumbbell Fly", "Push-Up"],
-            notes: ""
-          },
-          {
-            id: "preacher_curl", name: "Superset 1: Preacher Curl", superset: "A",
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
-            rest: "30 sec",
-            substitutions: ["EZ-Bar Biceps Curl", "Dumbbell Biceps Curl"],
-            notes: ""
-          },
-          {
-            id: "ez_bar_skullcrusher", name: "Superset 1: EZ-Bar Skullcrusher", superset: "A",
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
-            rest: "30 sec",
-            substitutions: ["Dumbbell Skullcrusher", "Overhead Triceps Extension"],
-            notes: ""
-          },
-          {
-            id: "machine_crunch", name: "Machine Crunch", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            substitutions: ["Machine Crunch", "Plate-Weighted Decline Sit-Up"],
             notes: ""
           },
         ]
@@ -2935,38 +2467,10 @@ const PROGRAMS = [
         name: "Lower #1",
         exercises: [
           {
-            id: "deadlift", name: "Deadlift", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "3–5",
-            rest: "3–5 min",
-            substitutions: ["Romanian Deadlift", "Hip Thrust"],
-            notes: ""
-          },
-          {
-            id: "leg_press", name: "Leg Press", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "6–8",
-            rest: "3–4 min",
-            substitutions: ["Barbell Front Squat", "Dumbbell Lunge"],
-            notes: ""
-          },
-          {
-            id: "glute_ham_raise", name: "Glute Ham Raise", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["45° Back Extension", "Lying Leg Curl"],
-            notes: ""
-          },
-          {
-            id: "seated_calf_raise", name: "Seated Calf Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
+            id: "dragon_flag", name: "Dragon Flag", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "12",
             rest: "1–2 min",
-            substitutions: ["Standing Calf Raise", "Leg Press Calf Press"],
-            notes: ""
-          },
-          {
-            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
+            substitutions: ["Hanging Leg Raise", "Roman Chair Leg Raise"],
             notes: ""
           },
         ]
@@ -2976,59 +2480,10 @@ const PROGRAMS = [
         name: "Upper #2",
         exercises: [
           {
-            id: "lat_pulldown", name: "Lat Pulldown", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "10–12",
-            rest: "2–3 min",
-            substitutions: ["Pull-Up (Optional Assistance)", "Chin-Up"],
-            notes: ""
-          },
-          {
-            id: "overhead_barbell_press", name: "Overhead Barbell Press", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "6–8",
-            rest: "3–4 min",
-            substitutions: ["Dumbbell Shoulder Press (Standing)", "Dumbbell Shoulder Press (Seated)"],
-            notes: ""
-          },
-          {
-            id: "dumbbell_row", name: "Dumbbell Row", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "10–12",
-            rest: "2–3 min",
-            substitutions: ["Chest-Supported T-Bar Row", "Barbell Row"],
-            notes: ""
-          },
-          {
-            id: "flat_dumbbell_press", name: "Flat Dumbbell Press", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["Dip", "Bench Press"],
-            notes: ""
-          },
-          {
-            id: "reverse_pec_deck", name: "Reverse Pec Deck", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
+            id: "cable_crunch", name: "Cable Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "10",
             rest: "1–2 min",
-            substitutions: ["Rope Facepull", "Reverse Cable Fly"],
-            notes: ""
-          },
-          {
-            id: "triceps_pressdown", name: "Superset 1: Triceps Pressdown", superset: "A",
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
-            rest: "30 sec",
-            substitutions: ["Triceps Kickback (Cable)", "EZ-Bar Skullcrusher"],
-            notes: ""
-          },
-          {
-            id: "bayesian_cable_curl", name: "Superset 1: Bayesian Cable Curl", superset: "A",
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
-            rest: "30 sec",
-            substitutions: ["Incline Dumbbell Curl", "Preacher Curl"],
-            notes: ""
-          },
-          {
-            id: "machine_crunch", name: "Machine Crunch", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            substitutions: ["Machine Crunch", "Plate-Weighted Decline Sit-Up"],
             notes: ""
           },
         ]
@@ -3038,45 +2493,10 @@ const PROGRAMS = [
         name: "Lower #2",
         exercises: [
           {
-            id: "barbell_back_squat", name: "Barbell Back Squat", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "3–5",
-            rest: "3–4 min",
-            substitutions: ["Leg Press", "Dumbbell Lunge"],
-            notes: ""
-          },
-          {
-            id: "45_back_extension", name: "45° Back Extension", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["Good Morning", "Glute Ham Raise"],
-            notes: ""
-          },
-          {
-            id: "leg_extension", name: "Leg Extension", superset: null,
-            warmupSets: "1–2", workingSets: 2, reps: "10–12",
-            rest: "2–3 min",
-            substitutions: ["Goblet Squat", "Dumbbell Lunge"],
-            notes: ""
-          },
-          {
-            id: "seated_leg_curl", name: "Seated Leg Curl", superset: null,
-            warmupSets: "1–2", workingSets: 2, reps: "10–12",
+            id: "dragon_flag", name: "Dragon Flag", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "12",
             rest: "1–2 min",
-            substitutions: ["Lying Leg Curl", "Nordic Ham Curl"],
-            notes: ""
-          },
-          {
-            id: "standing_calf_raise", name: "Standing Calf Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["Seated Calf Raise", "Leg Press Calf Press"],
-            notes: ""
-          },
-          {
-            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
+            substitutions: ["Hanging Leg Raise", "Roman Chair Leg Raise"],
             notes: ""
           },
         ]
@@ -3102,52 +2522,10 @@ const PROGRAMS = [
         name: "Full Body #1",
         exercises: [
           {
-            id: "bench_press", name: "Bench Press", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "3–5",
-            rest: "3–4 min",
-            substitutions: ["Machine Chest Press", "Flat Dumbbell Press"],
-            notes: ""
-          },
-          {
-            id: "leg_press", name: "Leg Press", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "6–8",
-            rest: "3–4 min",
-            substitutions: ["Barbell Front Squat", "Dumbbell Lunge"],
-            notes: ""
-          },
-          {
-            id: "barbell_row", name: "Barbell Row", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["Pendlay Row", "Dumbbell Row"],
-            notes: ""
-          },
-          {
-            id: "dumbbell_lateral_raise", name: "Dumbbell Lateral Raise", superset: null,
-            warmupSets: "0–1", workingSets: 2, reps: "12–15",
+            id: "cable_crunch", name: "Cable Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "10",
             rest: "1–2 min",
-            substitutions: ["Cable Lateral Raise", "Machine Lateral Raise"],
-            notes: ""
-          },
-          {
-            id: "preacher_curl", name: "Superset 1: Preacher Curl", superset: "A",
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
-            rest: "30 sec",
-            substitutions: ["EZ-Bar Biceps Curl", "Dumbbell Biceps Curl"],
-            notes: ""
-          },
-          {
-            id: "seated_calf_raise", name: "Superset 1: Seated Calf Raise", superset: "A",
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
-            rest: "30 sec",
-            substitutions: ["Standing Calf Raise", "Leg Press Calf Press"],
-            notes: ""
-          },
-          {
-            id: "machine_crunch", name: "Machine Crunch", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            substitutions: ["Machine Crunch", "Plate-Weighted Decline Sit-Up"],
             notes: ""
           },
         ]
@@ -3157,45 +2535,10 @@ const PROGRAMS = [
         name: "Full Body #2",
         exercises: [
           {
-            id: "deadlift", name: "Deadlift", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "3–5",
-            rest: "3–5 min",
-            substitutions: ["Romanian Deadlift", "Hip Thrust"],
-            notes: ""
-          },
-          {
-            id: "pull_up_optional_assistance", name: "Pull-Up (Optional Assistance)", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["Lat Pulldown", "Chin-Up"],
-            notes: ""
-          },
-          {
-            id: "glute_ham_raise", name: "Glute Ham Raise", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["45° Back Extension", "Lying Leg Curl"],
-            notes: ""
-          },
-          {
-            id: "pec_deck", name: "Pec Deck", superset: null,
-            warmupSets: "0–1", workingSets: 2, reps: "15–20",
+            id: "dragon_flag", name: "Dragon Flag", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "12",
             rest: "1–2 min",
-            substitutions: ["Dumbbell Fly", "Push-Up"],
-            notes: ""
-          },
-          {
-            id: "ez_bar_skullcrusher", name: "EZ-Bar Skullcrusher", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["Dumbbell Skullcrusher", "Overhead Triceps Extension"],
-            notes: ""
-          },
-          {
-            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
+            substitutions: ["Hanging Leg Raise", "Roman Chair Leg Raise"],
             notes: ""
           },
         ]
@@ -3205,59 +2548,10 @@ const PROGRAMS = [
         name: "Full Body #3",
         exercises: [
           {
-            id: "overhead_barbell_press", name: "Overhead Barbell Press", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "6–8",
-            rest: "3–4 min",
-            substitutions: ["Dumbbell Shoulder Press (Standing)", "Dumbbell Shoulder Press (Seated)"],
-            notes: ""
-          },
-          {
-            id: "45_back_extension", name: "45° Back Extension", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["Good Morning", "Glute Ham Raise"],
-            notes: ""
-          },
-          {
-            id: "dumbbell_row", name: "Dumbbell Row", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "10–12",
-            rest: "2–3 min",
-            substitutions: ["Chest-Supported T-Bar Row", "Barbell Row"],
-            notes: ""
-          },
-          {
-            id: "leg_extension", name: "Leg Extension", superset: null,
-            warmupSets: "1–2", workingSets: 2, reps: "15–20",
+            id: "cable_crunch", name: "Cable Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "10",
             rest: "1–2 min",
-            substitutions: ["Goblet Squat", "Dumbbell Lunge"],
-            notes: ""
-          },
-          {
-            id: "triceps_pressdown", name: "Superset 1: Triceps Pressdown", superset: "A",
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
-            rest: "30 sec",
-            substitutions: ["EZ-Bar Skullcrusher", "Triceps Kickback (Cable)"],
-            notes: ""
-          },
-          {
-            id: "bayesian_cable_curl", name: "Superset 1: Bayesian Cable Curl", superset: "A",
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
-            rest: "30 sec",
-            substitutions: ["Incline Dumbbell Curl", "Preacher Curl"],
-            notes: ""
-          },
-          {
-            id: "standing_calf_raise", name: "Standing Calf Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["Seated Calf Raise", "Leg Press Calf Press"],
-            notes: ""
-          },
-          {
-            id: "machine_crunch", name: "Machine Crunch", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            substitutions: ["Machine Crunch", "Plate-Weighted Decline Sit-Up"],
             notes: ""
           },
         ]
@@ -3267,45 +2561,10 @@ const PROGRAMS = [
         name: "Full Body #4",
         exercises: [
           {
-            id: "barbell_back_squat", name: "Barbell Back Squat", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "3–5",
-            rest: "3–4 min",
-            substitutions: ["Leg Press", "Dumbbell Lunge"],
-            notes: ""
-          },
-          {
-            id: "flat_dumbbell_press", name: "Flat Dumbbell Press", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["Dip", "Bench Press"],
-            notes: ""
-          },
-          {
-            id: "lat_pulldown", name: "Lat Pulldown", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "10–12",
-            rest: "2–3 min",
-            substitutions: ["Pull-Up (Optional Assistance)", "Chin-Up"],
-            notes: ""
-          },
-          {
-            id: "seated_leg_curl", name: "Seated Leg Curl", superset: null,
-            warmupSets: "1–2", workingSets: 2, reps: "10–12",
+            id: "dragon_flag", name: "Dragon Flag", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "12",
             rest: "1–2 min",
-            substitutions: ["Lying Leg Curl", "Nordic Ham Curl"],
-            notes: ""
-          },
-          {
-            id: "reverse_pec_deck", name: "Reverse Pec Deck", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
-            rest: "1–2 min",
-            substitutions: ["Rope Facepull", "Reverse Cable Fly"],
-            notes: ""
-          },
-          {
-            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
+            substitutions: ["Hanging Leg Raise", "Roman Chair Leg Raise"],
             notes: ""
           },
         ]
@@ -3331,52 +2590,10 @@ const PROGRAMS = [
         name: "Full Body #1",
         exercises: [
           {
-            id: "bench_press", name: "Bench Press", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "3–5",
-            rest: "3–4 min",
-            substitutions: ["Machine Chest Press", "Flat Dumbbell Press"],
-            notes: ""
-          },
-          {
-            id: "leg_press", name: "Leg Press", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "6–8",
-            rest: "3–4 min",
-            substitutions: ["Barbell Front Squat", "Dumbbell Lunge"],
-            notes: ""
-          },
-          {
-            id: "lat_pulldown", name: "Lat Pulldown", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["Pull-Up (Optional Assistance)", "Chin-Up"],
-            notes: ""
-          },
-          {
-            id: "dumbbell_lateral_raise", name: "Dumbbell Lateral Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
+            id: "cable_crunch", name: "Cable Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "10",
             rest: "1–2 min",
-            substitutions: ["Cable Lateral Raise", "Machine Lateral Raise"],
-            notes: ""
-          },
-          {
-            id: "preacher_curl", name: "Preacher Curl", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["EZ-Bar Biceps Curl", "Dumbbell Biceps Curl"],
-            notes: ""
-          },
-          {
-            id: "seated_calf_raise", name: "Seated Calf Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
-            rest: "1–2 min",
-            substitutions: ["Standing Calf Raise", "Leg Press Calf Press"],
-            notes: ""
-          },
-          {
-            id: "machine_crunch", name: "Machine Crunch", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            substitutions: ["Machine Crunch", "Plate-Weighted Decline Sit-Up"],
             notes: ""
           },
         ]
@@ -3386,45 +2603,10 @@ const PROGRAMS = [
         name: "Full Body #2",
         exercises: [
           {
-            id: "deadlift", name: "Deadlift", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "3–5",
-            rest: "3–5 min",
-            substitutions: ["Romanian Deadlift", "Hip Thrust"],
-            notes: ""
-          },
-          {
-            id: "overhead_barbell_press", name: "Overhead Barbell Press", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["Dumbbell Shoulder Press (Seated)", "Barbell Upright Row"],
-            notes: ""
-          },
-          {
-            id: "cable_lat_pullover", name: "Cable Lat Pullover", superset: null,
-            warmupSets: "0–1", workingSets: 2, reps: "12–15",
+            id: "dragon_flag", name: "Dragon Flag", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "12",
             rest: "1–2 min",
-            substitutions: ["Dumbbell Lat Pullover", "Cable Lat Pull-In"],
-            notes: ""
-          },
-          {
-            id: "pec_deck", name: "Pec Deck", superset: null,
-            warmupSets: "0–1", workingSets: 2, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["Dumbbell Fly", "Push-Up"],
-            notes: ""
-          },
-          {
-            id: "ez_bar_skullcrusher", name: "EZ-Bar Skullcrusher", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["Dumbbell Skullcrusher", "Overhead Triceps Extension"],
-            notes: ""
-          },
-          {
-            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
+            substitutions: ["Hanging Leg Raise", "Roman Chair Leg Raise"],
             notes: ""
           },
         ]
@@ -3434,52 +2616,10 @@ const PROGRAMS = [
         name: "Full Body #3",
         exercises: [
           {
-            id: "barbell_row", name: "Barbell Row", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["Pendlay Row", "Dumbbell Row"],
-            notes: ""
-          },
-          {
-            id: "glute_ham_raise", name: "Glute Ham Raise", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["45° Back Extension", "Lying Leg Curl"],
-            notes: ""
-          },
-          {
-            id: "barbell_shrug", name: "Barbell Shrug", superset: null,
-            warmupSets: "0–1", workingSets: 2, reps: "10–12",
+            id: "cable_crunch", name: "Cable Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "10",
             rest: "1–2 min",
-            substitutions: ["Dumbbell Shrug", "Trap Bar Shrug"],
-            notes: ""
-          },
-          {
-            id: "reverse_pec_deck", name: "Reverse Pec Deck", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
-            rest: "1–2 min",
-            substitutions: ["Rope Facepull", "Reverse Cable Fly"],
-            notes: ""
-          },
-          {
-            id: "triceps_pressdown", name: "Triceps Pressdown", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["Triceps Kickback (Cable)", "EZ-Bar Skullcrusher"],
-            notes: ""
-          },
-          {
-            id: "dumbbell_biceps_curl", name: "Dumbbell Biceps Curl", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["EZ-Bar Biceps Curl", "Standing Barbell Curl"],
-            notes: ""
-          },
-          {
-            id: "machine_crunch", name: "Machine Crunch", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            substitutions: ["Machine Crunch", "Plate-Weighted Decline Sit-Up"],
             notes: ""
           },
         ]
@@ -3489,52 +2629,10 @@ const PROGRAMS = [
         name: "Full Body #4",
         exercises: [
           {
-            id: "barbell_back_squat", name: "Barbell Back Squat", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "3–5",
-            rest: "3–4 min",
-            substitutions: ["Leg Press", "Dumbbell Lunge"],
-            notes: ""
-          },
-          {
-            id: "flat_dumbbell_press", name: "Flat Dumbbell Press", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["Dip", "Bench Press"],
-            notes: ""
-          },
-          {
-            id: "lat_pulldown", name: "Lat Pulldown", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "10–12",
-            rest: "2–3 min",
-            substitutions: ["Pull-Up (Optional Assistance)", "Chin-Up"],
-            notes: ""
-          },
-          {
-            id: "cable_lateral_raise", name: "Cable Lateral Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
+            id: "dragon_flag", name: "Dragon Flag", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "12",
             rest: "1–2 min",
-            substitutions: ["Machine Lateral Raise", "Dumbbell Lateral Raise"],
-            notes: ""
-          },
-          {
-            id: "cable_lat_pull_in", name: "Cable Lat Pull-In", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
-            rest: "1–2 min",
-            substitutions: ["Cable Lat Pullover", "Dumbbell Lat Pullover"],
-            notes: ""
-          },
-          {
-            id: "overhead_triceps_extension", name: "Overhead Triceps Extension", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
-            rest: "1–2 min",
-            substitutions: ["EZ-Bar Skullcrusher", "Dumbbell Skullcrusher"],
-            notes: ""
-          },
-          {
-            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
+            substitutions: ["Hanging Leg Raise", "Roman Chair Leg Raise"],
             notes: ""
           },
         ]
@@ -3544,52 +2642,10 @@ const PROGRAMS = [
         name: "Full Body #5",
         exercises: [
           {
-            id: "overhead_barbell_press", name: "Overhead Barbell Press", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "6–8",
-            rest: "3–4 min",
-            substitutions: ["Dumbbell Shoulder Press (Standing)", "Dumbbell Shoulder Press (Seated)"],
-            notes: ""
-          },
-          {
-            id: "dumbbell_row", name: "Dumbbell Row", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "10–12",
-            rest: "2–3 min",
-            substitutions: ["Chest-Supported T-Bar Row", "Barbell Row"],
-            notes: ""
-          },
-          {
-            id: "leg_extension", name: "Leg Extension", superset: null,
-            warmupSets: "1–2", workingSets: 2, reps: "15–20",
-            rest: "2–3 min",
-            substitutions: ["Goblet Squat", "Dumbbell Lunge"],
-            notes: ""
-          },
-          {
-            id: "seated_leg_curl", name: "Seated Leg Curl", superset: null,
-            warmupSets: "1–2", workingSets: 2, reps: "10–12",
-            rest: "2–3 min",
-            substitutions: ["Lying Leg Curl", "Nordic Ham Curl"],
-            notes: ""
-          },
-          {
-            id: "cable_fly", name: "Cable Fly", superset: null,
-            warmupSets: "0–1", workingSets: 2, reps: "10–12",
+            id: "cable_crunch", name: "Cable Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "10",
             rest: "1–2 min",
-            substitutions: ["Dumbbell Fly", "Pec Deck"],
-            notes: ""
-          },
-          {
-            id: "bayesian_cable_curl", name: "Bayesian Cable Curl", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
-            rest: "1–2 min",
-            substitutions: ["Incline Dumbbell Curl", "Preacher Curl"],
-            notes: ""
-          },
-          {
-            id: "machine_crunch", name: "Machine Crunch", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            substitutions: ["Machine Crunch", "Plate-Weighted Decline Sit-Up"],
             notes: ""
           },
         ]
@@ -3615,59 +2671,10 @@ const PROGRAMS = [
         name: "Upper #1 (Strength Focus)",
         exercises: [
           {
-            id: "bench_press", name: "Bench Press", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "3–5",
-            rest: "3–4 min",
-            substitutions: ["Machine Chest Press", "Flat Dumbbell Press"],
-            notes: ""
-          },
-          {
-            id: "barbell_row", name: "Barbell Row", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "6–8",
-            rest: "2–3 min",
-            substitutions: ["Pendlay Row", "Dumbbell Row"],
-            notes: ""
-          },
-          {
-            id: "dumbbell_lateral_raise", name: "Dumbbell Lateral Raise", superset: null,
-            warmupSets: "0–1", workingSets: 2, reps: "8–10",
+            id: "cable_crunch", name: "Cable Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "10",
             rest: "1–2 min",
-            substitutions: ["Cable Lateral Raise", "Machine Lateral Raise"],
-            notes: ""
-          },
-          {
-            id: "pull_up_optional_assistance", name: "Pull-Up (Optional Assistance)", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["Lat Pulldown", "Chin-Up"],
-            notes: ""
-          },
-          {
-            id: "pec_deck", name: "Pec Deck", superset: null,
-            warmupSets: "0–1", workingSets: 2, reps: "8–10",
-            rest: "1–2 min",
-            substitutions: ["Dumbbell Fly", "Push-Up"],
-            notes: ""
-          },
-          {
-            id: "preacher_curl", name: "Superset 1: Preacher Curl", superset: "A",
-            warmupSets: "0–1", workingSets: 3, reps: "8–10",
-            rest: "30 sec",
-            substitutions: ["EZ-Bar Biceps Curl", "Dumbbell Biceps Curl"],
-            notes: ""
-          },
-          {
-            id: "ez_bar_skullcrusher", name: "Superset 1: EZ-Bar Skullcrusher", superset: "A",
-            warmupSets: "0–1", workingSets: 3, reps: "8–10",
-            rest: "30 sec",
-            substitutions: ["Dumbbell Skullcrusher", "Overhead Triceps Extension"],
-            notes: ""
-          },
-          {
-            id: "machine_crunch", name: "Machine Crunch", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            substitutions: ["Machine Crunch", "Plate-Weighted Decline Sit-Up"],
             notes: ""
           },
         ]
@@ -3677,38 +2684,10 @@ const PROGRAMS = [
         name: "Lower #1 (Strength Focus)",
         exercises: [
           {
-            id: "deadlift", name: "Deadlift", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "3–5",
-            rest: "3–5 min",
-            substitutions: ["Romanian Deadlift", "Hip Thrust"],
-            notes: ""
-          },
-          {
-            id: "leg_press", name: "Leg Press", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "6–8",
-            rest: "3–4 min",
-            substitutions: ["Barbell Front Squat", "Dumbbell Lunge"],
-            notes: ""
-          },
-          {
-            id: "glute_ham_raise", name: "Glute Ham Raise", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["45° Back Extension", "Lying Leg Curl"],
-            notes: ""
-          },
-          {
-            id: "seated_calf_raise", name: "Seated Calf Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "8–10",
+            id: "dragon_flag", name: "Dragon Flag", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "12",
             rest: "1–2 min",
-            substitutions: ["Standing Calf Raise", "Leg Press Calf Press"],
-            notes: ""
-          },
-          {
-            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
+            substitutions: ["Hanging Leg Raise", "Roman Chair Leg Raise"],
             notes: ""
           },
         ]
@@ -3718,52 +2697,10 @@ const PROGRAMS = [
         name: "Push #1 (Hypertrophy Focus)",
         exercises: [
           {
-            id: "overhead_barbell_press", name: "Overhead Barbell Press", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "8–10",
-            rest: "3–4 min",
-            substitutions: ["Dumbbell Shoulder Press (Standing)", "Dumbbell Shoulder Press (Seated)"],
-            notes: ""
-          },
-          {
-            id: "flat_dumbbell_press", name: "Flat Dumbbell Press", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "10–12",
-            rest: "2–3 min",
-            substitutions: ["Dip", "Bench Press"],
-            notes: ""
-          },
-          {
-            id: "cable_lateral_raise", name: "Cable Lateral Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
+            id: "cable_crunch", name: "Cable Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "10",
             rest: "1–2 min",
-            substitutions: ["Machine Lateral Raise", "Dumbbell Lateral Raise"],
-            notes: ""
-          },
-          {
-            id: "cable_fly", name: "Cable Fly", superset: null,
-            warmupSets: "0–1", workingSets: 2, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["Dumbbell Fly", "Pec Deck"],
-            notes: ""
-          },
-          {
-            id: "triceps_kickback_cable", name: "Triceps Kickback (Cable)", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["EZ-Bar Skullcrusher", "Triceps Pressdown"],
-            notes: ""
-          },
-          {
-            id: "overhead_triceps_extension", name: "Overhead Triceps Extension", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["EZ-Bar Skullcrusher", "Dumbbell Skullcrusher"],
-            notes: ""
-          },
-          {
-            id: "machine_crunch", name: "Machine Crunch", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            substitutions: ["Machine Crunch", "Plate-Weighted Decline Sit-Up"],
             notes: ""
           },
         ]
@@ -3773,59 +2710,10 @@ const PROGRAMS = [
         name: "Pull #1 (Hypertrophy Focus)",
         exercises: [
           {
-            id: "lat_pulldown", name: "Lat Pulldown", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "10–12",
-            rest: "2–3 min",
-            substitutions: ["Pull-Up (Optional Assistance)", "Chin-Up"],
-            notes: ""
-          },
-          {
-            id: "dumbbell_row", name: "Dumbbell Row", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "10–12",
-            rest: "2–3 min",
-            substitutions: ["Chest-Supported T-Bar Row", "Barbell Row"],
-            notes: ""
-          },
-          {
-            id: "cable_lat_pull_in", name: "Cable Lat Pull-In", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
+            id: "cable_crunch", name: "Cable Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "10",
             rest: "1–2 min",
-            substitutions: ["Cable Lat Pullover", "Dumbbell Lat Pullover"],
-            notes: ""
-          },
-          {
-            id: "reverse_pec_deck", name: "Reverse Pec Deck", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["Rope Facepull", "Reverse Cable Fly"],
-            notes: ""
-          },
-          {
-            id: "barbell_shrug", name: "Barbell Shrug", superset: null,
-            warmupSets: "0–1", workingSets: 2, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["Dumbbell Shrug", "Trap Bar Shrug"],
-            notes: ""
-          },
-          {
-            id: "hammer_curl", name: "Hammer Curl", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["Dumbbell Biceps Curl", "EZ-Bar Biceps Curl"],
-            notes: ""
-          },
-          {
-            id: "bayesian_cable_curl", name: "Bayesian Cable Curl", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Incline Dumbbell Curl", "Preacher Curl"],
-            notes: ""
-          },
-          {
-            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
+            substitutions: ["Machine Crunch", "Plate-Weighted Decline Sit-Up"],
             notes: ""
           },
         ]
@@ -3835,45 +2723,10 @@ const PROGRAMS = [
         name: "Legs #1 (Hypertrophy Focus)",
         exercises: [
           {
-            id: "barbell_back_squat", name: "Barbell Back Squat", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "3–5",
-            rest: "3–4 min",
-            substitutions: ["Leg Press", "Dumbbell Lunge"],
-            notes: ""
-          },
-          {
-            id: "45_back_extension", name: "45° Back Extension", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "10–12",
-            rest: "2–3 min",
-            substitutions: ["Good Morning", "Glute Ham Raise"],
-            notes: ""
-          },
-          {
-            id: "leg_extension", name: "Leg Extension", superset: null,
-            warmupSets: "1–2", workingSets: 2, reps: "12–15",
-            rest: "2–3 min",
-            substitutions: ["Goblet Squat", "Dumbbell Lunge"],
-            notes: ""
-          },
-          {
-            id: "seated_leg_curl", name: "Seated Leg Curl", superset: null,
-            warmupSets: "1–2", workingSets: 2, reps: "12–15",
-            rest: "2–3 min",
-            substitutions: ["Lying Leg Curl", "Nordic Ham Curl"],
-            notes: ""
-          },
-          {
-            id: "standing_calf_raise", name: "Standing Calf Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
+            id: "dragon_flag", name: "Dragon Flag", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "12",
             rest: "1–2 min",
-            substitutions: ["Seated Calf Raise", "Leg Press Calf Press"],
-            notes: ""
-          },
-          {
-            id: "machine_crunch", name: "Machine Crunch", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            substitutions: ["Hanging Leg Raise", "Roman Chair Leg Raise"],
             notes: ""
           },
         ]
@@ -3899,52 +2752,10 @@ const PROGRAMS = [
         name: "Upper #1 (Strength Focus)",
         exercises: [
           {
-            id: "bench_press", name: "Bench Press", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "3–5",
-            rest: "3–4 min",
-            substitutions: ["Machine Chest Press", "Flat Dumbbell Press"],
-            notes: ""
-          },
-          {
-            id: "pull_up_optional_assistance", name: "Pull-Up (Optional Assistance)", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["Lat Pulldown", "Chin-Up"],
-            notes: ""
-          },
-          {
-            id: "dumbbell_lateral_raise", name: "Dumbbell Lateral Raise", superset: null,
-            warmupSets: "0–1", workingSets: 2, reps: "8–10",
+            id: "cable_crunch", name: "Cable Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "10",
             rest: "1–2 min",
-            substitutions: ["Cable Lateral Raise", "Machine Lateral Raise"],
-            notes: ""
-          },
-          {
-            id: "rope_facepull", name: "Rope Facepull", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "8–10",
-            rest: "1–2 min",
-            substitutions: ["Reverse Pec Deck", "Reverse Cable Fly"],
-            notes: ""
-          },
-          {
-            id: "ez_bar_skullcrusher", name: "EZ-Bar Skullcrusher", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "8–10",
-            rest: "1–2 min",
-            substitutions: ["Dumbbell Skullcrusher", "Overhead Triceps Extension"],
-            notes: ""
-          },
-          {
-            id: "preacher_curl", name: "Preacher Curl", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "8–10",
-            rest: "1–2 min",
-            substitutions: ["EZ-Bar Biceps Curl", "Dumbbell Biceps Curl"],
-            notes: ""
-          },
-          {
-            id: "machine_crunch", name: "Machine Crunch", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            substitutions: ["Machine Crunch", "Plate-Weighted Decline Sit-Up"],
             notes: ""
           },
         ]
@@ -3954,38 +2765,10 @@ const PROGRAMS = [
         name: "Lower #1 (Strength Focus)",
         exercises: [
           {
-            id: "deadlift", name: "Deadlift", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "3–5",
-            rest: "3–5 min",
-            substitutions: ["Romanian Deadlift", "Hip Thrust"],
-            notes: ""
-          },
-          {
-            id: "leg_press", name: "Leg Press", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "6–8",
-            rest: "3–4 min",
-            substitutions: ["Barbell Front Squat", "Dumbbell Lunge"],
-            notes: ""
-          },
-          {
-            id: "glute_ham_raise", name: "Glute Ham Raise", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["45° Back Extension", "Lying Leg Curl"],
-            notes: ""
-          },
-          {
-            id: "seated_calf_raise", name: "Seated Calf Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "8–10",
+            id: "dragon_flag", name: "Dragon Flag", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "12",
             rest: "1–2 min",
-            substitutions: ["Standing Calf Raise", "Leg Press Calf Press"],
-            notes: ""
-          },
-          {
-            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
+            substitutions: ["Hanging Leg Raise", "Roman Chair Leg Raise"],
             notes: ""
           },
         ]
@@ -3995,52 +2778,10 @@ const PROGRAMS = [
         name: "Upper #2 (Hypertrophy Focus)",
         exercises: [
           {
-            id: "barbell_row", name: "Barbell Row", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["Pendlay Row", "Dumbbell Row"],
-            notes: ""
-          },
-          {
-            id: "overhead_barbell_press", name: "Overhead Barbell Press", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "6–8",
-            rest: "3–4 min",
-            substitutions: ["Dumbbell Shoulder Press (Standing)", "Dumbbell Shoulder Press (Seated)"],
-            notes: ""
-          },
-          {
-            id: "cable_lat_pullover", name: "Cable Lat Pullover", superset: null,
-            warmupSets: "0–1", workingSets: 2, reps: "10–12",
+            id: "cable_crunch", name: "Cable Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "10",
             rest: "1–2 min",
-            substitutions: ["Dumbbell Lat Pullover", "Cable Lat Pull-In"],
-            notes: ""
-          },
-          {
-            id: "cable_fly", name: "Cable Fly", superset: null,
-            warmupSets: "0–1", workingSets: 2, reps: "10–12",
-            rest: "1–2 min",
-            substitutions: ["Dumbbell Fly", "Pec Deck"],
-            notes: ""
-          },
-          {
-            id: "hammer_curl", name: "Hammer Curl", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["Dumbbell Biceps Curl", "EZ-Bar Biceps Curl"],
-            notes: ""
-          },
-          {
-            id: "triceps_kickback_cable", name: "Triceps Kickback (Cable)", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["EZ-Bar Skullcrusher", "Triceps Pressdown"],
-            notes: ""
-          },
-          {
-            id: "machine_crunch", name: "Machine Crunch", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            substitutions: ["Machine Crunch", "Plate-Weighted Decline Sit-Up"],
             notes: ""
           },
         ]
@@ -4050,45 +2791,10 @@ const PROGRAMS = [
         name: "Lower #2 (Hypertrophy Focus)",
         exercises: [
           {
-            id: "barbell_back_squat", name: "Barbell Back Squat", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "3–5",
-            rest: "3–4 min",
-            substitutions: ["Leg Press", "Dumbbell Lunge"],
-            notes: ""
-          },
-          {
-            id: "45_back_extension", name: "45° Back Extension", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["Good Morning", "Glute Ham Raise"],
-            notes: ""
-          },
-          {
-            id: "leg_extension", name: "Leg Extension", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "10–12",
-            rest: "2–3 min",
-            substitutions: ["Goblet Squat", "Dumbbell Lunge"],
-            notes: ""
-          },
-          {
-            id: "seated_leg_curl", name: "Seated Leg Curl", superset: null,
-            warmupSets: "1–2", workingSets: 2, reps: "10–12",
-            rest: "2–3 min",
-            substitutions: ["Lying Leg Curl", "Nordic Ham Curl"],
-            notes: ""
-          },
-          {
-            id: "standing_calf_raise", name: "Standing Calf Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
+            id: "dragon_flag", name: "Dragon Flag", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "12",
             rest: "1–2 min",
-            substitutions: ["Seated Calf Raise", "Leg Press Calf Press"],
-            notes: ""
-          },
-          {
-            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
+            substitutions: ["Hanging Leg Raise", "Roman Chair Leg Raise"],
             notes: ""
           },
         ]
@@ -4098,52 +2804,10 @@ const PROGRAMS = [
         name: "Upper #3 (Muscle Endurance Focus)",
         exercises: [
           {
-            id: "flat_dumbbell_press", name: "Flat Dumbbell Press", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "10–12",
-            rest: "2–3 min",
-            substitutions: ["Dip", "Bench Press"],
-            notes: ""
-          },
-          {
-            id: "lat_pulldown", name: "Lat Pulldown", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "10–12",
-            rest: "2–3 min",
-            substitutions: ["Pull-Up (Optional Assistance)", "Chin-Up"],
-            notes: ""
-          },
-          {
-            id: "cable_lateral_raise", name: "Cable Lateral Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
+            id: "cable_crunch", name: "Cable Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "10",
             rest: "1–2 min",
-            substitutions: ["Machine Lateral Raise", "Dumbbell Lateral Raise"],
-            notes: ""
-          },
-          {
-            id: "dumbbell_row", name: "Dumbbell Row", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "12–15",
-            rest: "2–3 min",
-            substitutions: ["Chest-Supported T-Bar Row", "Barbell Row"],
-            notes: ""
-          },
-          {
-            id: "overhead_triceps_extension", name: "Overhead Triceps Extension", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["EZ-Bar Skullcrusher", "Dumbbell Skullcrusher"],
-            notes: ""
-          },
-          {
-            id: "bayesian_cable_curl", name: "Bayesian Cable Curl", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Incline Dumbbell Curl", "Preacher Curl"],
-            notes: ""
-          },
-          {
-            id: "machine_crunch", name: "Machine Crunch", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            substitutions: ["Machine Crunch", "Plate-Weighted Decline Sit-Up"],
             notes: ""
           },
         ]
@@ -4153,45 +2817,10 @@ const PROGRAMS = [
         name: "Lower #3 (Muscle Endurance Focus)",
         exercises: [
           {
-            id: "lunge_barbell", name: "Lunge (Barbell)", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "6–8",
-            rest: "2–3 min",
-            substitutions: ["Dumbbell Lunge", "Leg Press"],
-            notes: ""
-          },
-          {
-            id: "good_morning", name: "Good Morning", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "10–12",
-            rest: "2–3 min",
-            substitutions: ["45° Back Extension", "Glute Ham Raise"],
-            notes: ""
-          },
-          {
-            id: "goblet_squat", name: "Goblet Squat", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "12–15",
-            rest: "2–3 min",
-            substitutions: ["Leg Extension", "Front Squat"],
-            notes: ""
-          },
-          {
-            id: "cable_hip_abduction", name: "Cable Hip Abduction", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
+            id: "dragon_flag", name: "Dragon Flag", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "12",
             rest: "1–2 min",
-            substitutions: ["Machine Hip Abduction", "Weighted Hip Abduction"],
-            notes: ""
-          },
-          {
-            id: "standing_calf_raise", name: "Standing Calf Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Seated Calf Raise", "Leg Press Calf Press"],
-            notes: ""
-          },
-          {
-            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
+            substitutions: ["Hanging Leg Raise", "Roman Chair Leg Raise"],
             notes: ""
           },
         ]
@@ -4217,52 +2846,10 @@ const PROGRAMS = [
         name: "Push #1 (Strength Focus)",
         exercises: [
           {
-            id: "bench_press", name: "Bench Press", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "3–5",
-            rest: "3–4 min",
-            substitutions: ["Machine Chest Press", "Flat Dumbbell Press"],
-            notes: ""
-          },
-          {
-            id: "dumbbell_shoulder_press_seated", name: "Dumbbell Shoulder Press (Seated)", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["Overhead Barbell Press", "Barbell Upright Row"],
-            notes: ""
-          },
-          {
-            id: "pec_deck", name: "Pec Deck", superset: null,
-            warmupSets: "0–1", workingSets: 2, reps: "8–10",
+            id: "cable_crunch", name: "Cable Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "10",
             rest: "1–2 min",
-            substitutions: ["Dumbbell Fly", "Push-Up"],
-            notes: ""
-          },
-          {
-            id: "dumbbell_lateral_raise", name: "Dumbbell Lateral Raise", superset: null,
-            warmupSets: "0–1", workingSets: 2, reps: "8–10",
-            rest: "1–2 min",
-            substitutions: ["Cable Lateral Raise", "Machine Lateral Raise"],
-            notes: ""
-          },
-          {
-            id: "ez_bar_skullcrusher", name: "EZ-Bar Skullcrusher", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "8–10",
-            rest: "1–2 min",
-            substitutions: ["Dumbbell Skullcrusher", "Overhead Triceps Extension"],
-            notes: ""
-          },
-          {
-            id: "triceps_pressdown", name: "Triceps Pressdown", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "8–10",
-            rest: "1–2 min",
-            substitutions: ["Triceps Kickback (Cable)", "EZ-Bar Skullcrusher"],
-            notes: ""
-          },
-          {
-            id: "machine_crunch", name: "Machine Crunch", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            substitutions: ["Machine Crunch", "Plate-Weighted Decline Sit-Up"],
             notes: ""
           },
         ]
@@ -4272,52 +2859,10 @@ const PROGRAMS = [
         name: "Pull #1 (Strength Focus)",
         exercises: [
           {
-            id: "barbell_row", name: "Barbell Row", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["Pendlay Row", "Dumbbell Row"],
-            notes: ""
-          },
-          {
-            id: "pull_up_optional_assistance", name: "Pull-Up (Optional Assistance)", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["Lat Pulldown", "Chin-Up"],
-            notes: ""
-          },
-          {
-            id: "rope_facepull", name: "Rope Facepull", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "8–10",
+            id: "cable_crunch", name: "Cable Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "10",
             rest: "1–2 min",
-            substitutions: ["Reverse Pec Deck", "Reverse Cable Fly"],
-            notes: ""
-          },
-          {
-            id: "cable_lat_pullover", name: "Cable Lat Pullover", superset: null,
-            warmupSets: "0–1", workingSets: 2, reps: "8–10",
-            rest: "1–2 min",
-            substitutions: ["Dumbbell Lat Pullover", "Cable Lat Pull-In"],
-            notes: ""
-          },
-          {
-            id: "preacher_curl", name: "Preacher Curl", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "8–10",
-            rest: "1–2 min",
-            substitutions: ["EZ-Bar Biceps Curl", "Dumbbell Biceps Curl"],
-            notes: ""
-          },
-          {
-            id: "ez_bar_biceps_curl", name: "EZ-Bar Biceps Curl", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "8–10",
-            rest: "1–2 min",
-            substitutions: ["Standing Barbell Curl", "Dumbbell Biceps Curl"],
-            notes: ""
-          },
-          {
-            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
+            substitutions: ["Machine Crunch", "Plate-Weighted Decline Sit-Up"],
             notes: ""
           },
         ]
@@ -4327,38 +2872,10 @@ const PROGRAMS = [
         name: "Legs #1 (Strength Focus)",
         exercises: [
           {
-            id: "deadlift", name: "Deadlift", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "3–5",
-            rest: "3–5 min",
-            substitutions: ["Romanian Deadlift", "Hip Thrust"],
-            notes: ""
-          },
-          {
-            id: "leg_press", name: "Leg Press", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "6–8",
-            rest: "3–4 min",
-            substitutions: ["Barbell Front Squat", "Dumbbell Lunge"],
-            notes: ""
-          },
-          {
-            id: "glute_ham_raise", name: "Glute Ham Raise", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "8–10",
-            rest: "2–3 min",
-            substitutions: ["45° Back Extension", "Lying Leg Curl"],
-            notes: ""
-          },
-          {
-            id: "seated_calf_raise", name: "Seated Calf Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "8–10",
+            id: "dragon_flag", name: "Dragon Flag", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "12",
             rest: "1–2 min",
-            substitutions: ["Standing Calf Raise", "Leg Press Calf Press"],
-            notes: ""
-          },
-          {
-            id: "machine_crunch", name: "Machine Crunch", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            substitutions: ["Hanging Leg Raise", "Roman Chair Leg Raise"],
             notes: ""
           },
         ]
@@ -4368,52 +2885,10 @@ const PROGRAMS = [
         name: "Push #2 (Hypertrophy Focus)",
         exercises: [
           {
-            id: "overhead_barbell_press", name: "Overhead Barbell Press", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "6–8",
-            rest: "3–4 min",
-            substitutions: ["Dumbbell Shoulder Press (Standing)", "Dumbbell Shoulder Press (Seated)"],
-            notes: ""
-          },
-          {
-            id: "flat_dumbbell_press", name: "Flat Dumbbell Press", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "10–12",
-            rest: "2–3 min",
-            substitutions: ["Dip", "Bench Press"],
-            notes: ""
-          },
-          {
-            id: "cable_lateral_raise", name: "Cable Lateral Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
+            id: "cable_crunch", name: "Cable Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "10",
             rest: "1–2 min",
-            substitutions: ["Machine Lateral Raise", "Dumbbell Lateral Raise"],
-            notes: ""
-          },
-          {
-            id: "cable_fly", name: "Cable Fly", superset: null,
-            warmupSets: "0–1", workingSets: 2, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Dumbbell Fly", "Pec Deck"],
-            notes: ""
-          },
-          {
-            id: "triceps_kickback_cable", name: "Triceps Kickback (Cable)", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["EZ-Bar Skullcrusher", "Triceps Pressdown"],
-            notes: ""
-          },
-          {
-            id: "overhead_triceps_extension", name: "Overhead Triceps Extension", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["EZ-Bar Skullcrusher", "Dumbbell Skullcrusher"],
-            notes: ""
-          },
-          {
-            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
+            substitutions: ["Machine Crunch", "Plate-Weighted Decline Sit-Up"],
             notes: ""
           },
         ]
@@ -4423,59 +2898,10 @@ const PROGRAMS = [
         name: "Pull #2 (Hypertrophy Focus)",
         exercises: [
           {
-            id: "lat_pulldown", name: "Lat Pulldown", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "10–12",
-            rest: "2–3 min",
-            substitutions: ["Pull-Up (Optional Assistance)", "Chin-Up"],
-            notes: ""
-          },
-          {
-            id: "dumbbell_row", name: "Dumbbell Row", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "10–12",
-            rest: "2–3 min",
-            substitutions: ["Chest-Supported T-Bar Row", "Barbell Row"],
-            notes: ""
-          },
-          {
-            id: "cable_lat_pull_in", name: "Cable Lat Pull-In", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "10–12",
+            id: "cable_crunch", name: "Cable Crunch", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "10",
             rest: "1–2 min",
-            substitutions: ["Cable Lat Pullover", "Dumbbell Lat Pullover"],
-            notes: ""
-          },
-          {
-            id: "reverse_pec_deck", name: "Reverse Pec Deck", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Rope Facepull", "Reverse Cable Fly"],
-            notes: ""
-          },
-          {
-            id: "barbell_shrug", name: "Barbell Shrug", superset: null,
-            warmupSets: "0–1", workingSets: 2, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["Dumbbell Shrug", "Trap Bar Shrug"],
-            notes: ""
-          },
-          {
-            id: "hammer_curl", name: "Hammer Curl", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["Dumbbell Biceps Curl", "EZ-Bar Biceps Curl"],
-            notes: ""
-          },
-          {
-            id: "bayesian_cable_curl", name: "Bayesian Cable Curl", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "12–15",
-            rest: "1–2 min",
-            substitutions: ["Incline Dumbbell Curl", "Preacher Curl"],
-            notes: ""
-          },
-          {
-            id: "machine_crunch", name: "Machine Crunch", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Cable Crunch", "Plate-Weighted Decline Sit-Up"],
+            substitutions: ["Machine Crunch", "Plate-Weighted Decline Sit-Up"],
             notes: ""
           },
         ]
@@ -4485,45 +2911,10 @@ const PROGRAMS = [
         name: "Legs #2 (Hypertrophy Focus)",
         exercises: [
           {
-            id: "barbell_back_squat", name: "Barbell Back Squat", superset: null,
-            warmupSets: "2–3", workingSets: 3, reps: "3–5",
-            rest: "3–4 min",
-            substitutions: ["Leg Press", "Dumbbell Lunge"],
-            notes: ""
-          },
-          {
-            id: "45_back_extension", name: "45° Back Extension", superset: null,
-            warmupSets: "1–2", workingSets: 3, reps: "10–12",
-            rest: "2–3 min",
-            substitutions: ["Good Morning", "Glute Ham Raise"],
-            notes: ""
-          },
-          {
-            id: "leg_extension", name: "Leg Extension", superset: null,
-            warmupSets: "1–2", workingSets: 2, reps: "12–15",
-            rest: "2–3 min",
-            substitutions: ["Goblet Squat", "Dumbbell Lunge"],
-            notes: ""
-          },
-          {
-            id: "seated_leg_curl", name: "Seated Leg Curl", superset: null,
-            warmupSets: "1–2", workingSets: 2, reps: "12–15",
-            rest: "2–3 min",
-            substitutions: ["Lying Leg Curl", "Nordic Ham Curl"],
-            notes: ""
-          },
-          {
-            id: "standing_calf_raise", name: "Standing Calf Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
+            id: "dragon_flag", name: "Dragon Flag", superset: null,
+            warmupSets: "0–1", workingSets: 3, reps: "12",
             rest: "1–2 min",
-            substitutions: ["Seated Calf Raise", "Leg Press Calf Press"],
-            notes: ""
-          },
-          {
-            id: "hanging_leg_raise", name: "Hanging Leg Raise", superset: null,
-            warmupSets: "0–1", workingSets: 3, reps: "15–20",
-            rest: "1–2 min",
-            substitutions: ["Roman Chair Leg Raise", "Bent-Knee Leg Raise"],
+            substitutions: ["Hanging Leg Raise", "Roman Chair Leg Raise"],
             notes: ""
           },
         ]
@@ -4628,6 +3019,9 @@ const EX_ALIASES = {
   'overhead tricep extension': 'overhead triceps extension',
   'cable crunch': 'cable crunch',
   'cable machine crunch': 'cable crunch',
+  'cable crunches': 'cable crunch',
+  'dragon flag': 'dragon flag',
+  'dragon flags': 'dragon flag',
   'decline situp': 'plate-weighted decline sit-up',
   'decline sit up': 'plate-weighted decline sit-up',
   'hanging leg': 'hanging leg raise',
@@ -5110,6 +3504,7 @@ const FORM_CUES = {
   'ez-bar skullcrusher':{setup:'Flat bench. Grip shoulder-width on inner curves. Arms vertical. Elbows in.',execution:'Lower bar toward forehead by bending elbows only. Press back to lockout.',mistakes:'Elbows flaring out. Shoulder movement. Letting elbows drift forward.',tip:'Keep upper arms perfectly vertical — any drift turns it into a press.'},
   'rope facepull':{setup:'Cable at face height. Overhand grip, thumbs behind. Step back for tension.',execution:'Pull rope to ears, externally rotating so thumbs point behind you. Slow return.',mistakes:'Pulling too low (becomes a row). No external rotation. Going too heavy.',tip:'This is a rear delt + rotator cuff exercise — go light and feel every rep.'},
   'cable crunch':{setup:'Kneel at cable. Rope behind head at ears. Don\'t pull with arms.',execution:'Crunch by rounding your spine — elbows toward thighs. Hold contraction 1 sec.',mistakes:'Pulling with arms. Hip flexor dominant. Not getting full spinal flexion.',tip:'Think "pull your ribcage toward your pelvis" not "bring head to floor".'},
+  'dragon flag':{setup:'Lie flat on bench or mat, reach behind head to anchor hands firmly.',execution:'Brace core, lift entire body in a straight line up on shoulders, then lower with control maintaining rigid body.',mistakes:'Bending at hips, dropping quickly without control, arching lower back.',tip:'Keep abs and glutes squeezed hard as one single plank throughout the rep.'},
   'pec deck':{setup:'Elbows at shoulder height or slightly below. Slight bend in elbows throughout.',execution:'Bring pads together in a hugging motion. Control the stretch — don\'t let weight slam.',mistakes:'Going too heavy (no ROM). Elbows going behind the body. Lifting off seat.',tip:'Squeeze at the peak and take 3 seconds on the way back out.'},
   'bayesian cable curl':{setup:'Single cable behind body at hip height. Step forward for stretch. Shoulder back.',execution:'Curl with elbow slightly behind hip. Full stretch at bottom, full contraction at top.',mistakes:'Elbow moving forward. Not getting the stretch. Going too heavy.',tip:'Best curl variation for the long head of biceps — worth the setup.'},
   'dumbbell shoulder press':{setup:'Seated. Dumbbells at ear level, elbows slightly forward. Core braced.',execution:'Press straight up, slight inward arc at top. Don\'t fully lock out. Control down.',mistakes:'Flaring elbows too wide. Arching excessively. Leaning too far back.',tip:'Stop just short of lockout to keep constant tension.'},
@@ -5168,6 +3563,7 @@ const TRAVEL_MAP = {
   'standing calf raise':{name:'Single-Leg Calf Raise (step)',sets:3,reps:'20–25',note:'Stand on a stair or threshold on one foot. Deep stretch at bottom, full extension at top.'},
   'seated calf raise':{name:'Seated Calf Press (bodyweight)',sets:4,reps:'25–30',note:'Sit on edge of chair. Press toes down. Place a heavy suitcase/backpack on knees.'},
   'cable crunch':{name:'Crunch (slow, 3-sec pause)',sets:3,reps:'20–25',note:'Perform slow crunches. Pause and squeeze abs for 3 seconds at the top of each rep.'},
+  'dragon flag':{name:'Reverse Crunch (slow eccentric)',sets:3,reps:'12–15',note:'Lie on back, curl hips and knees toward chest. Lower under 3-second control without touching floor.'},
   'machine crunch':{name:'Crunch (slow, 3-sec pause)',sets:3,reps:'15–20',note:'Perform slow crunches. Pause and squeeze abs for 3 seconds at the top of each rep.'},
   'hanging leg raise':{name:'Lying Leg Raise',sets:3,reps:'15–20',note:'Lie on back, hands under hips. Raise legs to 90 degrees, lower slowly under control.'},
   'roman chair leg raise':{name:'Lying Leg Raise',sets:3,reps:'15–20',note:'Lie on back, hands under hips. Lower legs slowly with control without touching floor.'},
@@ -5288,6 +3684,46 @@ function plateCalc(totalW, barW = null) {
   return plates;
 }
 
+// ── IndexedDB Vault (Dual-Layer Persistence) ──────────────────────────────────
+const IDB_NAME = 'DCRGymDB';
+const IDB_STORE = 'vault';
+function getIDB() {
+  return new Promise((resolve) => {
+    if (!window.indexedDB) return resolve(null);
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) {
+        db.createObjectStore(IDB_STORE);
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => resolve(null);
+  });
+}
+async function idbGet(key) {
+  try {
+    const db = await getIDB();
+    if (!db) return null;
+    return new Promise((resolve) => {
+      const tx = db.transaction(IDB_STORE, 'readonly');
+      const store = tx.objectStore(IDB_STORE);
+      const req = store.get(key);
+      req.onsuccess = () => resolve(req.result != null ? req.result : null);
+      req.onerror = () => resolve(null);
+    });
+  } catch(e) { return null; }
+}
+async function idbSet(key, val) {
+  try {
+    const db = await getIDB();
+    if (!db) return;
+    const tx = db.transaction(IDB_STORE, 'readwrite');
+    const store = tx.objectStore(IDB_STORE);
+    store.put(val, key);
+  } catch(e) {}
+}
+
 // ── localStorage ─────────────────────────────────────────────────────────────
 // Safe Storage Sandbox Proxy — survives WebKit/Safari sandbox DOMException traps
 // Falls back to an in-memory store so the app keeps running even if storage is locked.
@@ -5366,43 +3802,17 @@ let ST = {
   notifEnabled: false,
   swReg: null,
   defaultProgram: null,
-  fitbit: {
-    readinessScore: null,
-    readinessFactor: null,
-    sleepScore: null,
-    restingHR: null,
-    hrv: null,
-    deepSleepMinutes: null,
-    remSleepMinutes: null,
-    lightSleepMinutes: null,
-    averageWorkoutHR: null,
-    spo2: null,
-    trailingReadiness: [],
-    trailingSleep:     [],
-    trailingHRV:       [],
-    trailingRHR:       [],
-    trailingDates:     [],
-    sleepEfficiency: null,
-    asOf: null,
-    dataState: 'disconnected',
-    lastError: null,
-    connected: false,
-    lastSync: null,
-    _range: 7,
-    _fetching: false,
-    _failUntil: 0,
-  },
 };
 
 // ── History helpers ───────────────────────────────────────────────────────────
 function getHistory() { return LS.get('dcrgym_history', []); }
-function saveHistory(h) { LS.set('dcrgym_history', h); }
+function saveHistory(h) { LS.set('dcrgym_history', h); idbSet('dcrgym_history', h); }
 function getNotes() { return LS.get('dcrgym_notes', {}); }
-function saveNotes(n) { LS.set('dcrgym_notes', n); }
+function saveNotes(n) { LS.set('dcrgym_notes', n); idbSet('dcrgym_notes', n); }
 function getRestTimes() { return LS.get('dcrgym_rest', {}); }
-function saveRestTimes(r) { LS.set('dcrgym_rest', r); }
+function saveRestTimes(r) { LS.set('dcrgym_rest', r); idbSet('dcrgym_rest', r); }
 function getSettings() { return LS.get('dcrgym_settings', {sound:true,sheets:'https://script.google.com/macros/s/AKfycbxcAKZDYOzbSJ1a5OjqYRo9OyL9OIhEhoos8a4aQE5MB68atj7XAWQeyTuulmB6UFUt/exec',weightUnit:'lb'}); }
-function saveSettings(s) { LS.set('dcrgym_settings', s); }
+function saveSettings(s) { LS.set('dcrgym_settings', s); idbSet('dcrgym_settings', s); }
 
 const INITIAL_MEASUREMENTS = [
   {
@@ -5441,13 +3851,13 @@ function getMeasurements() {
   }
   return m;
 }
-function saveMeasurements(m) { LS.set('dcrgym_measurements', m); }
+function saveMeasurements(m) { LS.set('dcrgym_measurements', m); idbSet('dcrgym_measurements', m); }
 
 // ── Bulletproof persistence core ─────────────────────────────────────────────
 // Schema-versioned, non-destructive, with rolling last-good backup.
 // History must survive every app update. Period.
 const SCHEMA_VERSION = 3;
-const APP_BUILD = '2026.09.01 · ota-21 · active-focus-pr-celebrations-and-subs-upgrade';
+const APP_BUILD = '2026.09.30 · ota-22 · zero-data-loss-vault-ab-overhaul';
 
 function convertHistoryWeightsToLbs(hist) {
   if (!Array.isArray(hist)) return 0;
@@ -6536,10 +4946,10 @@ function haptic(type) {
 }
 
 // ── Navigation ────────────────────────────────────────────────────────────────
-const SCREENS = ['home','prog','session','workout','history','settings','workouts-browser','strain'];
+const SCREENS = ['home','prog','session','workout','history','settings','workouts-browser'];
 
 // ── Navigation tab order for slide direction resolution ─────────────────────
-const SCREEN_ORDER = ['home', 'workouts-browser', 'strain', 'history'];
+const SCREEN_ORDER = ['home', 'workouts-browser', 'history'];
 
 function Maps(to, data={}) {
   const from = ST.screen;
@@ -6551,7 +4961,6 @@ function Maps(to, data={}) {
   else if (to === 'prog')             renderProg(data);
   else if (to === 'session')          renderSession(data);
   else if (to === 'workout')          renderWorkout();
-  else if (to === 'strain')           renderStrain();
   else if (to === 'history')          renderHistory();
   else if (to === 'settings')         renderSettings();
   else if (to === 'workouts-browser') renderWorkoutsBrowser();
@@ -9320,102 +7729,6 @@ function _cleanExitWorkout(toHistory) {
   Maps(toHistory ? 'history' : 'home');
 }
 
-// ── Post-workout insight engine ───────────────────────────────────────────────
-function generateInsightCard(entry, duration) {
-  const fb      = ST.fitbit;
-  const sleep   = fb.sleepScore;
-  const hrv     = fb.hrv;
-  const rhr     = fb.restingHR;
-  const readiness = fb.readinessScore;
-
-  // ── Card 1: Readiness Synthesis ───────────────────────────────────────────
-  let synthesisTag  = 'readiness synthesis';
-  let synthesisBody = '';
-
-  if (readiness >= 85) {
-    synthesisBody = `Programmed training parameters sustained completely against a commanding <strong>${readiness}%</strong> systemic readiness pool. Central nervous system recovery efficiency remains exceptional. Conditions favor progressive overload on your next neuro-load block.`;
-  } else if (readiness >= 75) {
-    synthesisBody = `Volume profile executed within a steady <strong>${readiness}%</strong> readiness baseline. Autonomic reserve is intact — standard 48-hour structural recovery window applies before your next primary compound session.`;
-  } else {
-    synthesisBody = `Training load held consistent against a tightened <strong>${readiness}%</strong> readiness floor. Prioritize immediately accessible parasympathetic protocols — thermal down-regulation, mineral timing, and extended sleep architecture tonight — to fast-track baseline restoration.`;
-    synthesisTag = 'autonomic strategy';
-  }
-
-  // ── Card 2: Tactical Recovery (existing sleep/HRV/RHR logic) ─────────────
-  let tacticalTag  = 'tactical optimization';
-  let tacticalBody = '';
-
-  if (sleep !== null && sleep < 70) {
-    tacticalBody = `Performance thresholds held constant relative to a restricted <strong>${sleep}%</strong> sleep efficiency window. Prioritize immediate parasympathetic down-regulation protocols — contrasted hydrotherapy or targeted 4-7-8 breathing windows — to protect baseline autonomic tone before the next session.`;
-    tacticalTag  = 'recovery alert';
-  } else if (hrv !== null && hrv < 45) {
-    tacticalBody = `HRV reading of <strong>${hrv}ms</strong> indicates elevated autonomic stress post-session. Extend your passive recovery window by 24–36 hours before your next neuro-load block. Prioritize hydration and whole-food carbohydrate replenishment.`;
-    tacticalTag  = 'hrv advisory';
-  } else if (rhr !== null && rhr > 68) {
-    tacticalBody = `Resting heart rate at <strong>${rhr}bpm</strong> — slightly elevated baseline suggests residual systemic fatigue. Monitor sleep architecture tonight; if pattern persists across two sessions, consider a deload micro-cycle.`;
-    tacticalTag  = 'cardiovascular note';
-  } else if (sleep !== null && sleep >= 85 && hrv !== null && hrv >= 55) {
-    tacticalBody = `Optimal recovery architecture confirmed — <strong>${sleep}%</strong> sleep efficiency, <strong>${hrv}ms</strong> HRV. Autonomic tone is high. Physiological conditions favor a progressive overload push in your next session.`;
-    tacticalTag  = 'readiness window';
-  } else {
-    tacticalBody = `Session logged. Sleep efficiency <strong>${sleep !== null ? sleep + '%' : '—'}</strong>, HRV <strong>${hrv !== null ? hrv + 'ms' : '—'}</strong>. Standard recovery protocols apply — prioritize 7–9 hours sleep and adequate protein synthesis window post-session.`;
-    tacticalTag  = 'session complete';
-  }
-
-  const card = {
-    id: entry.id,
-    sessionId: entry.sessionId,
-    sessionName: entry.sessionName,
-    duration,
-    ts: Date.now(),
-    synthesisTag,
-    synthesisBody,
-    tacticalTag,
-    tacticalBody,
-  };
-
-  LS.set('dcrgym_last_insight', card);
-}
-
-function getLastInsightCard() {
-  return LS.get('dcrgym_last_insight', null);
-}
-
-function renderInsightCardHTML(card) {
-  if (!card) return '';
-  const timeAgo = (() => {
-    const diff = Date.now() - (card.ts || 0);
-    const h = Math.floor(diff / 3600000);
-    const d = Math.floor(diff / 86400000);
-    if (d > 0) return `${d}d ago`;
-    if (h > 0) return `${h}h ago`;
-    return 'just now';
-  })();
-  const meta = `${card.sessionName ? card.sessionName.toLowerCase() + ' · ' : ''}${formatDuration(card.duration)} · ${timeAgo}`;
-
-  // Card 1 — Readiness Synthesis (new format) or legacy fallback
-  const card1 = card.synthesisBody ? `
-  <div class="insight-card" style="margin-bottom:8px">
-    <div class="insight-card-eyebrow">${card.synthesisTag || 'readiness synthesis'}</div>
-    <div class="insight-card-body">${card.synthesisBody}</div>
-    <div class="insight-card-meta">${meta}</div>
-  </div>` : `
-  <div class="insight-card" style="margin-bottom:8px">
-    <div class="insight-card-eyebrow">${card.tag || 'session complete'}</div>
-    <div class="insight-card-body">${card.directive || ''}</div>
-    <div class="insight-card-meta">${meta}</div>
-  </div>`;
-
-  // Card 2 — Tactical Recovery
-  const card2 = card.tacticalBody ? `
-  <div class="insight-card">
-    <div class="insight-card-eyebrow">${card.tacticalTag || 'tactical optimization'}</div>
-    <div class="insight-card-body">${card.tacticalBody}</div>
-  </div>` : '';
-
-  return card1 + card2;
-}
-
 function finishWorkout() {
   // Guard: warn if exercises incomplete — themed sheet, not a system dialog
   const prog = PROGRAMS.find(p => p.id === ST.currentProgram);
@@ -9527,16 +7840,7 @@ function commitWorkout() {
       additions: ST.workoutAdditions || [],
       completedCards: [...ST.completedCards],
     };
-    if (ST.fitbit && ST.fitbit.connected) {
-      entry.biometrics = {
-        readiness: ST.fitbit.readinessScore ?? null,
-        sleep: ST.fitbit.sleepScore ?? null,
-        hrv: ST.fitbit.hrv ?? null,
-        rhr: ST.fitbit.restingHR ?? null,
-        deep: ST.fitbit.deepSleepMinutes ?? null,
-        spo2: ST.fitbit.spo2 ?? null
-      };
-    }
+
     hist.push(entry);
   }
 
@@ -9562,7 +7866,6 @@ function commitWorkout() {
   ST.workoutAdditions = [];
   
   bgSyncToSheets(entry);
-  syncWorkoutCardioLoad(entry);
 
   if (wasEditing || wasBackdated) {
     Maps('history');
@@ -9579,7 +7882,6 @@ function commitWorkout() {
     e1rmDelta = Math.round(((curE1RM - prevE1RM) / prevE1RM) * 100);
   }
 
-  generateInsightCard(entry, duration);
 
   ST.lastSummary = { duration, prevDur, biggestGain, e1rmDelta, curE1RM, programId: ST.currentProgram, sessionId: ST.currentSession };
 
@@ -9720,11 +8022,6 @@ function showFinish() {
       <div class="finish-stat"><div class="finish-stat-val">${volStr} ${unit}</div><div class="finish-stat-lbl">Tonnage</div></div>
       <div class="finish-stat"><div class="finish-stat-val">${totalSetsDone}</div><div class="finish-stat-lbl">Sets Logged</div></div>
     </div>
-    <div id="finish-fitbit-badge" style="margin:0 auto 16px;padding:12px 16px;border-radius:16px;background:rgba(42,36,33,0.04);border:1px solid var(--border);max-width:340px;text-align:left;">
-      <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div style="font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--accent);font-weight:700;">⚡ Fitbit Cardio Load</div>
-        <button onclick="syncSinglePastWorkout('${lastEntry ? (lastEntry.id || lastEntry.endTime) : ''}')" style="background:none;border:none;color:var(--text-tertiary);font-size:11px;font-weight:600;cursor:pointer;">⟳ Sync</button>
-      </div>
       <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;">
         ${(lastEntry && lastEntry.cardioLoad) ? `<strong style="color:var(--text-primary);">${lastEntry.cardioLoad}</strong> Cardio Load score synced from Fitbit` : 'Fetching Cardio Load from Fitbit...'}
       </div>
@@ -10285,7 +8582,6 @@ function renderWorkoutsCalendarView() {
         <div class="whfc-ribbon">
           <span>⏱ ${durStr}</span>
           <span>🏋️ ${volStr} ${unit}</span>
-          ${w.cardioLoad ? `<button class="btn-sheet-ghost" style="font-size:10px;padding:2px 8px;border-radius:8px;color:#C9921A;border-color:rgba(201,146,26,0.25);" onclick="event.stopPropagation();promptEditCardioLoad('${w.id || w.endTime}', ${w.cardioLoad})">⚡ ${w.cardioLoad} Cardio ✎</button>` : `<button class="btn-sheet-ghost" style="font-size:9.5px;padding:2px 7px;border-radius:8px;" onclick="event.stopPropagation();syncSinglePastWorkout('${w.id || w.endTime}')">⟳ Sync Cardio</button>`}
           ${w.travelMode ? '<span style="color:var(--accent-kinetic)">✈ Travel</span>' : ''}
         </div>
         ${exNames.length > 0 ? `
@@ -10494,7 +8790,7 @@ function deleteCompletedWorkout(workoutId) {
 
   confirmSheet({
     title: 'Delete this workout?',
-    body: `Are you sure you want to permanently delete <strong>${name}</strong> (${dateStr})? This cannot be undone and will remove it from all logs and cardio load history.`,
+    body: `Are you sure you want to permanently delete <strong>${name}</strong> (${dateStr})? This cannot be undone and will remove it from all logs.`,
     confirmLabel: 'Delete Workout',
     cancelLabel: 'Keep Workout',
     destructive: true,
@@ -10514,34 +8810,11 @@ function deleteCompletedWorkout(workoutId) {
       }
 
       if (ST.screen === 'history') renderHistory();
-      else if (ST.screen === 'strain') renderStrain();
       else if (ST.screen === 'home') renderHome();
     }
   });
 }
 
-async function syncSinglePastWorkout(workoutId) {
-  const hist = getHistory();
-  const w = hist.find(x => String(x.id) === String(workoutId) || String(x.endTime) === String(workoutId));
-  if (!w) return;
-  const ok = await syncWorkoutCardioLoad(w);
-  if (ST.screen === 'history') renderHistory();
-  else if (ST.screen === 'strain') renderStrain();
-
-  if (!ok || w.cardioSource === 'calibrated-estimate') {
-    confirmSheet({
-      title: 'Fitbit Cardio Load',
-      body: `Live sync could not reach your Fitbit activity log for this session (Google Apps Script requires 'Who has access: Anyone' in Deploy settings). Would you like to enter your exact Cardio Load from the Fitbit app?`,
-      confirmLabel: 'Enter Score',
-      cancelLabel: 'Close',
-      onConfirm: () => {
-        promptEditCardioLoad(workoutId, w.cardioLoad);
-      }
-    });
-  } else {
-    noticeSheet('Cardio Load Synced', `Updated Cardio Load to ${w.cardioLoad} from Fitbit.`);
-  }
-}
 
 function clickOpenCalDay(timestamp, dateStr) {
   const existing = LS.get('dcrgym_current_workout');
@@ -10567,7 +8840,7 @@ function clickOpenCalDay(timestamp, dateStr) {
             <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(42,36,33,0.03);border:1px solid var(--border);border-radius:12px;padding:10px 12px;">
               <div>
                 <div style="font-size:13.5px;font-weight:600;color:var(--text-primary);">${w.sessionName || 'Workout'}</div>
-                <div style="font-size:11px;color:var(--muted);">${formatDuration(w.duration || 0)} · ${w.cardioLoad ? w.cardioLoad + ' Cardio' : 'Logged'}</div>
+                <div style="font-size:11px;color:var(--muted);">${formatDuration(w.duration || 0)} · Logged</div>
               </div>
               <div style="display:flex;gap:6px;">
                 <button class="btn-sheet-ghost" style="font-size:11px;padding:4px 9px;border-radius:10px;" onclick="closeSheet(); editCompletedWorkout('${w.id || w.endTime}')">Edit</button>
@@ -10900,484 +9173,6 @@ function showMuscleDetail(muscle) {
     <div style="background:rgba(240,78,35,0.06);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:12px 14px;font-size:13px;color:var(--text-secondary);margin-top:8px">${insight}</div>
     <div style="margin-top:16px;font-size:13px;color:var(--text-secondary)">Current 1RM estimate: <b>${p.latest > 0 ? p.latest + ' ' + unit : 'No data'}</b></div>
   `);
-}
-
-// ── Fitbit Biometrics & Cardio Load Sync Pipeline ───────────────────────────
-async function fetchFitbitData(force, interactive) {
-  force = !!force; interactive = !!interactive;
-  const fb = ST.fitbit;
-  if (fb._fetching) return;
-  if (!force && fb._failUntil && Date.now() < fb._failUntil) return;
-  if (!force && fb.fetchedAt === ghLocalDate() && fb.dataState === 'synced') return;
-
-  const s = getSettings();
-  if (!s.sheets) {
-    fb.connected = false; fb.dataState = 'disconnected'; fb.lastError = 'no-backend-url';
-    if (ST.screen === 'strain') renderStrain();
-    return;
-  }
-
-  fb._fetching = true;
-  try {
-    const res = await fetch(s.sheets + '?action=getFitbit' + (force ? '&force=1' : ''), { method: 'GET' });
-    const resp = await res.json();
-
-    if (!resp || resp.connected === false) {
-      fb.connected = false;
-      fb.dataState = 'disconnected';
-      fb.lastError = (resp && resp.reason) || 'unauthorized';
-      fb.authUrl = (resp && resp.authUrl) || null;
-      fb._failUntil = interactive ? 0 : Date.now() + 10 * 60 * 1000;
-      LS.set('dcrgym_fitbit', fb);
-      return;
-    }
-
-    const p = resp.fitbit || {};
-    const hasData = (p.readinessScore != null) || (p.sleepScore != null) || (p.restingHR != null) || (p.hrv != null)
-                 || (Array.isArray(p.trailingReadiness) && p.trailingReadiness.some(v => v != null));
-    Object.assign(fb, p);
-    fb.connected = true;
-    fb.authUrl = null;
-    fb.lastSync = Date.now();
-    fb._failUntil = 0;
-    fb.lastError = hasData ? null : 'no-data';
-    fb.dataState = hasData ? (resp.stale ? 'stale' : 'synced') : 'connected-no-data';
-    if (!fb.asOf) fb.asOf = p.fetchedAt || ghLocalDate();
-    LS.set('dcrgym_fitbit', fb);
-
-    if (ST.screen === 'strain') renderStrain();
-    if (ST.screen === 'home') renderHome();
-  } catch (e) {
-    fb.lastError = 'network';
-    fb._failUntil = Date.now() + 5 * 60 * 1000;
-    console.warn('[DCR Gym] Fitbit fetch notice:', e && e.message);
-  } finally {
-    fb._fetching = false;
-  }
-}
-
-function calculateWorkoutCardioLoad(w) {
-  if (!w) return 45;
-  let totalSets = 0;
-  let totalVol = 0;
-  let compoundSets = 0;
-
-  if (w.sets) {
-    for (const [key, sArr] of Object.entries(w.sets)) {
-      if (key.endsWith('_wu') || !Array.isArray(sArr)) continue;
-      const isCompound = /press|squat|deadlift|row|lunge|pullup|chinup/i.test(key);
-      for (const s of sArr) {
-        if (s && s.r > 0) {
-          totalSets++;
-          if (isCompound) compoundSets++;
-          if (s.w > 0) totalVol += (s.w * s.r);
-        }
-      }
-    }
-  }
-
-  // Duration: actual duration if recorded (> 5 min), else estimate based on working sets
-  const durMin = (w.duration && w.duration > 300) ? Math.round(w.duration / 60) : Math.max(25, totalSets * 2.5);
-
-  // Volume factor based on actual tonnage moved
-  const volFactor = Math.min(18, Math.round(totalVol / 1500));
-  // Compound sets produce higher cardiovascular demand than isolated movements
-  const setScore = (compoundSets * 2.2) + ((totalSets - compoundSets) * 1.3);
-  // Intensity density: work performed relative to session duration
-  const density = (totalSets / Math.max(15, durMin)) * 14;
-
-  const bio = w.biometrics || {};
-  const rhr = bio.restingHR || (ST.fitbit && ST.fitbit.restingHR);
-  const rhrMod = rhr ? Math.round((rhr - 60) * 0.25) : 0;
-
-  const rawLoad = Math.round(setScore + density + volFactor + rhrMod);
-  return Math.min(100, Math.max(18, rawLoad));
-}
-
-async function syncWorkoutCardioLoad(workoutEntry) {
-  if (!workoutEntry) return false;
-  const s = getSettings();
-  if (!s.sheets) return false;
-
-  const dateStr = ghLocalDate(workoutEntry.endTime || workoutEntry.startTime);
-  const startMs = workoutEntry.startTime || (workoutEntry.endTime - (workoutEntry.duration || 3600) * 1000);
-  const endMs = workoutEntry.endTime || Date.now();
-
-  try {
-    const url = `${s.sheets}?action=getFitbit&date=${dateStr}&start=${startMs}&end=${endMs}&force=1`;
-    const res = await fetch(url, { method: 'GET' });
-    const text = await res.text();
-    let data = null;
-    try {
-      data = JSON.parse(text);
-    } catch(err) {
-      console.warn('[DCR Gym] Google Apps Script returned non-JSON response.');
-      return false;
-    }
-
-    if (data && data.ok) {
-      if (data.fitbit) Object.assign(ST.fitbit, data.fitbit);
-
-      let cardioLoad = null;
-      let avgHR = null;
-      let zones = null;
-      let source = 'fitbit-synced';
-
-      if (data.workoutCardio && data.workoutCardio.cardioLoad) {
-        cardioLoad = data.workoutCardio.cardioLoad;
-        avgHR = data.workoutCardio.avgHR || null;
-        zones = data.workoutCardio.zones || null;
-      } else {
-        cardioLoad = calculateWorkoutCardioLoad(workoutEntry);
-        source = 'calibrated-estimate';
-      }
-
-      const hist = getHistory();
-      const match = hist.find(w => String(w.id || w.endTime) === String(workoutEntry.id || workoutEntry.endTime));
-      if (match) {
-        match.cardioLoad = cardioLoad;
-        match.cardioSource = source;
-        if (avgHR) match.avgHR = avgHR;
-        if (zones) match.cardioZones = zones;
-        if (ST.fitbit) {
-          match.biometrics = {
-            readiness: ST.fitbit.readinessScore ?? null,
-            restingHR: ST.fitbit.restingHR ?? null,
-            hrv: ST.fitbit.hrv ?? null,
-            sleep: ST.fitbit.sleepScore ?? null,
-          };
-        }
-        saveHistory(hist);
-      }
-
-      const badge = document.getElementById('finish-fitbit-badge');
-      if (badge) {
-        badge.innerHTML = `
-          <div style="display:flex;align-items:center;justify-content:space-between;">
-            <div style="font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:#28A745;font-weight:700;">✓ Fitbit Cardio Load</div>
-            <div style="font-family:var(--font-hero);font-style:italic;font-size:1.6rem;font-weight:700;color:var(--text-primary);">${cardioLoad}</div>
-          </div>
-          <div style="font-size:11.5px;color:var(--text-secondary);margin-top:2px;">Matched to your workout duration & cardiovascular load.</div>
-        `;
-      }
-      return true;
-    }
-    return false;
-  } catch(err) {
-    console.warn('[DCR Gym] Cardio load sync notice:', err && err.message);
-    return false;
-  }
-}
-
-function promptEditCardioLoad(workoutId, currentVal) {
-  const hist = getHistory();
-  const w = hist.find(x => String(x.id) === String(workoutId) || String(x.endTime) === String(workoutId));
-  if (!w) return;
-  const sessName = w.sessionName || 'Workout';
-  const val = currentVal || w.cardioLoad || '';
-
-  openSheet(`
-    <div class="bs-title">Set Fitbit Cardio Load</div>
-    <div style="font-size:12.5px;color:var(--text-secondary);margin-bottom:14px;line-height:1.4;">
-      Enter the exact <strong>Cardio Load</strong> recorded in your Fitbit app for this <strong>${sessName}</strong> session.
-    </div>
-    <div style="margin-bottom:16px;">
-      <input type="number" id="edit-cardio-load-input" pattern="[0-9]*" inputmode="numeric" 
-        style="width:100%;font-family:var(--font-mono);font-size:26px;font-weight:700;text-align:center;border:1px solid var(--border);border-radius:14px;padding:12px;background:rgba(255,255,255,0.7);color:var(--text-primary);box-sizing:border-box;"
-        value="${val}" placeholder="e.g. 54" autofocus>
-      <div style="font-size:11px;color:var(--text-tertiary);margin-top:6px;text-align:center;">Found in Fitbit app → Today → Activity / Exercise summary</div>
-    </div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn btn-primary" style="flex:1;padding:12px;font-size:14px;border-radius:12px;" onclick="saveCardioLoadValue('${workoutId}')">Save Cardio Load</button>
-      <button class="btn btn-sheet-ghost" style="padding:12px 16px;border-radius:12px;font-size:13px;" onclick="closeSheet()">Cancel</button>
-    </div>
-  `);
-}
-
-function saveCardioLoadValue(workoutId) {
-  const input = document.getElementById('edit-cardio-load-input');
-  if (!input) return;
-  const val = parseInt(input.value);
-  if (isNaN(val) || val < 0) return;
-
-  const hist = getHistory();
-  const match = hist.find(w => String(w.id) === String(workoutId) || String(w.endTime) === String(workoutId));
-  if (match) {
-    match.cardioLoad = val;
-    match.cardioSource = 'user-logged';
-    saveHistory(hist);
-  }
-  closeSheet();
-  if (ST.screen === 'strain') renderStrain();
-  else if (ST.screen === 'history') renderHistory();
-}
-
-function setStrainProgram(progId) {
-  ST.strainProgId = progId;
-  ST.strainSessId = null;
-  renderStrain();
-}
-
-function setStrainSession(sessId) {
-  ST.strainSessId = sessId;
-  renderStrain();
-}
-
-// ── Main Strain & Cardio Progression Screen ──────────────────────────────────
-function renderStrain() {
-  const el = document.getElementById('screen-strain');
-  if (!el) return;
-  const fb = ST.fitbit || {};
-  const hist = getHistory();
-  const unit = getWeightUnit();
-
-  const activeProgId = ST.strainProgId || ST.defaultProgram || ST.currentProgram || (PROGRAMS[0] && PROGRAMS[0].id);
-  const prog = PROGRAMS.find(p => p.id === activeProgId) || PROGRAMS[0];
-  const activeSessId = ST.strainSessId || (prog.sessions[0] && prog.sessions[0].id);
-  const sess = prog.sessions.find(s => s.id === activeSessId) || prog.sessions[0];
-
-  // Filter history: same workout within same program strictly week-by-week
-  const sessionInstances = hist
-    .filter(w => w.programId === activeProgId && w.sessionId === activeSessId)
-    .sort((a, b) => (a.endTime || a.startTime || 0) - (b.endTime || b.startTime || 0));
-
-  // Program selection pills
-  const progPillsHTML = PROGRAMS.map(p => `
-    <button class="strain-prog-pill ${p.id === activeProgId ? 'active' : ''}" onclick="setStrainProgram('${p.id}')">
-      ${p.name.split(' ')[0]} ${p.daysPerWeek ? `(${p.daysPerWeek}D)` : ''}
-    </button>
-  `).join('');
-
-  // Routine selection pills for this program
-  const sessPillsHTML = prog.sessions.map(s => `
-    <button class="strain-sess-pill ${s.id === activeSessId ? 'active' : ''}" onclick="setStrainSession('${s.id}')">
-      ${s.name.split('—')[0].trim()}
-    </button>
-  `).join('');
-
-  // Progression analysis
-  const recent = sessionInstances.slice(-6); // last 6 occurrences
-  let chartHTML = '';
-  let adviceHTML = '';
-  let historyFeedHTML = '';
-
-  if (recent.length === 0) {
-    chartHTML = `
-      <div style="padding: 28px 16px; text-align: center;">
-        <div style="font-family: var(--font-hero); font-style: italic; font-size: 1.2rem; color: var(--text-secondary); margin-bottom: 6px;">No ${sess.name} sessions logged yet</div>
-        <div style="font-size: 12px; color: var(--text-tertiary); max-width: 260px; margin: 0 auto 16px;">Complete this workout to start tracking and comparing your cardio load week by week.</div>
-        <button class="btn btn-primary" style="padding: 10px 18px; font-size: 13px; border-radius: 12px;" onclick="previewSession('${activeProgId}', '${activeSessId}')">Preview & Start Routine</button>
-      </div>
-    `;
-    adviceHTML = `
-      <div class="strain-advice-card">
-        <span class="strain-advice-badge strain-badge-optimal">FITBIT CARDIO LOAD</span>
-        <div style="font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">Cardio Load Tracking</div>
-        <div style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.45;">
-          Cardio load measures the cardiovascular demand of your workout based on your heart rate and Active Zone Minutes. Once you complete ${sess.name}, your score will appear here to compare across weeks.
-        </div>
-      </div>
-    `;
-  } else {
-    // Generate Week-by-Week Bar Chart
-    const barWidth = 28;
-    const chartHeight = 130;
-    const count = recent.length;
-    const svgWidth = Math.max(300, count * 52);
-
-    const values = recent.map(w => w.cardioLoad || calculateWorkoutCardioLoad(w));
-    const maxVal = Math.max(80, ...values, 100);
-    const avgLoad = Math.round(values.reduce((a, b) => a + b, 0) / count);
-    const avgY = chartHeight - (avgLoad / maxVal) * chartHeight;
-
-    const barsSVG = recent.map((w, idx) => {
-      const cLoad = values[idx];
-      const barH = Math.max(10, (cLoad / maxVal) * chartHeight);
-      const x = 30 + idx * 48;
-      const y = chartHeight - barH;
-      const d = new Date(w.endTime || w.startTime);
-      const dateLbl = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      const isLatest = idx === count - 1;
-      const barColor = isLatest ? 'var(--accent-kinetic)' : '#C9921A';
-
-      return `
-        <g>
-          <rect x="${x}" y="${y}" width="${barWidth}" height="${barH}" rx="6" fill="${barColor}" opacity="${isLatest ? '1' : '0.75'}"/>
-          <text x="${x + barWidth/2}" y="${Math.max(14, y - 6)}" text-anchor="middle" font-family="var(--font-mono)" font-size="11" font-weight="700" fill="${barColor}">${cLoad}</text>
-          <text x="${x + barWidth/2}" y="${chartHeight + 16}" text-anchor="middle" font-family="var(--font-mono)" font-size="9" fill="var(--text-tertiary)">W${idx + 1}</text>
-          <text x="${x + barWidth/2}" y="${chartHeight + 28}" text-anchor="middle" font-size="8.5" fill="var(--text-tertiary)">${dateLbl}</text>
-        </g>
-      `;
-    }).join('');
-
-    const latest = recent[count - 1];
-    const latestLoad = values[count - 1];
-    const prev = count >= 2 ? recent[count - 2] : null;
-    const prevLoad = prev ? values[count - 2] : null;
-    const delta = prev !== null ? latestLoad - prevLoad : null;
-
-    chartHTML = `
-      <div class="strain-chart-card">
-        <div class="strain-chart-head">
-          <div>
-            <div class="strain-chart-title">Cardio Load History</div>
-            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">${sess.name} Week-by-Week</div>
-          </div>
-          <div style="text-align:right;">
-            <div style="font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--text-primary);">
-              Latest: <span style="color:var(--accent-kinetic);">${latestLoad}</span>
-            </div>
-            ${delta !== null ? `<div style="font-size:11px;font-family:var(--font-mono);font-weight:600;color:${delta >= 0 ? 'var(--accent-kinetic)' : '#28A745'};margin-top:2px;">${delta >= 0 ? '+' : ''}${delta} vs previous</div>` : ''}
-          </div>
-        </div>
-
-        <div class="strain-chart-svg-wrap" style="overflow-x:auto;">
-          <svg viewBox="0 0 ${svgWidth} ${chartHeight + 36}" style="width:100%;min-width:${svgWidth}px;height:166px;overflow:visible;">
-            <!-- Average Cardio Load line -->
-            <line x1="10" y1="${avgY}" x2="${svgWidth - 10}" y2="${avgY}" stroke="rgba(42,36,33,0.18)" stroke-dasharray="3,3"/>
-            <text x="${svgWidth - 14}" y="${avgY - 4}" text-anchor="end" font-size="8" font-family="var(--font-mono)" fill="var(--text-tertiary)">AVG: ${avgLoad}</text>
-
-            ${barsSVG}
-          </svg>
-        </div>
-
-        <div style="display:flex;align-items:center;gap:12px;font-size:10.5px;color:var(--text-tertiary);margin-top:10px;">
-          <span><span class="strain-zone-dot" style="background:var(--accent-kinetic);"></span>Latest Session</span>
-          <span><span class="strain-zone-dot" style="background:#C9921A;"></span>Previous Sessions</span>
-          <span style="margin-left:auto;font-family:var(--font-mono);">Avg: ${avgLoad}</span>
-        </div>
-      </div>
-    `;
-
-    // Direct comparison card
-    let badgeClass = 'strain-badge-optimal';
-    let badgeText = 'STEADY CARDIO LOAD';
-    let titleText = 'Consistent Cardio Load';
-    let bodyText = `Your cardio load on ${sess.name} is holding steady at ${latestLoad}, closely matching your previous session (${prevLoad}).`;
-
-    if (delta !== null) {
-      if (delta <= -4) {
-        badgeClass = 'strain-badge-drop';
-        badgeText = `LOWER CARDIO LOAD (-${Math.abs(delta)})`;
-        titleText = 'Lower Heart Rate / Exertion';
-        bodyText = `Cardio load on ${sess.name} was ${Math.abs(delta)} points lower than your previous session (${latestLoad} vs ${prevLoad}). Your cardiovascular system handled this workout with less demand. If you want to increase progressive stimulus, consider adding 2.5–5 lbs to your primary lifts or an extra rep.`;
-      } else if (delta >= 4) {
-        badgeClass = 'strain-badge-high';
-        badgeText = `HIGHER CARDIO LOAD (+${delta})`;
-        titleText = 'Increased Heart Rate / Exertion';
-        bodyText = `Cardio load on ${sess.name} increased from ${prevLoad} to ${latestLoad} (+${delta}), indicating higher intensity or cardiovascular output during this workout.`;
-      }
-    } else {
-      badgeClass = 'strain-badge-optimal';
-      badgeText = 'BASELINE SESSION';
-      titleText = 'Initial Session Recorded';
-      bodyText = `Recorded cardio load for ${sess.name}: ${latestLoad}. Complete this routine again next week to compare your progress.`;
-    }
-
-    adviceHTML = `
-      <div class="strain-advice-card">
-        <span class="strain-advice-badge ${badgeClass}">${badgeText}</span>
-        <div style="font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">${titleText}</div>
-        <div style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.45;">${bodyText}</div>
-      </div>
-    `;
-
-    // History instances showing exact exercises and weights
-    historyFeedHTML = `
-      <div style="padding: 6px 16px 8px; font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-tertiary); font-weight: 700;">
-        ${sess.name} Past Workouts & Logged Exercises
-      </div>
-      <div class="strain-history-feed">
-        ${recent.slice().reverse().map((w, idx) => {
-          const cLoad = w.cardioLoad || calculateWorkoutCardioLoad(w);
-          const dateStr = new Date(w.endTime || w.startTime).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-          const durStr = formatDuration(w.duration || 0);
-          const bio = w.biometrics || {};
-          const readiness = bio.readiness ? `Readiness: ${bio.readiness}%` : (w.cardioSource === 'fitbit-synced' ? 'Fitbit Synced' : 'Estimated');
-
-          // Extract exercises & weights done on that day
-          const exItems = [];
-          if (w.sets) {
-            for (const [key, sArr] of Object.entries(w.sets)) {
-              if (key.endsWith('_wu') || !Array.isArray(sArr)) continue;
-              const completedSets = sArr.filter(s => s && s.r > 0);
-              if (completedSets.length === 0) continue;
-              const name = (completedSets.find(s => s._name) || {})._name || key;
-              const topSet = [...completedSets].sort((a,b) => (b.w||0) - (a.w||0))[0];
-              const setSummary = `${completedSets.length} sets · Top: ${topSet ? topSet.w + ' ' + unit + ' × ' + topSet.r : ''}`;
-              exItems.push({ name, setSummary });
-            }
-          }
-
-          const isUserLogged = w.cardioSource === 'user-logged';
-          const isSynced = w.cardioSource === 'fitbit-synced' || w.cardioSource === 'fitbit-azm';
-          const sourceText = isSynced ? '✓ Fitbit Synced' : (isUserLogged ? '✎ Manual Fitbit Entry' : 'Estimated · Tap ✎ to set');
-          const sourceColor = isSynced ? '#28A745' : (isUserLogged ? 'var(--accent-kinetic)' : 'var(--muted)');
-
-          return `
-            <div class="strain-entry-card">
-              <div class="sec-head">
-                <div>
-                  <div class="sec-date">📅 ${dateStr} · ⏱ ${durStr}</div>
-                  <div style="font-size:11px;color:${sourceColor};margin-top:2px;font-weight:500;">${sourceText}</div>
-                </div>
-                <div style="display:flex;align-items:center;gap:6px;">
-                  <button class="sec-cardio-pill" style="background:rgba(240,78,35,0.12);color:var(--accent-kinetic);border:none;cursor:pointer;" onclick="promptEditCardioLoad('${w.id || w.endTime}', ${cLoad})" title="Tap to enter exact Fitbit score">⚡ ${cLoad} Cardio Load ✎</button>
-                  <button class="btn-sheet-ghost" style="font-size:10px;padding:3px 8px;border-radius:8px;" onclick="syncSinglePastWorkout('${w.id || w.endTime}')" title="Sync from Fitbit">⟳</button>
-                </div>
-              </div>
-              <div class="sec-ex-list">
-                ${exItems.length > 0 ? exItems.map(it => `
-                  <div class="sec-ex-item">
-                    <span style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;">${it.name}</span>
-                    <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-tertiary);">${it.setSummary}</span>
-                  </div>
-                `).join('') : '<div style="font-size:11px;color:var(--muted);font-style:italic;">No logged exercises recorded.</div>'}
-              </div>
-            </div>
-          `;
-        }).join('')}
-      </div>
-    `;
-  }
-
-  const syncStatusText = fb.connected 
-    ? (fb.lastSync ? `Synced ${new Date(fb.lastSync).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}` : 'Fitbit Connected') 
-    : 'Connect Fitbit';
-
-  el.innerHTML = `
-    <div class="screen-content strain-container">
-      <div class="strain-header">
-        <div>
-          <div class="strain-title">Cardio Load</div>
-          <div class="strain-subtitle">Compare Fitbit cardio load across ${sess.name} sessions</div>
-        </div>
-        <button class="strain-sync-btn" onclick="fetchFitbitData(true, true)">
-          <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${fb.connected?'#28A745':'#D97706'};"></span>
-          ${syncStatusText} ↻
-        </button>
-      </div>
-
-      <!-- Program Selector (Compare within same plan only) -->
-      <div class="strain-prog-select-row">
-        ${progPillsHTML}
-      </div>
-
-      <!-- Routine Selector (Specific session focus) -->
-      <div style="display:flex;gap:6px;overflow-x:auto;padding:0 16px 12px;scrollbar-width:none;-webkit-overflow-scrolling:touch;">
-        ${sessPillsHTML}
-      </div>
-
-      <!-- Week-by-Week Progression Chart -->
-      ${chartHTML}
-
-      <!-- Comparison Directive -->
-      ${adviceHTML}
-
-      <!-- Session History Feed with Exact Logged Exercises -->
-      ${historyFeedHTML}
-    </div>
-  `;
 }
 
 // ── Settings screen ───────────────────────────────────────────────────────────
@@ -12255,48 +10050,29 @@ function checkWeekComplete() {
 // ── Gatekeeper — verifies (and injects if missing) all required UI root elements ──
 // ── Synchronous bootstrap — shell is hard-coded in HTML, no dynamic injection ─
 // ── Fault-tolerant bootstrap — all state access inside try/catch, LS proxy only ──
-function bootstrapApp() {
-  console.log('[DCR Gym Shell] Dispatching boot loop...');
+async function bootstrapApp() {
+  console.log('[DCR Gym Shell] Booting application...');
 
+  // Dismiss splash early if user was previously onboarded
   const splash = document.getElementById('splash');
   const home   = document.getElementById('screen-home');
   const nav    = document.getElementById('bottom-nav');
 
-  // Schema migration — versioned, non-destructive, backs up before touching
-  // anything. History survives every app update.
-  try { migrateStorage(); } catch(e) { console.warn('[DCR Gym Shell] Migration deferred:', e); }
+  // Fast-path: read synchronous localStorage for immediate render
+  const _obFast = LS.get('dcrgym_onboarded');
+  if (_obFast === true || _obFast === 'true') {
+    if (splash) {
+      splash.classList.remove('active');
+      splash.style.display = 'none';
+      splash.style.pointerEvents = 'none';
+      splash.style.zIndex = '-1';
+    }
+    if (home) home.style.display = 'block';
+    if (nav)  nav.style.display  = 'flex';
+  }
 
-  // Background-flush — the instant the app is backgrounded or killed, the live
-  // workout snapshot is written synchronously. Zero-loss guarantee.
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') saveNow();
-  });
-  window.addEventListener('pagehide', () => saveNow());
-
-  // ── System back gesture → in-app navigation (never kills the app) ─────────
-  // Overlays unwind first, then screens. Maps() pushes screen states.
-  try { history.replaceState({ screen: 'home' }, '', '#home'); } catch(e) {}
+  // Handle hardware / browser back button navigation
   window.addEventListener('popstate', (e) => {
-    // 1. An open layer always absorbs the back gesture
-    const sheet = document.getElementById('bottom-sheet');
-    if (sheet && sheet.classList.contains('visible')) { __closeSheetDom(); return; }
-    const mg = document.getElementById('muscle-graph-overlay');
-    if (mg && mg.classList.contains('visible')) { _closeMuscleGraphDom(); return; }
-    const gb = document.getElementById('graph-backdrop');
-    if (gb && gb.style.display === 'flex') { closeProgressGraph(); return; }
-    const fs = document.getElementById('finish-screen');
-    if (fs) {
-      window.__navFromPop = true;
-      try { dismissFinish(); } finally { window.__navFromPop = false; }
-      return;
-    }
-    const ms = document.getElementById('milestone-screen');
-    if (ms) {
-      window.__navFromPop = true;
-      try { dismissMilestone(); } finally { window.__navFromPop = false; }
-      return;
-    }
-    // 2. Then navigate to the state's screen
     const target = (e.state && e.state.screen) || 'home';
     if (target !== ST.screen) {
       window.__navFromPop = true;
@@ -12304,25 +10080,53 @@ function bootstrapApp() {
     }
   });
 
-  // State hydration — fully wrapped, LS proxy handles any storage exceptions
+  // State hydration & IndexedDB Vault recovery — guarantees zero data loss
   try {
-    ST.defaultProgram = LS.get('dcrgym_default_prog');
-    ST.blacklistedExercises = new Set(LS.get('dcrgym_blacklist', []));
-    // Auto-migrate URL — replace any old script URL with the current V9 deployment
-    const CURRENT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxcAKZDYOzbSJ1a5OjqYRo9OyL9OIhEhoos8a4aQE5MB68atj7XAWQeyTuulmB6UFUt/exec';
-    const storedSettings = LS.get('dcrgym_settings', null);
-    if (storedSettings && storedSettings.sheets && storedSettings.sheets !== CURRENT_SCRIPT_URL) {
-      storedSettings.sheets = CURRENT_SCRIPT_URL;
-      LS.set('dcrgym_settings', storedSettings);
+    if (navigator.storage && navigator.storage.persist) {
+      navigator.storage.persist().then(persistent => {
+        console.log('[DCR Gym Vault] Storage persistence:', persistent ? 'guaranteed' : 'default');
+      }).catch(() => {});
     }
+
+    // 1. Dual-layer recovery: if localStorage is empty, recover from IndexedDB vault!
+    const localHist = LS.get('dcrgym_history', []);
+    if (!localHist || localHist.length === 0) {
+      const idbHist = await idbGet('dcrgym_history');
+      if (Array.isArray(idbHist) && idbHist.length > 0) {
+        console.log('[DCR Gym Vault] Auto-recovered ' + idbHist.length + ' workouts from IndexedDB vault into localStorage');
+        saveHistory(idbHist);
+      }
+    } else {
+      // Mirror existing history into IndexedDB vault
+      idbSet('dcrgym_history', localHist);
+    }
+
+    // 2. Rehydrate settings, notes, default program from vault if localStorage was wiped
+    const localSettings = LS.get('dcrgym_settings', null);
+    if (!localSettings) {
+      const idbSettings = await idbGet('dcrgym_settings');
+      if (idbSettings) saveSettings(idbSettings);
+    } else {
+      idbSet('dcrgym_settings', localSettings);
+    }
+
+    const localNotes = LS.get('dcrgym_notes', null);
+    if (!localNotes) {
+      const idbNotes = await idbGet('dcrgym_notes');
+      if (idbNotes) saveNotes(idbNotes);
+    } else {
+      idbSet('dcrgym_notes', localNotes);
+    }
+
+    const idbProg = await idbGet('dcrgym_default_prog');
+    ST.defaultProgram = LS.get('dcrgym_default_prog') || idbProg || null;
+    ST.blacklistedExercises = new Set(LS.get('dcrgym_blacklist', []));
     getSettings();
   } catch(e) {
-    console.warn('[DCR Gym Shell] State hydration fault (non-fatal):', e);
+    console.warn('[DCR Gym Shell] State hydration notice (non-fatal):', e);
   }
 
   // Service worker — registered with a live OTA update watcher.
-  // Updates flow over the air: network-first navigations get new builds on
-  // launch; if a deploy lands while the app is OPEN, the chip appears.
   if ('serviceWorker' in navigator) {
     if ('Notification' in window) {
       ST.notifEnabled = Notification.permission === 'granted';
@@ -12334,15 +10138,23 @@ function bootstrapApp() {
   }
 
   // ── Cloud sync on every app open — PULL BEFORE PUSH (never clobber cloud) ──
-  // Merge cloud→local first (pull never shrinks local), then flush the queue,
-  // backfill readable rows once, and push the complete local history up. Fully
-  // non-blocking: any failure here can never break boot or the render path.
   (async () => {
     try {
       const added = await pullFromSheets();
       if (added > 0) {
-        if (ST.screen === 'home') renderHome();
-        else if (ST.screen === 'history') renderHistory();
+        // If we were on onboarding and cloud restored past workouts, bypass onboarding immediately!
+        const currentHist = getHistory();
+        if (currentHist.length > 0 && !LS.get('dcrgym_onboarded')) {
+          LS.set('dcrgym_onboarded', true);
+          const obEl = document.getElementById('screen-home');
+          if (obEl) { obEl.innerHTML = ''; obEl.style.display = 'none'; obEl.classList.remove('active'); }
+          const nav = document.getElementById('bottom-nav');
+          if (nav) nav.style.display = 'flex';
+          Maps('home');
+        } else {
+          if (ST.screen === 'home') renderHome();
+          else if (ST.screen === 'history') renderHistory();
+        }
       }
       await drainSyncQueue();
       await backfillAllRows();
@@ -12363,7 +10175,7 @@ function bootstrapApp() {
     const _ob = LS.get('dcrgym_onboarded');
     const onboarded = _ob === true || _ob === 'true';
 
-    if (!onboarded) {
+    if (!onboarded && getHistory().length === 0) {
       console.log('[DCR Gym Shell] First launch → onboarding');
       onboardStep = 0;
       onboardProg = null;
@@ -12391,7 +10203,6 @@ function bootstrapApp() {
   setTimeout(() => { pullFromSheets().catch(() => {}); }, 2500);
 }
 
-// Isolated fail-safe dispatcher — handles all readyState variants on WebKit/Safari
 function runBootSequence() {
   console.log('[DCR Gym Shell] Dispatched main boot loop.');
   try {
