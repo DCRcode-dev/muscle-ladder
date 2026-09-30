@@ -750,12 +750,66 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
   font-variant-numeric: tabular-nums lining-nums;
   letter-spacing: -0.02em;
 }
-.wh-progress { display: flex; gap: 4px; margin-top: 12px; }
-.wh-seg {
-  flex: 1; height: 3px; background: var(--border-subtle);
-  border-radius: 2px; transition: background 300ms var(--ease);
+.wh-hud-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  margin-top: 8px;
+  padding: 10px 14px;
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
 }
-.wh-seg.done { background: var(--accent-kinetic); }
+.wh-hud-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-width: 0;
+  flex: 1;
+}
+.wh-hud-label {
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  color: var(--text-tertiary);
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.wh-hud-val {
+  font-family: var(--font-mono);
+  font-size: 15.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums lining-nums;
+  white-space: nowrap;
+}
+.wh-hud-val.complete {
+  color: var(--accent-success);
+}
+.wh-hud-divider {
+  width: 1px;
+  height: 22px;
+  background: var(--border-subtle);
+}
+.wh-roadmap-bar, .wh-progress {
+  display: flex;
+  gap: 5px;
+  margin-top: 10px;
+}
+.wh-seg {
+  flex: 1;
+  height: 4px;
+  background: var(--border-subtle);
+  border-radius: 2px;
+  transition: all 300ms var(--ease);
+}
+.wh-seg.done {
+  background: var(--accent-success);
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.35);
+}
 .wh-seg.active { background: rgba(240,78,35,0.4); }
 .wh-pct-badge {
   width: 48px; height: 48px; border-radius: 50%;
@@ -1026,33 +1080,88 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   letter-spacing: 0.4px; text-transform: uppercase;
   border-radius: 6px; padding: 2px 7px; margin-bottom: 4px;
 }
-.ex-card-actions { display: flex; align-items: center; gap: 8px; }
-.ex-cue-btn {
-  width: 32px; height: 32px; border-radius: 16px;
+.ex-card-actions { display: flex; align-items: center; gap: 6px; }
+.ex-cue-btn, .ex-graph-btn, .ex-menu-btn, .ex-note-btn, .ex-chevron-btn {
+  width: 34px; height: 34px; border-radius: 17px;
   border: 1px solid var(--border-subtle); background: var(--surface-card);
-  color: var(--text-secondary); font-size: 13px; cursor: pointer;
+  color: var(--text-secondary); cursor: pointer; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  transition: background 150ms, transform 120ms;
+  transition: all 160ms var(--spring-snappy);
 }
-.ex-cue-btn:active { transform: scale(0.92); background: var(--surface-sunken); }
-.ex-graph-btn {
-  width: 32px; height: 32px; border-radius: 16px;
-  border: 1px solid var(--border-subtle); background: var(--surface-card);
-  color: var(--text-secondary); font-size: 12px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  transition: background 150ms, transform 120ms;
+.ex-cue-btn:active, .ex-graph-btn:active, .ex-menu-btn:active, .ex-note-btn:active, .ex-chevron-btn:active {
+  transform: scale(0.92); background: var(--surface-sunken);
 }
-.ex-graph-btn:active { transform: scale(0.92); background: var(--surface-sunken); }
+.ex-note-btn.has-note {
+  color: var(--accent-kinetic); border-color: rgba(240,78,35,0.4); background: rgba(240,78,35,0.08);
+}
+.ex-chevron-btn {
+  border: none; background: transparent; padding: 0;
+}
 .ex-chevron {
-  width: 20px; height: 20px; color: var(--text-tertiary);
+  width: 19px; height: 19px; color: var(--text-tertiary);
   transition: transform 300ms var(--ease); flex-shrink: 0;
-  stroke-width: 1.8;
+  stroke-width: 2.2;
 }
-.ex-card.expanded .ex-chevron { transform: rotate(180deg); }
+.ex-card.expanded .ex-chevron { transform: rotate(180deg); color: var(--text-primary); }
 .ex-card.completed .ex-chevron { color: var(--accent-success); }
 .ex-check { color: var(--accent-success); font-weight: 700; }
+.ex-check-pill {
+  font-size: 8.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--accent-success); background: oklch(72.3% 0.190 145 / 0.12);
+  border-radius: 6px; padding: 2px 6px; display: inline-flex; align-items: center;
+}
 .ex-last-perf { font-size: 11.5px; color: var(--text-tertiary); margin-top: 3px; font-style: italic; }
+
+/* ── Plate calc quick trigger ── */
+.plate-calc-trigger {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--surface-sunken); border: 1px solid var(--border-subtle);
+  border-radius: 8px; padding: 4px 8px; font-size: 11px; font-weight: 600;
+  color: var(--text-secondary); cursor: pointer; transition: all 140ms var(--ease);
+}
+.plate-calc-trigger:hover, .plate-calc-trigger:active {
+  background: var(--surface-card); border-color: var(--accent-kinetic); color: var(--accent-kinetic);
+}
+
+/* ── Luxury Action Sheet ── */
+.action-sheet-header {
+  padding-bottom: 14px; margin-bottom: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.action-sheet-title {
+  font-family: var(--font-hero); font-style: italic; font-size: 20px; font-weight: 600;
+  color: var(--text-primary); line-height: 1.25; margin-bottom: 4px;
+}
+.action-sheet-meta {
+  font-size: 11.5px; color: var(--text-tertiary); font-weight: 500;
+}
+.action-sheet-list {
+  display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px;
+}
+.action-sheet-row {
+  display: flex; align-items: center; gap: 14px; width: 100%;
+  padding: 12px 14px; border-radius: 14px;
+  background: var(--surface-card); border: 1px solid var(--border-subtle);
+  color: var(--text-primary); font-size: 14.5px; font-weight: 500;
+  cursor: pointer; transition: all 140ms var(--spring-snappy); text-align: left;
+}
+.action-sheet-row:active {
+  transform: scale(0.98); background: var(--surface-sunken); border-color: var(--border-strong);
+}
+.action-sheet-row.danger {
+  color: #C04E2A; border-color: rgba(192,78,42,0.18);
+}
+.action-sheet-icon {
+  width: 34px; height: 34px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0; background: var(--surface-sunken);
+  color: var(--text-primary);
+}
+.action-sheet-row.danger .action-sheet-icon {
+  background: rgba(192,78,42,0.1); color: #C04E2A;
+}
+.action-sheet-label { flex: 1; min-width: 0; }
+.action-sheet-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; line-height: 1.3; }
 
 /* Card body */
 .ex-body { max-height: 0; overflow: hidden; transition: max-height 320ms var(--ease); }
@@ -1753,6 +1862,81 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   border-radius: 8px;
   font-size: 10.5px;
   color: var(--text-secondary);
+}
+.whfc-detail {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 320ms var(--spring-snappy), opacity 240ms ease;
+  opacity: 0;
+  margin-top: 0;
+}
+.wh-feed-card.expanded .whfc-detail {
+  max-height: 1400px;
+  opacity: 1;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-subtle);
+}
+.whfc-chevron {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  transition: transform 240ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+.wh-feed-card.expanded .whfc-chevron {
+  transform: rotate(180deg);
+  color: var(--accent-kinetic);
+}
+.whfc-details-table {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.whfc-detail-ex {
+  background: var(--surface-sunken);
+  border-radius: 12px;
+  padding: 8px 12px;
+}
+.whfc-detail-ex-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+.whfc-detail-sets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.whfc-detail-set-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--text-secondary);
+}
+.whfc-set-idx {
+  font-weight: 700;
+  color: var(--text-tertiary);
+  font-size: 9.5px;
+}
+.whfc-set-pr {
+  font-size: 9px;
+  font-weight: 700;
+  color: #C4944A;
+  background: rgba(196, 148, 74, 0.15);
+  padding: 1px 4px;
+  border-radius: 4px;
 }
 
 /* ── 5-Week Calendar (Workouts tab) ── */
@@ -3857,7 +4041,7 @@ function saveMeasurements(m) { LS.set('dcrgym_measurements', m); idbSet('dcrgym_
 // Schema-versioned, non-destructive, with rolling last-good backup.
 // History must survive every app update. Period.
 const SCHEMA_VERSION = 3;
-const APP_BUILD = '2026.09.30 · ota-22 · zero-data-loss-vault-ab-overhaul';
+const APP_BUILD = '2026.09.30 · ota-23 · ultra-premium-ui-elevation';
 
 function convertHistoryWeightsToLbs(hist) {
   if (!Array.isArray(hist)) return 0;
@@ -5927,9 +6111,12 @@ function renderHome() {
     ${resumeHTML}
 
     ${ns && ns.session ? (() => {
-      return `<div class="boarding-card" style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 20px 22px;">
-        <div class="bc-label" style="margin-bottom: 4px;">Next up</div>
-        <div class="bc-name" style="font-family: var(--font-hero); font-style: italic; font-size: 17px; font-weight: 600; color: var(--charcoal); margin-bottom: 14px; max-width: 90%; line-height: 1.25;">${ns.session.name}</div>
+      const sessMuscles = [...new Set(ns.session.exercises.map(ex => getMuscle(stripSuperset(ex.name))).filter(m => m && m !== 'Other'))].slice(0, 3).join(' · ');
+      const exCount = ns.session.exercises.length;
+      return `<div class="boarding-card" style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 22px 22px;">
+        <div class="bc-label" style="margin-bottom: 4px; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-tertiary);">Next Up · Session</div>
+        <div class="bc-name" style="font-family: var(--font-hero); font-style: italic; font-size: 19px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; max-width: 90%; line-height: 1.25;">${ns.session.name}</div>
+        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 14px;">${exCount} exercises${sessMuscles ? ' · ' + sessMuscles : ''}</div>
         <button class="premium-action-pill" onclick="${ctaOnclick}">START WORKOUT</button>
       </div>`;
     })() : `<button class="premium-action-pill" onclick="${ctaOnclick}">CHOOSE A PROGRAM</button>`}`;
@@ -6361,28 +6548,34 @@ function exerciseCardHTML(ex, key, i, isAddition) {
   <div class="ex-card${isExpanded?' expanded':''}${isCompleted?' completed':''}${isAddition?' ex-card-add':''}" id="excard-${key}">
     <div class="ex-card-header" onclick="toggleCard('${key}')">
       <div class="ex-card-header-left">
-        <div class="ex-name">${displayName} ${isCompleted ? '<span class="ex-check">✓</span>' : ''}</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;flex-wrap:wrap;">
+          ${muscleBadgeHtml(muscle)}
+          ${isCompleted ? '<span class="ex-check-pill">DONE ✓</span>' : ''}
+        </div>
+        <div class="ex-name">${displayName}</div>
         ${subbed ? `<div class="ex-sub-note">⇄ swapped from ${name}</div>` : 
           (autoSubbed ? `<div class="ex-sub-note">⇄ auto-swapped from ${name} (blacklisted)</div>` : 
           (isAddition ? `<div class="ex-sub-note">✚ added exercise</div>` : ''))}
-        ${muscleBadgeHtml(muscle)}
-        ${lastPerf ? `<div class="ex-last-perf">${lastPerf[lastPerf.length-1].w} ${unit} × ${lastPerf[lastPerf.length-1].r} · ${relDay(lastPerfFull.endTime)}</div>` : ''}
-        <div class="ex-meta">${totalSets} × ${reps} · ${formatDuration(restSec)} rest</div>
+        ${lastPerf ? `<div class="ex-last-perf">Last: ${lastPerf[lastPerf.length-1].w} ${unit} × ${lastPerf[lastPerf.length-1].r} · ${relDay(lastPerfFull.endTime)}</div>` : ''}
+        <div class="ex-meta">${totalSets} sets × ${reps} reps · ${formatDuration(restSec)} rest</div>
       </div>
-      <div class="ex-card-actions">
-        <button class="ex-graph-btn" onclick="showProgressGraph(event,'${name}')" title="Progress">⬆</button>
-        ${cueAvail || true ? `<button class="ex-cue-btn" onclick="showCue(event,'${key}',${i})">?</button>` : ''}
-        ${isAddition ? `<button class="ex-cue-btn ex-remove-btn" onclick="removeAddition(event,${i})" title="Remove">✕</button>` : `
-          <button class="ex-cue-btn" onclick="showSubs(event,'${key}',${i})" title="Substitutions">⇄</button>
-          <button class="ex-cue-btn ex-remove-btn" onclick="blacklistExercisePrompt(event,'${key}')" title="Never show again">✕</button>
-        `}
+      <div class="ex-card-actions" onclick="event.stopPropagation()">
         <button class="ex-note-btn${(ST.workoutNotes[key] || noteVal) ? ' has-note' : ''}" id="notebtn-${key}"
-          onclick="toggleNotePanel(event,'${key}','${noteKey}')" title="Add note">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          onclick="toggleNotePanel(event,'${key}','${noteKey}')" title="Exercise notes" aria-label="Exercise notes">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
           </svg>
         </button>
-        <svg class="ex-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        <button class="ex-menu-btn" onclick="showExerciseActionSheet(event,'${key}',${i},${isAddition})" title="Exercise Options" aria-label="Exercise options">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <circle cx="5" cy="12" r="2.2"/>
+            <circle cx="12" cy="12" r="2.2"/>
+            <circle cx="19" cy="12" r="2.2"/>
+          </svg>
+        </button>
+        <button class="ex-chevron-btn" onclick="toggleCard('${key}')" aria-label="Toggle exercise">
+          <svg class="ex-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
       </div>
     </div>
     <div class="ex-body">
@@ -6390,11 +6583,14 @@ function exerciseCardHTML(ex, key, i, isAddition) {
         ${warmupRowHtml}
         ${overloadNudge}
         ${setRows}
-        <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:space-between;">
           <div class="set-hint rest-time-row">
-            <span style="color:var(--muted)">Rest</span>
+            <span style="color:var(--text-tertiary);font-size:12px;">Rest:</span>
             <span class="rest-time-display" id="rest-lbl-${key}" onclick="editRestTime('${key}',${i},this)" title="Tap to edit">${formatDuration(restSec)}</span>
           </div>
+          <button class="plate-calc-trigger" onclick="showPlateCalcSheet('${displayName.replace(/'/g, "\\'")}','${key}')" title="Plate Calculator">
+            <span>⚖ Plates</span>
+          </button>
         </div>
         <!-- Inline note panel — revealed by header pen icon -->
         <div class="ex-note-panel${(ST.workoutNotes[key] || noteVal) ? ' open' : ''}" id="notepanel-${key}">
@@ -6437,6 +6633,12 @@ function renderWorkout() {
   const showDateHeader = ST.editingWorkoutId || ST.isBackdated;
   const finishBtnText = ST.editingWorkoutId ? 'Save Changes' : (ST.isBackdated ? 'Save Workout' : 'Finish Workout');
 
+  const totalEx = exList.length;
+  const doneEx = exList.filter((_, i) => ST.completedCards.has(`${sess.id}_${i}`)).length;
+  const remainingEx = totalEx - doneEx;
+  const vol = calcVolume();
+  const unit = getWeightUnit();
+
   el.innerHTML = `
   <div id="workout-header${ST.travelLocked?' travel-locked':''}">
     <div class="wh-top-bar">
@@ -6452,24 +6654,34 @@ function renderWorkout() {
       </div>
       <div style="width:44px;flex-shrink:0"></div>
     </div>
-    <div class="wh-top">
-      <div class="wh-duration" id="wh-dur" ${showDateHeader ? 'onclick="editWorkoutDateTime()" style="cursor:pointer;"' : ''}>${formatDuration(ST.durationSecs)}</div>
-      ${(()=>{
-        const total = exList.length;
-        const done = exList.filter((_,i)=>ST.completedCards.has(`${sess.id}_${i}`)).length;
-        const remaining = total - done;
-        return `<div class="wh-pct-badge${remaining===0?' complete':''}" id="wh-pct">
-          <div class="wh-pct-num" id="wh-pct-num">${remaining}</div>
-          <div class="wh-pct-unit">left</div>
-        </div>`;
-      })()}
+
+    <!-- Active workout live metric ribbon -->
+    <div class="wh-hud-strip">
+      <div class="wh-hud-stat">
+        <span class="wh-hud-label">Duration</span>
+        <span class="wh-hud-val" id="wh-dur" ${showDateHeader ? 'onclick="editWorkoutDateTime()" style="cursor:pointer;"' : ''}>${formatDuration(ST.durationSecs)}</span>
+      </div>
+      <div class="wh-hud-divider"></div>
+      <div class="wh-hud-stat">
+        <span class="wh-hud-label">Volume</span>
+        <span class="wh-hud-val" id="wh-vol-num">${vol.toLocaleString()} <span style="font-size:11px;font-weight:500;">${unit}</span></span>
+      </div>
+      <div class="wh-hud-divider"></div>
+      <div class="wh-hud-stat">
+        <span class="wh-hud-label">Status</span>
+        <span class="wh-hud-val${remainingEx===0?' complete':''}" id="wh-pct-num">${remainingEx === 0 ? '✓ Complete' : `${remainingEx} left`}</span>
+      </div>
     </div>
-    <div class="wh-progress">
-      ${exList.map((_,i)=>{
-        const k=`${sess.id}_${i}`;
-        return `<div class="wh-seg${ST.completedCards.has(k)?' done':''}"></div>`;
+
+    <!-- Segmented exercise roadmap -->
+    <div class="wh-roadmap-bar" id="wh-segs">
+      ${exList.map((_, i) => {
+        const k = `${sess.id}_${i}`;
+        const isDone = ST.completedCards.has(k);
+        return `<div class="wh-seg${isDone?' done':''}"></div>`;
       }).join('')}
     </div>
+
     ${!ST.travelLocked ? `
     <div class="travel-toggle-row">
       <span class="travel-toggle-lbl">✈ Travel Mode (no gym)</span>
@@ -6505,6 +6717,198 @@ function renderWorkout() {
       if (firstCard) firstCard.classList.add('expanded');
     }
   }
+}
+
+// ── Luxury Action Sheet for Exercises ──────────────────────────────────────────
+function showExerciseActionSheet(e, key, exIdx, isAddition) {
+  if (e && e.stopPropagation) e.stopPropagation();
+  const slot = slotForKey(key);
+  if (!slot) return;
+  const ex = slot.ex;
+  const name = liveExName(key, ex);
+  const baseName = stripSuperset(ex.name);
+  const muscle = getMuscle(name);
+  const noteKey = normalizeEx(name);
+  const hasNote = !!(ST.workoutNotes[key] || getNotes()[noteKey]);
+
+  const html = `
+    <div class="action-sheet-container" style="padding: 4px 0 12px;">
+      <div class="action-sheet-header">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+          <div class="action-sheet-title">${name}</div>
+          ${muscleBadgeHtml(muscle)}
+        </div>
+        <div class="action-sheet-meta">${effSetCount(key, ex)} Sets · ${effReps(key, ex)} Reps · ${isAddition ? 'Accessory Addition' : 'Programmed Slot'}</div>
+      </div>
+      <div class="action-sheet-list">
+        ${!isAddition ? `
+          <button class="action-sheet-row" onclick="closeSheet();showSubs(null,'${key}',${exIdx})">
+            <div class="action-sheet-icon">⇄</div>
+            <div class="action-sheet-label">
+              <div>Substitute Exercise</div>
+              <div class="action-sheet-sub">Swap with barbell, dumbbell, or machine alternative</div>
+            </div>
+          </button>
+        ` : ''}
+
+        <button class="action-sheet-row" onclick="closeSheet();showCue(null,'${key}',${exIdx})">
+          <div class="action-sheet-icon">💡</div>
+          <div class="action-sheet-label">
+            <div>Form Tips & Coaching Cues</div>
+            <div class="action-sheet-sub">Setup, execution, and safety guidelines</div>
+          </div>
+        </button>
+
+        <button class="action-sheet-row" onclick="closeSheet();showProgressGraph(null,'${baseName}')">
+          <div class="action-sheet-icon">📈</div>
+          <div class="action-sheet-label">
+            <div>Strength History & Progress</div>
+            <div class="action-sheet-sub">Past performances and estimated 1RM trends</div>
+          </div>
+        </button>
+
+        <button class="action-sheet-row" onclick="closeSheet();showPlateCalcSheet('${name.replace(/'/g, "\\'")}','${key}')">
+          <div class="action-sheet-icon">⚖</div>
+          <div class="action-sheet-label">
+            <div>Barbell Plate Calculator</div>
+            <div class="action-sheet-sub">Calculate exact plate loading per side</div>
+          </div>
+        </button>
+
+        <button class="action-sheet-row" onclick="closeSheet();editRestTimeFromActionSheet('${key}',${exIdx})">
+          <div class="action-sheet-icon">◷</div>
+          <div class="action-sheet-label">
+            <div>Custom Rest Timer</div>
+            <div class="action-sheet-sub">Adjust recovery interval between working sets</div>
+          </div>
+        </button>
+
+        <button class="action-sheet-row" onclick="closeSheet();toggleNoteFromActionSheet('${key}','${noteKey}')">
+          <div class="action-sheet-icon">📝</div>
+          <div class="action-sheet-label">
+            <div>${hasNote ? 'Edit Session Note' : 'Add Session Note'}</div>
+            <div class="action-sheet-sub">${hasNote ? 'Update exercise technique or setup note' : 'Write personal cues or machine pin settings'}</div>
+          </div>
+        </button>
+
+        ${isAddition ? `
+          <button class="action-sheet-row danger" onclick="closeSheet();removeAddition(null,${exIdx})">
+            <div class="action-sheet-icon">✕</div>
+            <div class="action-sheet-label">
+              <div>Remove Exercise Addition</div>
+              <div class="action-sheet-sub">Delete this movement from today's workout</div>
+            </div>
+          </button>
+        ` : `
+          <button class="action-sheet-row danger" onclick="closeSheet();blacklistExercisePrompt(null,'${key}')">
+            <div class="action-sheet-icon">🚫</div>
+            <div class="action-sheet-label">
+              <div>Blacklist / Avoid Exercise</div>
+              <div class="action-sheet-sub">Never show in future workouts; auto-swap always</div>
+            </div>
+          </button>
+        `}
+      </div>
+      <button class="btn btn-sheet-ghost" style="width: 100%; padding: 12px; border-radius: 14px; font-weight: 600;" onclick="closeSheet()">Done</button>
+    </div>
+  `;
+  openSheet(html);
+}
+
+function editRestTimeFromActionSheet(key, exIdx) {
+  if (!ST.expandedCards.has(key)) toggleCard(key);
+  setTimeout(() => {
+    const el = document.getElementById('rest-lbl-' + key);
+    if (el) editRestTime(key, exIdx, el);
+  }, 220);
+}
+
+function toggleNoteFromActionSheet(key, noteKey) {
+  if (!ST.expandedCards.has(key)) toggleCard(key);
+  setTimeout(() => {
+    const panel = document.getElementById('notepanel-' + key);
+    if (panel) {
+      panel.classList.add('open');
+      const area = document.getElementById('noteinput-' + key);
+      if (area) { area.focus(); area.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+    }
+  }, 220);
+}
+
+// ── Interactive Plate Calculator Sheet ─────────────────────────────────────────
+let _currentPlateCalcKey = null;
+let _currentPlateCalcWeight = 45;
+
+function showPlateCalcSheet(name, key, defaultWeight) {
+  _currentPlateCalcKey = key;
+  const unit = getWeightUnit();
+  const barW = unit === 'lb' ? 45 : 20;
+  let w = parseFloat(defaultWeight);
+  if (isNaN(w) || w < barW) {
+    const inp = key ? document.getElementById('wi-' + key + '-0') : null;
+    w = (inp && parseFloat(inp.value)) || (getLastPerformance(name) && getLastPerformance(name)[0] ? parseFloat(getLastPerformance(name)[0].w) : barW * 3);
+  }
+  if (isNaN(w) || w < barW) w = barW;
+  _currentPlateCalcWeight = w;
+
+  const html = `
+    <div class="plate-calc-container" style="padding: 4px 0 16px;">
+      <div class="action-sheet-header">
+        <div class="action-sheet-title" style="font-size: 20px;">Plate Calculator</div>
+        <div class="action-sheet-meta">${name || 'Barbell Exercise'} · ${barW} ${unit} Olympic Bar</div>
+      </div>
+      <div id="plate-calc-visual" style="margin: 12px 0;">
+        ${renderPlatePopover(_currentPlateCalcWeight)}
+      </div>
+      <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin: 16px 0 20px;">
+        <button class="btn-sheet-ghost" style="padding: 8px 12px; font-size: 13px; font-weight: 700; border-radius: 12px;" onclick="adjustPlateCalcWeight(-10)">-10</button>
+        <button class="btn-sheet-ghost" style="padding: 8px 12px; font-size: 13px; font-weight: 700; border-radius: 12px;" onclick="adjustPlateCalcWeight(-5)">-5</button>
+        <div style="min-width: 110px; text-align: center; font-family: var(--font-mono); font-size: 22px; font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums;" id="plate-calc-weight-lbl">
+          ${_currentPlateCalcWeight} <span style="font-size: 13px; color: var(--text-tertiary); font-weight: 500;">${unit}</span>
+        </div>
+        <button class="btn-sheet-ghost" style="padding: 8px 12px; font-size: 13px; font-weight: 700; border-radius: 12px;" onclick="adjustPlateCalcWeight(5)">+5</button>
+        <button class="btn-sheet-ghost" style="padding: 8px 12px; font-size: 13px; font-weight: 700; border-radius: 12px;" onclick="adjustPlateCalcWeight(10)">+10</button>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        ${key ? `<button class="btn btn-primary" style="flex: 1;" onclick="applyPlateCalcWeight('${key}')">Apply to Exercise</button>` : ''}
+        <button class="btn btn-sheet-ghost" style="${key ? '' : 'width: 100%;'}" onclick="closeSheet()">Close</button>
+      </div>
+    </div>
+  `;
+  openSheet(html);
+}
+
+function adjustPlateCalcWeight(delta) {
+  const unit = getWeightUnit();
+  const barW = unit === 'lb' ? 45 : 20;
+  _currentPlateCalcWeight = Math.max(barW, _currentPlateCalcWeight + delta);
+  const vis = document.getElementById('plate-calc-visual');
+  const lbl = document.getElementById('plate-calc-weight-lbl');
+  if (vis) vis.innerHTML = renderPlatePopover(_currentPlateCalcWeight);
+  if (lbl) lbl.innerHTML = `${_currentPlateCalcWeight} <span style="font-size: 13px; color: var(--text-tertiary); font-weight: 500;">${unit}</span>`;
+  haptic('tick');
+}
+
+function applyPlateCalcWeight(key) {
+  if (!key) { closeSheet(); return; }
+  let applied = false;
+  const slot = slotForKey(key);
+  const totalSets = effSetCount(key, slot ? slot.ex : null);
+  for (let si = 0; si < totalSets; si++) {
+    const wi = document.getElementById('wi-' + key + '-' + si);
+    if (wi && !wi.classList.contains('logged')) {
+      wi.value = _currentPlateCalcWeight;
+      markDraft(key, si);
+      applied = true;
+      break;
+    }
+  }
+  if (!applied) {
+    const wi = document.getElementById('wi-' + key + '-0');
+    if (wi) { wi.value = _currentPlateCalcWeight; markDraft(key, 0); }
+  }
+  closeSheet();
+  haptic('set');
 }
 
 function renderPlatePopover(totalW) {
@@ -6561,9 +6965,7 @@ function calcVolume() {
 }
 
 function updateProgressBadge() {
-  const badge = document.getElementById('wh-pct');
-  const numEl = document.getElementById('wh-pct-num');
-  if (!badge || !numEl || !ST.currentSession) return;
+  if (!ST.currentSession) return;
   const prog = PROGRAMS.find(p => p.id === ST.currentProgram);
   if (!prog) return;
   const sess = prog.sessions.find(s => s.id === ST.currentSession);
@@ -6572,8 +6974,29 @@ function updateProgressBadge() {
   const total = exList.length;
   const done = exList.filter((_, i) => ST.completedCards.has(`${sess.id}_${i}`)).length;
   const remaining = total - done;
-  numEl.textContent = remaining;
-  badge.classList.toggle('complete', remaining === 0);
+
+  const numEl = document.getElementById('wh-pct-num');
+  if (numEl) {
+    numEl.textContent = remaining === 0 ? '✓ Complete' : `${remaining} left`;
+    numEl.classList.toggle('complete', remaining === 0);
+  }
+
+  const volEl = document.getElementById('wh-vol-num');
+  if (volEl) {
+    const vol = calcVolume();
+    volEl.innerHTML = `${vol.toLocaleString()} <span style="font-size:11px;font-weight:500;">${getWeightUnit()}</span>`;
+  }
+
+  const segs = document.querySelectorAll('.wh-seg');
+  exList.forEach((_, i) => {
+    const k = `${sess.id}_${i}`;
+    if (segs[i]) {
+      segs[i].classList.toggle('done', ST.completedCards.has(k));
+    }
+  });
+
+  const legacyBadge = document.getElementById('wh-pct');
+  if (legacyBadge) legacyBadge.classList.toggle('complete', remaining === 0);
 }
 
 
@@ -8549,6 +8972,7 @@ function renderWorkoutsCalendarView() {
   }
 
   const feedHTML = hist.slice(0, 15).map(w => {
+    const wid = String(w.id || w.endTime);
     const dateStr = new Date(w.endTime || w.startTime).toLocaleDateString('en-US', {
       weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
     });
@@ -8568,15 +8992,16 @@ function renderWorkoutsCalendarView() {
     const volStr = Math.round(vol).toLocaleString();
 
     return `
-      <div class="wh-feed-card" onclick="editCompletedWorkout('${w.id || w.endTime}')">
+      <div class="wh-feed-card" id="hist-card-${wid}" onclick="toggleHistoryCard('${wid}')">
         <div class="whfc-head">
           <div>
             <div class="whfc-title">${w.sessionName || 'Workout Session'}</div>
             <div class="whfc-date">📅 ${dateStr}</div>
           </div>
-          <div style="display:flex;gap:6px;align-items:center;">
-            <button class="btn-sheet-ghost" style="font-size:11px;padding:4px 10px;border-radius:12px;" onclick="event.stopPropagation();editCompletedWorkout('${w.id || w.endTime}')">Edit</button>
-            <button class="btn-sheet-ghost" style="font-size:11px;padding:4px 10px;border-radius:12px;color:#C04E2A;border-color:rgba(192,78,42,0.25);" onclick="event.stopPropagation();deleteCompletedWorkout('${w.id || w.endTime}')">Delete</button>
+          <div style="display:flex;gap:6px;align-items:center;" onclick="event.stopPropagation()">
+            <button class="btn-sheet-ghost" style="font-size:11px;padding:4px 10px;border-radius:12px;" onclick="editCompletedWorkout('${wid}')">Edit</button>
+            <button class="btn-sheet-ghost" style="font-size:11px;padding:4px 10px;border-radius:12px;color:#C04E2A;border-color:rgba(192,78,42,0.25);" onclick="deleteCompletedWorkout('${wid}')">Delete</button>
+            <span class="whfc-chevron">▼</span>
           </div>
         </div>
         <div class="whfc-ribbon">
@@ -8590,6 +9015,9 @@ function renderWorkoutsCalendarView() {
             ${exNames.length > 4 ? `<span class="whfc-chip">+${exNames.length - 4} more</span>` : ''}
           </div>
         ` : ''}
+        <div class="whfc-detail" id="hist-detail-${wid}">
+          ${renderHistoryCardDetails(w, unit)}
+        </div>
       </div>
     `;
   }).join('');
@@ -8599,6 +9027,51 @@ function renderWorkoutsCalendarView() {
     <div style="padding: 12px 16px 8px; font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-tertiary); font-weight: 700;">Recent Workout Logs</div>
     <div class="workout-history-feed">${feedHTML}</div>
   `;
+}
+
+function renderHistoryCardDetails(w, unit) {
+  if (!w || !w.sets) return '<div style="color:var(--text-tertiary);font-size:12px;font-style:italic;">No sets logged</div>';
+  const exMap = {};
+  for (const [k, sArr] of Object.entries(w.sets)) {
+    if (!Array.isArray(sArr)) continue;
+    for (const s of sArr) {
+      if (!s || !s.r) continue;
+      const exName = s._name || 'Exercise';
+      if (!exMap[exName]) exMap[exName] = [];
+      exMap[exName].push(s);
+    }
+  }
+
+  const exEntries = Object.entries(exMap);
+  if (exEntries.length === 0) {
+    return '<div style="color:var(--text-tertiary);font-size:12px;font-style:italic;padding:4px 0;">No set records found.</div>';
+  }
+
+  return `
+    <div class="whfc-details-table">
+      ${exEntries.map(([name, sets]) => `
+        <div class="whfc-detail-ex">
+          <div class="whfc-detail-ex-name">${name}</div>
+          <div class="whfc-detail-sets">
+            ${sets.map((s, idx) => `
+              <span class="whfc-detail-set-chip">
+                <span class="whfc-set-idx">S${idx + 1}</span>
+                <span>${s.w} ${unit} × ${s.r}</span>
+                ${s._isPR ? '<span class="whfc-set-pr">PR</span>' : ''}
+              </span>
+            `).join('')}
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function toggleHistoryCard(wid) {
+  const card = document.getElementById('hist-card-' + wid);
+  if (!card) return;
+  card.classList.toggle('expanded');
+  haptic('tick');
 }
 
 function renderFiveWeekCalendar() {
