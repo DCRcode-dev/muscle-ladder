@@ -5198,7 +5198,9 @@ function getExactSubstitutes(exName) {
   return EXERCISE_LIBRARY.filter(it => it.subMuscle === cur.subMuscle && normalizeEx(it.name) !== curNorm);
 }
 function isBarbell(name) {
-  return BARBELL_EX.has(normalizeEx(stripSuperset(name)));
+  const norm = normalizeEx(stripSuperset(name));
+  const alias = resolveAlias(norm);
+  return BARBELL_EX.has(norm) || BARBELL_EX.has(alias);
 }
 function epley1RM(w, r) {
   if (!r || r === 0) return w;
@@ -5762,7 +5764,11 @@ function openNumpad(inputEl, key, si, exIdx, field, isWu = false) {
 
 function closeNumpad() {
   const np = document.getElementById('numpad');
-  if (np) np.classList.remove('open');
+  if (np) {
+    np.classList.remove('open');
+    np.style.transform = '';
+    np.style.transition = '';
+  }
   document.body.classList.remove('numpad-open');
   document.querySelectorAll('.np-focus').forEach(e => e.classList.remove('np-focus'));
   NP.el = null;
@@ -6018,7 +6024,7 @@ function getLastPerformanceFull(exName) {
         const addIdx = parseInt(key.slice(4));
         if (w.additions[addIdx]) storedName = w.additions[addIdx].name;
         else {
-          const foundAdd = w.additions.find(a => a && (a.id === key || a.name === exName));
+          const foundAdd = w.additions.find(a => a && (a.id === key || a.name === exName || (a.name && exercisesMatch(a.name, exName))));
           if (foundAdd) storedName = foundAdd.name;
         }
       }
@@ -6952,7 +6958,7 @@ function getMuscleVolumeHistory(muscle) {
   const msW = 7 * 24 * 3600 * 1000;
   return Array.from({ length: 5 }, (_, i) => {
     const wStart = now - (4 - i + 1) * msW;
-    const wEnd   = now - (4 - i) * msW;
+    const wEnd   = i === 4 ? (now + 86400000) : (now - (4 - i) * msW);
     let sets = 0;
     for (const w of hist) {
       if (w.endTime < wStart || w.endTime >= wEnd || !w.sets) continue;
@@ -6962,7 +6968,7 @@ function getMuscleVolumeHistory(muscle) {
       if (!sess) continue;
       for (const [key, s] of Object.entries(w.sets)) {
         const ex = sess.exercises[parseInt(key.split('_').pop())];
-        if (ex && getMuscle(stripSuperset(ex.name)) === muscle) sets += s.length;
+        if (ex && getMuscle(stripSuperset(ex.name)) === muscle) sets += (Array.isArray(s) ? s.filter(x => x && x.r > 0).length : 0);
       }
     }
     const labels = ['W-4','W-3','W-2','Last','This'];
@@ -7021,7 +7027,7 @@ function getEpleyOverloadByMuscle(muscle, numWeeks = 5) {
   const prevExPeaks = {};  // prior-week peaks for the delta
   const weeks = Array.from({ length: numWeeks }, (_, i) => {
     const wStart = now - (numWeeks - i) * msW;
-    const wEnd   = now - (numWeeks - 1 - i) * msW;
+    const wEnd   = i === numWeeks - 1 ? (now + 86400000) : (now - (numWeeks - 1 - i) * msW);
     let peakE1RM = 0;
     for (const w of hist) {
       if (w.endTime < wStart || w.endTime >= wEnd || !w.sets) continue;
@@ -9646,10 +9652,11 @@ function commitWorkout() {
   if (prevSame && prevSame.sets) {
     let maxGain = 0;
     for (const [key, sets] of Object.entries(ST.workoutSets)) {
+      if (!Array.isArray(sets)) continue;
       const exIdx = parseInt(key.split('_').pop());
       const ex = sess && sess.exercises[exIdx];
       if (!ex) continue;
-      const prevSets = prevSame.sets[key] || [];
+      const prevSets = Array.isArray(prevSame.sets[key]) ? prevSame.sets[key] : [];
       const curMax = sets.reduce((m,s)=>Math.max(m,(s && s.w)||0),0);
       const prevMax = prevSets.reduce((m,s)=>Math.max(m,(s && s.w)||0),0);
       const gainName = (sets.find(s => s && s._name) || {})._name || stripSuperset(ex.name);
@@ -9927,6 +9934,10 @@ function dismissFinish() {
   // snapshot / "Continue" pill. currentProgram stays for the Home silhouette/streak.
   ST.currentSession = null;
   ST.workoutStart = null;
+  ST.workoutSets = {};
+  ST.completedCards = new Set();
+  ST.expandedCards = new Set();
+  ST.durationSecs = 0;
   Maps('home');
 }
 
@@ -10047,7 +10058,7 @@ function showProgressGraph(e, exName) {
         const addIdx = parseInt(key.slice(4));
         if (w.additions[addIdx]) storedName = w.additions[addIdx].name;
         else {
-          const foundAdd = w.additions.find(a => a && (a.id === key || a.name === exName));
+          const foundAdd = w.additions.find(a => a && (a.id === key || a.name === exName || (a.name && exercisesMatch(a.name, exName))));
           if (foundAdd) storedName = foundAdd.name;
         }
       }
@@ -10551,17 +10562,10 @@ function deleteCompletedWorkout(workoutId) {
       const s = getSettings();
       if (s.sheets) {
         const deletePayload = { action: 'deleteWorkout', id: w.id || w.endTime };
-        enqueueSyncPayload(deletePayload);
-        try {
-          fetch(s.sheets, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(deletePayload),
-          }).then(r => r.json()).then(d => {
-            if (d && d.ok) dequeueSyncPayload(deletePayload);
-          }).catch(()=>{});
-        } catch(e) {}
-        bgSyncToSheets(null, true);
+        (async () => {
+          await postToSheets(deletePayload);
+          await bgSyncToSheets(null, true);
+        })().catch(() => {});
       }
 
       if (ST.screen === 'history') renderHistory();
@@ -11245,17 +11249,19 @@ function exportCSV() {
   const hist = getHistory();
   let csv = 'Date,Program,Session,Exercise,Set,Weight,Reps\n';
   for (const w of hist) {
+    if (!w || !w.sets) continue;
     const prog = PROGRAMS.find(p => p.id === w.programId);
-    if (!prog) continue;
-    const sess = prog.sessions.find(s => s.id === w.sessionId);
-    if (!sess) continue;
-    const date = new Date(w.endTime).toISOString().split('T')[0];
+    const sess = prog && prog.sessions.find(s => s.id === w.sessionId);
+    const progName = prog ? prog.name : (w.programId === 'import' ? 'Strong Import' : 'Workout');
+    const sessName = w.sessionName || (sess ? sess.name : 'Session');
+    const date = new Date(w.endTime || w.startTime || Date.now()).toISOString().split('T')[0];
     for (const [key, sets] of Object.entries(w.sets || {})) {
+      if (!Array.isArray(sets) || key.endsWith('_wu')) continue;
       const exIdx = parseInt(key.split('_').pop());
-      const ex = sess.exercises[exIdx];
-      if (!ex) continue;
+      const fallbackName = (sess && !isNaN(exIdx) && sess.exercises[exIdx]) ? stripSuperset(sess.exercises[exIdx].name) : 'Exercise';
       (sets || []).filter(Boolean).forEach((s, i) => {
-        csv += `${date},${prog.name},${sess.name},${stripSuperset(ex.name)},${i+1},${s.w||0},${s.r||0}\n`;
+        const exName = (s && s._name) || fallbackName;
+        csv += `${date},${progName},${sessName},${stripSuperset(exName)},${i+1},${(s && s.w)||0},${(s && s.r)||0}\n`;
       });
     }
   }
@@ -11944,9 +11950,11 @@ async function bootstrapApp() {
   }
 
   // ── Cloud sync & Auto-Hydration for fresh devices ──────────────────────────
+  let didInitialPull = false;
   if (getHistory().length === 0) {
     try {
       const added = await pullFromSheets();
+      didInitialPull = true;
       if (added > 0 || getHistory().length > 0) {
         LS.set('dcrgym_onboarded', true);
       }
@@ -11958,20 +11966,22 @@ async function bootstrapApp() {
   // ── Cloud sync on every app open — PULL BEFORE PUSH (never clobber cloud) ──
   (async () => {
     try {
-      const added = await pullFromSheets();
-      if (added > 0) {
-        // If we were on onboarding and cloud restored past workouts, bypass onboarding immediately!
-        const currentHist = getHistory();
-        if (currentHist.length > 0 && !LS.get('dcrgym_onboarded')) {
-          LS.set('dcrgym_onboarded', true);
-          const obEl = document.getElementById('screen-home');
-          if (obEl) { obEl.innerHTML = ''; obEl.style.display = 'none'; obEl.classList.remove('active'); }
-          const nav = document.getElementById('bottom-nav');
-          if (nav) nav.style.display = 'flex';
-          Maps('home');
-        } else {
-          if (ST.screen === 'home') renderHome();
-          else if (ST.screen === 'history') renderHistory();
+      if (!didInitialPull) {
+        const added = await pullFromSheets();
+        if (added > 0) {
+          // If we were on onboarding and cloud restored past workouts, bypass onboarding immediately!
+          const currentHist = getHistory();
+          if (currentHist.length > 0 && !LS.get('dcrgym_onboarded')) {
+            LS.set('dcrgym_onboarded', true);
+            const obEl = document.getElementById('screen-home');
+            if (obEl) { obEl.innerHTML = ''; obEl.style.display = 'none'; obEl.classList.remove('active'); }
+            const nav = document.getElementById('bottom-nav');
+            if (nav) nav.style.display = 'flex';
+            Maps('home');
+          } else {
+            if (ST.screen === 'home') renderHome();
+            else if (ST.screen === 'history') renderHistory();
+          }
         }
       }
       await drainSyncQueue();
