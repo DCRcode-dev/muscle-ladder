@@ -7,12 +7,13 @@ const SHEET_NAME_SUMMARY = "WorkoutSummary";
 const SHEET_NAME_STATE   = "AppState";
 
 function doGet(e) {
-  const action = e && e.parameter && e.parameter.action;
+  const rawAction = (e && e.parameter && e.parameter.action) || 'ping';
+  const action = String(rawAction).trim().toLowerCase();
 
   if (action === 'ping')      return jsonResponse({ ok: true, message: 'Muscle Ladder backend connected!' });
-  if (action === 'pullState') return pullState();
+  if (action === 'pullstate') return pullState();
 
-  return jsonResponse({ ok: false, message: 'Unknown action: ' + action });
+  return jsonResponse({ ok: false, message: 'Unknown action: ' + rawAction });
 }
 
 function doPost(e) {
@@ -335,6 +336,28 @@ function deleteWorkoutInSheet(wid) {
       }
     }
   }
+
+  let stateSheet = ss.getSheetByName(SHEET_NAME_STATE);
+  if (stateSheet) {
+    const values = stateSheet.getDataRange().getValues();
+    if (values.length === 2 && values[1][0] && String(values[1][0]).trim().startsWith('[')) {
+      try {
+        const oldHistory = JSON.parse(values[1][0]);
+        if (Array.isArray(oldHistory)) {
+          const filtered = oldHistory.filter(w => w && String(w.id) !== String(wid) && String(w.endTime) !== String(wid));
+          stateSheet.getRange(2, 1).setValue(JSON.stringify(filtered));
+        }
+      } catch(e) {}
+    } else {
+      for (let i = values.length - 1; i >= 1; i--) {
+        const rowId = String(values[i][0]);
+        if (rowId === String(wid)) {
+          stateSheet.deleteRow(i + 1);
+        }
+      }
+    }
+  }
+
   return jsonResponse({ ok: true });
 }
 

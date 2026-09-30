@@ -163,8 +163,8 @@ html, body {
   overflow-y: auto; overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   will-change: transform, opacity;
-  transition: transform 350ms cubic-bezier(0.16,1,0.3,1),
-              opacity  350ms cubic-bezier(0.16,1,0.3,1);
+  transition: transform 280ms cubic-bezier(0.16,1,0.3,1),
+              opacity  280ms cubic-bezier(0.16,1,0.3,1);
   opacity: 0; pointer-events: none; z-index: 0;
 }
 .screen.active        { transform: translateX(0);   opacity: 1; pointer-events: all; z-index: 10; }
@@ -174,9 +174,9 @@ html, body {
 .screen.slide-in-left   { transform: translateX(-30%); opacity: 0; pointer-events: none; }
 .screen-content { padding-bottom: calc(var(--nav-h) + 24px); }
 /* Island non-occlusion: every screen glides down beneath the rest capsule */
-.screen { transition: transform 350ms cubic-bezier(0.16,1,0.3,1),
-                      opacity  350ms cubic-bezier(0.16,1,0.3,1),
-                      padding-top 340ms cubic-bezier(0.16,1,0.3,1); }
+.screen { transition: transform 280ms cubic-bezier(0.16,1,0.3,1),
+                      opacity  280ms cubic-bezier(0.16,1,0.3,1),
+                      padding-top 280ms cubic-bezier(0.16,1,0.3,1); }
 body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58px); }
 
 /* ── Bottom nav ── */
@@ -896,7 +896,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
   opacity: 1;
   pointer-events: auto;
 }
-#rest-island.expanded { max-width: min(92vw, 390px); }
+#rest-island.expanded, #rest-island.go { max-width: min(92vw, 390px); }
 #rest-island.go { background: #154D2B; border-color: rgba(74, 222, 128, 0.4); }
 #rest-island:active { transform: translateX(-50%) translateY(0) scale(0.96); }
 #rest-hud-ring { position: relative; width: 36px; height: 36px; flex-shrink: 0; }
@@ -1164,9 +1164,9 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
 .action-sheet-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; line-height: 1.3; }
 
 /* Card body */
-.ex-body { max-height: 0; overflow: hidden; transition: max-height 320ms var(--ease); }
-.ex-card.expanded .ex-body { max-height: 900px; }
-.ex-body-inner { padding: 0 16px 18px; }
+.ex-body { display: grid; grid-template-rows: 0fr; overflow: hidden; transition: grid-template-rows 260ms cubic-bezier(0.16, 1, 0.3, 1); }
+.ex-card.expanded .ex-body { grid-template-rows: 1fr; }
+.ex-body-inner { overflow: hidden; min-height: 0; padding: 0 16px 18px; }
 .warmup-hint { font-style: italic; font-size: 12px; color: var(--text-tertiary); margin-bottom: 10px; }
 
 /* ── Warm-up set row ── */
@@ -1248,12 +1248,14 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   box-sizing: border-box;
   padding: 6px 8px;
   border-radius: 14px;
-  border: 1px solid transparent;
-  transition: all var(--dur-smooth) var(--spring-snappy);
+  border: 1.5px solid transparent;
+  transition: background var(--dur-smooth) var(--spring-snappy),
+              border-color var(--dur-smooth) var(--spring-snappy),
+              box-shadow var(--dur-smooth) var(--spring-snappy);
 }
 .set-row.active-focus {
   background: rgba(240, 78, 35, 0.05);
-  border: 1.5px solid var(--accent-kinetic);
+  border-color: var(--accent-kinetic);
   box-shadow: 0 0 0 3px rgba(240, 78, 35, 0.12), var(--shadow-sm);
 }
 .set-row.active-focus .set-num {
@@ -2399,7 +2401,7 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
     Home
   </button>
   <button class="nav-btn" data-nav="workouts-browser" onclick="Maps('workouts-browser')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg>
     Workouts
   </button>
 
@@ -5407,7 +5409,7 @@ function saveMeasurements(m) { LS.set('dcrgym_measurements', m); idbSet('dcrgym_
 // Schema-versioned, non-destructive, with rolling last-good backup.
 // History must survive every app update. Period.
 const SCHEMA_VERSION = 3;
-const APP_BUILD = '2026.09.30 · ota-25 · restored-all-exercises';
+const APP_BUILD = '2026.09.30 · ota-26 · sync-motion-bugfixes';
 
 function convertHistoryWeightsToLbs(hist) {
   if (!Array.isArray(hist)) return 0;
@@ -5428,8 +5430,14 @@ function convertHistoryWeightsToLbs(hist) {
 }
 
 function convertHistoryUnits(targetUnit) {
+  if (getSettings().weightUnit === targetUnit) return;
   const currentHist = getHistory();
-  if (!currentHist || currentHist.length === 0) return;
+  if (!currentHist || currentHist.length === 0) {
+    const settings = getSettings();
+    settings.weightUnit = targetUnit;
+    saveSettings(settings);
+    return;
+  }
   const factor = targetUnit === 'lb' ? 2.20462 : (1 / 2.20462);
   for (const w of currentHist) {
     if (!w || !w.sets) continue;
@@ -5760,6 +5768,46 @@ function closeNumpad() {
   NP.el = null;
 }
 
+(function initNumpadDrag() {
+  const grab = document.querySelector('.np-grab');
+  const np = document.getElementById('numpad');
+  if (!grab || !np) return;
+  let startY = 0, curY = 0, dragging = false;
+  grab.addEventListener('touchstart', (e) => {
+    dragging = true;
+    startY = curY = e.touches[0].clientY;
+    np.style.transition = 'none';
+  }, { passive: true });
+  grab.addEventListener('touchmove', (e) => {
+    if (!dragging) return;
+    curY = e.touches[0].clientY;
+    let dy = curY - startY;
+    if (dy < 0) dy = -Math.pow(-dy, 0.72);
+    np.style.transform = `translateY(${Math.max(dy, -15)}px)`;
+  }, { passive: true });
+  const release = () => {
+    if (!dragging) return;
+    dragging = false;
+    const dy = curY - startY;
+    if (dy > 50) {
+      haptic('tick');
+      np.style.transition = 'transform 200ms cubic-bezier(0.16, 1, 0.3, 1)';
+      np.style.transform = 'translateY(105%)';
+      setTimeout(() => {
+        np.style.transition = '';
+        np.style.transform = '';
+        closeNumpad();
+      }, 200);
+    } else {
+      np.style.transition = 'transform 240ms cubic-bezier(0.16, 1, 0.3, 1)';
+      np.style.transform = '';
+      setTimeout(() => { np.style.transition = ''; }, 240);
+    }
+  };
+  grab.addEventListener('touchend', release);
+  grab.addEventListener('touchcancel', release);
+})();
+
 function _npCommitDraft() {
   if (!NP.key) return;
   if (NP.isWu) markDraftWu(NP.key); else markDraft(NP.key, NP.si);
@@ -5970,7 +6018,7 @@ function getLastPerformanceFull(exName) {
         const addIdx = parseInt(key.slice(4));
         if (w.additions[addIdx]) storedName = w.additions[addIdx].name;
         else {
-          const foundAdd = w.additions.find(a => a.id === key || a.name);
+          const foundAdd = w.additions.find(a => a && (a.id === key || a.name === exName));
           if (foundAdd) storedName = foundAdd.name;
         }
       }
@@ -6024,7 +6072,7 @@ function getStats() {
   const thisMonth = hist.filter(w => w.endTime >= monthStart).length;
   const thisWeekVol = hist.filter(w => w.endTime >= weekStart).reduce((sum,w) => {
     if (!w.sets) return sum;
-    return sum + Object.values(w.sets).flat().reduce((s,set) => s+(set.w||0)*(set.r||0),0);
+    return sum + Object.values(w.sets).flat().filter(Boolean).reduce((s,set) => s+(set.w||0)*(set.r||0),0);
   }, 0);
   // Streak: count consecutive weeks with at least 1 workout
   let streak = 0;
@@ -6227,6 +6275,8 @@ function playSound(type) {
 
 // ── Rest timer ────────────────────────────────────────────────────────────────
 function startRestTimer(seconds, exName, nextText, afterText, isLast) {
+  if (ST.restGoTimeout) { clearTimeout(ST.restGoTimeout); ST.restGoTimeout = null; }
+  if (ST.restHapticInterval) { clearInterval(ST.restHapticInterval); ST.restHapticInterval = null; }
   if (document.activeElement && typeof document.activeElement.blur === 'function') {
     document.activeElement.blur();
   }
@@ -6259,10 +6309,18 @@ function startRestTimer(seconds, exName, nextText, afterText, isLast) {
 function addRestTime(secs) {
   if (!ST.restActive) return;
   ST.restEndTime += secs * 1000;
+  ST.restDuration = (ST.restDuration || 0) + secs;
   LS.set('dcrgym_rest_end', ST.restEndTime);
+  LS.set('dcrgym_rest_dur', ST.restDuration);
   const remaining = Math.ceil((ST.restEndTime - Date.now()) / 1000);
   const el = document.getElementById('rest-countdown');
   if (el) el.textContent = formatDuration(remaining);
+  updateRestHudRing(remaining);
+  if (ST.swReg && ST.notifEnabled && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage({
+      type: 'SCHEDULE_NOTIFICATION', delay: Math.max(0, ST.restEndTime - Date.now())
+    });
+  }
 }
 
 function cancelRestTimer() {
@@ -6589,7 +6647,7 @@ function Maps(to, data={}) {
       setTimeout(() => {
         fromEl.style.display = 'none';
         fromEl.classList.remove('slide-out-left', 'slide-out-right');
-      }, 270);
+      }, 290);
     });
   });
 }
@@ -7954,9 +8012,10 @@ function exerciseCardHTML(ex, key, i, isAddition) {
             <span style="color:var(--text-tertiary);font-size:12px;">Rest:</span>
             <span class="rest-time-display" id="rest-lbl-${key}" onclick="editRestTime('${key}',${i},this)" title="Tap to edit">${formatDuration(restSec)}</span>
           </div>
+          ${isBarbell(displayName) ? `
           <button class="plate-calc-trigger" onclick="showPlateCalcSheet('${displayName.replace(/'/g, "\\'")}','${key}')" title="Plate Calculator">
             <span>⚖ Plates</span>
-          </button>
+          </button>` : ''}
         </div>
         <!-- Inline note panel — revealed by header pen icon -->
         <div class="ex-note-panel${(ST.workoutNotes[key] || noteVal) ? ' open' : ''}" id="notepanel-${key}">
@@ -8133,13 +8192,14 @@ function showExerciseActionSheet(e, key, exIdx, isAddition) {
           </div>
         </button>
 
+        ${isBarbell(name) ? `
         <button class="action-sheet-row" onclick="closeSheet();showPlateCalcSheet('${name.replace(/'/g, "\\'")}','${key}')">
           <div class="action-sheet-icon">⚖</div>
           <div class="action-sheet-label">
             <div>Barbell Plate Calculator</div>
             <div class="action-sheet-sub">Calculate exact plate loading per side</div>
           </div>
-        </button>
+        </button>` : ''}
 
         <button class="action-sheet-row" onclick="closeSheet();editRestTimeFromActionSheet('${key}',${exIdx})">
           <div class="action-sheet-icon">◷</div>
@@ -8227,13 +8287,23 @@ function showPlateCalcSheet(name, key, defaultWeight) {
         ${renderPlatePopover(_currentPlateCalcWeight)}
       </div>
       <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin: 16px 0 20px;">
+        ${unit === 'lb' ? `
         <button class="btn-sheet-ghost" style="padding: 8px 12px; font-size: 13px; font-weight: 700; border-radius: 12px;" onclick="adjustPlateCalcWeight(-10)">-10</button>
         <button class="btn-sheet-ghost" style="padding: 8px 12px; font-size: 13px; font-weight: 700; border-radius: 12px;" onclick="adjustPlateCalcWeight(-5)">-5</button>
+        ` : `
+        <button class="btn-sheet-ghost" style="padding: 8px 12px; font-size: 13px; font-weight: 700; border-radius: 12px;" onclick="adjustPlateCalcWeight(-5)">-5</button>
+        <button class="btn-sheet-ghost" style="padding: 8px 12px; font-size: 13px; font-weight: 700; border-radius: 12px;" onclick="adjustPlateCalcWeight(-2.5)">-2.5</button>
+        `}
         <div style="min-width: 110px; text-align: center; font-family: var(--font-mono); font-size: 22px; font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums;" id="plate-calc-weight-lbl">
           ${_currentPlateCalcWeight} <span style="font-size: 13px; color: var(--text-tertiary); font-weight: 500;">${unit}</span>
         </div>
+        ${unit === 'lb' ? `
         <button class="btn-sheet-ghost" style="padding: 8px 12px; font-size: 13px; font-weight: 700; border-radius: 12px;" onclick="adjustPlateCalcWeight(5)">+5</button>
         <button class="btn-sheet-ghost" style="padding: 8px 12px; font-size: 13px; font-weight: 700; border-radius: 12px;" onclick="adjustPlateCalcWeight(10)">+10</button>
+        ` : `
+        <button class="btn-sheet-ghost" style="padding: 8px 12px; font-size: 13px; font-weight: 700; border-radius: 12px;" onclick="adjustPlateCalcWeight(2.5)">+2.5</button>
+        <button class="btn-sheet-ghost" style="padding: 8px 12px; font-size: 13px; font-weight: 700; border-radius: 12px;" onclick="adjustPlateCalcWeight(5)">+5</button>
+        `}
       </div>
       <div style="display: flex; gap: 8px;">
         ${key ? `<button class="btn btn-primary" style="flex: 1;" onclick="applyPlateCalcWeight('${key}')">Apply to Exercise</button>` : ''}
@@ -8247,7 +8317,7 @@ function showPlateCalcSheet(name, key, defaultWeight) {
 function adjustPlateCalcWeight(delta) {
   const unit = getWeightUnit();
   const barW = unit === 'lb' ? 45 : 20;
-  _currentPlateCalcWeight = Math.max(barW, _currentPlateCalcWeight + delta);
+  _currentPlateCalcWeight = Math.max(barW, Math.round((_currentPlateCalcWeight + delta) * 10) / 10);
   const vis = document.getElementById('plate-calc-visual');
   const lbl = document.getElementById('plate-calc-weight-lbl');
   if (vis) vis.innerHTML = renderPlatePopover(_currentPlateCalcWeight);
@@ -8325,7 +8395,10 @@ function renderPlatePopover(totalW) {
 function calcVolume() {
   let v = 0;
   for (const sets of Object.values(ST.workoutSets)) {
-    for (const s of sets) v += (s.w||0)*(s.r||0);
+    if (!Array.isArray(sets)) continue;
+    for (const s of sets) {
+      if (s && s.w > 0 && s.r > 0) v += s.w * s.r;
+    }
   }
   return Math.round(v);
 }
@@ -8501,7 +8574,11 @@ function logSet(key, si, exIdx) {
   if (row) {
     row.classList.remove('active-focus');
     const btn = row.querySelector('.set-log-btn');
-    if (btn) { btn.classList.add('logged'); btn.innerHTML = checkSVG(); }
+    if (btn) {
+      btn.classList.add('logged');
+      btn.innerHTML = checkSVG();
+      btn.onclick = () => unlogSet(key, si, exIdx);
+    }
 
     if (isPR) {
       const nextEl = row.nextElementSibling;
@@ -9196,9 +9273,20 @@ function __closeSheetDom() {
     if (!dragging) return;
     dragging = false;
     const dy = curY - startY;
-    sheet.style.transition = '';
-    sheet.style.transform = '';
-    if (dy > 88) { haptic('tick'); closeSheet(); }
+    if (dy > 88) {
+      haptic('tick');
+      sheet.style.transition = 'transform 220ms cubic-bezier(0.16, 1, 0.3, 1)';
+      sheet.style.transform = 'translateY(100%)';
+      setTimeout(() => {
+        sheet.style.transition = '';
+        sheet.style.transform = '';
+        closeSheet();
+      }, 220);
+    } else {
+      sheet.style.transition = 'transform 260ms cubic-bezier(0.16, 1, 0.3, 1)';
+      sheet.style.transform = '';
+      setTimeout(() => { sheet.style.transition = ''; }, 260);
+    }
   };
   sheet.addEventListener('touchend', release);
   sheet.addEventListener('touchcancel', release);
@@ -9562,8 +9650,8 @@ function commitWorkout() {
       const ex = sess && sess.exercises[exIdx];
       if (!ex) continue;
       const prevSets = prevSame.sets[key] || [];
-      const curMax = sets.reduce((m,s)=>Math.max(m,s.w||0),0);
-      const prevMax = prevSets.reduce((m,s)=>Math.max(m,s.w||0),0);
+      const curMax = sets.reduce((m,s)=>Math.max(m,(s && s.w)||0),0);
+      const prevMax = prevSets.reduce((m,s)=>Math.max(m,(s && s.w)||0),0);
       const gainName = (sets.find(s => s && s._name) || {})._name || stripSuperset(ex.name);
       // Only a real gain if there was a prior load to beat — skips first-time
       // additions/exercises that would otherwise read as a spurious "+Xkg".
@@ -9657,6 +9745,13 @@ function commitWorkout() {
   bgSyncToSheets(entry);
 
   if (wasEditing || wasBackdated) {
+    ST.currentProgram = null;
+    ST.currentSession = null;
+    ST.workoutSets = {};
+    ST.workoutStart = null;
+    ST.completedCards = new Set();
+    ST.expandedCards = new Set();
+    ST.durationSecs = 0;
     Maps('history');
     return;
   }
@@ -9715,11 +9810,11 @@ function showFinish() {
     for (const [k, sets] of Object.entries(lastEntry.sets)) {
       if (!Array.isArray(sets)) continue;
       for (const st of sets) {
-        if (st && st.w > 0 && st.r > 0) {
-          totalVol += (st.w * st.r);
+        if (st && st.r > 0) {
+          if (st.w > 0) totalVol += (st.w * st.r);
           totalSetsDone++;
           if (st._isPR) {
-            prsHit.push(`${st._name || 'Movement'} · ${st.w} ${unit} × ${st.r}`);
+            prsHit.push(`${st._name || 'Movement'} · ${st.w || 'BW'} ${unit} × ${st.r}`);
           }
         }
       }
@@ -9811,10 +9906,10 @@ function showFinish() {
       <div class="finish-stat"><div class="finish-stat-val">${volStr} ${unit}</div><div class="finish-stat-lbl">Tonnage</div></div>
       <div class="finish-stat"><div class="finish-stat-val">${totalSetsDone}</div><div class="finish-stat-lbl">Sets Logged</div></div>
     </div>
-      <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;">
-        ${(lastEntry && lastEntry.cardioLoad) ? `<strong style="color:var(--text-primary);">${lastEntry.cardioLoad}</strong> Cardio Load score synced from Fitbit` : 'Fetching Cardio Load from Fitbit...'}
-      </div>
-    </div>
+    ${(s.duration > 0 && totalVol > 0) ? `
+      <div style="font-size:12px;color:var(--text-secondary);margin: -4px 0 14px;">
+        <strong style="color:var(--text-primary);">${Math.round(totalVol / Math.max(1, (s.duration / 60)))}</strong> ${unit}/min workout density
+      </div>` : ''}
     ${prog ? `<div class="finish-plan-table">${tableRows}</div>` : ''}
     <button class="btn btn-primary" style="max-width:360px;width:100%;font-size:15px;padding:14px;" onclick="dismissFinish()">Back to Home</button>
   `;
@@ -9952,7 +10047,7 @@ function showProgressGraph(e, exName) {
         const addIdx = parseInt(key.slice(4));
         if (w.additions[addIdx]) storedName = w.additions[addIdx].name;
         else {
-          const foundAdd = w.additions.find(a => a.id === key || a.name);
+          const foundAdd = w.additions.find(a => a && (a.id === key || a.name === exName));
           if (foundAdd) storedName = foundAdd.name;
         }
       }
@@ -10455,13 +10550,18 @@ function deleteCompletedWorkout(workoutId) {
       
       const s = getSettings();
       if (s.sheets) {
+        const deletePayload = { action: 'deleteWorkout', id: w.id || w.endTime };
+        enqueueSyncPayload(deletePayload);
         try {
           fetch(s.sheets, {
             method: 'POST',
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify({ action: 'deleteWorkout', id: w.id || w.endTime }),
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(deletePayload),
+          }).then(r => r.json()).then(d => {
+            if (d && d.ok) dequeueSyncPayload(deletePayload);
           }).catch(()=>{});
         } catch(e) {}
+        bgSyncToSheets(null, true);
       }
 
       if (ST.screen === 'history') renderHistory();
@@ -11154,7 +11254,7 @@ function exportCSV() {
       const exIdx = parseInt(key.split('_').pop());
       const ex = sess.exercises[exIdx];
       if (!ex) continue;
-      sets.forEach((s, i) => {
+      (sets || []).filter(Boolean).forEach((s, i) => {
         csv += `${date},${prog.name},${sess.name},${stripSuperset(ex.name)},${i+1},${s.w||0},${s.r||0}\n`;
       });
     }
@@ -11193,6 +11293,14 @@ function importStrongCSV(input) {
       return;
     }
 
+    let headerWeightUnit = null;
+    if (colWeight !== -1) {
+      const hText = header[colWeight];
+      if (hText.includes('kg')) headerWeightUnit = 'kg';
+      else if (hText.includes('lb')) headerWeightUnit = 'lb';
+    }
+    const activeWeightUnit = getWeightUnit();
+
     const hist = getHistory();
     let parsed = 0;
     let currentDate = null, currentWorkout = null;
@@ -11221,7 +11329,15 @@ function importStrongCSV(input) {
       const clean = exName.replace(/\s*\([^)]*\)/g,'').trim();
       const key = 'import_' + clean.replace(/\s/g,'_').toLowerCase();
       if (!currentWorkout.sets[key]) currentWorkout.sets[key] = [];
-      currentWorkout.sets[key].push({ w: parseFloat(weightStr)||0, r: parseInt(repsStr)||0, ts: date, _name: clean });
+
+      let parsedWeight = parseFloat(weightStr) || 0;
+      if (headerWeightUnit === 'kg' && activeWeightUnit === 'lb') {
+        parsedWeight = Math.round(parsedWeight * 2.20462 * 2) / 2;
+      } else if (headerWeightUnit === 'lb' && activeWeightUnit === 'kg') {
+        parsedWeight = Math.round((parsedWeight / 2.20462) * 10) / 10;
+      }
+
+      currentWorkout.sets[key].push({ w: parsedWeight, r: parseInt(repsStr)||0, ts: date, _name: clean });
     }
 
     if (currentWorkout) hist.push(currentWorkout);
@@ -11419,11 +11535,28 @@ function selectProgram(id) {
 // ── Init ──────────────────────────────────────────────────────────────────────
 // beforeinstallprompt: not needed — install is native Android Chrome flow
 
+function requestWakeLock() {
+  if (navigator.wakeLock && !ST.editingWorkoutId && !ST.isBackdated) {
+    navigator.wakeLock.request('screen').then(wl => { ST.wakeLock = wl; }).catch(() => {});
+  }
+}
+
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible' && ST.restActive) {
-    const remaining = Math.ceil((ST.restEndTime - Date.now()) / 1000);
-    if (remaining <= 0) { restExpire(); }   // GO morph greets the return
-    else { renderRestIsland(); }
+  if (document.visibilityState === 'visible') {
+    if (ST.currentSession && !ST.workoutCommitted) {
+      requestWakeLock();
+    }
+    if (ST.restActive) {
+      const remaining = Math.ceil((ST.restEndTime - Date.now()) / 1000);
+      if (remaining <= 0) { restExpire(); }   // GO morph greets the return
+      else { renderRestIsland(); }
+    }
+    pullFromSheets().then(added => {
+      if (added > 0) {
+        if (ST.screen === 'home') renderHome();
+        else if (ST.screen === 'history') renderHistory();
+      }
+    }).catch(() => {});
   }
 });
 
@@ -11452,14 +11585,14 @@ async function pullFromSheets() {
 // next boot or on connectivity restore. Nothing is ever silently dropped.
 
 function enqueueSyncPayload(payload) {
+  payload._qid = payload._qid || (Date.now() + '_' + Math.random().toString(36).slice(2, 7));
   let queue = LS.get('dcrgym_sync_queue', []);
-  // Deduplicate by action + ts to avoid pile-up on retries
-  const key = (payload.action || '') + (payload.ts || '');
-  if (key && queue.some(i => (i.payload.action || '') + (i.payload.ts || '') === key)) return;
+  // Deduplicate by unique _qid
+  if (queue.some(i => i.payload && i.payload._qid === payload._qid)) return;
   queue.push({ payload, ts: Date.now() });
   // Cap at 50 entries — keep newest, drop oldest saveState entries first
   if (queue.length > 50) {
-    const saveStateIdxs = queue.map((i,n) => i.payload.action==='saveState'?n:-1).filter(n=>n>=0);
+    const saveStateIdxs = queue.map((i,n) => (i.payload && i.payload.action==='saveState')?n:-1).filter(n=>n>=0);
     if (saveStateIdxs.length > 1) queue.splice(saveStateIdxs[0], 1); // drop oldest saveState
     else queue.shift(); // drop oldest entry
   }
@@ -11467,10 +11600,14 @@ function enqueueSyncPayload(payload) {
 }
 
 function dequeueSyncPayload(payload) {
-  const key = (payload.action || '') + (payload.ts || '');
-  if (!key) return;
+  const qid = payload && payload._qid;
+  const legacyKey = (payload.action || '') + (payload.ts || '');
   const queue = LS.get('dcrgym_sync_queue', []);
-  const filtered = queue.filter(i => (i.payload.action || '') + (i.payload.ts || '') !== key);
+  const filtered = queue.filter(i => {
+    if (!i.payload) return false;
+    if (qid && i.payload._qid) return i.payload._qid !== qid;
+    return (i.payload.action || '') + (i.payload.ts || '') !== legacyKey;
+  });
   LS.set('dcrgym_sync_queue', filtered);
 }
 
@@ -11635,7 +11772,7 @@ function cloudSyncStatus() {
   return 'last synced ' + syncRelTime(t) + (q ? ' · ' + q + ' pending' : '');
 }
 
-async function bgSyncToSheets(specificEntry) {
+async function bgSyncToSheets(specificEntry, onlyState) {
   const s = getSettings();
   if (!s.sheets) return;
   const hist = getHistory();
@@ -11643,6 +11780,8 @@ async function bgSyncToSheets(specificEntry) {
 
   // Full restorable state blob — this is what Recover / pullState reads back.
   await postToSheets({ action: 'saveState', history: hist, ts: Date.now() });
+
+  if (onlyState) return;
 
   // Readable rows for the just-finished workout. Built from the history record
   // (not live ST), so it stays correct even if the user navigated away.
@@ -11804,6 +11943,18 @@ async function bootstrapApp() {
     }).catch(() => {});
   }
 
+  // ── Cloud sync & Auto-Hydration for fresh devices ──────────────────────────
+  if (getHistory().length === 0) {
+    try {
+      const added = await pullFromSheets();
+      if (added > 0 || getHistory().length > 0) {
+        LS.set('dcrgym_onboarded', true);
+      }
+    } catch(e) {
+      console.warn('[DCR Gym Shell] Initial cloud auto-hydration notice:', e);
+    }
+  }
+
   // ── Cloud sync on every app open — PULL BEFORE PUSH (never clobber cloud) ──
   (async () => {
     try {
@@ -11840,7 +11991,7 @@ async function bootstrapApp() {
   // Routing — uses LS proxy, no raw localStorage calls
   try {
     const _ob = LS.get('dcrgym_onboarded');
-    const onboarded = _ob === true || _ob === 'true';
+    const onboarded = _ob === true || _ob === 'true' || getHistory().length > 0;
 
     if (!onboarded && getHistory().length === 0) {
       console.log('[DCR Gym Shell] First launch → onboarding');
