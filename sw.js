@@ -1,6 +1,6 @@
 
-const CACHE = 'dcr-gym-v34';
-const ASSETS = ['./index.html', './programs.js', './manifest.json', './icon-192.png', './icon-512.png'];
+const CACHE = 'dcr-gym-v35';
+const ASSETS = ['./index.html', './programs.js', './manifest.json', './Resources/icon-192.png', './Resources/icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
@@ -83,8 +83,8 @@ self.addEventListener('message', e => {
         self.__resolveRestTimer = null;
         self.registration.showNotification('Lock In DCR!', {
           body: 'Rest over — next set is waiting.',
-          icon: './icon-192.png',
-          badge: './icon-192.png',
+          icon: './Resources/icon-192.png',
+          badge: './Resources/icon-192.png',
           vibrate: [300, 100, 300, 100, 300, 100, 400],
           tag: 'dcr-rest',
           renotify: true,

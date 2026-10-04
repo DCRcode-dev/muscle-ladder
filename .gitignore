@@ -6,6 +6,8 @@
 
 # local source photos (not for deploy)
 Workouts/
+Resources/Workouts/
 
 # local junk drawer (not for deploy)
 _Archive/
+Archive/
