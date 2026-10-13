@@ -32,6 +32,59 @@ function doPost(e) {
 }
 
 // ── STATE BLOB (bidirectional sync) ──────────────────────────────────────────
+const PROGRAM_SESSION_MAP_ = {
+  'Upper/Lower/Push/Pull/Legs': {
+    id: 'p14',
+    sessions: {
+      'Upper #1 (Strength Focus)': 'p14_s1',
+      'Lower #1 (Strength Focus)': 'p14_s2',
+      'Push #1 (Hypertrophy Focus)': 'p14_s3',
+      'Pull #1 (Hypertrophy Focus)': 'p14_s4',
+      'Legs #1 (Hypertrophy Focus)': 'p14_s5'
+    }
+  },
+  'Upper/Lower Split': {
+    id: 'p7',
+    sessions: {
+      'Upper #1 (Strength Focus)': 'p7_s1',
+      'Lower #1 (Strength Focus)': 'p7_s2',
+      'Upper #2 (Hypertrophy Focus)': 'p7_s3',
+      'Lower #2 (Hypertrophy Focus)': 'p7_s4'
+    }
+  },
+  'Full Body Split': {
+    id: 'p12',
+    sessions: {
+      'Full Body #1 (Strength Focus)': 'p12_s1',
+      'Full Body #2 (Hypertrophy Focus)': 'p12_s2',
+      'Full Body #3 (Strength Focus)': 'p12_s3',
+      'Full Body #4 (Hypertrophy Focus)': 'p12_s4',
+      'Full Body #5 (Hypertrophy Focus)': 'p12_s5'
+    }
+  },
+  'Push/Pull/Legs': {
+    id: 'p19',
+    sessions: {
+      'Push #1 (Strength Focus)': 'p19_s1',
+      'Pull #1 (Strength Focus)': 'p19_s2',
+      'Legs #1 (Strength Focus)': 'p19_s3',
+      'Push #2 (Hypertrophy Focus)': 'p19_s4',
+      'Pull #2 (Hypertrophy Focus)': 'p19_s5',
+      'Legs #2 (Hypertrophy Focus)': 'p19_s6'
+    }
+  }
+};
+
+function mergeWorkoutRecords_(existingW, incomingW) {
+  if (!existingW) return incomingW;
+  if (!incomingW) return existingW;
+  // Prefer the record with a real programId over 'import'
+  const base = (incomingW.programId && incomingW.programId !== 'import') ? incomingW : existingW;
+  const other = (base === incomingW) ? existingW : incomingW;
+  const mergedSets = Object.assign({}, other.sets || {}, base.sets || {});
+  return Object.assign({}, other, base, { sets: mergedSets });
+}
+
 function reconstructHistoryFromLog_() {
   const ss = getSpreadsheet_();
   const logSheet = ss.getSheetByName(SHEET_NAME_LOG);
@@ -47,6 +100,7 @@ function reconstructHistoryFromLog_() {
       const row = values[i];
       const rowId       = String(row[0] || '');
       const dateStr     = String(row[1] || '');
+      const progName    = String(row[2] || '');
       const sessionName = String(row[3] || '');
       const exName      = String(row[4] || '');
       const setNum      = Number(row[5] || 0);
@@ -69,16 +123,20 @@ function reconstructHistoryFromLog_() {
       
       if (!workoutsMap[wid]) {
         const timestamp = isNaN(Number(wid)) ? new Date(dateStr).getTime() : Number(wid);
+        const mappedProg = PROGRAM_SESSION_MAP_[progName];
+        const resolvedProgId = mappedProg ? mappedProg.id : 'import';
+        const resolvedSessId = (mappedProg && mappedProg.sessions[sessionName]) ? mappedProg.sessions[sessionName] : 'import';
         workoutsMap[wid] = {
           id: wid,
-          programId: 'import',
-          sessionId: 'import',
+          programId: resolvedProgId,
+          sessionId: resolvedSessId,
           sessionName: sessionName || 'Imported Workout',
           startTime: timestamp || Date.now(),
           endTime: timestamp || Date.now(),
           duration: duration ? parseInt(duration) || 3600 : 3600,
           travelMode: false,
-          sets: {}
+          sets: {},
+          _unitLb: (timestamp >= 1788000000000)
         };
       }
       
@@ -166,7 +224,11 @@ function pullState() {
     if (reconstructed.length > 0) {
       const map = {};
       reconstructed.forEach(function(w) { if (w && w.id) map[w.id] = w; });
-      history.forEach(function(w) { if (w && w.id) map[w.id] = w; });
+      history.forEach(function(w) {
+        if (w && w.id) {
+          map[w.id] = map[w.id] ? mergeWorkoutRecords_(map[w.id], w) : w;
+        }
+      });
       const merged = Object.keys(map).map(function(k) { return map[k]; })
                            .sort(function(a, b) { return (a.endTime || 0) - (b.endTime || 0); });
       
@@ -219,7 +281,11 @@ function saveState(history, ts) {
 
   const map = {};
   (existing || []).forEach(function(w) { if (w && w.id) map[w.id] = w; });
-  (history  || []).forEach(function(w) { if (w && w.id) map[w.id] = w; });
+  (history  || []).forEach(function(w) {
+    if (w && w.id) {
+      map[w.id] = map[w.id] ? mergeWorkoutRecords_(map[w.id], w) : w;
+    }
+  });
   const merged = Object.keys(map).map(function(k) { return map[k]; })
                        .sort(function(a, b) { return (a.endTime || 0) - (b.endTime || 0); });
 
