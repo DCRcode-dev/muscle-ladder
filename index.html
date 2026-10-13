@@ -5918,7 +5918,7 @@ function buildWorkoutPayload() {
     v: SCHEMA_VERSION,
     programId: ST.currentProgram,
     sessionId: ST.currentSession,
-    sessionName: (() => { const p=PROGRAMS.find(pp=>pp.id===ST.currentProgram); const s=p&&p.sessions.find(ss=>ss.id===ST.currentSession); return s?s.name:''; })(),
+    sessionName: (() => { const p=PROGRAMS.find(pp=>pp.id===ST.currentProgram); const s=p&&p.sessions.find(ss=>ss.id===ST.currentSession); return (s && s.name) || 'Workout'; })(),
     sets: ST.workoutSets,
     drafts: ST.workoutDrafts || {},
     subs: ST.workoutSubs || {},
@@ -6187,20 +6187,27 @@ function archiveWorkoutToHistory(snapshot) {
   const hasSets = Object.values(snapshot.sets).some(arr => Array.isArray(arr) && arr.some(s => s && s.r > 0));
   if (!hasSets) return false;
   const hist = getHistory();
-  hist.push({
+  const entry = {
     id: (snapshot.startTime || Date.now()).toString(),
     programId: snapshot.programId,
     sessionId: snapshot.sessionId,
     sessionName: snapshot.sessionName || '',
     startTime: snapshot.startTime || Date.now(),
     endTime: Date.now(),
-    duration: snapshot.durationSecs || 0,
+    duration: snapshot.durationSecs || snapshot.duration || 0,
     travelMode: snapshot.travelMode || false,
     sets: snapshot.sets,
     notes: snapshot.notes || {},
+    subs: snapshot.subs || {},
+    subMeta: snapshot.subMeta || {},
+    additions: snapshot.additions || [],
+    completedCards: snapshot.completedCards || [],
+    _unitLb: getWeightUnit() === 'lb',
     partial: true,
-  });
+  };
+  hist.push(entry);
   saveHistory(hist);
+  bgSyncToSheets(entry).catch(() => {});
   return true;
 }
 
@@ -6209,8 +6216,15 @@ let _sheetCb = {};
 function _sheetGo(which) {
   const fn = _sheetCb[which];
   _sheetCb = {};
-  closeSheet();
-  if (fn) setTimeout(fn, 90);
+  if (which === 'cancel') {
+    closeSheet(true);
+  } else {
+    __closeSheetDom();
+    if (fn) fn();
+    if (history.state && history.state.overlay === 'sheet') {
+      try { history.back(); } catch(e) {}
+    }
+  }
 }
 function confirmSheet(opts) {
   _sheetCb = { confirm: opts.onConfirm || null, secondary: opts.onSecondary || null };
@@ -6316,9 +6330,16 @@ function getStats() {
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
   const weekStart = (() => { const d = new Date(now); d.setHours(0,0,0,0); d.setDate(d.getDate() - d.getDay()); return d.getTime(); })();
   const thisMonth = hist.filter(w => w.endTime >= monthStart).length;
-  const thisWeekVol = hist.filter(w => w.endTime >= weekStart).reduce((sum,w) => {
+  const thisWeekVol = hist.filter(w => w.endTime >= weekStart).reduce((sum, w) => {
     if (!w.sets) return sum;
-    return sum + Object.values(w.sets).flat().filter(Boolean).reduce((s,set) => s+(set.w||0)*(set.r||0),0);
+    let wVol = 0;
+    for (const [k, sArr] of Object.entries(w.sets)) {
+      if (k.endsWith('_wu') || !Array.isArray(sArr)) continue;
+      for (const s of sArr) {
+        if (s && s.w > 0 && s.r > 0) wVol += (s.w * s.r);
+      }
+    }
+    return sum + wVol;
   }, 0);
   // Streak: count consecutive weeks with at least 1 workout
   let streak = 0;
@@ -6814,11 +6835,18 @@ const SCREENS = ['home','prog','session','workout','history','settings','workout
 
 // ── Navigation tab order for slide direction resolution ─────────────────────
 const SCREEN_ORDER = ['home', 'workouts-browser', 'history'];
+let _transitionTimer = null;
 
 function Maps(to, data={}) {
   const from = ST.screen;
   ST.screen = to;
   if (typeof closeNumpad === 'function') closeNumpad();
+
+  // Cancel any pending transition cleanup timer from a rapid previous navigation
+  if (_transitionTimer) {
+    clearTimeout(_transitionTimer);
+    _transitionTimer = null;
+  }
 
   // Render content into the destination screen BEFORE transition fires
   if (to === 'home')                  renderHome();
@@ -6844,10 +6872,12 @@ function Maps(to, data={}) {
   updateWorkoutPill();
 
   // History API — Android's system back gesture navigates the app instead of
-  // killing it. Overlays are handled in the popstate listener.
+  // killing it. Overlays replace their temporary state so they don't corrupt history.
   if (!window.__navFromPop) {
     try {
-      if (!(history.state && history.state.screen === to && !history.state.overlay)) {
+      if (history.state && history.state.overlay) {
+        history.replaceState({ screen: to }, '', '#' + to);
+      } else if (!(history.state && history.state.screen === to)) {
         history.pushState({ screen: to }, '', '#' + to);
       }
     } catch(e) {}
@@ -6873,6 +6903,7 @@ function Maps(to, data={}) {
   if (!fromEl || from === to || from === null) {
     // First paint — no animation needed
     toEl.style.display = 'block';
+    toEl.classList.remove('slide-out-left', 'slide-out-right', 'slide-in-left', 'slide-in-right');
     toEl.classList.add('active');
     return;
   }
@@ -6880,13 +6911,23 @@ function Maps(to, data={}) {
   // Determine slide direction from the tab order
   const fromOrd = SCREEN_ORDER.indexOf(from);
   const toOrd   = SCREEN_ORDER.indexOf(to);
-  // workout/prog/session are modals — always slide in from right
-  const goRight = (fromOrd === -1 || toOrd === -1) ? true : toOrd > fromOrd;
+  const fromIsTab = SCREEN_ORDER.includes(from);
+  const toIsTab   = SCREEN_ORDER.includes(to);
+  let goRight = true;
+  if (fromIsTab && toIsTab) {
+    goRight = toOrd > fromOrd;
+  } else if (!fromIsTab && toIsTab) {
+    goRight = false;
+  } else if (fromIsTab && !toIsTab) {
+    goRight = true;
+  } else {
+    goRight = (to === 'workout');
+  }
 
   // Phase 1 — Position incoming screen off-canvas (no transition yet)
   toEl.style.transition = 'none';
   toEl.style.display = 'block';
-  toEl.classList.remove('active');
+  toEl.classList.remove('active', 'slide-out-left', 'slide-out-right');
   toEl.classList.add(goRight ? 'slide-in-right' : 'slide-in-left');
 
   requestAnimationFrame(() => {
@@ -6900,9 +6941,12 @@ function Maps(to, data={}) {
       toEl.classList.add('active');
 
       // Phase 3 — Cleanup outgoing screen after transition completes
-      setTimeout(() => {
-        fromEl.style.display = 'none';
-        fromEl.classList.remove('slide-out-left', 'slide-out-right');
+      _transitionTimer = setTimeout(() => {
+        _transitionTimer = null;
+        if (ST.screen === to && fromEl) {
+          fromEl.style.display = 'none';
+          fromEl.classList.remove('slide-out-left', 'slide-out-right');
+        }
       }, 290);
     });
   });
@@ -7643,10 +7687,10 @@ function closeMuscleGraph(e) {
   const ov = document.getElementById('muscle-graph-overlay');
   // Allow close from: the ✕ button (no event), or tap directly on the overlay backdrop
   if (e && e.target !== ov) return;
-  if (history.state && history.state.overlay === 'muscle') {
-    try { history.back(); return; } catch(err) {}
-  }
   _closeMuscleGraphDom();
+  if (history.state && history.state.overlay === 'muscle') {
+    try { history.back(); } catch(err) {}
+  }
 }
 
 function _closeMuscleGraphDom() {
@@ -7738,7 +7782,7 @@ function renderHome() {
     <div class="premium-resume">
       <div class="premium-resume-info">
         <div class="premium-resume-label">In Progress</div>
-        <div class="premium-resume-name">${resumed.sessionName}</div>
+        <div class="premium-resume-name">${resumed.sessionName || 'Workout'}</div>
       </div>
       <div class="premium-resume-btns">
         <button class="premium-resume-continue" onclick="resumeWorkout()">Continue</button>
@@ -8388,7 +8432,7 @@ function showExerciseActionSheet(e, key, exIdx, isAddition) {
       </div>
       <div class="action-sheet-list">
         ${!isAddition ? `
-          <button class="action-sheet-row" onclick="closeSheet();showSubs(null,'${key}',${exIdx})">
+          <button class="action-sheet-row" onclick="closeSheet(false);showSubs(null,'${key}',${exIdx})">
             <div class="action-sheet-icon">⇄</div>
             <div class="action-sheet-label">
               <div>Substitute Exercise</div>
@@ -8397,7 +8441,7 @@ function showExerciseActionSheet(e, key, exIdx, isAddition) {
           </button>
         ` : ''}
 
-        <button class="action-sheet-row" onclick="closeSheet();showCue(null,'${key}',${exIdx})">
+        <button class="action-sheet-row" onclick="closeSheet(false);showCue(null,'${key}',${exIdx})">
           <div class="action-sheet-icon">💡</div>
           <div class="action-sheet-label">
             <div>Form Tips & Coaching Cues</div>
@@ -8405,7 +8449,7 @@ function showExerciseActionSheet(e, key, exIdx, isAddition) {
           </div>
         </button>
 
-        <button class="action-sheet-row" onclick="closeSheet();showProgressGraph(null,'${baseName}')">
+        <button class="action-sheet-row" onclick="closeSheet(false);showProgressGraph(null,'${baseName}')">
           <div class="action-sheet-icon">📈</div>
           <div class="action-sheet-label">
             <div>Strength History & Progress</div>
@@ -8414,7 +8458,7 @@ function showExerciseActionSheet(e, key, exIdx, isAddition) {
         </button>
 
         ${isBarbell(name) ? `
-        <button class="action-sheet-row" onclick="closeSheet();showPlateCalcSheet('${name.replace(/'/g, "\\'")}','${key}')">
+        <button class="action-sheet-row" onclick="closeSheet(false);showPlateCalcSheet('${name.replace(/'/g, "\\'")}','${key}')">
           <div class="action-sheet-icon">⚖</div>
           <div class="action-sheet-label">
             <div>Barbell Plate Calculator</div>
@@ -8422,7 +8466,7 @@ function showExerciseActionSheet(e, key, exIdx, isAddition) {
           </div>
         </button>` : ''}
 
-        <button class="action-sheet-row" onclick="closeSheet();editRestTimeFromActionSheet('${key}',${exIdx})">
+        <button class="action-sheet-row" onclick="closeSheet(false);editRestTimeFromActionSheet('${key}',${exIdx})">
           <div class="action-sheet-icon">◷</div>
           <div class="action-sheet-label">
             <div>Custom Rest Timer</div>
@@ -8430,7 +8474,7 @@ function showExerciseActionSheet(e, key, exIdx, isAddition) {
           </div>
         </button>
 
-        <button class="action-sheet-row" onclick="closeSheet();toggleNoteFromActionSheet('${key}','${noteKey}')">
+        <button class="action-sheet-row" onclick="closeSheet(false);toggleNoteFromActionSheet('${key}','${noteKey}')">
           <div class="action-sheet-icon">📝</div>
           <div class="action-sheet-label">
             <div>${hasNote ? 'Edit Session Note' : 'Add Session Note'}</div>
@@ -8439,7 +8483,7 @@ function showExerciseActionSheet(e, key, exIdx, isAddition) {
         </button>
 
         ${isAddition ? `
-          <button class="action-sheet-row danger" onclick="closeSheet();removeAddition(null,${exIdx})">
+          <button class="action-sheet-row danger" onclick="closeSheet(true);removeAddition(null,${exIdx})">
             <div class="action-sheet-icon">✕</div>
             <div class="action-sheet-label">
               <div>Remove Exercise Addition</div>
@@ -8447,7 +8491,7 @@ function showExerciseActionSheet(e, key, exIdx, isAddition) {
             </div>
           </button>
         ` : `
-          <button class="action-sheet-row danger" onclick="closeSheet();blacklistExercisePrompt(null,'${key}')">
+          <button class="action-sheet-row danger" onclick="closeSheet(false);blacklistExercisePrompt(null,'${key}')">
             <div class="action-sheet-icon">🚫</div>
             <div class="action-sheet-label">
               <div>Blacklist / Avoid Exercise</div>
@@ -8615,8 +8659,8 @@ function renderPlatePopover(totalW) {
 
 function calcVolume() {
   let v = 0;
-  for (const sets of Object.values(ST.workoutSets)) {
-    if (!Array.isArray(sets)) continue;
+  for (const [key, sets] of Object.entries(ST.workoutSets)) {
+    if (key.endsWith('_wu') || !Array.isArray(sets)) continue;
     for (const s of sets) {
       if (s && s.w > 0 && s.r > 0) v += s.w * s.r;
     }
@@ -9396,7 +9440,7 @@ function applySubstitution(key, exIdx, subName, sets, reps) {
   ST.expandedCards.add(key);
   if (slot) { const notes = getNotes(); notes[normalizeEx(slot.name)] = 'Using: ' + subName; saveNotes(notes); }
   saveNow();
-  closeSheet();
+  closeSheet(true);
   renderWorkout();
 }
 
@@ -9405,7 +9449,7 @@ function applyAddition(name, sets, reps) {
   const id = ST.workoutAdditions.reduce((m, a) => Math.max(m, a.id), -1) + 1;
   ST.workoutAdditions.push({ id: id, name: name, muscle: getMuscle(name), sets: sets, reps: String(reps), rest: '2–3 min' });
   saveNow();
-  closeSheet();
+  closeSheet(true);
   renderWorkout();
   setTimeout(() => {
     const k = 'add_' + id;
@@ -9439,7 +9483,7 @@ function revertSubstitution(key) {
   if (ST.workoutDrafts) { for (const k of Object.keys(ST.workoutDrafts)) { if (k.indexOf(key + '-') === 0) delete ST.workoutDrafts[k]; } }
   ST.completedCards.delete(key);
   saveNow();
-  closeSheet();
+  closeSheet(false);
   renderWorkout();
 }
 
@@ -9451,21 +9495,26 @@ function openSheet(html) {
   document.getElementById('sheet-overlay').classList.add('visible');
   document.getElementById('bottom-sheet').classList.add('visible');
   document.body.style.overflow = 'hidden';
-  // Back gesture closes the sheet, not the app
-  try { history.pushState({ screen: ST.screen, overlay: 'sheet' }, '', '#sheet'); } catch(e) {}
+  // Back gesture closes the sheet, not the app — avoid duplicate sheet history states
+  try {
+    if (!history.state || history.state.overlay !== 'sheet') {
+      history.pushState({ screen: ST.screen, overlay: 'sheet' }, '', '#sheet');
+    }
+  } catch(e) {}
 }
 
-function closeSheet() {
-  // If our overlay state is on the stack, unwind via back so history stays clean
-  if (history.state && history.state.overlay === 'sheet') {
-    try { history.back(); return; } catch(e) {}
-  }
+function closeSheet(unwindHistory = true) {
   __closeSheetDom();
+  if (unwindHistory && history.state && history.state.overlay === 'sheet') {
+    try { history.back(); } catch(e) {}
+  }
 }
 
 function __closeSheetDom() {
-  document.getElementById('sheet-overlay').classList.remove('visible');
-  document.getElementById('bottom-sheet').classList.remove('visible');
+  const overlay = document.getElementById('sheet-overlay');
+  const sheet = document.getElementById('bottom-sheet');
+  if (overlay) overlay.classList.remove('visible');
+  if (sheet) sheet.classList.remove('visible');
   document.body.style.overflow = '';
   ST.openSubCard = null;
 }
@@ -9580,6 +9629,10 @@ function startWorkoutFromHome(progId, sessId) {
 
 function beginWorkout(progId, sessId) {
   ST.workoutCommitted = false; // fresh live workout — re-enable snapshot autosave
+  ST.editingWorkoutId = null;
+  ST.isBackdated = false;
+  ST.workoutEnd = null;
+  cancelRestTimer();
   ST.currentProgram = progId;
   ST.currentSession = sessId;
   ST.travelMode = false;
@@ -9718,7 +9771,7 @@ function discardWorkout() {
 }
 
 function confirmDeleteDraftWorkout() {
-  closeSheet();
+  closeSheet(false);
   confirmSheet({
     title: 'Are you sure?',
     body: 'Are you sure you want to delete this workout? All progress and logged sets from this session will be permanently erased.',
@@ -9733,7 +9786,7 @@ function confirmDeleteDraftWorkout() {
 }
 
 function archiveAndExitSavedWorkout() {
-  closeSheet();
+  closeSheet(true);
   const saved = LS.get('dcrgym_current_workout');
   if (saved) archiveWorkoutToHistory(saved);
   LS.remove('dcrgym_current_workout');
@@ -9793,7 +9846,7 @@ function cancelWorkout() {
 }
 
 function promptConfirmDeleteLiveWorkout() {
-  closeSheet();
+  closeSheet(false);
   confirmSheet({
     title: 'Are you sure?',
     body: 'Are you sure you want to delete this workout? All progress from this session will be permanently erased and nothing will be saved to your history.',
@@ -9807,7 +9860,7 @@ function promptConfirmDeleteLiveWorkout() {
 }
 
 function saveAndExitLiveWorkout() {
-  closeSheet();
+  closeSheet(false);
   archiveWorkoutToHistory(buildWorkoutPayload());
   _cleanExitWorkout(false);
 }
@@ -9822,7 +9875,8 @@ function _cleanExitWorkout(toHistory) {
   ST.editingWorkoutId = null; ST.isBackdated = false; ST.workoutEnd = null;
   ST.workoutSets = {}; ST.workoutStart = null; ST.durationSecs = 0;
   ST.workoutDrafts = {}; ST.workoutSubs = {}; ST.workoutNotes = {};
-  ST.workoutSubMeta = {}; ST.workoutAdditions = [];
+  ST.workoutSubMeta = {}; ST.workoutAutoSubs = {}; ST.workoutAutoSubMeta = {};
+  ST.workoutAdditions = [];
   ST.expandedCards = new Set(); ST.completedCards = new Set();
   ST.travelMode = false; ST.travelLocked = false;
   Maps(toHistory ? 'history' : 'home');
@@ -10046,7 +10100,7 @@ function showFinish() {
   const prsHit = [];
   if (lastEntry && lastEntry.sets) {
     for (const [k, sets] of Object.entries(lastEntry.sets)) {
-      if (!Array.isArray(sets)) continue;
+      if (k.endsWith('_wu') || !Array.isArray(sets)) continue;
       for (const st of sets) {
         if (st && st.r > 0) {
           if (st.w > 0) totalVol += (st.w * st.r);
@@ -10278,7 +10332,7 @@ function showProgressGraph(e, exName) {
   const weekData = {};
   for (const w of hist) {
     for (const [key, sets] of Object.entries(w.sets)) {
-      if (!sets || sets.length === 0) continue;
+      if (key.endsWith('_wu') || !sets || sets.length === 0) continue;
 
       let storedName = null;
       for (const s of sets) {
@@ -10400,11 +10454,27 @@ function showProgressGraph(e, exName) {
   const bd = document.getElementById('graph-backdrop');
   bd.style.display = 'flex';
   requestAnimationFrame(() => bd.classList.add('visible'));
+  try {
+    if (history.state && history.state.overlay) {
+      history.replaceState({ screen: ST.screen, overlay: 'graph' }, '', '#graph');
+    } else if (!history.state || history.state.overlay !== 'graph') {
+      history.pushState({ screen: ST.screen, overlay: 'graph' }, '', '#graph');
+    }
+  } catch(err) {}
 }
 
 function closeProgressGraph(e) {
-  if (e && e.target !== document.getElementById('graph-backdrop')) return;
   const bd = document.getElementById('graph-backdrop');
+  if (e && e.target !== bd) return;
+  _closeProgressGraphDom();
+  if (history.state && history.state.overlay === 'graph') {
+    try { history.back(); } catch(err) {}
+  }
+}
+
+function _closeProgressGraphDom() {
+  const bd = document.getElementById('graph-backdrop');
+  if (!bd) return;
   bd.classList.remove('visible');
   setTimeout(() => { bd.style.display = 'none'; }, 300);
   _clearSilhouetteFocus();
@@ -10421,11 +10491,10 @@ function getWeeklyVolumeProgression(numWeeks = 6) {
     let vol = 0;
     for (const w of hist) {
       if (w.endTime >= wStart && w.endTime < wEnd && w.sets) {
-        for (const sets of Object.values(w.sets)) {
-          if (Array.isArray(sets)) {
-            for (const s of sets) {
-              if (s && s.w > 0 && s.r > 0) vol += (s.w * s.r);
-            }
+        for (const [key, sets] of Object.entries(w.sets)) {
+          if (key.endsWith('_wu') || !Array.isArray(sets)) continue;
+          for (const s of sets) {
+            if (s && s.w > 0 && s.r > 0) vol += (s.w * s.r);
           }
         }
       }
@@ -10638,7 +10707,7 @@ function renderRecentWorkoutsFeed() {
     const exNames = [];
     if (w.sets) {
       for (const [k, sArr] of Object.entries(w.sets)) {
-        if (Array.isArray(sArr)) {
+        if (!k.endsWith('_wu') && Array.isArray(sArr)) {
           for (const s of sArr) {
             if (s && s.w > 0 && s.r > 0) vol += (s.w * s.r);
             if (s && s._name && !exNames.includes(s._name)) exNames.push(s._name);
@@ -10681,6 +10750,7 @@ function editCompletedWorkout(workoutId) {
     if (!w) return;
 
     ST.workoutCommitted = false; // editing a workout — re-enable snapshot autosave
+    cancelRestTimer();
     ST.editingWorkoutId = w.id || w.endTime;
     ST.isBackdated = false;
     ST.currentProgram = w.programId;
@@ -10692,6 +10762,8 @@ function editCompletedWorkout(workoutId) {
     ST.workoutDrafts = {};
     ST.workoutSubs = w.subs ? JSON.parse(JSON.stringify(w.subs)) : {};
     ST.workoutSubMeta = w.subMeta ? JSON.parse(JSON.stringify(w.subMeta)) : {};
+    ST.workoutAutoSubs = {};
+    ST.workoutAutoSubMeta = {};
     ST.workoutAdditions = w.additions ? JSON.parse(JSON.stringify(w.additions)) : [];
     
     // Reconstruct fields if they were not stored in this workout (for backward compatibility)
@@ -10848,8 +10920,8 @@ function clickOpenCalDay(timestamp, dateStr) {
                 <div style="font-size:11px;color:var(--muted);">${formatDuration(w.duration || 0)} · Logged</div>
               </div>
               <div style="display:flex;gap:6px;">
-                <button class="btn-sheet-ghost" style="font-size:11px;padding:4px 9px;border-radius:10px;" onclick="closeSheet(); editCompletedWorkout('${w.id || w.endTime}')">Edit</button>
-                <button class="btn-sheet-ghost" style="font-size:11px;padding:4px 9px;border-radius:10px;color:#C04E2A;border-color:rgba(192,78,42,0.25);" onclick="closeSheet(); deleteCompletedWorkout('${w.id || w.endTime}')">Delete</button>
+                <button class="btn-sheet-ghost" style="font-size:11px;padding:4px 9px;border-radius:10px;" onclick="closeSheet(false); editCompletedWorkout('${w.id || w.endTime}')">Edit</button>
+                <button class="btn-sheet-ghost" style="font-size:11px;padding:4px 9px;border-radius:10px;color:#C04E2A;border-color:rgba(192,78,42,0.25);" onclick="closeSheet(false); deleteCompletedWorkout('${w.id || w.endTime}')">Delete</button>
               </div>
             </div>
           `).join('')}
@@ -10868,7 +10940,7 @@ function clickOpenCalDay(timestamp, dateStr) {
       html += `<div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin:12px 0 6px">${p.name}</div>`;
       p.sessions.forEach(s => {
         html += `
-          <div onclick="closeSheet(); beginBackdatedWorkout('${p.id}', '${s.id}', ${timestamp})"
+          <div onclick="closeSheet(false); beginBackdatedWorkout('${p.id}', '${s.id}', ${timestamp})"
                style="display:flex;align-items:center;justify-content:space-between;padding:10px 8px;border-bottom:1px solid var(--border);cursor:pointer;">
             <div style="flex:1">
               <div style="font-size:13.5px;font-weight:600;color:var(--charcoal)">${s.name}</div>
@@ -10911,11 +10983,14 @@ function beginBackdatedWorkout(progId, sessId, timestamp) {
   ST.editingWorkoutId = null;
   ST.travelMode = false;
   ST.travelLocked = false;
+  cancelRestTimer();
   ST.workoutSets   = {};
   ST.workoutNotes  = {};
   ST.workoutDrafts = {};
   ST.workoutSubs   = {};
   ST.workoutSubMeta = {};
+  ST.workoutAutoSubs = {};
+  ST.workoutAutoSubMeta = {};
   ST.workoutAdditions = [];
   ST.expandedCards = new Set();
   ST.completedCards = new Set();
@@ -11035,7 +11110,7 @@ function deleteWorkout(id) {
       ST.expandedCards = new Set(); ST.completedCards = new Set();
       ST.travelMode = false; ST.travelLocked = false;
       
-      closeSheet();
+      closeSheet(false);
       Maps('history');
     }
   });
@@ -11048,7 +11123,16 @@ function openCalDay(id, dateStr) {
   if (!w) return;
   const sessName = w.sessionName || 'Workout';
   const dur = formatDuration(w.duration || 0);
-  const vol = Math.round(Object.values(w.sets || {}).flat().filter(Boolean).reduce((s, x) => s + (x.w||0)*(x.r||0), 0));
+  let vol = 0;
+  if (w.sets) {
+    for (const [k, sArr] of Object.entries(w.sets)) {
+      if (k.endsWith('_wu') || !Array.isArray(sArr)) continue;
+      for (const s of sArr) {
+        if (s && s.w > 0 && s.r > 0) vol += (s.w * s.r);
+      }
+    }
+  }
+  vol = Math.round(vol);
   const prog = PROGRAMS.find(p => p.id === w.programId);
   const sess = prog && prog.sessions.find(s => s.id === w.sessionId);
   const unit = getWeightUnit();
@@ -11143,15 +11227,29 @@ function openCalDay(id, dateStr) {
     <div class="cal-ex-list">${rowsHTML || '<div style="padding:12px;color:var(--text-tertiary);text-align:center;font-size:12px;">No logged sets found.</div>'}</div>
 
     <div class="cal-popup-actions">
-      <button class="btn btn-primary" style="width:100%;font-size:14px;padding:12px;" onclick="closeCalPopup(); editCompletedWorkout('${w.id || w.endTime}')">Edit Workout & Sets</button>
-      <button class="btn btn-sheet-ghost" style="width:100%;font-size:12px;" onclick="closeCalPopup(); ST.editingWorkoutId='${w.id || w.endTime}'; ST.workoutStart=${w.startTime || w.endTime}; ST.durationSecs=${w.duration || 0}; editWorkoutDateTime()">Change Date, Time or Delete</button>
+      <button class="btn btn-primary" style="width:100%;font-size:14px;padding:12px;" onclick="closeCalPopup(false); editCompletedWorkout('${w.id || w.endTime}')">Edit Workout & Sets</button>
+      <button class="btn btn-sheet-ghost" style="width:100%;font-size:12px;" onclick="closeCalPopup(false); ST.editingWorkoutId='${w.id || w.endTime}'; ST.workoutStart=${w.startTime || w.endTime}; ST.durationSecs=${w.duration || 0}; editWorkoutDateTime()">Change Date, Time or Delete</button>
     </div>
   `;
   popup.style.display = 'flex';
   requestAnimationFrame(() => popup.classList.add('visible'));
+  try {
+    if (history.state && history.state.overlay) {
+      history.replaceState({ screen: ST.screen, overlay: 'cal' }, '', '#cal');
+    } else if (!history.state || history.state.overlay !== 'cal') {
+      history.pushState({ screen: ST.screen, overlay: 'cal' }, '', '#cal');
+    }
+  } catch(err) {}
 }
 
-function closeCalPopup() {
+function closeCalPopup(unwindHistory = true) {
+  _closeCalPopupDom();
+  if (unwindHistory && history.state && history.state.overlay === 'cal') {
+    try { history.back(); } catch(err) {}
+  }
+}
+
+function _closeCalPopupDom() {
   const popup = document.getElementById('cal-popup');
   if (!popup) return;
   popup.classList.remove('visible');
@@ -11514,9 +11612,10 @@ function exportCSV() {
       if (!Array.isArray(sets) || key.endsWith('_wu')) continue;
       const exIdx = parseInt(key.split('_').pop());
       const fallbackName = (sess && !isNaN(exIdx) && sess.exercises[exIdx]) ? stripSuperset(sess.exercises[exIdx].name) : 'Exercise';
+      const escapeCsv = (str) => `"${String(str || '').replace(/"/g, '""')}"`;
       (sets || []).filter(s => s && s.r > 0).forEach((s, i) => {
         const exName = (s && s._name) || fallbackName;
-        csv += `${date},${progName},${sessName},${stripSuperset(exName)},${i+1},${(s && s.w)||0},${(s && s.r)||0}\n`;
+        csv += `${escapeCsv(date)},${escapeCsv(progName)},${escapeCsv(sessName)},${escapeCsv(stripSuperset(exName))},${i+1},${(s && s.w)||0},${(s && s.r)||0}\n`;
       });
     }
   }
@@ -11773,7 +11872,7 @@ function previewSession(progId, sessId) {
         ${exList}
       </div>
       <div style="display:flex;gap:8px;padding-top:4px;flex-shrink:0;">
-        <button class="btn btn-primary" style="flex:1;font-size:13.5px;padding:11px 14px;border-radius:12px;" onclick="closeSheet();startWorkoutFromHome('${progId}','${sessId}')">Start Workout</button>
+        <button class="btn btn-primary" style="flex:1;font-size:13.5px;padding:11px 14px;border-radius:12px;" onclick="closeSheet(false);startWorkoutFromHome('${progId}','${sessId}')">Start Workout</button>
         <button class="btn btn-sheet-ghost" style="padding:11px 16px;border-radius:12px;font-size:13px;" onclick="closeSheet()">Close</button>
       </div>
     </div>
@@ -12283,7 +12382,63 @@ async function bootstrapApp() {
 
   // Handle hardware / browser back button navigation
   window.addEventListener('popstate', (e) => {
+    let handledOverlay = false;
+
+    // Check if bottom-sheet is visible in DOM
+    const sheet = document.getElementById('bottom-sheet');
+    if (sheet && sheet.classList.contains('visible')) {
+      __closeSheetDom();
+      handledOverlay = true;
+    }
+
+    // Check if muscle-graph-overlay is visible in DOM
+    const muscleOv = document.getElementById('muscle-graph-overlay');
+    if (muscleOv && (muscleOv.classList.contains('visible') || (muscleOv.style && muscleOv.style.display !== 'none' && muscleOv.style.display !== ''))) {
+      _closeMuscleGraphDom();
+      handledOverlay = true;
+    }
+
+    // Check if graph-backdrop (progress graph) is visible in DOM
+    const graphBd = document.getElementById('graph-backdrop');
+    if (graphBd && (graphBd.classList.contains('visible') || (graphBd.style && graphBd.style.display !== 'none' && graphBd.style.display !== ''))) {
+      if (typeof _closeProgressGraphDom === 'function') _closeProgressGraphDom();
+      handledOverlay = true;
+    }
+
+    // Check if cal-popup is open
+    const calPopup = document.getElementById('cal-popup');
+    if (calPopup && (calPopup.classList.contains('visible') || (calPopup.style && calPopup.style.display !== 'none' && calPopup.style.display !== ''))) {
+      if (typeof _closeCalPopupDom === 'function') _closeCalPopupDom();
+      handledOverlay = true;
+    }
+
+    // Check if numpad is open
+    if (document.body.classList.contains('numpad-open')) {
+      if (typeof closeNumpad === 'function') closeNumpad();
+      handledOverlay = true;
+    }
+
+    // Check if finish-screen is open
+    const finishScreen = document.getElementById('finish-screen');
+    if (finishScreen) {
+      if (typeof dismissFinish === 'function') dismissFinish();
+      return;
+    }
+
+    // Check if milestone-screen is open
+    const milestoneScreen = document.getElementById('milestone-screen');
+    if (milestoneScreen) {
+      if (typeof dismissMilestone === 'function') dismissMilestone();
+      return;
+    }
+
     const target = (e.state && e.state.screen) || 'home';
+
+    // If popstate was triggered by dismissing an overlay (and screen hasn't changed), don't navigate screens
+    if (handledOverlay && target === ST.screen) {
+      return;
+    }
+
     if (target !== ST.screen) {
       window.__navFromPop = true;
       try { Maps(target); } finally { window.__navFromPop = false; }

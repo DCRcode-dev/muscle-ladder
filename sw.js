@@ -1,5 +1,5 @@
 
-const CACHE = 'dcr-gym-v38';
+const CACHE = 'dcr-gym-v40';
 const ASSETS = ['./index.html', './programs.js', './fitbit-overlay.js', './manifest.json', './Resources/icon-192.png', './Resources/icon-512.png'];
 
 self.addEventListener('install', e => {
