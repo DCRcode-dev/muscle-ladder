@@ -22,7 +22,7 @@ function doPost(e) {
     const action = body.action;
 
     if (action === 'syncWorkouts')  return syncWorkouts(body.workouts || []);
-    if (action === 'saveState')     return saveState(body.history || [], body.ts || 0);
+    if (action === 'saveState')     return saveState(body.history || [], body.ts || 0, body.defaultProgram || null, body.notes || null);
     if (action === 'deleteWorkout') return deleteWorkoutInSheet(body.id);
 
     return jsonResponse({ ok: false, message: 'Unknown action: ' + action });
@@ -78,10 +78,39 @@ const PROGRAM_SESSION_MAP_ = {
 function mergeWorkoutRecords_(existingW, incomingW) {
   if (!existingW) return incomingW;
   if (!incomingW) return existingW;
-  // Prefer the record with a real programId over 'import'
-  const base = (incomingW.programId && incomingW.programId !== 'import') ? incomingW : existingW;
-  const other = (base === incomingW) ? existingW : incomingW;
-  const mergedSets = Object.assign({}, other.sets || {}, base.sets || {});
+  const existingHasSlotKeys = Object.keys(existingW.sets || {}).some(function(k) { return k.indexOf('import_') !== 0 && k.slice(-3) !== '_wu'; });
+  const incomingHasSlotKeys = Object.keys(incomingW.sets || {}).some(function(k) { return k.indexOf('import_') !== 0 && k.slice(-3) !== '_wu'; });
+  // Prefer the record with real slot keys or real programId over reconstructed 'import_' records
+  let base = incomingW;
+  let other = existingW;
+  if (existingHasSlotKeys && !incomingHasSlotKeys) {
+    base = existingW;
+    other = incomingW;
+  } else if (!incomingHasSlotKeys && !existingHasSlotKeys && existingW.programId && existingW.programId !== 'import' && (!incomingW.programId || incomingW.programId === 'import')) {
+    base = existingW;
+    other = incomingW;
+  }
+  const mergedSets = Object.assign({}, base.sets || {});
+  const baseHasSlotKeys = Object.keys(mergedSets).some(function(k) { return k.indexOf('import_') !== 0 && k.slice(-3) !== '_wu'; });
+  const baseExNames = {};
+  Object.keys(mergedSets).forEach(function(k) {
+    const arr = mergedSets[k];
+    if (Array.isArray(arr) && arr.length > 0 && arr[0] && arr[0]._name) {
+      baseExNames[String(arr[0]._name).toLowerCase().trim()] = true;
+    }
+  });
+  Object.keys(other.sets || {}).forEach(function(k) {
+    if (mergedSets[k] && Array.isArray(mergedSets[k]) && mergedSets[k].length > 0) return;
+    // Never pollute a real slot-key workout with reconstructed import_* keys
+    if (baseHasSlotKeys && k.indexOf('import_') === 0) return;
+    const arr = other.sets[k];
+    if (Array.isArray(arr) && arr.length > 0 && arr[0] && arr[0]._name) {
+      const n = String(arr[0]._name).toLowerCase().trim();
+      if (baseExNames[n]) return;
+      baseExNames[n] = true;
+    }
+    mergedSets[k] = arr;
+  });
   return Object.assign({}, other, base, { sets: mergedSets });
 }
 
@@ -108,7 +137,7 @@ function reconstructHistoryFromLog_() {
       const reps        = Number(row[7] || 0);
       const duration    = String(row[9] || '');
       
-      if (!rowId || !exName || isNaN(setNum)) continue;
+      if (!rowId || !exName || isNaN(setNum) || !(reps > 0)) continue;
       
       const suffix = '-' + exName + '-' + (setNum - 1);
       let wid = '';
@@ -222,6 +251,7 @@ function pullState() {
   try {
     const reconstructed = reconstructHistoryFromLog_();
     if (reconstructed.length > 0) {
+      const prevCount = history.length;
       const map = {};
       reconstructed.forEach(function(w) { if (w && w.id) map[w.id] = w; });
       history.forEach(function(w) {
@@ -232,20 +262,38 @@ function pullState() {
       const merged = Object.keys(map).map(function(k) { return map[k]; })
                            .sort(function(a, b) { return (a.endTime || 0) - (b.endTime || 0); });
       
-      if (merged.length > history.length) {
-        history = merged;
-        saveState(history, maxTs || Date.now());
+      history = merged;
+      if (merged.length > prevCount) {
+        saveState(history, maxTs || Date.now(), null, null);
       }
     }
   } catch(e) {
     Logger.log('Self-healing pullState merge failed: ' + e.toString());
   }
+
+  let defaultProgram = null;
+  let notes = {};
+  try {
+    const props = PropertiesService.getScriptProperties();
+    defaultProgram = props.getProperty('DEFAULT_PROGRAM') || null;
+    notes = JSON.parse(props.getProperty('EXERCISE_NOTES_JSON') || '{}') || {};
+  } catch(e) {}
   
-  return jsonResponse({ ok: true, history: history, ts: maxTs });
+  return jsonResponse({ ok: true, history: history, defaultProgram: defaultProgram, notes: notes, ts: maxTs });
 }
 
-function saveState(history, ts) {
+function saveState(history, ts, defaultProgram, notes) {
   const ss = getSpreadsheet_();
+  try {
+    const props = PropertiesService.getScriptProperties();
+    if (defaultProgram) props.setProperty('DEFAULT_PROGRAM', String(defaultProgram));
+    if (notes && typeof notes === 'object') {
+      let existingNotes = {};
+      try { existingNotes = JSON.parse(props.getProperty('EXERCISE_NOTES_JSON') || '{}') || {}; } catch(e) {}
+      const mergedNotes = Object.assign({}, existingNotes, notes);
+      props.setProperty('EXERCISE_NOTES_JSON', JSON.stringify(mergedNotes));
+    }
+  } catch(e) {}
   let stateSheet = ss.getSheetByName(SHEET_NAME_STATE);
   if (!stateSheet) {
     stateSheet = ss.insertSheet(SHEET_NAME_STATE);
@@ -360,15 +408,16 @@ function syncWorkouts(workouts) {
   workouts.forEach(w => {
     const wid     = w.id || (w.date + '-' + w.sessionName);
     const dateStr = new Date(w.date).toLocaleDateString('en-US');
+    const totMetric = w.totalVolume || w.totalE1RM || 0;
 
-    summarySheet.appendRow([wid, dateStr, w.programName||'', w.sessionName||'', w.duration||'', w.totalVolume||0, w.totalSets||0, (w.exercises||[]).map(e=>e.name).join(', ')]);
+    summarySheet.appendRow([wid, dateStr, w.programName||'', w.sessionName||'', w.duration||'', totMetric, w.totalSets||0, (w.exercises||[]).map(e=>e.name).join(', ')]);
     added++;
 
     (w.exercises||[]).forEach(ex => {
       (ex.sets||[]).forEach((s, i) => {
         const rowId = wid + '-' + ex.name + '-' + i;
         const setVol = (parseFloat(s.weight)||0) * (parseInt(s.reps)||0);
-        logSheet.appendRow([rowId, dateStr, w.programName||'', w.sessionName||'', ex.name, i+1, s.weight||'', s.reps||'', setVol, w.duration||'', w.totalVolume||0, w.totalSets||0]);
+        logSheet.appendRow([rowId, dateStr, w.programName||'', w.sessionName||'', ex.name, i+1, s.weight||'', s.reps||'', setVol, w.duration||'', totMetric, w.totalSets||0]);
       });
     });
   });
