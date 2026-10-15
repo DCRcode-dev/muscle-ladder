@@ -157,20 +157,12 @@ Because you added new OAuth scopes, you need to create a new deployment:
 
 From now on, every time you open the AI tab the app fetches live Google Fit data for that day.
 
-### 5d. Set up automatic daily sync (optional but recommended)
+### 5d. Automatic daily sync (DECOMMISSIONED)
 
-Pre-loads biometric data every morning before you open the app:
-
-1. In Apps Script → **Triggers** (clock icon in left sidebar)
-2. Click **+ Add Trigger** (bottom right)
-3. Configure:
-   - **Function to run:** `fitbitDailySync`
-   - **Event source:** `Time-driven`
-   - **Type of time based trigger:** `Day timer`
-   - **Time of day:** `7am to 8am`
-4. Click **Save**
-
-The AI screen will always show fresh numbers when you open it each morning.
+> **Note:** Biometric and cardio/AI features were removed in favor of pure cloud workout logging. If an automated trigger for `fitbitDailySync` was previously created, it should be deleted to prevent failure notifications:
+> 1. In Apps Script → **Triggers** (clock icon in left sidebar)
+> 2. Locate `fitbitDailySync` → Click ⋮ → **Delete trigger**
+> 3. Alternatively, deploying the updated `apps-script.gs` provides a graceful stub function that executes cleanly with no errors.
 
 ### 5e. What data is fetched
 

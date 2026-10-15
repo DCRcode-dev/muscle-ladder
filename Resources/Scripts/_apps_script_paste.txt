@@ -490,3 +490,11 @@ function getSpreadsheet_() {
   props.setProperty('SPREADSHEET_ID', ss.getId());
   return ss;
 }
+
+// ── SCHEDULED TRIGGER HANDLERS ───────────────────────────────────────────────
+// Legacy trigger stub: Prevents Apps Script automated execution failure emails
+// if a time-driven trigger for 'fitbitDailySync' remains active in script triggers.
+function fitbitDailySync() {
+  console.log('[fitbitDailySync] Legacy trigger executed. Biometric cardio/AI sync is decommissioned; stub executed cleanly.');
+  return { ok: true, status: 'decommissioned' };
+}
