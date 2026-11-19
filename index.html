@@ -13,7 +13,7 @@
 <link rel="icon" type="image/png" sizes="512x512" href="Resources/icon-512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════════════════════════════════════════
    DCR GYM  ·  Ultra-Luxury Biometric Interface  ·  Phase 1-5 Production Rewrite
@@ -2373,6 +2373,180 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
 .install-prompt, #install-prompt { display: none !important; }
 
 
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ota-30 · Premium cream ("Vellum") — workout card, sets, swap sheet.
+   Cream stays the main look. Colour is reserved for state: copper = active, sage = done.
+   Calendar popup, silhouette and home are intentionally untouched.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+:root {
+  --font-body: 'Manrope', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+  --sage:        #5f8a5c;
+  --sage-ink:    #4f7a4c;
+  --sage-bg:     rgba(95, 138, 92, 0.12);
+  --hold-ink:    #a9832e;
+  --hold-bg:     rgba(169, 131, 46, 0.12);
+  --tile:        oklch(95.4% 0.010 72);
+  --tile-strong: oklch(93% 0.013 72);
+  --line-soft:   rgba(36, 32, 28, 0.06);
+  --shadow-md:
+    0 1px 2px rgba(42,36,33,0.04),
+    0 6px 18px rgba(42,36,33,0.07),
+    0 18px 40px rgba(42,36,33,0.05);
+}
+body { font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
+
+/* Card surface: borderless, soft depth */
+.ex-card {
+  border: 0; border-radius: 22px;
+  box-shadow: 0 1px 0 var(--line-soft) inset, 0 4px 14px rgba(42,36,33,0.05);
+}
+.ex-card.expanded { border: 0; box-shadow: var(--shadow-md); }
+.ex-card.completed { border-left: 0; box-shadow: inset 0 0 0 1.5px rgba(95,138,92,0.30), 0 4px 14px rgba(42,36,33,0.04); }
+.ex-card-header { padding: 16px 16px 14px 18px; align-items: flex-start; }
+.ex-kicker { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+.ex-name { font-size: 17px; font-weight: 700; letter-spacing: -0.015em; line-height: 1.25; }
+.ex-card.completed .ex-name { text-decoration: none; color: var(--sage-ink); }
+.ex-meta { font-size: 12.5px; color: var(--text-secondary); font-weight: 500; margin-top: 3px; font-variant-numeric: tabular-nums; }
+.ex-check-pill { font-size: 10px; letter-spacing: .06em; color: var(--sage-ink); background: var(--sage-bg); border-radius: 999px; padding: 2px 8px; }
+.ex-card.completed .ex-chevron { color: var(--sage); }
+.ex-sub-note { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-top: 3px; font-style: normal; }
+.ex-sub-note svg { width: 13px; height: 13px; flex-shrink: 0; color: var(--accent-kinetic); }
+.ex-cue-btn, .ex-graph-btn, .ex-menu-btn, .ex-note-btn { border: 0; background: var(--tile); }
+.ex-note-btn.has-note { border: 0; }
+
+/* Muscle label: text with a small tonal dot instead of a pastel chip */
+.muscle-badge {
+  background: transparent !important; color: var(--text-secondary) !important;
+  display: inline-flex; align-items: center; gap: 6px; padding: 0; margin: 0;
+  font-size: 11px; font-weight: 700; letter-spacing: .03em; text-transform: none;
+}
+.muscle-badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--mdot, #a39b92); opacity: .85; }
+
+/* Weight memory chips (by rep range) */
+.zone-chips { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.zone-chip {
+  flex: 1 1 0; min-width: 120px; text-align: left; border: 0; cursor: pointer; font: inherit;
+  border-radius: 12px; padding: 7px 10px; background: var(--tile); color: var(--text-secondary);
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.zone-chip b { display: block; font-size: 10px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
+.zone-chip span { display: block; font-size: 12.5px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.zone-chip[aria-pressed="true"] { background: color-mix(in oklab, var(--accent-kinetic) 12%, var(--surface-card)); color: var(--text-primary); }
+.zone-chip[aria-pressed="true"] b { color: var(--accent-kinetic); }
+.zone-chip.empty span { font-style: italic; font-weight: 500; }
+.ex-last-perf { font-style: normal; font-weight: 500; font-variant-numeric: tabular-nums; }
+
+/* Progression verdict */
+.verdict { display: flex; gap: 10px; align-items: flex-start; margin: 2px 0 12px; padding: 10px 12px; border-radius: 14px; background: var(--sage-bg); font-size: 13px; line-height: 1.4; color: var(--text-primary); }
+.verdict svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; color: var(--sage); }
+.verdict strong { color: var(--sage-ink); font-weight: 700; }
+.verdict.hold { background: var(--hold-bg); }
+.verdict.hold svg, .verdict.hold strong { color: var(--hold-ink); }
+.verdict.build { background: var(--tile); }
+.verdict.build svg, .verdict.build strong { color: var(--text-secondary); }
+
+/* Set rows: borderless number tiles, round log button */
+.set-row {
+  display: grid; grid-template-columns: 20px minmax(0,1fr) minmax(0,1fr) auto; align-items: center;
+  gap: 8px; padding: 5px 6px 5px 2px; margin-bottom: 6px; border: 0; border-radius: 16px;
+}
+.set-row.active-focus {
+  border: 0; background: color-mix(in oklab, var(--accent-kinetic) 6%, transparent);
+  box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--accent-kinetic) 55%, transparent);
+}
+.set-row.is-logged { background: var(--sage-bg); }
+.set-num { width: auto; font-family: var(--font-body); font-size: 12px; font-weight: 700; color: var(--text-ghost); }
+.set-row.active-focus .set-num { color: var(--accent-kinetic); }
+.set-tile { position: relative; display: block; min-width: 0; }
+.set-tile::after {
+  content: attr(data-unit); position: absolute; right: 9px; bottom: 9px; pointer-events: none;
+  font-size: 10.5px; font-weight: 600; color: var(--text-tertiary); letter-spacing: 0;
+}
+.set-tile .set-input {
+  width: 100%; height: 48px; border: 0; border-radius: 12px; box-shadow: none;
+  background: var(--tile); color: var(--text-primary);
+  font-family: var(--font-body); font-size: 21px; font-weight: 700; letter-spacing: -0.02em;
+  padding: 0 26px 0 8px; text-align: center; font-variant-numeric: tabular-nums;
+}
+.set-tile .set-input::placeholder { color: var(--text-ghost); font-size: 14px; font-weight: 600; }
+.set-tile .set-input:focus, .set-tile .set-input.np-focus { box-shadow: inset 0 0 0 2px var(--accent-kinetic); border: 0; }
+.set-tile.sugg .set-input { box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--sage) 55%, transparent); color: var(--sage-ink); background: var(--surface-card); }
+.set-tile.est .set-input { background: transparent; box-shadow: inset 0 0 0 1.5px var(--tile-strong); color: var(--text-secondary); }
+.set-tile.est::before { content: "est."; position: absolute; left: 8px; top: 5px; font-size: 9px; font-weight: 800; letter-spacing: .06em; color: var(--text-tertiary); text-transform: uppercase; }
+.set-input.logged { background: transparent !important; color: var(--sage-ink) !important; box-shadow: none !important; border: 0; }
+.set-row.is-logged .set-tile::after { color: var(--sage); opacity: .8; }
+.set-act { display: flex; align-items: center; gap: 6px; }
+.set-log-btn {
+  width: 46px; height: 46px; border-radius: 50%; margin-left: 0;
+  background: var(--accent-kinetic); color: #fff; box-shadow: 0 2px 8px color-mix(in oklab, var(--accent-kinetic) 30%, transparent);
+}
+.set-log-btn svg { width: 20px; height: 20px; }
+.set-log-btn.logged { background: var(--sage); color: #fff; box-shadow: none; }
+
+/* RIR pills */
+.rir-pills { display: inline-flex; gap: 3px; padding: 3px; border-radius: 999px; background: var(--surface-card); box-shadow: 0 0 0 1px var(--line-soft); }
+.rir-pill { width: 28px; height: 28px; border-radius: 50%; border: 0; cursor: pointer; background: transparent; color: var(--text-secondary); font: 700 12.5px var(--font-body); font-variant-numeric: tabular-nums; }
+.rir-pill[aria-pressed="true"] { background: var(--sage); color: #fff; }
+.set-row.is-last.is-logged .rir-pills { box-shadow: 0 0 0 1.5px color-mix(in oklab, var(--sage) 55%, transparent); }
+.rir-gate { font-size: 11px; line-height: 1.4; color: var(--text-tertiary); padding: 2px 4px 0 28px; }
+.ex-foot { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line-soft); display: flex; align-items: center; justify-content: space-between; }
+.ex-foot-lbl { font-size: 12px; color: var(--text-tertiary); font-weight: 600; }
+.plate-calc-trigger { border: 0; background: var(--tile); border-radius: 999px; padding: 6px 11px; gap: 6px; }
+.plate-calc-trigger svg { width: 14px; height: 14px; }
+.warmup-row { border-radius: 14px; }
+
+@media (max-width: 350px) {
+  .set-tile .set-input { font-size: 18px; padding: 0 6px; }
+  .set-tile::after { display: none; }
+  .rir-pill { width: 26px; height: 26px; }
+  .set-log-btn { width: 42px; height: 42px; }
+}
+
+/* Swap / library sheet */
+.bs-title { letter-spacing: -0.015em; margin-bottom: 8px; }
+.bs-sub { margin: 0 0 14px; color: var(--text-secondary); }
+.bs-section-lbl { font-size: 10.5px; font-weight: 800; letter-spacing: .08em; color: var(--text-tertiary); margin: 18px 2px 6px; }
+.swap-head .bs-sub strong { color: var(--accent-kinetic); font-weight: 700; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; padding: 3px; border-radius: 12px; background: var(--tile); }
+.seg button { border: 0; cursor: pointer; font: 700 13px var(--font-body); padding: 10px 6px; border-radius: 10px; background: transparent; color: var(--text-secondary); min-height: 40px; }
+.seg button[aria-pressed="true"] { background: var(--surface-card); color: var(--text-primary); box-shadow: 0 1px 3px rgba(42,36,33,.12); }
+.seg-note { font-size: 11.5px; color: var(--text-secondary); margin: 7px 2px 0; }
+.restore-row { display: grid; gap: 6px; margin-bottom: 12px; }
+.restore-one { width: 100%; margin-bottom: 12px; }
+.equip-chips { display: flex; gap: 6px; overflow-x: auto; margin: 14px 0 2px; padding-bottom: 2px; scrollbar-width: none; }
+.equip-chips.wrap { flex-wrap: wrap; overflow: visible; margin-top: 4px; }
+.equip-chips::-webkit-scrollbar { display: none; }
+.equip-chips button { flex-shrink: 0; border: 0; cursor: pointer; font: 700 12px var(--font-body); padding: 7px 12px; border-radius: 999px; background: var(--tile); color: var(--text-secondary); min-height: 32px; }
+.equip-chips button[aria-pressed="true"] { background: var(--text-primary); color: var(--surface-card); }
+.lib-section { display: flex; flex-direction: column; }
+.opt-row {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px; width: 100%;
+  border: 0; border-top: 1px solid var(--line-soft); background: transparent; cursor: pointer;
+  padding: 11px 2px; min-height: 56px; text-align: left; font: inherit; color: var(--text-primary);
+}
+.lib-section .opt-row:first-child { border-top: 0; }
+.opt-row:active { background: var(--tile); }
+.opt-main { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.opt-main b { font-size: 14px; font-weight: 700; letter-spacing: -0.01em; }
+.opt-main small { font-size: 12px; color: var(--text-secondary); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.opt-side { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; }
+.opt-side em { font-style: normal; font-size: 10.5px; font-weight: 800; color: var(--accent-kinetic); letter-spacing: .03em; }
+.opt-side i { font-style: normal; font-size: 10.5px; font-weight: 600; color: var(--text-tertiary); }
+.lib-more { margin-top: 12px; }
+.lib-more summary { cursor: pointer; list-style: none; font-size: 13px; font-weight: 700; color: var(--text-secondary); padding: 10px 2px; border-top: 1px solid var(--line-soft); }
+.lib-more summary::-webkit-details-marker { display: none; }
+.lib-more summary::after { content: " +"; color: var(--text-tertiary); }
+.lib-more[open] summary::after { content: " −"; }
+.lib-add-custom { display: flex; align-items: center; gap: 8px; width: 100%; margin-top: 10px; padding: 12px; border: 1.5px dashed var(--border-strong); border-radius: 14px; background: transparent; cursor: pointer; font: 700 13px var(--font-body); color: var(--text-primary); }
+.lib-add-custom svg { width: 16px; height: 16px; color: var(--accent-kinetic); }
+.bs-search { border-radius: 12px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .rir-pill, .zone-chip, .seg button, .set-log-btn, .equip-chips button { transition: background .18s ease, color .18s ease, transform .2s var(--spring-bounce); }
+  .set-log-btn.logged svg { animation: ota30-check .32s var(--spring-bounce); }
+}
+@keyframes ota30-check { from { transform: scale(.4) rotate(-12deg); opacity: 0; } to { transform: scale(1) rotate(0); opacity: 1; } }
 </style>
 </head>
 <body>
@@ -4638,7 +4812,7 @@ const MUSCLE_COLORS = {
 
 function muscleBadgeHtml(muscle) {
   const c = MUSCLE_COLORS[muscle] || MUSCLE_COLORS.Other;
-  return `<span class="muscle-badge" style="background:${c.bg};color:${c.color}">${muscle}</span>`;
+  return `<span class="muscle-badge" style="--mdot:${c.color}">${muscle}</span>`;
 }
 
 // ── Comprehensive Master Exercise Repository (250+ Exercises) ─────────────────
@@ -5006,7 +5180,66 @@ const EXERCISE_REPOSITORY = [
 ];
 
 // Flat export sorted alphabetically
-const EXERCISE_LIBRARY = [...EXERCISE_REPOSITORY].sort((a, b) => a.name.localeCompare(b.name));
+
+// ── ota-30 library expansion: gym machine / cable / Smith / single-arm variants ──
+// Plus the program exercises and history names the library could not map before.
+// History names get their OWN entries (no alias merge), so past PRs/bests per name stay exactly as they were.
+const EXERCISE_REPOSITORY_EXT = (() => {
+  const G = (muscle, subMuscle, names, tag = 'Gym') => names.map(name => ({ name, muscle, subMuscle, tag }));
+  return [
+    ...G('Chest', 'Upper Chest (Incline)', ['Plate-Loaded Incline Press', 'Single-Arm Incline Cable Press', 'Incline Machine Fly', 'Low Incline Dumbbell Press', 'Seated Low-to-High Cable Fly', 'Single-Arm Low-to-High Cable Fly', 'Low Incline Smith Machine Press']),
+    ...G('Chest', 'Mid/Lower Chest (Flat/Decline)', ['Dip', 'Plate-Loaded Chest Press', 'Seated Cable Chest Press', 'Single-Arm Machine Chest Press', 'Converging Machine Chest Press', 'Assisted Dip Machine', 'Smith Machine Decline Press', 'Cable Decline Press', 'Wide-Grip Machine Chest Press']),
+    ...G('Chest', 'Chest Fly (Adduction)', ['Dumbbell Fly', 'Chest Fly', 'Single-Arm Cable Fly', 'Seated Cable Fly', 'Plate-Loaded Fly', 'Mid-Height Cable Fly', 'Single-Arm Pec Deck', 'Decline Cable Fly']),
+    ...G('Chest', 'Chest Fly (Adduction)', ['Banded Chest Fly'], 'Travel'),
+    ...G('Back', 'Lats (Vertical Pull)', ['Close-Grip Lat Pulldown', 'Plate-Loaded Lat Pulldown', 'Single-Arm Machine Pulldown', 'Dual-Handle Lat Pulldown', 'Hammer Strength High Row', 'Kneeling Single-Arm Cable Pulldown', 'Underhand Lat Pulldown']),
+    ...G('Back', 'Lats (Vertical Pull)', ['Banded Lat Pulldown'], 'Travel'),
+    ...G('Back', 'Lats (Horizontal Row)', ['Bent Over One Arm Row', 'Cross Body Cable Row', 'Hammer Strength Low Row', 'Plate-Loaded Seated Row', 'Single-Arm Machine Row', 'Smith Machine Row', 'Landmine Row', 'Chest-Supported Dumbbell Row', 'Single-Arm Seated Cable Row', 'Close-Grip Seated Cable Row']),
+    ...G('Back', 'Lats (Pullover)', ['Cable Lat Pull-In', 'Dumbbell Lat Pullover', 'Single-Arm Cable Lat Pull-In', 'Kneeling Cable Pullover', 'Straight-Arm Pulldown (Bar)', 'Incline Bench Cable Pullover']),
+    ...G('Back', 'Lats (Pullover)', ['Banded Straight-Arm Pulldown'], 'Travel'),
+    ...G('Back', 'Upper Back (Row/Traps)', ['Wide-Grip Seated Cable Row', 'Machine High Row', 'Wide-Grip Chest-Supported Machine Row', 'Smith Machine Inverted Row', 'Wide-Grip T-Bar Row', 'Single-Arm High Cable Row']),
+    ...G('Back', 'Erectors (Spinal Extension)', ['Machine Back Extension', 'Reverse Hyperextension', 'Single-Leg 45° Back Extension']),
+    ...G('Shoulders', 'Front Delts (OHP)', ['Seated Overhead Press', 'Plate-Loaded Shoulder Press', 'Smith Machine Seated Shoulder Press', 'Single-Arm Cable Shoulder Press', 'Landmine Shoulder Press', 'Cable Front Raise', 'Plate Front Raise', 'Single-Arm Machine Shoulder Press']),
+    ...G('Shoulders', 'Side Delts (Abduction)', ['Lateral Raise', 'Single-Arm Cable Lateral Raise', 'Cable Y-Raise', 'Seated Dumbbell Lateral Raise', 'Leaning Dumbbell Lateral Raise', 'Lying Incline Lateral Raise', 'Single-Arm Machine Lateral Raise', 'Behind-the-Back Cable Lateral Raise', 'Cable Wrist-Height Lateral Raise']),
+    ...G('Shoulders', 'Side Delts (Abduction)', ['Banded Lateral Raise'], 'Travel'),
+    ...G('Shoulders', 'Rear Delts (Fly)', ['Reverse Cable Fly', 'Single-Arm Reverse Cable Fly', 'Cable Rear Delt Row', 'Seated Bent-Over Reverse Dumbbell Fly', 'Chest-Supported Reverse Dumbbell Fly', 'Single-Arm Reverse Pec Deck']),
+    ...G('Shoulders', 'Rear Delts (Fly)', ['Banded Pull-Apart'], 'Travel'),
+    ...G('Biceps', 'Biceps (Short Head/Preacher)', ['Bicep Curl', 'Cable Preacher Curl', 'Single-Arm Cable Curl', 'Straight-Bar Cable Curl', 'Machine Biceps Curl', 'Single-Arm Machine Preacher Curl', 'EZ-Bar Cable Curl']),
+    ...G('Biceps', 'Biceps (Long Head/Incline)', ['Incline Cable Curl', 'Single-Arm Bayesian Curl', 'Lying Cable Curl']),
+    ...G('Biceps', 'Brachialis (Hammer/Reverse)', ['Preacher Hammer Curl', 'Single-Arm Rope Hammer Curl', 'Reverse-Grip EZ-Bar Curl']),
+    ...G('Triceps', 'Triceps (Lateral/Medial)', ['Single-Arm Cable Pressdown', 'V-Bar Pressdown', 'Reverse-Grip Pressdown', 'Machine Triceps Extension', 'Smith Machine Close-Grip Press', 'Machine Dip (Seated)', 'Straight-Bar Pressdown']),
+    ...G('Triceps', 'Triceps (Long Head/Overhead)', ['Triceps Extension', 'Rope Overhead Cable Extension', 'Single-Arm Cable Overhead Extension', 'Machine Overhead Triceps Extension', 'Incline Dumbbell Skullcrusher', 'Cross-Body Cable Extension', 'Seated Dumbbell Overhead Extension']),
+    ...G('Quads', 'Compound Squat & Press', ['V-Squat Machine', 'Single-Leg Leg Press', 'Horizontal Leg Press', 'Plate-Loaded Hack Squat', 'Smith Machine Front Squat']),
+    ...G('Quads', 'Quad Isolation', ['Single-Leg Leg Extension', 'Reverse Nordic', 'Cable Leg Extension', 'Spanish Squat']),
+    ...G('Quads', 'Unilateral Quads / Lunges', ['Smith Machine Split Squat', 'Smith Machine Reverse Lunge', 'Dumbbell Step-Up', 'Front-Foot-Elevated Split Squat']),
+    ...G('Hamstrings', 'Hamstrings (Hip Hinge)', ['Smith Machine Romanian Deadlift', 'Single-Leg Dumbbell RDL', 'Cable Romanian Deadlift']),
+    ...G('Hamstrings', 'Hamstrings (Knee Flexion)', ['Single-Leg Lying Leg Curl', 'Single-Leg Seated Leg Curl', 'Standing Cable Leg Curl', 'Kneeling Leg Curl Machine']),
+    ...G('Glutes', 'Glute Max (Compound/Extension)', ['Glute Kickback', 'Cable Glute Kickback', 'Machine Glute Kickback', 'Reverse Hack Squat']),
+    ...G('Glutes', 'Glute Max (Hip Thrust)', ['Smith Machine Hip Thrust', 'Hip Thrust Machine', 'Single-Leg Hip Thrust', 'Glute Bridge Machine']),
+    ...G('Glutes', 'Mid-Glute (Abduction)', ['Standing Cable Hip Abduction', 'Standing Machine Hip Abduction']),
+    ...G('Glutes', 'Mid-Glute (Abduction)', ['Banded Lateral Walk'], 'Travel'),
+    ...G('Calves', 'Calves (Gastrocnemius)', ['Single-Leg Dumbbell Calf Raise', 'Hack Squat Calf Raise', 'Donkey Calf Raise Machine', 'Standing Calf Raise Machine']),
+    ...G('Calves', 'Calves (Soleus)', ['Plate-Loaded Seated Calf Raise', 'Smith Machine Seated Calf Raise', 'Bent-Knee Leg Press Calf Press', 'Single-Leg Seated Calf Raise']),
+    ...G('Adductors', 'Adductors (Hip Adduction)', ['Sumo Goblet Squat', 'Single-Leg Cable Adduction']),
+    ...G('Traps', 'Traps (Upper Shrugs)', ['Machine Shrug', 'Plate-Loaded Shrug', 'Single-Arm Dumbbell Shrug', 'Seated Dumbbell Shrug']),
+    ...G('Forearms', 'Forearms (Flexion/Extension/Grip)', ['Cable Wrist Curl', 'Reverse Dumbbell Wrist Curl', 'Farmer\'s Carry', 'Plate Pinch Hold', 'Cable Reverse Wrist Curl']),
+    ...G('Core', 'Upper Abs (Spinal Flexion)', ['Single-Arm Cable Crunch', 'Decline Crunch', 'Standing Rope Cable Crunch']),
+    ...G('Core', 'Lower Abs (Pelvic Tilt)', ['Captain\'s Chair Knee Raise', 'Decline Reverse Crunch', 'Cable Reverse Crunch']),
+    ...G('Core', 'Obliques (Rotation)', ['High-to-Low Cable Woodchopper', 'Landmine Rotation', 'Cable Side Bend']),
+    ...G('Core', 'Anti-Extension (Plank/Rollout)', ['Ab Wheel Rollout', 'Stability Ball Rollout', 'Body Saw Plank']),
+  ];
+})();
+
+// Merge: base repository first, extension skipped where the name (or an alias of a library name) already exists.
+const EXERCISE_LIBRARY = (() => {
+  const seen = new Set(EXERCISE_REPOSITORY.map(it => normalizeEx(it.name)));
+  const out = [...EXERCISE_REPOSITORY];
+  for (const it of EXERCISE_REPOSITORY_EXT) {
+    const n = normalizeEx(it.name);
+    if (seen.has(n) || (EX_ALIASES[n] && seen.has(normalizeEx(EX_ALIASES[n])))) continue;
+    seen.add(n); out.push(it);
+  }
+  return out.sort((a, b) => a.name.localeCompare(b.name));
+})();
 
 // Backward compatibility map for muscle lookups
 const MUSCLE_MAP = {};
@@ -5333,6 +5566,8 @@ let ST = {
   workoutSubMeta: {},   // key: `${sessionId}_${exIdx}` → {sets,reps} custom counts for a substituted slot
   workoutAutoSubs: {},   // key: `${sessionId}_${exIdx}` → automatically substituted exercise name
   workoutAutoSubMeta: {},// key: `${sessionId}_${exIdx}` → {sets,reps} default counts for an auto-substituted slot
+  workoutSubSource: {},  // key → 'default' when the swap came from a saved slot default (ota-30)
+  workoutZoneView: {},   // key → zone the user tapped to view/pre-fill instead of today's (ota-30, not persisted)
   blacklistedExercises: new Set(), // persistent: normalised names of exercises to never show again
   workoutAdditions: [], // [{name,muscle,sets,reps}] accessory exercises added via "+"; index n → key `add_${n}`
   dismissedWarmups: new Set(),  // in-memory: normalised exercise names with warm-up dismissed
@@ -5424,7 +5659,7 @@ function saveMeasurements(m) { LS.set('dcrgym_measurements', m); idbSet('dcrgym_
 // Schema-versioned, non-destructive, with rolling last-good backup.
 // History must survive every app update. Period.
 const SCHEMA_VERSION = 3;
-const APP_BUILD = '2026.11.12 · ota-29 · sync-v2-catchup';
+const APP_BUILD = '2026.11.19 · ota-30 · ledger-batch';
 const KG_TO_LB_CUTOFF_MS = 1788000000000; // Workouts before Sep 2026 were logged in kg; Sep 2026+ are already in lbs
 
 function hasLoggedWorkingSets(w) {
@@ -5791,13 +6026,18 @@ function getTravelExDetails(subName) {
 function autoSubstituteExercise(key, exIdx, ex) {
   const originalName = stripSuperset(ex.name);
   const muscle = getMuscle(originalName);
-  const candidates = SUB_LIBRARY[muscle] || [];
+  // ota-30 fix: SUB_LIBRARY never existed (blacklisting threw). Candidates now come from the
+  // program's own substitutes, then the same exact target, then the same muscle.
+  const progSubs = ((ex && ex.substitutions) || []).filter(n => n && n.trim()).map(n => { const it = getExerciseInfo(n); return { name: it.name || n, tag: it.tag || 'Gym' }; });
+  const sameTarget = getExactSubstitutes(originalName);
+  const sameMuscle = EXERCISE_LIBRARY.filter(it => it.muscle === muscle);
+  const candidates = [...progSubs, ...sameTarget, ...sameMuscle];
   const isTravel = ST.travelMode;
   const targetTag = isTravel ? 'Travel' : 'Gym';
 
   const match = candidates.find(c => {
     const norm = normalizeEx(c.name);
-    if (c.tag !== targetTag) return false;
+    if ((c.tag || 'Gym') !== targetTag) return false;
     if (ST.blacklistedExercises.has(norm)) return false;
     if (norm === normalizeEx(originalName)) return false;
     // Must not be the currently active auto-sub name (avoid loops)
@@ -5925,6 +6165,7 @@ function buildWorkoutPayload() {
     subMeta: ST.workoutSubMeta || {},
     autoSubs: ST.workoutAutoSubs || {},
     autoSubMeta: ST.workoutAutoSubMeta || {},
+    subSource: ST.workoutSubSource || {},
     additions: ST.workoutAdditions || [],
     notes: ST.workoutNotes || {},
     travelMode: ST.travelMode,
@@ -6311,6 +6552,235 @@ function getLastPerformanceFull(exName) {
     }
   }
   return null;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ota-30 training engine — rep-range memory, RIR progression, slot defaults,
+// equipment tags, custom exercises. READ-ONLY over history: nothing here ever
+// rewrites a stored set. Old sets are interpreted with fallbacks at read time.
+// ═══════════════════════════════════════════════════════════════════════════
+const EQUIP_LIST = ['Machine', 'Cable', 'Dumbbell', 'Barbell', 'Smith', 'Plate-loaded', 'Bodyweight', 'Band'];
+function equipOf(nameOrItem) {
+  const it = typeof nameOrItem === 'string' ? getExerciseInfo(nameOrItem) : nameOrItem;
+  if (it && it.equip) return it.equip;
+  const n = ' ' + normalizeEx(it ? it.name : nameOrItem) + ' ';
+  const has = (...ws) => ws.some(w => n.indexOf(' ' + w) !== -1);
+  if (has('smith')) return 'Smith';
+  if (has('banded', 'band ', 'resistance band')) return 'Band';
+  if (it && it.tag === 'Travel') return 'Bodyweight';
+  if (has('hammer strength', 'plate loaded', 'pendulum', 'belt squat', 't bar', 'landmine', 'v squat', 'meadow')) return 'Plate-loaded';
+  if (has('cable', 'rope', 'pulldown', 'pull in', 'crossover', 'facepull', 'face pull', 'pressdown', 'pushdown', 'pull through', 'woodchop', 'pallof', 'bayesian')) return 'Cable';
+  if (has('machine', 'pec deck', 'leg press', 'leg extension', 'leg curl', 'hack squat', 'assisted', 'seated calf', 'calf press', 'abduction', 'adduction', 'reverse hyper', 'glute ham', 'captain')) return 'Machine';
+  if (has('dumbbell', 'db ', 'goblet', 'kettlebell', 'kroc', 'farmer', 'suitcase')) return 'Dumbbell';
+  if (has('barbell', 'ez bar', 'bench press', 'deadlift', 'squat', 'rdl', 'good morning', 'pendlay', 'yates', 'skullcrusher', 'jm press', 'rack pull', 'floor press', 'shrug', 'row', 'curl', 'press')) return 'Barbell';
+  return 'Bodyweight';
+}
+
+// Rep ranges → zone. Heavy: top ≤ 8 · Moderate: 9–12 · Light: ≥ 13. Time-based targets have no zone.
+function repTop(reps) { if (reps == null) return NaN; const s = String(reps); if (/sec|min|\bs\b/i.test(s)) return NaN; const m = s.match(/(\d+)\s*$/) || s.match(/(\d+)/); return m ? parseInt(m[1]) : NaN; }
+function repBottom(reps) { if (reps == null) return NaN; const m = String(reps).match(/(\d+)/); return m ? parseInt(m[1]) : NaN; }
+function zoneOfTop(top) { if (!top || isNaN(top)) return null; return top <= 8 ? 'heavy' : (top <= 12 ? 'moderate' : 'light'); }
+function repZone(reps) { return zoneOfTop(repTop(reps)); }
+const ZONE_LABEL = { heavy: 'Heavy', moderate: 'Moderate', light: 'Light' };
+
+// Target rep range a past slot was trained against. Order: stamped on the set (ota-30+),
+// the swap's custom reps, the addition's reps, the program slot. Never written back.
+function workoutSlotTarget(w, key, sets) {
+  const stamped = Array.isArray(sets) && sets.find(s => s && s._tgt);
+  if (stamped) return stamped._tgt;
+  if (!w || !key) return null;
+  if (w.subs && w.subs[key] && w.subMeta && w.subMeta[key] && w.subMeta[key].reps) return String(w.subMeta[key].reps);
+  if (key.indexOf('add_') === 0 && Array.isArray(w.additions)) {
+    const id = parseInt(key.slice(4));
+    const a = w.additions.find(x => x && x.id === id);
+    if (a && a.reps) return String(a.reps);
+    return null;
+  }
+  if (w.programId && w.programId !== 'import') {
+    const prog = PROGRAMS.find(p => p.id === w.programId);
+    const sess = prog && prog.sessions.find(s => s.id === w.sessionId);
+    const exIdx = parseInt(String(key).split('_').pop());
+    if (sess && !isNaN(exIdx) && sess.exercises[exIdx]) return sess.exercises[exIdx].reps || null;
+  }
+  return null;
+}
+function zoneFromDoneReps(ws) {
+  const rs = ws.map(s => Number(s.r) || 0).filter(r => r > 0).sort((a, b) => a - b);
+  if (!rs.length) return null;
+  return zoneOfTop(rs[Math.floor(rs.length / 2)]);
+}
+
+// One-pass index of every logged slot in history, keyed the same four ways exercisesMatch compares names.
+let _zoneIdx = null;
+function _nameKeys(name) {
+  const raw = stripSuperset(name);
+  return ['n:' + normalizeEx(raw), 'a:' + resolveAlias(raw), 'p:' + normalizeEx(stripParentheticals(raw)), 'q:' + resolveAlias(normalizeEx(stripParentheticals(raw)))];
+}
+function getZoneIndex() {
+  let raw = null;
+  try { raw = localStorage.getItem('dcrgym_history'); } catch (e) {}
+  if (_zoneIdx && raw !== null && _zoneIdx.raw === raw) return _zoneIdx;
+  const hist = getHistory().filter(w => w && w.sets).sort((a, b) => (b.endTime || 0) - (a.endTime || 0));
+  const buckets = new Map();
+  let seq = 0;
+  for (const w of hist) {
+    for (const [key, sets] of Object.entries(w.sets)) {
+      if (key.endsWith('_wu') || !Array.isArray(sets) || !sets.length) continue;
+      const name = resolveWorkoutSetExName(w, key, sets);
+      if (!name) continue;
+      const ws = sets.filter(s => s && s.r > 0 && (s.w != null && s.w !== ''));
+      if (!ws.length) continue;
+      const target = workoutSlotTarget(w, key, sets);
+      const zone = repZone(target) || zoneFromDoneReps(ws);
+      const entry = { seq: seq++, name, zone, target, sets: ws, endTime: w.endTime || 0, workoutId: String(w.id), sessionId: w.sessionId, key };
+      for (const k of new Set(_nameKeys(name))) { if (!buckets.has(k)) buckets.set(k, []); buckets.get(k).push(entry); }
+    }
+  }
+  _zoneIdx = { raw, buckets, memo: new Map() };
+  return _zoneIdx;
+}
+function historyEntriesFor(exName) {
+  if (!exName) return [];
+  const idx = getZoneIndex();
+  if (idx.memo.has(exName)) return idx.memo.get(exName);
+  const seen = new Set(), out = [];
+  for (const k of _nameKeys(exName)) for (const e of (idx.buckets.get(k) || [])) if (!seen.has(e.seq)) { seen.add(e.seq); out.push(e); }
+  out.sort((a, b) => a.seq - b.seq); // newest first
+  idx.memo.set(exName, out);
+  return out;
+}
+function weightStep(exName) { return getWeightUnit() === 'kg' ? 2.5 : 5; }
+function roundToStep(w, exName) {
+  const step = getWeightUnit() === 'kg' ? (w < 15 ? 1.25 : 2.5) : (w < 30 ? 2.5 : 5);
+  return Math.max(step, Math.round(w / step) * step);
+}
+
+// Memory for one exercise at one rep range: latest session per zone, today's pick, or an estimate.
+function getZoneMemory(exName, reps, opts = {}) {
+  const exclude = opts.excludeId != null ? String(opts.excludeId) : null;
+  const entries = historyEntriesFor(exName).filter(e => e.workoutId !== exclude);
+  const wantZone = opts.zone || repZone(reps);
+  const byZone = {};
+  for (const e of entries) if (e.zone && !byZone[e.zone]) byZone[e.zone] = e;
+  const anyLast = entries[0] || null;
+  if (!wantZone) return { zone: null, entry: anyLast, byZone, estimate: null, anyLast };
+  if (byZone[wantZone]) return { zone: wantZone, entry: byZone[wantZone], byZone, estimate: null, anyLast };
+  // Estimate from strength in other zones: best e1RM in the last 8 weeks (else all-time) → today's top reps at 1 RIR.
+  const top = repTop(reps) || ({ heavy: 6, moderate: 10, light: 15 })[wantZone];
+  const bottom = repBottom(reps) || top;
+  const now = Date.now(), recent = entries.filter(e => now - e.endTime < 56 * 86400000);
+  let best = 0;
+  for (const e of (recent.length ? recent : entries)) for (const s of e.sets) { const w = Number(s.w) || 0, r = Number(s.r) || 0; if (w > 0 && r > 0 && r <= 30) best = Math.max(best, w * (1 + r / 30)); }
+  if (best > 0 && !isNaN(top)) {
+    let w = best / (1 + (top + 1) / 30);
+    if (top >= 15) w *= 0.95; // Epley runs hot at high reps
+    return { zone: wantZone, entry: null, byZone, estimate: { w: roundToStep(w, exName), r: bottom }, anyLast };
+  }
+  return { zone: wantZone, entry: null, byZone, estimate: null, anyLast };
+}
+
+// The move-up rule (DCR, Nov 12): every working set at the top of the range AND the last set at 1 or 2 RIR.
+// Top of range at 0 RIR = hold. Sets from before RIR existed fall back to the old top-of-range rule.
+function progressionVerdict(sets, reps) {
+  const ws = (sets || []).filter(s => s && s.r > 0);
+  const top = repTop(reps);
+  if (!ws.length || isNaN(top)) return null;
+  const allTop = ws.every(s => s.r >= top);
+  const last = ws[ws.length - 1];
+  const hasRir = last.rir === 0 || last.rir === 1 || last.rir === 2;
+  const maxW = ws.reduce((m, s) => Math.max(m, Number(s.w) || 0), 0);
+  if (allTop && (!hasRir || last.rir >= 1)) return { kind: 'up', top, legacy: !hasRir, lastRir: hasRir ? last.rir : null, weight: maxW };
+  if (allTop) return { kind: 'hold', top, legacy: false, lastRir: 0, weight: maxW };
+  return { kind: 'build', top, legacy: !hasRir, lastRir: hasRir ? last.rir : null, weight: maxW };
+}
+function suggestedUpWeight(weight, exName) {
+  if (!(weight > 0)) return null;
+  return Math.round((weight + weightStep(exName)) * 100) / 100;
+}
+
+// ── Default swaps (per program slot) ─────────────────────────────────────────
+function getSlotDefaults() { return LS.get('dcrgym_slot_defaults', {}) || {}; }
+function saveSlotDefaults(d) { LS.set('dcrgym_slot_defaults', d); idbSet('dcrgym_slot_defaults', d); }
+function slotDefaultFor(key, ex) {
+  const d = getSlotDefaults()[key];
+  if (!d || !d.name || !ex) return null;
+  if (normalizeEx(d.from || '') !== normalizeEx(stripSuperset(ex.name))) return null; // program changed under this slot
+  return d;
+}
+function applySlotDefaults() {
+  if (!ST.workoutSubSource) ST.workoutSubSource = {};
+  const prog = PROGRAMS.find(p => p.id === ST.currentProgram);
+  const sess = prog && prog.sessions.find(s => s.id === ST.currentSession);
+  if (!sess) return;
+  sess.exercises.forEach((ex, i) => {
+    const key = `${sess.id}_${i}`;
+    if (ST.workoutSubs[key]) return;
+    const d = slotDefaultFor(key, ex);
+    if (!d || ST.blacklistedExercises.has(normalizeEx(d.name))) return;
+    if (ST.travelMode && TRAVEL_MAP[normalizeEx(stripSuperset(ex.name))]) return; // hotel gym can't honour a machine default
+    ST.workoutSubs[key] = d.name;
+    ST.workoutSubMeta[key] = { sets: d.sets || ex.workingSets || 3, reps: String(d.reps || ex.reps || '8–10') };
+    ST.workoutSubSource[key] = 'default';
+  });
+}
+function clearDefaultSubsWithoutSets() {
+  if (!ST.workoutSubSource) return;
+  for (const [key, src] of Object.entries(ST.workoutSubSource)) {
+    if (src !== 'default') continue;
+    const logged = (ST.workoutSets[key] || []).some(s => s && s.r > 0);
+    if (logged) continue;
+    delete ST.workoutSubs[key]; delete ST.workoutSubMeta[key]; delete ST.workoutSubSource[key];
+  }
+}
+// Exercises used in this slot before (history), newest first.
+function pastPicksForSlot(key, originalName) {
+  const out = [], seen = new Set([normalizeEx(originalName)]);
+  const hist = getHistory().filter(w => w && w.sets).sort((a, b) => (b.endTime || 0) - (a.endTime || 0));
+  for (const w of hist) {
+    const sets = w.sets[key];
+    if (!Array.isArray(sets)) continue;
+    const nm = resolveWorkoutSetExName(w, key, sets);
+    if (!nm || seen.has(normalizeEx(nm))) continue;
+    if (!sets.some(s => s && s.r > 0)) continue;
+    seen.add(normalizeEx(nm)); out.push(nm);
+  }
+  const d = getSlotDefaults()[key];
+  if (d && d.name && !seen.has(normalizeEx(d.name))) out.unshift(d.name);
+  return out;
+}
+
+// ── Custom exercises ─────────────────────────────────────────────────────────
+function getCustomExercises() { const c = LS.get('dcrgym_custom_exercises', []); return Array.isArray(c) ? c : []; }
+function mergeCustomExercises() {
+  const have = new Set(EXERCISE_LIBRARY.map(it => normalizeEx(it.name)));
+  let added = 0;
+  for (const c of getCustomExercises()) {
+    if (!c || !c.name || have.has(normalizeEx(c.name))) continue;
+    EXERCISE_LIBRARY.push({ name: c.name, muscle: c.muscle || 'Other', subMuscle: c.subMuscle || c.muscle || 'Other', tag: 'Gym', custom: true, equip: c.equip || undefined });
+    MUSCLE_MAP[normalizeEx(c.name)] = c.muscle || 'Other';
+    have.add(normalizeEx(c.name)); added++;
+  }
+  if (added) EXERCISE_LIBRARY.sort((a, b) => a.name.localeCompare(b.name));
+  return added;
+}
+function saveCustomExercise(name, muscle, subMuscle) {
+  const list = getCustomExercises();
+  if (!list.some(c => normalizeEx(c.name) === normalizeEx(name))) list.push({ name, muscle, subMuscle, createdAt: Date.now() });
+  LS.set('dcrgym_custom_exercises', list); idbSet('dcrgym_custom_exercises', list);
+  mergeCustomExercises();
+}
+
+// Search: tokens in any order + gym shorthand.
+const LIB_SHORTHAND = { db: 'dumbbell', bb: 'barbell', sm: 'smith', kb: 'kettlebell', ohp: 'overhead press', rdl: 'romanian deadlift', sa: 'single arm', cs: 'chest supported', ez: 'ez bar', sl: 'single leg', ext: 'extension', lat: 'lat', tri: 'triceps', bi: 'biceps', delt: 'delt', hs: 'hammer strength' };
+function libMatches(it, query) {
+  const q = normalizeEx(query || '');
+  if (!q) return true;
+  const hay = ' ' + normalizeEx([it.name, it.muscle, it.subMuscle, it.tag, equipOf(it)].join(' ')) + ' ';
+  return q.split(' ').every(t => {
+    const exp = LIB_SHORTHAND[t];
+    if (exp) return exp.split(' ').every(x => hay.indexOf(x) !== -1) || hay.indexOf(' ' + t) !== -1;
+    return hay.indexOf(t) !== -1;
+  });
 }
 
 // "last Tue" / "3d ago" — quiet relative date for the card memory chip
@@ -8103,6 +8573,105 @@ function selectProgramFromBrowser(id) {
 // ── Single exercise card (program slot OR accessory addition) ───────────────
 // Extracted so additions reuse the exact same logging/prefill/rest/overload UI.
 // isAddition=true → key is `add_${n}`, resolves via ST.workoutAdditions.
+// ── ota-30 card pieces ───────────────────────────────────────────────────────
+const UI_ICON = {
+  swap: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4 3 8l4 4"/><path d="M3 8h13a4 4 0 0 1 0 8h-2"/><path d="m17 20 4-4-4-4"/><path d="M21 16H8"/></svg>',
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>',
+  hold: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><path d="M5 9h14M5 15h14"/></svg>',
+  build: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18 10 12l4 4 6-8"/><path d="M15 8h5v5"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
+  arrow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>',
+  plates: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><path d="M3 12h18"/><rect x="5" y="7" width="3" height="10" rx="1"/><rect x="16" y="7" width="3" height="10" rx="1"/></svg>',
+};
+function rirPillsHTML(key, si, rir) {
+  return `<div class="rir-pills" id="rir-${key}-${si}" role="group" aria-label="Reps in reserve, set ${si + 1}" onclick="event.stopPropagation()">` +
+    [1, 2].map(v => `<button class="rir-pill" aria-pressed="${rir === v}" aria-label="${v} rep${v > 1 ? 's' : ''} in reserve" onclick="setRIR('${key}',${si},${v})">${v}</button>`).join('') +
+    `</div>`;
+}
+function zoneRangeLabel(zone, target) {
+  if (target && !isNaN(repTop(target))) return String(target).replace(/-/g, '–');
+  return zone === 'heavy' ? '≤8' : (zone === 'moderate' ? '9–12' : '13+');
+}
+function zoneChipsHTML(key, mem, todayZone, unit) {
+  if (!mem || !mem.zone) {
+    const e = mem && mem.anyLast;
+    return e ? `<div class="ex-last-perf">Last: ${e.sets[e.sets.length - 1].w} ${unit} × ${e.sets[e.sets.length - 1].r} · ${relDay(e.endTime)}</div>` : '';
+  }
+  const active = mem.zone;
+  const zones = ['heavy', 'moderate', 'light'].filter(z => mem.byZone[z] || z === todayZone);
+  if (!zones.length) return '';
+  const chips = zones.map(z => {
+    const e = mem.byZone[z];
+    let body;
+    if (e) body = `${formatWeight(Number(e.sets[0].w) || 0)} ${unit} × ${e.sets.map(s => s.r).join(', ')} · ${relDay(e.endTime)}`;
+    else if (z === active && mem.estimate) body = `est. ${formatWeight(mem.estimate.w)} ${unit} from your other sets`;
+    else body = 'No history yet';
+    const tgt = e ? e.target : (z === todayZone ? effTargetForKey(key) : null);
+    return `<button class="zone-chip${e ? '' : ' empty'}" aria-pressed="${z === active}" onclick="event.stopPropagation();setZoneView('${key}','${z}')">
+      <b>${ZONE_LABEL[z]} ${zoneRangeLabel(z, tgt)}</b><span>${body}</span></button>`;
+  }).join('');
+  return `<div class="zone-chips" role="group" aria-label="Weight memory by rep range">${chips}</div>`;
+}
+function effTargetForKey(key) { const slot = slotForKey(key); return slot ? effReps(key, slot.ex) : null; }
+function verdictHTML(v, unit, exName, live) {
+  if (!v) return '';
+  const lead = live ? 'Next time: ' : '';
+  if (v.kind === 'up') {
+    const nw = suggestedUpWeight(v.weight, exName);
+    const why = v.legacy ? `Last time every set reached ${v.top}.` : (live ? `Every set reached ${v.top} with ${v.lastRir} in reserve on the last.` : `Last time every set reached ${v.top} and your last set was ${v.lastRir} RIR.`);
+    return `<div class="verdict up">${UI_ICON.up}<div><strong>${lead}${nw ? `Go up to ${formatWeight(nw)} ${unit}.` : 'Go up: add load or slow the tempo.'}</strong> ${why}</div></div>`;
+  }
+  if (v.kind === 'hold') {
+    return `<div class="verdict hold">${UI_ICON.hold}<div><strong>${lead}Hold ${formatWeight(v.weight)} ${unit}.</strong> ${live ? `You hit ${v.top} on every set but the last one was at failure.` : `You hit ${v.top} on every set last time, but the last one was at failure.`}</div></div>`;
+  }
+  return `<div class="verdict build">${UI_ICON.build}<div><strong>${lead}Build reps at ${formatWeight(v.weight)} ${unit}.</strong> Aim for ${v.top} on every set.</div></div>`;
+}
+function liveVerdictFor(key) {
+  const slot = slotForKey(key); if (!slot) return null;
+  const total = effSetCount(key, slot.ex);
+  const logged = (ST.workoutSets[key] || []).filter(s => s && s.r > 0);
+  if (ST.editingWorkoutId || logged.length < total || !total) return null;
+  return progressionVerdict(logged, effReps(key, slot.ex));
+}
+function refreshVerdict(key) {
+  const body = document.querySelector('#excard-' + key + ' .ex-body-inner');
+  if (!body) return;
+  const slot = slotForKey(key); if (!slot) return;
+  const v = liveVerdictFor(key);
+  const old = body.querySelector('.verdict');
+  if (!v) return;
+  const tmp = document.createElement('div');
+  tmp.innerHTML = verdictHTML(v, getWeightUnit(), liveExName(key, slot.ex), true);
+  const el = tmp.firstElementChild;
+  if (old) old.replaceWith(el); else body.prepend(el);
+}
+function setRIR(key, si, val) {
+  const s = ST.workoutSets[key] && ST.workoutSets[key][si];
+  if (!s) return;
+  s.rir = s.rir === val ? 0 : val;
+  saveNow();
+  haptic('tick');
+  const pills = document.getElementById('rir-' + key + '-' + si);
+  if (pills) pills.outerHTML = rirPillsHTML(key, si, s.rir);
+  refreshVerdict(key);
+}
+function setZoneView(key, zone) {
+  if (!ST.workoutZoneView) ST.workoutZoneView = {};
+  const today = repZone(effTargetForKey(key));
+  if (!zone || zone === today) delete ST.workoutZoneView[key]; else ST.workoutZoneView[key] = zone;
+  if (ST.workoutDrafts) for (const k of Object.keys(ST.workoutDrafts)) { if (k.indexOf(key + '-') === 0 && k !== key + '-wu') delete ST.workoutDrafts[k]; }
+  haptic('tick');
+  rerenderCard(key);
+}
+function rerenderCard(key) {
+  const el = document.getElementById('excard-' + key);
+  const slot = slotForKey(key);
+  if (!el || !slot) return;
+  const i = slot.isAddition ? slot.addId : slot.exIdx;
+  el.outerHTML = exerciseCardHTML(slot.ex, key, i, slot.isAddition);
+}
+
 function exerciseCardHTML(ex, key, i, isAddition) {
   const notes = getNotes();
   const restTimes = getRestTimes();
@@ -8110,43 +8679,38 @@ function exerciseCardHTML(ex, key, i, isAddition) {
   const name = isAddition ? liveExName(key, ex) : stripSuperset(ex.name);
   const isExpanded = ST.expandedCards.has(key);
   const isCompleted = ST.completedCards.has(key);
-  const muscle = getMuscle(name);
-  const cueAvail = !!FORM_CUES[normalizeEx(name)];
-  const travel = !isAddition && ST.travelMode && TRAVEL_MAP[normalizeEx(name)];
   const displayName = liveExName(key, ex);
+  const muscle = getMuscle(displayName) !== 'Other' ? getMuscle(displayName) : getMuscle(name);
   const subbed = !isAddition && ST.workoutSubs && ST.workoutSubs[key];
+  const subIsDefault = subbed && ST.workoutSubSource && ST.workoutSubSource[key] === 'default';
   const autoSubbed = !isAddition && ST.workoutAutoSubs && ST.workoutAutoSubs[key];
   const loggedSets = ST.workoutSets[key] || [];
-
-  // Sets count / reps — honours custom counts on subbed slots & additions
   const totalSets = effSetCount(key, ex);
   const reps = effReps(key, ex);
 
-  // Last performance (pre-fill) — looked up by the EFFECTIVE exercise identity across all workouts.
-  const lastPerfFull = getLastPerformanceFull(displayName);
-  const lastPerf = lastPerfFull ? lastPerfFull.sets : null;
+  // Weight memory by rep range — today's zone unless the user tapped another chip.
+  const zoneView = ST.workoutZoneView && ST.workoutZoneView[key];
+  const todayZone = repZone(reps);
+  const mem = getZoneMemory(displayName, reps, { zone: zoneView || null, excludeId: ST.editingWorkoutId });
+  let lastPerf = null, estimate = null;
+  if (mem.entry) lastPerf = mem.entry.sets;
+  else if (mem.estimate) estimate = mem.estimate;
+  else if (mem.anyLast) lastPerf = mem.anyLast.sets;
 
-  // Active focus spotlight: find first unlogged set row
+  // Verdict from the last session in today's zone (live workouts only) and the weight it suggests.
+  let verdict = null, suggestW = null;
+  const liveV = liveVerdictFor(key);
+  if (!ST.editingWorkoutId && !zoneView && mem.entry && mem.zone) {
+    verdict = progressionVerdict(mem.entry.sets, reps);
+    if (verdict && verdict.kind === 'up') suggestW = suggestedUpWeight(verdict.weight, displayName);
+  }
+  const bottomReps = repBottom(reps);
+
   let activeFocusIdx = -1;
   if (isExpanded && !isCompleted) {
-    for (let idx = 0; idx < totalSets; idx++) {
-      if (!loggedSets[idx] || !loggedSets[idx].r) {
-        activeFocusIdx = idx;
-        break;
-      }
-    }
+    for (let idx = 0; idx < totalSets; idx++) { if (!loggedSets[idx] || !loggedSets[idx].r) { activeFocusIdx = idx; break; } }
   }
 
-  // Overload nudge check
-  let overloadNudge = '';
-  if (loggedSets.length === totalSets && totalSets > 0) {
-    const topRep = parseInt((reps.match(/(\d+)$/) || ['',reps])[1]);
-    if (!isNaN(topRep) && loggedSets.every(s => s && s.r >= topRep)) {
-      overloadNudge = `<div class="overload-nudge">⬆ All sets hit ${topRep} reps — increase weight next session!</div>`;
-    }
-  }
-
-  // ── Build set rows with trend micro-indicators & active focus ─────────────
   let histAvgW = null;
   if (lastPerf && lastPerf.length > 0) {
     const wArr = lastPerf.filter(s => s && s.w > 0).map(s => s.w);
@@ -8159,62 +8723,64 @@ function exerciseCardHTML(ex, key, i, isAddition) {
     const lastSet = lastPerf && (lastPerf[si] != null ? lastPerf[si] : lastPerf[lastPerf.length - 1]);
     const draft = !logged && ST.workoutDrafts && ST.workoutDrafts[key + '-' + si];
     const prevLoggedThisSession = si > 0 && loggedSets[si - 1] ? loggedSets[si - 1] : null;
+    const useSugg = !logged && !(draft && draft.w !== '') && suggestW != null;
+    const useEst = !logged && !(draft && draft.w !== '') && !lastSet && estimate;
+    const defaultR = ex && ex.reps ? (parseInt((String(reps).match(/(\d+)$/) || ['', '8'])[1]) || 8) : 8;
 
-    // Reliable previous weight & reps pre-fill
-    const preW = logged ? logged.w : (draft && draft.w !== '' ? draft.w : (lastSet != null && lastSet.w != null ? lastSet.w : (prevLoggedThisSession ? prevLoggedThisSession.w : '')));
-    const preR = logged ? logged.r : (draft && draft.r !== '' ? draft.r : (lastSet != null && lastSet.r != null ? lastSet.r : (prevLoggedThisSession ? prevLoggedThisSession.r : (ex && ex.reps ? (parseInt((ex.reps.match(/(\d+)$/) || ['', '8'])[1]) || 8) : 8))));
+    let preW, preR;
+    if (logged) { preW = logged.w; preR = logged.r; }
+    else {
+      preW = draft && draft.w !== '' ? draft.w : (useSugg ? suggestW : (useEst ? estimate.w : (lastSet != null && lastSet.w != null ? lastSet.w : (prevLoggedThisSession ? prevLoggedThisSession.w : ''))));
+      preR = draft && draft.r !== '' ? draft.r : ((useSugg && !isNaN(bottomReps)) ? bottomReps : (useEst ? estimate.r : (lastSet != null && lastSet.r != null ? lastSet.r : (prevLoggedThisSession ? prevLoggedThisSession.r : defaultR))));
+    }
 
     const isLastSet = si === totalSets - 1;
     const tech = isLastSet && ex.lastSetTechnique ? `<span class="technique-badge">${ex.lastSetTechnique}</span>` : '';
     const isLogged = !!logged;
     const isActiveFocus = si === activeFocusIdx;
 
-    let prHtml = '';
-    if (isLogged && logged._isPR) {
-      prHtml = `<div class="pr-toast">✦ New Record · ${logged.w} ${unit} × ${logged.r}</div>`;
-    }
+    const prHtml = (isLogged && logged._isPR) ? `<div class="pr-toast">✦ New Record · ${logged.w} ${unit} × ${logged.r}</div>` : '';
 
     let trendHtml = '';
-    if (!isLogged && histAvgW !== null && preW !== '' && Number(preW) > 0) {
+    if (!isLogged && !useSugg && histAvgW !== null && preW !== '' && Number(preW) > 0) {
       const diff = Number(preW) - histAvgW;
-      const absDiff = Math.abs(diff);
-      if (absDiff >= 0.5) {
-        const arrow   = diff > 0 ? '↑' : '↓';
-        const cls     = diff > 0 ? 'trend-arrow-up' : 'trend-arrow-down';
-        const diffStr = (diff > 0 ? '+' : '') + diff.toFixed(1) + ' ' + unit + ' vs avg';
-        trendHtml = `<div class="set-trend">
-          <span class="${cls}">${arrow}</span>
-          <span>${diffStr}</span>
-        </div>`;
+      if (Math.abs(diff) >= 0.5) {
+        const cls = diff > 0 ? 'trend-arrow-up' : 'trend-arrow-down';
+        trendHtml = `<div class="set-trend"><span class="${cls}">${diff > 0 ? '↑' : '↓'}</span><span>${(diff > 0 ? '+' : '') + diff.toFixed(1)} ${unit} vs avg</span></div>`;
       }
     }
+    const tileCls = useSugg ? ' sugg' : (useEst ? ' est' : '');
 
     setRows += `
-    <div class="set-row${isActiveFocus ? ' active-focus' : ''}" id="setrow-${key}-${si}">
-      <div class="set-num">${si+1}</div>
-      <input class="set-input${isLogged?' logged':''}" id="wi-${key}-${si}" type="text" readonly inputmode="none"
-        value="${preW}" placeholder="${unit}" autocomplete="off"
-        onclick="openNumpad(this,'${key}',${si},${i},'w')"
-        oninput="markDraft('${key}',${si})">
-      <div class="set-sep">×</div>
-      <input class="set-input${isLogged?' logged':''}" id="ri-${key}-${si}" type="text" readonly inputmode="none"
-        value="${preR}" placeholder="reps" autocomplete="off"
-        onclick="openNumpad(this,'${key}',${si},${i},'r')"
-        oninput="markDraft('${key}',${si})">
-      <button class="set-log-btn${isLogged?' logged':''}" onclick="${isLogged ? `unlogSet('${key}',${si},${i})` : `logSet('${key}',${si},${i})`}"
-        >${isLogged ? checkSVG() : '→'}</button>
+    <div class="set-row${isActiveFocus ? ' active-focus' : ''}${isLogged ? ' is-logged' : ''}${isLastSet ? ' is-last' : ''}" id="setrow-${key}-${si}">
+      <div class="set-num">${si + 1}</div>
+      <label class="set-tile${tileCls}" data-unit="${unit}">
+        <input class="set-input${isLogged ? ' logged' : ''}" id="wi-${key}-${si}" type="text" readonly inputmode="none"
+          value="${preW}" placeholder="${unit}" autocomplete="off" aria-label="Set ${si + 1} weight"
+          onclick="openNumpad(this,'${key}',${si},${i},'w')" oninput="markDraft('${key}',${si})">
+      </label>
+      <label class="set-tile${tileCls}" data-unit="reps">
+        <input class="set-input${isLogged ? ' logged' : ''}" id="ri-${key}-${si}" type="text" readonly inputmode="none"
+          value="${preR}" placeholder="reps" autocomplete="off" aria-label="Set ${si + 1} reps"
+          onclick="openNumpad(this,'${key}',${si},${i},'r')" oninput="markDraft('${key}',${si})">
+      </label>
+      <div class="set-act">
+        ${isLogged ? rirPillsHTML(key, si, logged.rir) : ''}
+        <button class="set-log-btn${isLogged ? ' logged' : ''}" aria-label="${isLogged ? 'Undo' : 'Log'} set ${si + 1}"
+          onclick="${isLogged ? `unlogSet('${key}',${si},${i})` : `logSet('${key}',${si},${i})`}">${isLogged ? checkSVG() : UI_ICON.arrow}</button>
+      </div>
     </div>
     ${prHtml}
     ${trendHtml}
     ${tech ? `<div style="padding-left:30px;margin-bottom:6px">${tech}</div>` : ''}`;
   }
 
-  // Warm-up set row — one interactive row; hidden if user dismissed for this exercise
   const wuKey = `${key}_wu`;
   const wuDismissed = ST.dismissedWarmups.has(normalizeEx(name));
   const wuLogged = ST.workoutSets[wuKey] && ST.workoutSets[wuKey][0];
   const wuDraft = !wuLogged && ST.workoutDrafts && ST.workoutDrafts[key + '-wu'];
-  const wuPreW = wuLogged ? wuLogged.w : (wuDraft && wuDraft.w !== '' ? wuDraft.w : (lastPerf && lastPerf[0] && lastPerf[0].w != null ? Math.round(Number(lastPerf[0].w) * 0.5) : ''));
+  const wuBase = lastPerf && lastPerf[0] && lastPerf[0].w != null ? Number(lastPerf[0].w) : (estimate ? estimate.w : null);
+  const wuPreW = wuLogged ? wuLogged.w : (wuDraft && wuDraft.w !== '' ? wuDraft.w : (wuBase != null ? Math.round(wuBase * 0.5) : ''));
   const wuPreR = wuLogged ? wuLogged.r : (wuDraft && wuDraft.r !== '' ? wuDraft.r : '');
   const warmupRowHtml = (!wuDismissed) ? `
     <div class="warmup-row" id="wurow-${key}">
@@ -8232,60 +8798,55 @@ function exerciseCardHTML(ex, key, i, isAddition) {
   const noteKey = normalizeEx(name);
   const noteVal = notes[noteKey] || '';
   const restSec = restTimes[normalizeEx(name)] || parseRestSeconds(ex.rest);
+  const subNote = subbed
+    ? (subIsDefault ? `<div class="ex-sub-note">${UI_ICON.swap}<span>Your default · program has ${name}</span></div>` : `<div class="ex-sub-note">${UI_ICON.swap}<span>Swapped from ${name} today</span></div>`)
+    : (autoSubbed ? `<div class="ex-sub-note">${UI_ICON.swap}<span>Auto-swapped from ${name} (blacklisted)</span></div>`
+      : (isAddition ? `<div class="ex-sub-note">${UI_ICON.plus}<span>Added exercise</span></div>` : ''));
+  const verdictBlock = liveV ? verdictHTML(liveV, unit, displayName, true) : verdictHTML(verdict, unit, displayName, false);
+  const gate = totalSets > 0 && !ST.editingWorkoutId ? `<div class="rir-gate">After a set, tap 1 or 2 for reps in reserve. Nothing lit = failure. The last set decides next time's weight.</div>` : '';
 
   return `
-  <div class="ex-card${isExpanded?' expanded':''}${isCompleted?' completed':''}${isAddition?' ex-card-add':''}" id="excard-${key}">
+  <div class="ex-card${isExpanded ? ' expanded' : ''}${isCompleted ? ' completed' : ''}${isAddition ? ' ex-card-add' : ''}" id="excard-${key}">
     <div class="ex-card-header" onclick="toggleCard('${key}')">
       <div class="ex-card-header-left">
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;flex-wrap:wrap;">
+        <div class="ex-kicker">
           ${muscleBadgeHtml(muscle)}
-          ${isCompleted ? '<span class="ex-check-pill">DONE ✓</span>' : ''}
+          ${isCompleted ? '<span class="ex-check-pill">Done</span>' : ''}
         </div>
         <div class="ex-name">${displayName}</div>
-        ${subbed ? `<div class="ex-sub-note">⇄ swapped from ${name}</div>` : 
-          (autoSubbed ? `<div class="ex-sub-note">⇄ auto-swapped from ${name} (blacklisted)</div>` : 
-          (isAddition ? `<div class="ex-sub-note">✚ added exercise</div>` : ''))}
-        ${lastPerf ? `<div class="ex-last-perf">Last: ${lastPerf[lastPerf.length-1].w} ${unit} × ${lastPerf[lastPerf.length-1].r} · ${relDay(lastPerfFull.endTime)}</div>` : ''}
+        ${subNote}
         <div class="ex-meta">${totalSets} sets × ${reps} reps · ${formatDuration(restSec)} rest</div>
+        ${zoneChipsHTML(key, mem, todayZone, unit)}
       </div>
       <div class="ex-card-actions" onclick="event.stopPropagation()">
         <button class="ex-note-btn${(ST.workoutNotes[key] || noteVal) ? ' has-note' : ''}" id="notebtn-${key}"
           onclick="toggleNotePanel(event,'${key}','${noteKey}')" title="Exercise notes" aria-label="Exercise notes">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
-          </svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
         </button>
-        <button class="ex-menu-btn" onclick="showExerciseActionSheet(event,'${key}',${i},${isAddition})" title="Exercise Options" aria-label="Exercise options">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <circle cx="5" cy="12" r="2.2"/>
-            <circle cx="12" cy="12" r="2.2"/>
-            <circle cx="19" cy="12" r="2.2"/>
-          </svg>
+        <button class="ex-menu-btn" onclick="showExerciseActionSheet(event,'${key}',${i},${isAddition})" title="Exercise options" aria-label="Exercise options">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
         </button>
         <button class="ex-chevron-btn" onclick="toggleCard('${key}')" aria-label="Toggle exercise">
-          <svg class="ex-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg>
+          <svg class="ex-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
       </div>
     </div>
     <div class="ex-body">
       <div class="ex-body-inner">
+        ${verdictBlock}
         ${warmupRowHtml}
-        ${overloadNudge}
         ${setRows}
-        <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:space-between;">
+        ${gate}
+        <div class="ex-foot">
           <div class="set-hint rest-time-row">
-            <span style="color:var(--text-tertiary);font-size:12px;">Rest:</span>
+            <span class="ex-foot-lbl">Rest</span>
             <span class="rest-time-display" id="rest-lbl-${key}" onclick="editRestTime('${key}',${i},this)" title="Tap to edit">${formatDuration(restSec)}</span>
           </div>
           ${isBarbell(displayName) ? `
-          <button class="plate-calc-trigger" onclick="showPlateCalcSheet('${displayName.replace(/'/g, "\\'")}','${key}')" title="Plate Calculator">
-            <span>⚖ Plates</span>
-          </button>` : ''}
+          <button class="plate-calc-trigger" onclick="showPlateCalcSheet('${displayName.replace(/'/g, "\\'")}','${key}')" title="Plate calculator">${UI_ICON.plates}<span>Plates</span></button>` : ''}
         </div>
-        <!-- Inline note panel — revealed by header pen icon -->
         <div class="ex-note-panel${(ST.workoutNotes[key] || noteVal) ? ' open' : ''}" id="notepanel-${key}">
-          <textarea class="ex-note-area" id="noteinput-${key}"
-            placeholder="Session notes…"
+          <textarea class="ex-note-area" id="noteinput-${key}" placeholder="Session notes…"
             oninput="saveSessionNote('${key}','${noteKey}',this.value)"
           >${ST.workoutNotes[key] !== undefined ? ST.workoutNotes[key] : noteVal}</textarea>
         </div>
@@ -8751,6 +9312,9 @@ function shimmerBtn(btn) {
 
 function setTravel(on) {
   ST.travelMode = on;
+  // Travel wins over saved defaults (a hotel gym can't honour a machine default); defaults come back when it's off.
+  clearDefaultSubsWithoutSets();
+  applySlotDefaults(); // with travel on, only re-adds slots that have no travel alternative
   applyAutoSubstitutions();
   saveNow();
   renderWorkout();
@@ -8817,7 +9381,9 @@ function logSet(key, si, exIdx) {
   const prevBestE1rm = getHistoricalBestE1RM(exName);
   const isPR = prevBestE1rm > 0 && curE1rm > (prevBestE1rm + 0.5);
 
-  ST.workoutSets[key][si] = { w, r, ts: Date.now(), _name: exName, _isPR: isPR };
+  // ota-30: rir is always written (0 = failure) so "0" is distinguishable from "not recorded" on older sets;
+  // _tgt stamps the rep range this set was logged against (weight memory by rep range).
+  ST.workoutSets[key][si] = { w, r, ts: Date.now(), _name: exName, _isPR: isPR, rir: 0, _tgt: String(effReps(key, ex)) };
 
   // Draft for this set is now committed — clear it
   if (ST.workoutDrafts) delete ST.workoutDrafts[key + '-' + si];
@@ -8839,11 +9405,14 @@ function logSet(key, si, exIdx) {
   const row = document.getElementById('setrow-' + key + '-' + si);
   if (row) {
     row.classList.remove('active-focus');
+    row.classList.add('is-logged');
     const btn = row.querySelector('.set-log-btn');
     if (btn) {
       btn.classList.add('logged');
       btn.innerHTML = checkSVG();
+      btn.setAttribute('aria-label', 'Undo set ' + (si + 1));
       btn.onclick = () => unlogSet(key, si, exIdx);
+      if (!document.getElementById('rir-' + key + '-' + si)) btn.insertAdjacentHTML('beforebegin', rirPillsHTML(key, si, 0));
     }
 
     if (isPR) {
@@ -8924,18 +9493,8 @@ function logSet(key, si, exIdx) {
     }, 300);
   }
 
-  // Check overload nudge
-  const reps = effReps(key, ex);
-  const topRep = parseInt((reps.match(/(\d+)$/) || ['', '10'])[1]);
-  if (doneCount >= totalSets && !isNaN(topRep) && loggedSets.every(s => s && s.r >= topRep)) {
-    const body = document.querySelector('#excard-' + key + ' .ex-body-inner');
-    if (body && !body.querySelector('.overload-nudge')) {
-      const nudge = document.createElement('div');
-      nudge.className = 'overload-nudge';
-      nudge.textContent = '⬆ All sets hit ' + topRep + ' reps — increase weight next session!';
-      body.prepend(nudge);
-    }
-  }
+  // Progression verdict for next time (RIR-gated) — updates in place, and again if RIR is tapped after.
+  if (doneCount >= totalSets) refreshVerdict(key);
 
   // Rest timer
   const name = stripSuperset(ex.name);
@@ -8951,9 +9510,11 @@ function logSet(key, si, exIdx) {
       const nextExIdx = exIdx + 1;
       if (!isAdd && nextExIdx < sess.exercises.length) {
         const nextEx = sess.exercises[nextExIdx];
-        const nextName = liveExName(`${sess.id}_${nextExIdx}`, nextEx);
-        const nextLast = getLastPerformance(nextName);
-        const nextW = nextLast && nextLast[0] ? nextLast[0].w + ' ' + unit : '?';
+        const nextKey = `${sess.id}_${nextExIdx}`;
+        const nextName = liveExName(nextKey, nextEx);
+        const nextMem = getZoneMemory(nextName, effReps(nextKey, nextEx), { excludeId: ST.editingWorkoutId });
+        const nextW = nextMem.entry && nextMem.entry.sets[0] ? nextMem.entry.sets[0].w + ' ' + unit
+          : (nextMem.estimate ? '~' + formatWeight(nextMem.estimate.w) + ' ' + unit : (nextMem.anyLast && nextMem.anyLast.sets[0] ? nextMem.anyLast.sets[0].w + ' ' + unit : '?'));
         nextText = 'Exercise done ✓  Up next: ' + nextName + ' · ' + nextW;
       } else {
         nextText = 'Last exercise done ✓';
@@ -9024,9 +9585,15 @@ function unlogSet(key, si, exIdx) {
   if (ri) ri.classList.remove('logged');
   if (btn) {
     btn.classList.remove('logged');
-    btn.textContent = '→';
+    btn.innerHTML = UI_ICON.arrow;
+    btn.setAttribute('aria-label', 'Log set ' + (si + 1));
     btn.onclick = () => logSet(key, si, exIdx);
   }
+  const pills = document.getElementById('rir-' + key + '-' + si);
+  if (pills) pills.remove();
+  if (row) row.classList.remove('is-logged');
+  const staleVerdict = document.querySelector('#excard-' + key + ' .verdict');
+  if (staleVerdict && /Next time/.test(staleVerdict.textContent)) staleVerdict.remove();
   if (row) {
     const prToast = row.nextElementSibling;
     if (prToast && prToast.classList.contains('pr-toast')) prToast.remove();
@@ -9224,7 +9791,9 @@ function showSubs(e, key, exIdx) {
   const slot = slotForKey(key);
   if (!slot || slot.isAddition) return;
   const rawName = stripSuperset(slot.ex.name);
-  ST._lib = { mode: 'sub', key: key, exIdx: exIdx, name: rawName, muscle: getMuscle(rawName) };
+  const _p = PROGRAMS.find(p => p.id === ST.currentProgram);
+  const _s = _p && _p.sessions.find(ss => ss.id === ST.currentSession);
+  ST._lib = { mode: 'sub', key: key, exIdx: exIdx, name: rawName, muscle: getMuscle(rawName), persist: false, equip: 'All', sessName: _s ? _s.name.replace(/\s*\(.*\)\s*$/, '') : '' };
   openSheet(subsSheetHTML());
 }
 
@@ -9236,42 +9805,87 @@ function subsSheetHTML() {
   const exInfo = getExerciseInfo(name);
   const subMuscle = exInfo.subMuscle || getMuscle(name);
   const activeSub = ST.workoutSubs && ST.workoutSubs[ctx.key];
+  const isDefault = activeSub && ST.workoutSubSource && ST.workoutSubSource[ctx.key] === 'default';
+  const savedDefault = ex ? slotDefaultFor(ctx.key, ex) : null;
+  const persist = !!ctx.persist;
+  const current = slot ? liveExName(ctx.key, ex) : name;
+  const skip = new Set([normalizeEx(name), normalizeEx(current)]);
 
-  // 1. Exact Target Muscle Substitutes (matching exact subMuscle biomechanics)
-  const exactSubs = getExactSubstitutes(name);
-  const exactHtml = exactSubs.length
-    ? exactSubs.slice(0, 8).map(it => libCard(it.name, it.muscle, it.tag, it.subMuscle)).join('')
-    : '';
+  const past = pastPicksForSlot(ctx.key, name).filter(n => !skip.has(normalizeEx(n)));
+  const pastHtml = past.slice(0, 6).map(n => { const it = getExerciseInfo(n); return libCard(it.name || n, it.muscle, it.tag, it.subMuscle, 'Used here'); }).join('');
 
-  // 2. Program Recommended Substitutes (if programmed)
-  const nippardSubs = ((ex && ex.substitutions) || []).filter(s => s && s.trim());
-  const nippardHtml = nippardSubs.map(s => {
-    const sInfo = getExerciseInfo(s);
-    return libCard(s, sInfo.muscle, 'Program', sInfo.subMuscle);
-  }).join('');
+  const progSubs = ((ex && ex.substitutions) || []).filter(s => s && s.trim() && !skip.has(normalizeEx(s)));
+  const progHtml = progSubs.map(s => { const it = getExerciseInfo(s); return libCard(s, it.muscle, 'Program', it.subMuscle, 'Program'); }).join('');
+
+  const exact = getExactSubstitutes(name).filter(it => !skip.has(normalizeEx(it.name)) && it.tag !== 'Travel');
+  const sameMuscle = EXERCISE_LIBRARY.filter(it => it.muscle === exInfo.muscle && it.subMuscle !== exInfo.subMuscle && it.tag !== 'Travel' && !skip.has(normalizeEx(it.name)));
+  const equipsPresent = EQUIP_LIST.filter(e => exact.some(it => equipOf(it) === e) || sameMuscle.some(it => equipOf(it) === e));
+
+  const restoreHtml = activeSub ? (isDefault
+    ? `<div class="restore-row">
+         <button class="btn btn-sheet-secondary" onclick="restoreProgramExercise('${ctx.key}', false)">Use ${name} today only</button>
+         <button class="btn btn-sheet-ghost" onclick="restoreProgramExercise('${ctx.key}', true)">Back to ${name} for good</button>
+       </div>`
+    : `<button class="btn btn-sheet-secondary restore-one" onclick="restoreProgramExercise('${ctx.key}', false)">Back to ${name}</button>`)
+    : (savedDefault ? `<button class="btn btn-sheet-ghost restore-one" onclick="restoreProgramExercise('${ctx.key}', true)">Remove saved default (${savedDefault.name})</button>` : '');
 
   return `
-    <div class="cue-dossier-hero" style="margin-bottom:12px;">
-      <div class="cue-dossier-title">Swap ${name}</div>
-      <div style="font-size:12px;color:var(--text-tertiary);margin-top:4px;">
-        Target: <strong style="color:var(--accent-kinetic)">${subMuscle}</strong> · ${exInfo.muscle}
-      </div>
+    <div class="swap-head">
+      <div class="bs-title">Swap ${current}</div>
+      <div class="bs-sub">Same target: <strong>${subMuscle}</strong> · ${exInfo.muscle}${activeSub ? ` · program has ${name}` : ''}</div>
     </div>
+    ${restoreHtml}
+    <div class="seg" role="group" aria-label="How long to keep this swap">
+      <button aria-pressed="${!persist}" onclick="setLibPersist(false)">Today only</button>
+      <button aria-pressed="${persist}" onclick="setLibPersist(true)">Make default</button>
+    </div>
+    <div class="seg-note" id="seg-note">${persist ? `Every ${ctx.sessName || 'session'} from now on, until you restore ${name}.` : `Back to ${name} next time.`}</div>
 
-    ${activeSub ? `<button class="btn btn-sheet-secondary" style="margin-bottom:14px;width:100%;" onclick="revertSubstitution('${ctx.key}')">↩ Revert back to ${name}</button>` : ''}
+    ${past.length ? `<div class="bs-section-lbl">Your swaps here</div><div class="lib-section">${pastHtml}</div>` : ''}
+    ${progSubs.length ? `<div class="bs-section-lbl">Program recommended</div><div class="lib-section">${progHtml}</div>` : ''}
 
-    ${nippardSubs.length ? `
-      <div style="font-size:10.5px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-tertiary);margin:12px 0 8px;">Program Recommended</div>
-      <div class="lib-section" style="margin-bottom:12px">${nippardHtml}</div>` : ''}
+    ${equipsPresent.length > 1 ? `<div class="equip-chips" role="group" aria-label="Filter by equipment">${['All', ...equipsPresent].map(e => `<button aria-pressed="${(ctx.equip || 'All') === e}" onclick="setLibEquip('${e}')">${e}</button>`).join('')}</div>` : ''}
+    <div id="swap-targets">${swapTargetsHTML(exact, sameMuscle, subMuscle, exInfo.muscle)}</div>
 
-    ${exactSubs.length ? `
-      <div style="font-size:10.5px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-tertiary);margin:12px 0 8px;">Exact Biomechanical Substitutes (${subMuscle})</div>
-      <div class="lib-section" style="margin-bottom:12px">${exactHtml}</div>` : ''}
-
-    <div style="font-size:10.5px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-tertiary);margin:14px 0 8px;">Search All Exercises (${EXERCISE_LIBRARY.length})</div>
-    <input class="bs-search" id="lib-search" type="text" placeholder="Search by name, muscle, equipment…" autocomplete="off" oninput="filterLib(this.value)">
-    <div id="lib-list" style="margin-top:10px;">${libListHTML('')}</div>
+    <div class="bs-section-lbl">Search all exercises (${EXERCISE_LIBRARY.length})</div>
+    <input class="bs-search" id="lib-search" type="text" placeholder="Try “row db”, “sm incline”, “cable lateral”" autocomplete="off" oninput="filterLib(this.value)">
+    <div id="lib-list">${libListHTML('', true)}</div>
   `;
+}
+function swapTargetsHTML(exact, sameMuscle, subMuscle, muscle) {
+  const eq = (ST._lib && ST._lib.equip) || 'All';
+  const f = arr => eq === 'All' ? arr : arr.filter(it => equipOf(it) === eq);
+  const a = f(exact), b = f(sameMuscle);
+  return `
+    <div class="bs-section-lbl">Same target (${a.length})</div>
+    <div class="lib-section">${a.length ? a.map(it => libCard(it.name, it.muscle, it.tag, it.subMuscle)).join('') : `<div class="lib-empty">Nothing with that equipment for ${subMuscle}.</div>`}</div>
+    ${b.length ? `<details class="lib-more"><summary>Same muscle, other angle (${b.length})</summary><div class="lib-section">${b.map(it => libCard(it.name, it.muscle, it.tag, it.subMuscle)).join('')}</div></details>` : ''}`;
+}
+function setLibPersist(on) {
+  if (!ST._lib) return;
+  ST._lib.persist = !!on;
+  const btns = document.querySelectorAll('.seg button');
+  btns.forEach((b, i) => b.setAttribute('aria-pressed', String(i === 1 ? !!on : !on)));
+  const note = document.getElementById('seg-note');
+  const name = ST._lib.name || '';
+  if (note) note.textContent = on ? `Every ${ST._lib.sessName || 'session'} from now on, until you restore ${name}.` : `Back to ${name} next time.`;
+  haptic('tick');
+}
+function setLibEquip(e) {
+  if (!ST._lib) return;
+  ST._lib.equip = e;
+  const name = ST._lib.name || '';
+  const exInfo = getExerciseInfo(name);
+  const slot = slotForKey(ST._lib.key);
+  const current = slot ? liveExName(ST._lib.key, slot.ex) : name;
+  const skip = new Set([normalizeEx(name), normalizeEx(current)]);
+  const exact = getExactSubstitutes(name).filter(it => !skip.has(normalizeEx(it.name)) && it.tag !== 'Travel');
+  const sameMuscle = EXERCISE_LIBRARY.filter(it => it.muscle === exInfo.muscle && it.subMuscle !== exInfo.subMuscle && it.tag !== 'Travel' && !skip.has(normalizeEx(it.name)));
+  const el = document.getElementById('swap-targets');
+  if (el) el.innerHTML = swapTargetsHTML(exact, sameMuscle, exInfo.subMuscle || exInfo.muscle, exInfo.muscle);
+  document.querySelectorAll('.equip-chips button').forEach(b => b.setAttribute('aria-pressed', String(b.textContent === e)));
+  const s = document.getElementById('lib-search'); if (s && s.value) filterLib(s.value);
+  haptic('tick');
 }
 
 function showAddSheet() {
@@ -9281,76 +9895,103 @@ function showAddSheet() {
 
 function addSheetHTML() {
   return `
-    <div class="bs-title">Add Exercise</div>
-    <div class="bs-sub">Accessory work — logs after your programmed exercises and counts toward weekly volume.</div>
-    <div class="bs-section-lbl">All Exercises (${EXERCISE_LIBRARY.length})</div>
-    <input class="bs-search" id="lib-search" type="text" placeholder="Search by name, muscle, equipment…" autocomplete="off" oninput="filterLib(this.value)">
+    <div class="bs-title">Add exercise</div>
+    <div class="bs-sub">Accessory work. Logs after your programmed exercises and counts toward weekly volume.</div>
+    <input class="bs-search" id="lib-search" type="text" placeholder="Try “row db”, “sm incline”, “cable lateral”" autocomplete="off" oninput="filterLib(this.value)">
     <div id="lib-list">${libListHTML('')}</div>
   `;
 }
 
-function libListHTML(filter) {
-  const f = normalizeEx(filter || '');
-  let items = EXERCISE_LIBRARY;
-  if (f) {
-    items = items.filter(it =>
-      normalizeEx(it.name).indexOf(f) !== -1 ||
-      normalizeEx(it.muscle).indexOf(f) !== -1 ||
-      (it.subMuscle && normalizeEx(it.subMuscle).indexOf(f) !== -1) ||
-      (it.tag && normalizeEx(it.tag).indexOf(f) !== -1)
-    );
-  }
-  if (items.length === 0) return `<div class="lib-empty">No exercises match "${filter}".</div>`;
-  if (f) return items.map(it => libCard(it.name, it.muscle, it.tag, it.subMuscle)).join('');
+function escAttr(s) { return String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+function escHtml(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
-  // Browsing (no filter) → grouped by major muscle
+function libListHTML(filter, collapsed) {
+  const q = (filter || '').trim();
+  const eq = (ST._lib && ST._lib.mode === 'sub' && ST._lib.equip) || 'All';
+  let items = EXERCISE_LIBRARY.filter(it => libMatches(it, q) && (eq === 'All' || equipOf(it) === eq));
+  const addBtn = q ? `<button class="lib-add-custom" onclick="showCustomExerciseSheet('${escAttr(q)}')">${UI_ICON.plus}<span>Add “${escHtml(q)}” as a new exercise</span></button>` : '';
+  if (items.length === 0) return `<div class="lib-empty">No exercises match “${escHtml(q)}”.</div>${addBtn}`;
+  if (q) return items.slice(0, 60).map(it => libCard(it.name, it.muscle, it.tag, it.subMuscle)).join('') + addBtn;
+  if (collapsed) return `<div class="lib-empty">Type to search ${EXERCISE_LIBRARY.length} exercises.</div>`;
   const order = ['Chest','Back','Shoulders','Biceps','Triceps','Quads','Hamstrings','Glutes','Calves','Core','Traps','Forearms','Adductors'];
   const byMuscle = {};
   for (const it of items) { (byMuscle[it.muscle] = byMuscle[it.muscle] || []).push(it); }
-  const muscles = Object.keys(byMuscle).sort((a,b) => {
-    const ia = order.indexOf(a), ib = order.indexOf(b);
-    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
-  });
-  return muscles.map(m => `<div class="lib-muscle-lbl">${m} (${byMuscle[m].length})</div>` + byMuscle[m].map(it => libCard(it.name, it.muscle, it.tag, it.subMuscle)).join('')).join('');
+  const muscles = Object.keys(byMuscle).sort((a,b) => { const ia = order.indexOf(a), ib = order.indexOf(b); return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib); });
+  return muscles.map(m => `<details class="lib-more"><summary>${m} (${byMuscle[m].length})</summary><div class="lib-section">` + byMuscle[m].map(it => libCard(it.name, it.muscle, it.tag, it.subMuscle)).join('') + `</div></details>`).join('');
 }
 
-function libCard(name, muscle, tag, subMuscle = null) {
+// One row per exercise: name, its weight for TODAY's rep range (or an estimate), tap to pick.
+function libCard(name, muscle, tag, subMuscle = null, badge = '') {
   const unit = getWeightUnit();
-  const last = getLastPerformance(name);
-  const lastText = last && last[0] ? `${last[0].w} ${unit} × ${last[0].r} last time` : 'No history yet';
-  const id = name.replace(/[^a-zA-Z0-9]/g, '_');
-  const badgeSub = subMuscle || getSubMuscle(name);
+  const ctx = ST._lib || {};
+  let reps = null;
+  if (ctx.mode === 'sub' && ctx.key) reps = effTargetForKey(ctx.key);
+  const mem = getZoneMemory(name, reps, {});
+  let detail;
+  if (mem.entry) {
+    const e = mem.entry;
+    detail = `${mem.zone ? ZONE_LABEL[mem.zone] + ' ' + zoneRangeLabel(mem.zone, e.target) + ' · ' : ''}${formatWeight(Number(e.sets[0].w) || 0)} ${unit} × ${e.sets.map(s => s.r).join(', ')} · ${relDay(e.endTime)}`;
+  } else if (mem.estimate) {
+    detail = `${ZONE_LABEL[mem.zone]} · est. ${formatWeight(mem.estimate.w)} ${unit} from your other sets`;
+    badge = badge || 'Estimate';
+  } else if (mem.anyLast) {
+    detail = `${formatWeight(Number(mem.anyLast.sets[0].w) || 0)} ${unit} × ${mem.anyLast.sets[0].r} · ${relDay(mem.anyLast.endTime)}`;
+  } else {
+    detail = 'No history yet';
+  }
+  const info = getExerciseInfo(name);
+  const eq = equipOf(info && info.name ? info : name);
   return `
-  <div class="sub-card" id="subcard-${id}">
-    <div class="sub-card-header" onclick="toggleSubCard('${id}')">
-      <span class="sub-card-name">${name}</span>
-      <div style="display:flex;gap:4px;align-items:center">
-        ${badgeSub ? `<span class="sub-card-tag" style="background:rgba(42,36,33,0.06);color:var(--text-secondary);font-size:9.5px">${badgeSub}</span>` : ''}
-        <span class="sub-card-tag">${muscle}</span>
-      </div>
-    </div>
-    <div class="sub-card-body">
-      <div class="sub-card-detail">${lastText}</div>
-      <button class="sub-use-btn" onclick="chooseExercise('${name.replace(/'/g, "\\'")}')">Use This Exercise</button>
-    </div>
-  </div>`;
+  <button class="opt-row" onclick="chooseExercise('${escAttr(name)}')">
+    <span class="opt-main"><b>${escHtml(name)}</b><small>${detail}</small></span>
+    <span class="opt-side">${badge ? `<em>${badge}</em>` : ''}<i>${eq}${info && info.custom ? ' · yours' : ''}</i></span>
+  </button>`;
 }
 
 function filterLib(val) {
   const list = document.getElementById('lib-list');
-  if (list) list.innerHTML = libListHTML(val);
+  if (list) list.innerHTML = libListHTML(val, ST._lib && ST._lib.mode === 'sub');
   ST.openSubCard = null;
 }
 
 function toggleSubCard(id) {
   const card = document.getElementById('subcard-' + id);
   if (!card) return;
-  if (ST.openSubCard && ST.openSubCard !== id) {
-    const prev = document.getElementById('subcard-' + ST.openSubCard);
-    if (prev) prev.classList.remove('open');
-  }
   card.classList.toggle('open');
-  ST.openSubCard = card.classList.contains('open') ? id : null;
+}
+
+// ── Create-your-own exercise ──────────────────────────────────────────────────
+function showCustomExerciseSheet(name) {
+  const clean = String(name || '').replace(/[<>"`\\]/g, '').trim().slice(0, 60);
+  const titled = clean.replace(/\b([a-z])/g, (m, c) => c.toUpperCase());
+  const guess = getExerciseInfo(ST._lib && ST._lib.name || '').muscle;
+  ST._custom = { name: titled, muscle: guess && guess !== 'Other' ? guess : 'Chest', subMuscle: null };
+  setSheetBody(customExerciseHTML());
+}
+function customExerciseHTML() {
+  const c = ST._custom || {};
+  const muscles = ['Chest','Back','Shoulders','Biceps','Triceps','Quads','Hamstrings','Glutes','Calves','Core','Traps','Forearms','Adductors'];
+  const subs = [...new Set(EXERCISE_LIBRARY.filter(it => it.muscle === c.muscle).map(it => it.subMuscle))];
+  if (!c.subMuscle || !subs.includes(c.subMuscle)) c.subMuscle = subs[0] || c.muscle;
+  return `
+    <div class="bs-title">New exercise</div>
+    <div class="bs-sub">Saved to your library on this phone. Sets you log with it keep its name in your history.</div>
+    <input class="bs-search" id="custom-name" type="text" value="${escHtml(c.name || '')}" maxlength="60">
+    <div class="bs-section-lbl">Muscle</div>
+    <div class="equip-chips wrap">${muscles.map(m => `<button aria-pressed="${m === c.muscle}" onclick="ST._custom.muscle='${m}';ST._custom.subMuscle=null;setSheetBody(customExerciseHTML())">${m}</button>`).join('')}</div>
+    <div class="bs-section-lbl">Target</div>
+    <div class="equip-chips wrap">${subs.map(sm => `<button aria-pressed="${sm === c.subMuscle}" onclick="ST._custom.subMuscle='${escAttr(sm)}';setSheetBody(customExerciseHTML())">${sm}</button>`).join('')}</div>
+    <button class="btn btn-primary" style="margin-top:14px" onclick="saveCustomFromSheet()">Save and use it</button>
+    <button class="btn btn-sheet-ghost" onclick="backToLib()">Back to list</button>`;
+}
+function saveCustomFromSheet() {
+  const c = ST._custom || {};
+  const nmEl = document.getElementById('custom-name');
+  const name = String((nmEl && nmEl.value) || c.name || '').replace(/[<>"`\\]/g, '').trim().slice(0, 60);
+  if (!name) return;
+  const existing = EXERCISE_LIBRARY.find(it => normalizeEx(it.name) === normalizeEx(name));
+  if (!existing) saveCustomExercise(name, c.muscle, c.subMuscle);
+  chooseExercise(existing ? existing.name : name);
 }
 
 // Step 2 — pick a custom set/rep count before committing (Decision 2)
@@ -9364,9 +10005,12 @@ function chooseExercise(name) {
       defSets = slot.ex.workingSets || 3;
       const m = String(slot.ex.reps || '10').match(/(\d+)\s*$/);
       defReps = m ? parseInt(m[1]) : 10;
+      // Keep the slot's rep RANGE (e.g. 12–15) unless the user changes reps, so progression keeps a range.
+      if (/\d\s*[–-]\s*\d/.test(String(slot.ex.reps || ''))) ctx._range = String(slot.ex.reps);
+      else ctx._range = null;
     }
   }
-  ST._pick = { name: name, sets: defSets, reps: defReps };
+  ST._pick = { name: name, sets: defSets, reps: defReps, range: ctx.mode === 'sub' ? (ctx._range || null) : null };
   setSheetBody(pickerHTML());
 }
 
@@ -9374,11 +10018,11 @@ function pickerHTML() {
   const p = ST._pick || { name: '', sets: 3, reps: 10 };
   const ctx = ST._lib || {};
   const isSub = ctx.mode === 'sub';
-  const title = isSub ? `Swap → ${p.name}` : `Add ${p.name}`;
-  const confirmLbl = isSub ? 'Use this exercise' : 'Add to workout';
+  const title = isSub ? `Swap to ${escHtml(p.name)}` : `Add ${escHtml(p.name)}`;
+  const confirmLbl = isSub ? (ctx.persist ? 'Use it and make default' : 'Use it today') : 'Add to workout';
   return `
     <div class="bs-title">${title}</div>
-    <div class="bs-sub">Set your own volume — substitutes &amp; additions aren't locked to the programmed structure.</div>
+    <div class="bs-sub">${isSub ? (ctx.persist ? `Saved as your default for this slot. Restore ${escHtml(ctx.name || 'the program exercise')} any time from Swap.` : `Just for today. Back to ${escHtml(ctx.name || 'the program exercise')} next time.`) : 'Set your own volume. Additions log after your programmed exercises.'}</div>
     <div class="srp">
       <div class="srp-row">
         <span class="srp-lbl">Sets</span>
@@ -9392,14 +10036,14 @@ function pickerHTML() {
         <span class="srp-lbl">Reps <span class="srp-hint">target</span></span>
         <div class="srp-stepper">
           <button class="srp-btn" onclick="pickAdjust('reps',-1)">−</button>
-          <span class="srp-val" id="srp-reps">${p.reps}</span>
+          <span class="srp-val" id="srp-reps">${p.range ? p.range : p.reps}</span>
           <button class="srp-btn srp-up" onclick="pickAdjust('reps',1)">+</button>
         </div>
       </div>
     </div>
-    <div class="srp-preview" id="srp-preview">${p.sets} × ${p.reps}</div>
+    <div class="srp-preview" id="srp-preview">${p.sets} × ${p.range ? p.range : p.reps}</div>
     <button class="btn btn-primary" style="margin-top:6px" onclick="confirmPick()">${confirmLbl}</button>
-    <button class="btn btn-sheet-ghost" onclick="backToLib()">← Back to list</button>
+    <button class="btn btn-sheet-ghost" onclick="backToLib()">Back to list</button>
   `;
 }
 
@@ -9407,10 +10051,10 @@ function pickAdjust(field, delta) {
   const p = ST._pick;
   if (!p) return;
   if (field === 'sets') p.sets = Math.max(1, Math.min(10, p.sets + delta));
-  else p.reps = Math.max(1, Math.min(50, p.reps + delta));
+  else { p.reps = Math.max(1, Math.min(50, p.reps + delta)); p.range = null; }
   const se = document.getElementById('srp-sets'); if (se) se.textContent = p.sets;
-  const re = document.getElementById('srp-reps'); if (re) re.textContent = p.reps;
-  const pv = document.getElementById('srp-preview'); if (pv) pv.textContent = p.sets + ' × ' + p.reps;
+  const re = document.getElementById('srp-reps'); if (re) re.textContent = p.range || p.reps;
+  const pv = document.getElementById('srp-preview'); if (pv) pv.textContent = p.sets + ' × ' + (p.range || p.reps);
   haptic('tick');
 }
 
@@ -9422,23 +10066,57 @@ function backToLib() {
 function confirmPick() {
   const p = ST._pick, ctx = ST._lib || {};
   if (!p) return;
-  if (ctx.mode === 'sub') applySubstitution(ctx.key, ctx.exIdx, p.name, p.sets, String(p.reps));
+  if (ctx.mode === 'sub') applySubstitution(ctx.key, ctx.exIdx, p.name, p.sets, String(p.range || p.reps), !!ctx.persist);
   else applyAddition(p.name, p.sets, String(p.reps));
 }
 
-function applySubstitution(key, exIdx, subName, sets, reps) {
+// ota-30 fix: sets already logged on a slot are NEVER deleted by a swap. They move to an
+// "added exercise" under the name they were logged with, so history keeps them exactly.
+function preserveLoggedSlotSets(key) {
+  const sets = ST.workoutSets[key];
+  const hasLogged = Array.isArray(sets) && sets.some(s => s && s.r > 0);
+  const wu = ST.workoutSets[key + '_wu'];
+  const hasWu = Array.isArray(wu) && wu.some(s => s && s.r > 0);
+  if (!hasLogged) {
+    if (hasWu) { /* warm-up only: keep it on the slot, it is never counted as a working set */ }
+    return null;
+  }
+  const slot = slotForKey(key);
+  const priorName = (sets.find(s => s && s._name) || {})._name || (slot ? liveExName(key, slot.ex) : 'Exercise');
+  if (!ST.workoutAdditions) ST.workoutAdditions = [];
+  const id = ST.workoutAdditions.reduce((m, a) => Math.max(m, a.id), -1) + 1;
+  const priorReps = slot ? String(effReps(key, slot.ex)) : '8–10';
+  ST.workoutAdditions.push({ id, name: priorName, muscle: getMuscle(priorName), sets: Math.max(sets.filter(Boolean).length, 1), reps: priorReps, rest: (slot && slot.ex.rest) || '2–3 min', _fromSwap: key });
+  const nk = 'add_' + id;
+  ST.workoutSets[nk] = sets.map(s => s ? { ...s } : s).filter(s => s && s.r > 0);
+  delete ST.workoutSets[key];
+  if (hasWu) { ST.workoutSets[nk + '_wu'] = wu; delete ST.workoutSets[key + '_wu']; }
+  ST.completedCards.add(nk);
+  return nk;
+}
+
+function applySubstitution(key, exIdx, subName, sets, reps, makeDefault) {
   const slot = slotForKey(key);
   if (!ST.workoutSubs) ST.workoutSubs = {};
   if (!ST.workoutSubMeta) ST.workoutSubMeta = {};
+  if (!ST.workoutSubSource) ST.workoutSubSource = {};
+  preserveLoggedSlotSets(key);
   ST.workoutSubs[key] = subName;
   ST.workoutSubMeta[key] = { sets: sets, reps: String(reps) };
-  // Different movement now — drop any sets/drafts logged under the prior identity
-  delete ST.workoutSets[key];
-  delete ST.workoutSets[key + '_wu'];
+  if (makeDefault && slot && !slot.isAddition) {
+    const d = getSlotDefaults();
+    d[key] = { name: subName, sets: sets, reps: String(reps), since: Date.now(), from: stripSuperset(slot.ex.name) };
+    saveSlotDefaults(d);
+    ST.workoutSubSource[key] = 'default';
+  } else {
+    delete ST.workoutSubSource[key];
+  }
   if (ST.workoutDrafts) { for (const k of Object.keys(ST.workoutDrafts)) { if (k.indexOf(key + '-') === 0) delete ST.workoutDrafts[k]; } }
+  if (ST.workoutZoneView) delete ST.workoutZoneView[key];
   ST.completedCards.delete(key);
   ST.expandedCards.add(key);
-  if (slot) { const notes = getNotes(); notes[normalizeEx(slot.name)] = 'Using: ' + subName; saveNotes(notes); }
+  // Leave a note only where none exists (never overwrite one he wrote).
+  if (slot) { const notes = getNotes(); const nk = normalizeEx(slot.name); if (!notes[nk] || /^Using: /.test(notes[nk])) { notes[nk] = 'Using: ' + subName; saveNotes(notes); } }
   saveNow();
   closeSheet(true);
   renderWorkout();
@@ -9459,11 +10137,18 @@ function applyAddition(name, sets, reps) {
   }, 80);
 }
 
-function removeAddition(e, id) {
+function removeAddition(e, id, confirmed) {
   if (e && e.stopPropagation) e.stopPropagation();
   const idx = (ST.workoutAdditions || []).findIndex(a => a && a.id === id);
   if (idx < 0) return;
   const key = 'add_' + id;
+  // ota-30: removing an addition that already has logged sets asks first
+  const logged = (ST.workoutSets[key] || []).filter(s => s && s.r > 0).length;
+  if (logged && !confirmed) {
+    confirmSheet({ title: 'Remove logged sets?', body: `<strong>${escHtml(ST.workoutAdditions[idx].name)}</strong> has ${logged} logged set${logged > 1 ? 's' : ''} in this workout. Removing it drops them from today's workout.`,
+      confirmLabel: 'Remove it', cancelLabel: 'Keep it', destructive: true, onConfirm: () => removeAddition(null, id, true) });
+    return;
+  }
   ST.workoutAdditions.splice(idx, 1);
   delete ST.workoutSets[key];
   delete ST.workoutSets[key + '_wu'];
@@ -9475,13 +10160,18 @@ function removeAddition(e, id) {
   renderWorkout();
 }
 
-function revertSubstitution(key) {
+function revertSubstitution(key) { restoreProgramExercise(key, false); }
+// Back to the program exercise. forGood also removes the saved default for this slot.
+function restoreProgramExercise(key, forGood) {
+  preserveLoggedSlotSets(key);
   if (ST.workoutSubs) delete ST.workoutSubs[key];
   if (ST.workoutSubMeta) delete ST.workoutSubMeta[key];
-  delete ST.workoutSets[key];
-  delete ST.workoutSets[key + '_wu'];
+  if (ST.workoutSubSource) delete ST.workoutSubSource[key];
+  if (ST.workoutZoneView) delete ST.workoutZoneView[key];
+  if (forGood) { const d = getSlotDefaults(); if (d[key]) { delete d[key]; saveSlotDefaults(d); } }
   if (ST.workoutDrafts) { for (const k of Object.keys(ST.workoutDrafts)) { if (k.indexOf(key + '-') === 0) delete ST.workoutDrafts[k]; } }
   ST.completedCards.delete(key);
+  applyAutoSubstitutions();
   saveNow();
   closeSheet(false);
   renderWorkout();
@@ -9645,6 +10335,8 @@ function beginWorkout(progId, sessId) {
   ST.workoutAutoSubs = {};
   ST.workoutAutoSubMeta = {};
   ST.workoutAdditions = [];
+  ST.workoutSubSource = {};
+  ST.workoutZoneView = {};
   ST.expandedCards = new Set();
   ST.completedCards = new Set();
   ST.durationSecs = 0;
@@ -9661,6 +10353,7 @@ function beginWorkout(progId, sessId) {
   if (navigator.wakeLock) {
     navigator.wakeLock.request('screen').then(wl => { ST.wakeLock = wl; }).catch(() => {});
   }
+  applySlotDefaults();
   applyAutoSubstitutions();
   saveNow();
   Maps('workout');
@@ -9679,6 +10372,8 @@ function resumeWorkout() {
   ST.workoutAutoSubs = saved.autoSubs || {};
   ST.workoutAutoSubMeta = saved.autoSubMeta || {};
   ST.workoutAdditions = saved.additions || []; // accessory additions come back
+  ST.workoutSubSource = saved.subSource || {};
+  ST.workoutZoneView = {};
   ST.workoutNotes  = saved.notes  || {};   // session notes come back
   ST.travelMode = saved.travelMode || false;
   ST.travelLocked = saved.travelLocked || false;
@@ -9957,6 +10652,7 @@ function commitWorkout() {
         notes: { ...ST.workoutNotes },
         subs: ST.workoutSubs || {},
         subMeta: ST.workoutSubMeta || {},
+        subSource: ST.workoutSubSource || {},
         additions: ST.workoutAdditions || [],
         completedCards: [...ST.completedCards],
         startTime: ST.workoutStart,
@@ -9977,6 +10673,7 @@ function commitWorkout() {
         notes: { ...ST.workoutNotes },
         subs: ST.workoutSubs || {},
         subMeta: ST.workoutSubMeta || {},
+        subSource: ST.workoutSubSource || {},
         additions: ST.workoutAdditions || [],
         completedCards: [...ST.completedCards],
       };
@@ -9999,6 +10696,7 @@ function commitWorkout() {
       notes: { ...ST.workoutNotes },
       subs: ST.workoutSubs || {},
       subMeta: ST.workoutSubMeta || {},
+      subSource: ST.workoutSubSource || {},
       additions: ST.workoutAdditions || [],
       completedCards: [...ST.completedCards],
       _unitLb: getWeightUnit() === 'lb',
@@ -10032,6 +10730,8 @@ function commitWorkout() {
   ST.workoutDrafts = {};
   ST.workoutSubs   = {};
   ST.workoutSubMeta = {};
+  ST.workoutSubSource = {};
+  ST.workoutZoneView = {};
   ST.workoutAdditions = [];
   
   bgSyncToSheets(entry);
@@ -10762,6 +11462,8 @@ function editCompletedWorkout(workoutId) {
     ST.workoutDrafts = {};
     ST.workoutSubs = w.subs ? JSON.parse(JSON.stringify(w.subs)) : {};
     ST.workoutSubMeta = w.subMeta ? JSON.parse(JSON.stringify(w.subMeta)) : {};
+    ST.workoutSubSource = w.subSource ? JSON.parse(JSON.stringify(w.subSource)) : {};
+    ST.workoutZoneView = {};
     ST.workoutAutoSubs = {};
     ST.workoutAutoSubMeta = {};
     ST.workoutAdditions = w.additions ? JSON.parse(JSON.stringify(w.additions)) : [];
@@ -10992,6 +11694,8 @@ function beginBackdatedWorkout(progId, sessId, timestamp) {
   ST.workoutAutoSubs = {};
   ST.workoutAutoSubMeta = {};
   ST.workoutAdditions = [];
+  ST.workoutSubSource = {};
+  ST.workoutZoneView = {};
   ST.expandedCards = new Set();
   ST.completedCards = new Set();
   ST.durationSecs = 45 * 60; // default 45 min
@@ -11005,6 +11709,8 @@ function beginBackdatedWorkout(progId, sessId, timestamp) {
   if (ST.durationTimer) clearInterval(ST.durationTimer);
   ST.durationTimer = null;
   
+  applySlotDefaults();
+  applyAutoSubstitutions();
   saveNow();
   Maps('workout');
 }
@@ -12132,7 +12838,7 @@ window.addEventListener('online', () => { drainSyncQueue().catch(() => {}); });
 // ── JSON full-fidelity backup export ─────────────────────────────────────────
 function exportJSON() {
   const hist = getHistory();
-  const blob = new Blob([JSON.stringify({ version: 2, exportedAt: Date.now(), history: hist }, null, 2)], { type: 'application/json' });
+  const blob = new Blob([JSON.stringify({ version: 2, exportedAt: Date.now(), history: hist, slotDefaults: getSlotDefaults(), customExercises: getCustomExercises() }, null, 2)], { type: 'application/json' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   const date = new Date().toISOString().slice(0, 10);
@@ -12150,6 +12856,9 @@ function importJSON(input) {
       const data = JSON.parse(e.target.result);
       const incoming = Array.isArray(data) ? data : (data.history || []);
       if (!incoming.length) { noticeSheet('Restore failed', 'No workout history found in this backup file.'); return; }
+      // ota-30: bring back saved swaps and custom exercises without replacing any already on this phone
+      if (data && data.slotDefaults && typeof data.slotDefaults === 'object') { const d = getSlotDefaults(); for (const [k, v] of Object.entries(data.slotDefaults)) if (!d[k]) d[k] = v; saveSlotDefaults(d); }
+      if (data && Array.isArray(data.customExercises)) { const c = getCustomExercises(); for (const x of data.customExercises) if (x && x.name && !c.some(y => normalizeEx(y.name) === normalizeEx(x.name))) c.push(x); LS.set('dcrgym_custom_exercises', c); idbSet('dcrgym_custom_exercises', c); mergeCustomExercises(); }
       const local  = getHistory();
       const merged = mergeHistories(local, incoming);
       const added  = merged.length - local.length;
@@ -12288,6 +12997,8 @@ async function bgSyncToSheets(specificEntry, onlyState) {
     history: hist,
     defaultProgram: ST.defaultProgram || LS.get('dcrgym_default_prog', null),
     notes: getNotes(),
+    slotDefaults: getSlotDefaults(),          // ota-30 (current server ignores; kept for a later server paste)
+    customExercises: getCustomExercises(),    // ota-30
     ts: Date.now()
   });
 
@@ -12441,6 +13152,16 @@ function checkWeekComplete() {
 // ── Fault-tolerant bootstrap — all state access inside try/catch, LS proxy only ──
 async function bootstrapApp() {
   console.log('[DCR Gym Shell] Booting application...');
+
+  // ota-30: one-time copy of the full history in the IndexedDB vault before this build touches anything.
+  // Read-only snapshot; nothing ever restores over live data automatically.
+  try {
+    if (!LS.get('dcrgym_ota30_backup_at', null)) {
+      const _h = getHistory();
+      if (_h.length) { idbSet('dcrgym_history_backup_ota30', { at: Date.now(), build: APP_BUILD, history: _h }); LS.set('dcrgym_ota30_backup_at', Date.now()); }
+    }
+  } catch (e) { console.warn('[DCR Gym] pre-update backup skipped', e); }
+  try { mergeCustomExercises(); } catch (e) { console.warn('[DCR Gym] custom exercises not merged', e); }
 
   // Dismiss splash early if user was previously onboarded
   const splash = document.getElementById('splash');
