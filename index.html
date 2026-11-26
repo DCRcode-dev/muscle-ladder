@@ -5686,7 +5686,7 @@ function saveMeasurements(m) { LS.set('dcrgym_measurements', m); idbSet('dcrgym_
 // Schema-versioned, non-destructive, with rolling last-good backup.
 // History must survive every app update. Period.
 const SCHEMA_VERSION = 3;
-const APP_BUILD = '2026.11.26 · ota-32 · forgotten-finish';
+const APP_BUILD = '2026.11.26 · ota-33 · monday-push';
 const KG_TO_LB_CUTOFF_MS = 1788000000000; // Workouts before Sep 2026 were logged in kg; Sep 2026+ are already in lbs
 
 function hasLoggedWorkingSets(w) {
@@ -6914,7 +6914,6 @@ function ota31FlagSummary() {
 // undone in Settings. Set counts and values never change.
 // ═══════════════════════════════════════════════════════════════════════════
 const AUTO_FINISH_MS = 2 * 60 * 60 * 1000;      // 2 hours with no new set → the workout finishes itself
-const OTA32_MONDAY_PULL_ID = '1795729085602';   // Pull #1 done Mon Nov 23, closed out Thu Nov 26 5:38 PM
 // When a set was really done: an edited set keeps its first time in _orig.
 function setRealTs(s) { return Number((s && s._orig && s._orig.ts) || (s && s.ts) || 0); }
 function workoutSetTimes(w) {
@@ -6993,18 +6992,8 @@ function runOta32Fixes(histInput) {
       report.durSuspect++; changed = true;
     }
   }
-  // Item 3: Monday's Pull. If its set times couldn't place it, he told us the day: Monday Nov 23 (same clock time).
-  const pull = hist.find(w => w && String(w.id) === OTA32_MONDAY_PULL_ID && !w._redate);
-  if (pull && localDateKey(pull.endTime || pull.startTime) === '2026-11-26') {
-    const shift = (t) => { const d = new Date(Number(t)); d.setDate(d.getDate() - 3); return d.getTime(); };
-    pull._redate = { from: { startTime: pull.startTime, endTime: pull.endTime }, to: { startTime: shift(pull.startTime || pull.endTime), endTime: shift(pull.endTime) },
-                     why: 'done Monday Nov 23 (his word), closed out Nov 26; no set times to place it', at, by: 'ota-32' };
-    pull.startTime = pull._redate.to.startTime;
-    pull.endTime = pull._redate.to.endTime;
-    if (pull._durSuspect && pull._durSuspect.by === 'ota-32') delete pull._durSuspect;
-    if (!pull._durFix) pull._durSuspect = { reason: 'closed out days later; real length unknown', at, by: 'ota-32' };
-    report.redated++; report.ids.push(OTA32_MONDAY_PULL_ID); changed = true;
-  }
+  // ota-33: the hardcoded 'Monday Pull' rule was removed. Monday's workout was the Push (his word),
+  // and the Pull was done on Thursday. Only set times move a workout now.
   if (changed) {
     try { idbSet('dcrgym_history_backup_ota32', { at, build: APP_BUILD, note: 'before ota-32 fixes', history: JSON.parse(before) }); } catch (e) {}
     hist.sort((a, b) => ((a.endTime || a.startTime || 0) - (b.endTime || b.startTime || 0)));
@@ -7036,11 +7025,87 @@ function ota32FixSummary() {
   let redated = 0, dur = 0;
   for (const w of getHistory()) {
     if (!w) continue;
-    if (w._redate && w._redate.by === 'ota-32') redated++;
+    if (w._redate && (w._redate.by === 'ota-32' || w._redate.by === 'ota-33')) redated++;
     else if ((w._durFix && w._durFix.from === 'ota-32 set times') || (w._durSuspect && w._durSuspect.by === 'ota-32')) dur++;
   }
-  return { redated, dur, total: redated + dur };
+  const restored = getHistory().filter(w => w && w._redateUndone && w._redateUndone.undoneBy === 'ota-33').length;
+  return { redated, dur, restored, total: redated + dur + restored };
 }
+
+// ── ota-33: Monday's workout was the Push (his word), not the Pull ───────────
+// ota-32 moved Thursday's Pull to Monday by a hardcoded rule. Put it back on the day
+// its own sets show, keeping a record of both. Move the Push to Monday only if its
+// own set times couldn't (no times, or all stamped at the Thursday close-out).
+// Runs once, keeps a backup, undo in Settings. No workout or set is removed.
+const OTA33_PUSH_ID = '1795696176228';
+function runOta33Fixes(hist) {
+  if (LS.get('dcrgym_ota33_fix', null) || LS.get('dcrgym_ota33_fix_undone', false)) return null;
+  hist = hist || getHistory();
+  if (!Array.isArray(hist) || !hist.length) return null;
+  const before = JSON.stringify(hist);
+  const at = Date.now();
+  const report = { restored: [], moved: [] };
+  let changed = false;
+  for (const w of hist) {
+    if (!w || !w._redate || w._redate.by !== 'ota-32' || !/his word/.test(w._redate.why || '')) continue;
+    const toDay = localDateKey(w._redate.to.endTime);
+    const times = workoutSetTimes(w);
+    if (times.length && times.every(t => localDateKey(t) === toDay)) continue;   // its own sets say Monday: leave it
+    w._redateUndone = Object.assign({}, w._redate, { undoneAt: at, undoneBy: 'ota-33', undoneWhy: 'Monday was the Push (his word); this workout was done on ' + localDateKey(w._redate.from.endTime) });
+    w.startTime = w._redate.from.startTime;
+    w.endTime = w._redate.from.endTime;
+    if (w.startTime === undefined) delete w.startTime;
+    if (w.endTime === undefined) delete w.endTime;
+    delete w._redate;
+    if (w._durSuspect && w._durSuspect.by === 'ota-32' && /closed out/.test(w._durSuspect.reason || '')) delete w._durSuspect;
+    report.restored.push(String(w.id)); changed = true;
+  }
+  const push = hist.find(w => w && String(w.id) === OTA33_PUSH_ID && !w._redate && !w._redateUndone && !w._dupOf);
+  if (push && localDateKey(push.endTime || push.startTime) === '2026-11-26') {
+    const times = workoutSetTimes(push);
+    const restamped = times.length >= 3 && (times[times.length - 1] - times[0]) < 3 * 60 * 1000;   // all stamped within 3 min = close-out, not training
+    if (!times.length || restamped || !times.some(t => localDateKey(t) === '2026-11-26')) {
+      const shift = t => { const d = new Date(Number(t)); d.setDate(d.getDate() - 3); return d.getTime(); };
+      push._redate = { from: { startTime: push.startTime, endTime: push.endTime }, to: { startTime: shift(push.startTime || push.endTime), endTime: shift(push.endTime) },
+                       why: 'done Monday Nov 23 (his word); set times could not place it', at, by: 'ota-33' };
+      push.startTime = push._redate.to.startTime;
+      push.endTime = push._redate.to.endTime;
+      report.moved.push(OTA33_PUSH_ID); changed = true;
+    }
+  }
+  if (changed) {
+    try { idbSet('dcrgym_history_backup_ota33', { at, build: APP_BUILD, note: 'before ota-33 fixes', history: JSON.parse(before) }); } catch (e) {}
+    hist.sort((a, b) => ((a.endTime || a.startTime || 0) - (b.endTime || b.startTime || 0)));
+    saveHistory(hist);
+  }
+  LS.set('dcrgym_ota33_fix', { at, restored: report.restored, moved: report.moved });
+  return report;
+}
+function undoOta33Fixes() {
+  const hist = getHistory();
+  for (const w of hist) {
+    if (!w) continue;
+    if (w._redate && w._redate.by === 'ota-33') {
+      w.startTime = w._redate.from.startTime;
+      w.endTime = w._redate.from.endTime;
+      if (w.startTime === undefined) delete w.startTime;
+      if (w.endTime === undefined) delete w.endTime;
+      delete w._redate;
+    }
+    if (w._redateUndone && w._redateUndone.undoneBy === 'ota-33') {
+      const r = Object.assign({}, w._redateUndone);
+      delete r.undoneAt; delete r.undoneBy; delete r.undoneWhy;
+      w._redate = r;
+      w.startTime = r.to.startTime;
+      w.endTime = r.to.endTime;
+      delete w._redateUndone;
+    }
+  }
+  hist.sort((a, b) => ((a.endTime || a.startTime || 0) - (b.endTime || b.startTime || 0)));
+  saveHistory(hist);
+  LS.set('dcrgym_ota33_fix_undone', true);
+}
+function undoDateFixes() { undoOta33Fixes(); undoOta32Fixes(); }
 
 // Item 2: auto-finish. Live workout with no new set for 2 hours → saved at its last set.
 function autoFinishLive() {
@@ -7311,7 +7376,7 @@ function syncHealth() {
   const last = LS.get('dcrgym_last_sync', 0);
   const q = (LS.get('dcrgym_sync_queue', []) || []).length;
   const stale = !last || (Date.now() - last > 24 * 3600 * 1000);
-  const err = ST.lastCloudSyncError && ST.lastCloudSyncError !== 'offline' ? ST.lastCloudSyncError : null;
+  const err = ST.lastCloudSyncError && ST.lastCloudSyncError !== 'offline' && ST.lastCloudSyncError !== BACKUP_FULL_MSG ? ST.lastCloudSyncError : null;
   if (!stale && !q && !err) return null;
   const parts = ['Backup ' + (last ? 'last ' + syncRelTime(last) : 'never ran')];
   if (q) parts.push(q + ' waiting');
@@ -7328,8 +7393,9 @@ function syncResultLines(d) {
   if (!d) return [];
   const lines = [];
   lines.push(d.rowsOk ? 'Workout rows: up to date in the Sheet' : (d.rowsPending ? `Workout rows: ${d.rowsPending} still to send` : 'Workout rows: not sent'));
-  lines.push(d.stateOk ? 'Restore backup: saved' : 'Restore backup: not saved' + (d.stateErr ? ' (' + d.stateErr + ')' : ''));
-  if (d.err) lines.push('Cloud says: ' + d.err);
+  const full = !d.stateOk && (d.stateErr === BACKUP_FULL_MSG || d.err === BACKUP_FULL_MSG);
+  lines.push(d.stateOk ? 'Restore backup: saved' : full ? 'Restore backup: not saved. The Google script\'s backup cell is full and needs the script update. Your workouts are safe in the Sheet and on this phone.' : 'Restore backup: not saved' + (d.stateErr ? ' (' + d.stateErr + ')' : ''));
+  if (d.err && !full) lines.push('Cloud says: ' + d.err);
   return lines;
 }
 async function syncNowFromHome() {
@@ -12684,7 +12750,7 @@ function openCalDay(id, dateStr) {
       <span class="cal-popup-prog">${progName}</span>
       ${w._dupOf ? `<div class="cal-dup-note">This looks like a second copy of another saved workout, so it isn't counted twice. Nothing was deleted.</div>` : ''}
       ${w._durFix ? `<div class="cal-dup-note">Duration shown ends at your last set. Saved timer said ${formatDuration(w.duration || 0)}.</div>` : ''}
-      ${w._redate && w._redate.by === 'ota-32' ? `<div class="cal-dup-note">Moved back to the day of its sets. It had been finished on ${new Date(Number(w._redate.from.endTime)).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}. Undo in Settings.</div>` : ''}
+      ${w._redate && (w._redate.by === 'ota-32' || w._redate.by === 'ota-33') ? `<div class="cal-dup-note">Moved back to the day of its sets. It had been finished on ${new Date(Number(w._redate.from.endTime)).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}. Undo in Settings.</div>` : ''}
     </div>
 
     <div class="cal-popup-stats">
@@ -12829,8 +12895,8 @@ function renderSettings() {
       <div class="settings-row"><label>Saved weights<br><span style="font-weight:normal;color:var(--muted);font-size:11px">Stored in ${getStoreUnit()}. Changing the unit above only changes how they're shown.</span></label></div>
       ${(() => { const f = ota31FlagSummary(); if (!f.total) return ''; return `<div class="settings-row"><label>Data check<br><span style="font-weight:normal;color:var(--muted);font-size:11px">${[f.suspect ? f.suspect + ' typo set' + (f.suspect === 1 ? '' : 's') + ' left out of records' : '', f.dup ? f.dup + ' duplicate cop' + (f.dup === 1 ? 'y' : 'ies') + ' not counted twice' : '', f.dur ? f.dur + ' long timer' + (f.dur === 1 ? '' : 's') + ' shown to last set' : ''].filter(Boolean).join(' · ')}. Nothing was deleted.</span></label>
         <button onclick="confirmSheet({title:'Undo the data check?',body:'Every workout goes back to exactly how it was counted before. No sets are changed either way.',confirmLabel:'Undo',onConfirm:()=>{undoOta31DataFlags();renderSettings();}})" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer">Undo</button></div>`; })()}
-      ${(() => { const f = ota32FixSummary(); if (!f.total) return ''; return `<div class="settings-row"><label>Forgotten finishes<br><span style="font-weight:normal;color:var(--muted);font-size:11px">${[f.redated ? f.redated + ' workout' + (f.redated === 1 ? '' : 's') + ' moved back to the day of the sets' : '', f.dur ? f.dur + ' timer' + (f.dur === 1 ? '' : 's') + ' corrected' : ''].filter(Boolean).join(' · ')}. Original times kept.</span></label>
-        <button onclick="confirmSheet({title:'Undo the date fixes?',body:'Those workouts go back to the dates and times they had before. No sets are changed either way.',confirmLabel:'Undo',onConfirm:()=>{undoOta32Fixes();renderSettings();}})" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer">Undo</button></div>`; })()}
+      ${(() => { const f = ota32FixSummary(); if (!f.total) return ''; return `<div class="settings-row"><label>Forgotten finishes<br><span style="font-weight:normal;color:var(--muted);font-size:11px">${[f.redated ? f.redated + ' workout' + (f.redated === 1 ? '' : 's') + ' moved back to the day of the sets' : '', f.dur ? f.dur + ' timer' + (f.dur === 1 ? '' : 's') + ' corrected' : '', f.restored ? f.restored + ' put back on the day it was done' : ''].filter(Boolean).join(' · ')}. Original times kept.</span></label>
+        <button onclick="confirmSheet({title:'Undo the date fixes?',body:'Those workouts go back to the dates and times they had before. No sets are changed either way.',confirmLabel:'Undo',onConfirm:()=>{undoDateFixes();renderSettings();}})" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer">Undo</button></div>`; })()}
       <div class="settings-row"><label>Import Strong CSV</label>
         <input type="file" accept=".csv" onchange="importStrongCSV(this)" style="font-size:13px;max-width:160px">
       </div>
@@ -13598,6 +13664,11 @@ async function drainSyncQueue() {
           continue;
         }
         if (data && data.error) ST.lastCloudSyncError = String(data.error).slice(0, 80);
+        if (item.payload.action === 'saveState' && isBackupCellFull(data)) {   // ota-33: see postToSheets
+          LS.set('dcrgym_backup_blocked', { at: Date.now(), err: ST.lastCloudSyncError });
+          ST.lastCloudSyncError = BACKUP_FULL_MSG;
+          continue;
+        }
       } else {
         ST.lastCloudSyncError = `HTTP ${resp.status}`;
       }
@@ -13659,6 +13730,13 @@ function importJSON(input) {
 // e.postData.contents and JSON.parses it regardless of the declared type, so
 // the body still arrives intact. Queue-first: enqueue as insurance, POST,
 // dequeue on success, stamp the last-sync time.
+// ota-33: the live Google script keeps the restore backup in ONE cell, and Google caps a cell
+// at 50,000 characters. That cell has been full since Oct 4. Workout rows are not affected.
+const BACKUP_FULL_MSG = 'backup cell full';
+function isBackupCellFull(data) {
+  const e = String((data && (data.error || data.message)) || '');
+  return /50,?000|maximum of .*characters|single cell|too (long|large)/i.test(e);
+}
 async function postToSheets(payload) {
   const s = getSettings();
   if (!s.sheets) return false;
@@ -13675,6 +13753,7 @@ async function postToSheets(payload) {
         dequeueSyncPayload(payload);
         LS.set('dcrgym_last_sync', Date.now());
         ST.lastCloudSyncError = null;
+        if (payload.action === 'saveState') LS.remove('dcrgym_backup_blocked');
         if (payload.action === 'syncWorkouts' && Array.isArray(payload.workouts)) {
           markRowsSynced(payload.workouts.map(w => w && w.id));
         }
@@ -13683,6 +13762,13 @@ async function postToSheets(payload) {
       // Server answered but refused (e.g. the old one-cell AppState hitting
       // Google's 50,000-character limit). Surface it instead of failing silently.
       if (data && (data.error || data.message)) ST.lastCloudSyncError = String(data.error || data.message).slice(0, 80);
+      // ota-33: the old script's one-cell backup is full. Retrying can't work until the script is
+      // updated, so don't keep it waiting in the queue (a fresh copy goes with every sync anyway).
+      if (payload.action === 'saveState' && isBackupCellFull(data)) {
+        dequeueSyncPayload(payload);
+        LS.set('dcrgym_backup_blocked', { at: Date.now(), err: ST.lastCloudSyncError });
+        ST.lastCloudSyncError = BACKUP_FULL_MSG;
+      }
     } else {
       ST.lastCloudSyncError = `HTTP ${r.status}`;
     }
@@ -13743,8 +13829,11 @@ async function backfillAllRows() {
   if (LS.get('dcrgym_rows_backfilled', false)) return;
   const s = getSettings();
   if (!s.sheets) return;
-  const rows = historyToWorkoutRows(getHistory());
-  if (!rows.length) return;
+  // ota-33: only workouts the Sheet hasn't confirmed. The current Google script adds a
+  // WorkoutSummary row for every workout it is sent, even ones it already has.
+  const done = getRowsSyncedIds();
+  const rows = historyToWorkoutRows(getHistory().filter(w => w && !done.has(String(w.id))));
+  if (!rows.length) { LS.set('dcrgym_rows_backfilled', true); return; }
   const ok = await postToSheets({ action: 'syncWorkouts', workouts: rows });
   if (ok) LS.set('dcrgym_rows_backfilled', true);
 }
@@ -13772,8 +13861,12 @@ async function bgSyncToSheets(specificEntry, onlyState) {
   const hist = getHistory();
   if (!hist.length) return false;   // never push an empty history over the cloud copy
 
+  // ota-33: while the old script's backup cell is full, automatic syncs try the 171 KB backup
+  // at most every 12 hours (Sync Now always tries, so a script update shows at once).
+  const blocked = LS.get('dcrgym_backup_blocked', null);
+  const skipState = !ST._manualSync && !ST.serverV2 && blocked && (Date.now() - (blocked.at || 0) < 12 * 3600 * 1000);
   // Full restorable state blob — this is what Recover / pullState reads back.
-  const stateOk = await postToSheets({
+  const stateOk = skipState ? (ST.lastCloudSyncError = BACKUP_FULL_MSG, false) : await postToSheets({
     action: 'saveState',
     history: hist,
     defaultProgram: ST.defaultProgram || LS.get('dcrgym_default_prog', null),
@@ -13797,8 +13890,12 @@ async function bgSyncToSheets(specificEntry, onlyState) {
 
   // Readable rows for the just-finished workout. Built from the history record
   // (not live ST), so it stays correct even if the user navigated away.
+  // ota-33: on app open / Sync Now, don't resend the latest workout when the Sheet already has
+  // it. The current Google script adds a WorkoutSummary row on every send, so each open added
+  // a copy. (No bulk catch-up against that script, for the same reason.)
   const targetEntry = specificEntry || hist[hist.length - 1];
-  const rows = historyToWorkoutRows([targetEntry]);
+  const alreadyIn = !specificEntry && targetEntry && getRowsSyncedIds().has(String(targetEntry.id));
+  const rows = alreadyIn ? [] : historyToWorkoutRows([targetEntry]);
   let rowsOk = true;
   if (rows.length) rowsOk = await postToSheets({ action: 'syncWorkouts', workouts: rows });
   ST.lastSyncDetail = { stateOk, rowsOk, rowsPending: rowsOk ? 0 : 1, stateErr: _stateErr, err: ST.lastCloudSyncError || null, at: Date.now() };
@@ -13819,7 +13916,8 @@ async function runSyncNow() {
     await drainSyncQueue();
     await backfillAllRows();
   }
-  pushOk = await bgSyncToSheets();
+  ST._manualSync = true;
+  try { pushOk = await bgSyncToSheets(); } finally { ST._manualSync = false; }
   const d = Object.assign({ stateOk: false, rowsOk: false }, ST.lastSyncDetail || {}, { added, pushOk });
   if (!d.err && ST.lastCloudSyncError) d.err = ST.lastCloudSyncError;
   ST.lastSyncDetail = d;
@@ -14114,6 +14212,7 @@ async function bootstrapApp() {
     migrateStorage();
     try { runOta31DataFlags(); } catch (e31) { console.warn('[ota-31] data check skipped:', e31); }
     try { runOta32Fixes(); } catch (e32) { console.warn('[ota-32] date check skipped:', e32); }
+    try { runOta33Fixes(); } catch (e33) { console.warn('[ota-33] Monday fix skipped:', e33); }
   } catch(e) {
     console.warn('[DCR Gym Shell] State hydration notice (non-fatal):', e);
   }
