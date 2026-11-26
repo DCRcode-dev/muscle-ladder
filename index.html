@@ -2547,6 +2547,32 @@ body { font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
   .set-log-btn.logged svg { animation: ota30-check .32s var(--spring-bounce); }
 }
 @keyframes ota30-check { from { transform: scale(.4) rotate(-12deg); opacity: 0; } to { transform: scale(1) rotate(0); opacity: 1; } }
+
+/* ── ota-31: ledger batch (cream base, sage = done) ─────────────────────── */
+.sync-badge { display:flex; align-items:center; gap:8px; width:calc(100% - 32px); margin:4px 16px 10px; padding:9px 12px; border-radius:14px; border:1px solid var(--border-strong); background:var(--surface-raised); color:var(--text-secondary); font:500 12.5px var(--font-body); text-align:left; cursor:pointer; }
+.sync-badge .sb-dot { width:8px; height:8px; border-radius:50%; background:var(--accent-timer); flex-shrink:0; }
+.sync-badge .sb-text { flex:1; min-width:0; }
+.sync-badge .sb-cta { color:var(--accent); font-weight:600; white-space:nowrap; }
+.sync-badge:disabled { opacity:.7; }
+.next-time-card { width:100%; max-width:360px; margin:0 auto 14px; padding:12px 14px; border-radius:16px; background:var(--surface-raised); border:1px solid var(--border); text-align:left; }
+.next-time-card .nt-title { font:700 10px var(--font-body); letter-spacing:.08em; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:6px; }
+.next-time-card .nt-line { font-size:13.5px; line-height:1.45; color:var(--text-primary); margin:2px 0; }
+.next-time-card .nt-line b { font-weight:600; }
+.next-time-card .nt-line.up b { color:var(--sage-ink); }
+.next-time-card .nt-line.hold b { color:var(--text-secondary); }
+.next-time-card .nt-line.build b { color:var(--accent); }
+.cal-cmp { font-size:11.5px; margin:-2px 0 6px 26px; color:var(--text-tertiary); font-variant-numeric:tabular-nums; }
+.cal-cmp.up { color:var(--sage-ink); }
+.cal-cmp.down { color:var(--accent); }
+.cal-ex-note { font-size:11.5px; font-style:italic; color:var(--text-secondary); margin:-2px 0 6px 26px; }
+.cal-flag-line { font-size:11px; color:var(--text-secondary); background:var(--surface-sunken); border-radius:10px; padding:6px 8px; margin:0 0 6px 26px; }
+.cal-flag-btn { margin-left:6px; border:1px solid var(--border-strong); background:var(--card); border-radius:8px; padding:2px 8px; font-size:11px; cursor:pointer; }
+.cal-dup-note { font-size:11.5px; color:var(--text-secondary); background:var(--surface-sunken); border-radius:10px; padding:6px 10px; margin-top:8px; }
+.whfc-dup { color:var(--text-tertiary); font-style:italic; }
+.premium-resume-idle { font-size:11px; color:var(--text-tertiary); margin-top:2px; }
+.premium-resume-continue.secondary { background:transparent; color:var(--charcoal); border:1px solid var(--border-strong); }
+.ex-card.muscle-jump { box-shadow:0 0 0 2px var(--sage), var(--shadow-sm); transition:box-shadow .6s ease; }
+.ota31-toast { position:fixed; left:50%; bottom:calc(92px + env(safe-area-inset-bottom)); transform:translateX(-50%); background:var(--surface-glass-dark); color:#fff; padding:9px 14px; border-radius:12px; font-size:13px; z-index:9999; max-width:86vw; text-align:center; pointer-events:none; }
 </style>
 </head>
 <body>
@@ -5449,7 +5475,8 @@ function formatDuration(seconds) {
 }
 function getWeightUnit() {
   const s = getSettings();
-  return (s && s.weightUnit) ? s.weightUnit : 'lb';
+  // ota-31 (E): displayUnit only changes how numbers are SHOWN. weightUnit stays the unit history is stored in.
+  return (s && s.displayUnit) ? s.displayUnit : ((s && s.weightUnit) ? s.weightUnit : 'lb');
 }
 function formatWeight(val) {
   if (val == null || isNaN(val)) return '0';
@@ -5659,7 +5686,7 @@ function saveMeasurements(m) { LS.set('dcrgym_measurements', m); idbSet('dcrgym_
 // Schema-versioned, non-destructive, with rolling last-good backup.
 // History must survive every app update. Period.
 const SCHEMA_VERSION = 3;
-const APP_BUILD = '2026.11.19 · ota-30 · ledger-batch';
+const APP_BUILD = '2026.11.26 · ota-31 · ledger-batch';
 const KG_TO_LB_CUTOFF_MS = 1788000000000; // Workouts before Sep 2026 were logged in kg; Sep 2026+ are already in lbs
 
 function hasLoggedWorkingSets(w) {
@@ -5668,7 +5695,7 @@ function hasLoggedWorkingSets(w) {
 }
 
 function isCompletedProgramWorkout(w, progId) {
-  if (!w || w.partial) return false;
+  if (!w || w.partial || w._dupOf) return false;
   if (progId && w.programId !== progId) return false;
   return hasLoggedWorkingSets(w);
 }
@@ -5819,6 +5846,11 @@ function convertHistoryWeightsToLbs(hist) {
 }
 
 function convertHistoryUnits(targetUnit) {
+  // ota-31 (E): converting used to rewrite every saved weight. Now it only changes the display.
+  if (targetUnit === 'lb' || targetUnit === 'kg') { setDisplayUnit(targetUnit); return; }
+  return _legacyConvertHistoryUnits(targetUnit);
+}
+function _legacyConvertHistoryUnits(targetUnit) {
   if (getSettings().weightUnit === targetUnit) return;
   const currentHist = getHistory();
   if (!currentHist || currentHist.length === 0) {
@@ -6428,14 +6460,33 @@ function archiveWorkoutToHistory(snapshot) {
   const hasSets = Object.values(snapshot.sets).some(arr => Array.isArray(arr) && arr.some(s => s && s.r > 0));
   if (!hasSets) return false;
   const hist = getHistory();
+  // ota-31 (C): an unfinished EDIT of an old workout goes back into that workout, never a new copy.
+  if (snapshot.editingWorkoutId) {
+    const idx = hist.findIndex(w => String(w.id) === String(snapshot.editingWorkoutId));
+    if (idx !== -1) {
+      hist[idx] = applyEditToEntry(hist[idx], { sets: snapshot.sets, notes: Object.assign({}, hist[idx].notes || {}, snapshot.notes || {}) });
+      saveHistory(hist);
+      bgSyncToSheets(hist[idx]).catch(() => {});
+      return true;
+    }
+  }
+  // ota-31 (C): same sets already saved → don't save them a second time.
+  const same = findSameSetsWorkout(hist, snapshot.sets, null);
+  if (same) return true;
+  // ota-31 (D): end at the last set (not "now"), and credit it when every programmed exercise was done.
+  const lastTs = lastSetTs(snapshot.sets);
+  const startT = snapshot.startTime || firstSetTs(snapshot.sets) || Date.now();
+  const endT = snapshot.isBackdated ? (snapshot.workoutEnd || (startT + (snapshot.durationSecs || 0) * 1000)) : (lastTs || Date.now());
+  const complete = allProgrammedSlotsLogged(snapshot.programId, snapshot.sessionId, snapshot.sets);
   const entry = {
     id: (snapshot.startTime || Date.now()).toString(),
     programId: snapshot.programId,
     sessionId: snapshot.sessionId,
     sessionName: snapshot.sessionName || '',
-    startTime: snapshot.startTime || Date.now(),
-    endTime: Date.now(),
-    duration: snapshot.durationSecs || snapshot.duration || 0,
+    startTime: startT,
+    endTime: endT,
+    duration: (lastTs && !snapshot.isBackdated) ? Math.max(60, Math.round((lastTs - startT) / 1000) + 60) : (snapshot.durationSecs || snapshot.duration || 0),
+    _archived: { at: Date.now(), endedAt: lastTs ? 'last set' : 'archive time', liveDurationSecs: snapshot.durationSecs || 0 },
     travelMode: snapshot.travelMode || false,
     sets: snapshot.sets,
     notes: snapshot.notes || {},
@@ -6443,8 +6494,8 @@ function archiveWorkoutToHistory(snapshot) {
     subMeta: snapshot.subMeta || {},
     additions: snapshot.additions || [],
     completedCards: snapshot.completedCards || [],
-    _unitLb: getWeightUnit() === 'lb',
-    partial: true,
+    _unitLb: getStoreUnit() === 'lb',
+    partial: !complete,
   };
   hist.push(entry);
   saveHistory(hist);
@@ -6624,11 +6675,12 @@ function getZoneIndex() {
   const buckets = new Map();
   let seq = 0;
   for (const w of hist) {
+    if (w._dupOf) continue; // ota-31: duplicate copies never count twice
     for (const [key, sets] of Object.entries(w.sets)) {
       if (key.endsWith('_wu') || !Array.isArray(sets) || !sets.length) continue;
       const name = resolveWorkoutSetExName(w, key, sets);
       if (!name) continue;
-      const ws = sets.filter(s => s && s.r > 0 && (s.w != null && s.w !== ''));
+      const ws = sets.filter(s => s && s.r > 0 && !s._suspect && (s.w != null && s.w !== ''));
       if (!ws.length) continue;
       const target = workoutSlotTarget(w, key, sets);
       const zone = repZone(target) || zoneFromDoneReps(ws);
@@ -6649,10 +6701,13 @@ function historyEntriesFor(exName) {
   idx.memo.set(exName, out);
   return out;
 }
-function weightStep(exName) { return getWeightUnit() === 'kg' ? 2.5 : 5; }
+// ota-31: steps are picked in the DISPLAY unit and returned in the STORED unit (lb), so a kg view never rewrites lb math.
+function weightStep(exName) { const st = getWeightUnit() === 'kg' ? 2.5 : 5; return dispFactor() === 1 ? st : storeW(st); }
 function roundToStep(w, exName) {
-  const step = getWeightUnit() === 'kg' ? (w < 15 ? 1.25 : 2.5) : (w < 30 ? 2.5 : 5);
-  return Math.max(step, Math.round(w / step) * step);
+  const d = dispW(w);
+  const step = getWeightUnit() === 'kg' ? (d < 15 ? 1.25 : 2.5) : (d < 30 ? 2.5 : 5);
+  const r = Math.max(step, Math.round(d / step) * step);
+  return dispFactor() === 1 ? r : storeW(r);
 }
 
 // Memory for one exercise at one rep range: latest session per zone, today's pick, or an estimate.
@@ -6663,7 +6718,10 @@ function getZoneMemory(exName, reps, opts = {}) {
   const byZone = {};
   for (const e of entries) if (e.zone && !byZone[e.zone]) byZone[e.zone] = e;
   const anyLast = entries[0] || null;
-  if (!wantZone) return { zone: null, entry: anyLast, byZone, estimate: null, anyLast };
+  // ota-31: the same program day wins (Tue dragon flags vs Fri dragon flags), when it's recent.
+  const sameDay = opts.sessionId && !opts.zone ? sameDayEntry(entries, opts.sessionId, wantZone) : null;
+  if (!wantZone) return { zone: null, entry: sameDay || anyLast, byZone, estimate: null, anyLast, sameDay: !!sameDay };
+  if (sameDay) { byZone[wantZone] = sameDay; return { zone: wantZone, entry: sameDay, byZone, estimate: null, anyLast, sameDay: true }; }
   if (byZone[wantZone]) return { zone: wantZone, entry: byZone[wantZone], byZone, estimate: null, anyLast };
   // Estimate from strength in other zones: best e1RM in the last 8 weeks (else all-time) → today's top reps at 1 RIR.
   const top = repTop(reps) || ({ heavy: 6, moderate: 10, light: 15 })[wantZone];
@@ -6697,6 +6755,505 @@ function suggestedUpWeight(weight, exName) {
   if (!(weight > 0)) return null;
   return Math.round((weight + weightStep(exName)) * 100) / 100;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ota-31 — ledger batch (Nov 26). Data rule: nothing stored is ever deleted or
+// overwritten. Every clean-up below ADDS a field beside the original value and
+// can be undone. Reads skip flagged values; the values themselves stay.
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ── Flags (F) ───────────────────────────────────────────────────────────────
+// _suspect on a set   → kept as logged, left out of records and volume.
+// _dupOf on a workout → an extra saved copy of another workout; left out of counts.
+// _durFix on a workout → corrected duration (secs) beside the original `duration`.
+function isSuspectSet(s) { return !!(s && s._suspect); }
+function isDupWorkout(w) { return !!(w && w._dupOf); }
+function countsAsWorkSet(s) { return !!(s && s.r > 0 && !s._suspect); }
+function workoutDuration(w) {
+  if (!w) return 0;
+  if (w._durFix && w._durFix.secs > 0) return w._durFix.secs;
+  return w.duration || 0;
+}
+function workoutVolume(w) {
+  let v = 0;
+  if (!w || !w.sets || isDupWorkout(w)) return 0;
+  for (const [k, arr] of Object.entries(w.sets)) {
+    if (k.endsWith('_wu') || !Array.isArray(arr)) continue;
+    for (const s of arr) if (countsAsWorkSet(s) && s.w > 0) v += s.w * s.r;
+  }
+  return v;
+}
+function setTsSignature(sets) {
+  const ts = [];
+  for (const [k, arr] of Object.entries(sets || {})) {
+    if (!Array.isArray(arr)) continue;
+    for (const s of arr) if (s && s.ts && s.r > 0) ts.push(Number(s.ts));
+  }
+  return ts.sort((a, b) => a - b).join(',');
+}
+function lastSetTs(sets) {
+  let m = 0;
+  for (const [k, arr] of Object.entries(sets || {})) {
+    if (!Array.isArray(arr)) continue;
+    for (const s of arr) if (s && s.ts && s.r > 0 && Number(s.ts) > m) m = Number(s.ts);
+  }
+  return m;
+}
+function firstSetTs(sets) {
+  let m = 0;
+  for (const [k, arr] of Object.entries(sets || {})) {
+    if (!Array.isArray(arr)) continue;
+    for (const s of arr) if (s && s.ts && s.r > 0 && (!m || Number(s.ts) < m)) m = Number(s.ts);
+  }
+  return m;
+}
+function localDateKey(ts) {
+  const d = new Date(Number(ts) || 0);
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+// What DCR approved on Nov 26 ("Do it all for me"): flag the Oct 23 OHP 90 × 100 sets,
+// mark the June duplicate copies, add a corrected duration beside the 3 runaway ones.
+const OTA31_LONG_DURATION_IDS = ['1789433429487', '1793498865403', '1793830640709'];
+function runOta31DataFlags(histInput) {
+  const hist = Array.isArray(histInput) ? histInput : getHistory();
+  const report = { suspect: 0, dups: 0, durFix: 0, durSuspect: 0 };
+  if (!hist.length) return report;
+  if (LS.get('dcrgym_ota31_flags_undone', false)) return report; // he undid it: never re-apply on its own
+  const at = Date.now();
+  const before = JSON.stringify(hist);
+  let changed = false;
+  // 1. Oct 23 overhead press typo (90 lb × 100 reps)
+  for (const w of hist) {
+    if (!w || !w.sets) continue;
+    const onDay = String(w.id) === '1792796663270' || localDateKey(w.endTime || w.startTime) === '2026-10-23';
+    if (!onDay) continue;
+    for (const [k, arr] of Object.entries(w.sets)) {
+      if (k.endsWith('_wu') || !Array.isArray(arr)) continue;
+      const nm = resolveWorkoutSetExName(w, k, arr);
+      if (!nm || !/overhead/i.test(nm) || !/press/i.test(nm)) continue;
+      for (const s of arr) {
+        if (s && Number(s.w) === 90 && Number(s.r) === 100 && !s._suspect) {
+          s._suspect = { reason: 'reps look like a typo (100)', at, by: 'ota-31' };
+          report.suspect++; changed = true;
+        }
+      }
+    }
+  }
+  // 2. Duplicate copies: same set timestamps as another saved workout
+  const groups = new Map();
+  for (const w of hist) {
+    if (!w || !w.sets) continue;
+    const sig = setTsSignature(w.sets);
+    if (!sig) continue;
+    if (!groups.has(sig)) groups.set(sig, []);
+    groups.get(sig).push(w);
+  }
+  for (const ws of groups.values()) {
+    if (ws.length < 2) continue;
+    const ordered = [...ws].sort((a, b) => (a.partial ? 1 : 0) - (b.partial ? 1 : 0) || (a.endTime || 0) - (b.endTime || 0));
+    const keep = ordered.find(w => w._dupOf == null) || ordered[0];
+    for (const w of ordered) {
+      if (w === keep || w._dupOf) continue;
+      w._dupOf = String(keep.id);
+      w._dupMarkedAt = at;
+      report.dups++; changed = true;
+    }
+  }
+  // 3. Runaway durations (left running): corrected value next to the original
+  for (const w of hist) {
+    if (!w || OTA31_LONG_DURATION_IDS.indexOf(String(w.id)) === -1) continue;
+    if (w._durFix || w._durSuspect) continue;
+    const last = lastSetTs(w.sets), first = firstSetTs(w.sets);
+    const start = Number(w.startTime) || first;
+    if (last && start && last > start) {
+      w._durFix = { secs: Math.round((last - start) / 1000) + 60, from: 'last set', at };
+      report.durFix++;
+    } else {
+      w._durSuspect = { reason: 'left running; no set times to correct from', at };
+      report.durSuspect++;
+    }
+    changed = true;
+  }
+  if (changed) {
+    try { idbSet('dcrgym_history_backup_ota31', { at, build: APP_BUILD, note: 'before ota-31 flags', history: JSON.parse(before) }); } catch (e) {}
+    saveHistory(hist);
+    LS.set('dcrgym_ota31_flags', { at, ...report });
+  }
+  return report;
+}
+// Undo every ota-31 flag (values were never changed, so nothing else to restore).
+function undoOta31DataFlags() {
+  const hist = getHistory();
+  for (const w of hist) {
+    if (!w) continue;
+    if (w._dupOf) { delete w._dupOf; delete w._dupMarkedAt; }
+    if (w._durFix && w._durFix.from === 'last set') delete w._durFix;
+    if (w._durSuspect) delete w._durSuspect;
+    for (const arr of Object.values(w.sets || {})) if (Array.isArray(arr)) for (const s of arr) if (s && s._suspect && s._suspect.by === 'ota-31') delete s._suspect;
+  }
+  saveHistory(hist);
+  LS.set('dcrgym_ota31_flags_undone', true);
+  LS.remove('dcrgym_ota31_flags');
+}
+function ota31FlagSummary() {
+  let suspect = 0, dups = 0, dur = 0;
+  for (const w of getHistory()) {
+    if (!w) continue;
+    if (w._dupOf) dups++;
+    if (w._durFix || w._durSuspect) dur++;
+    for (const arr of Object.values(w.sets || {})) if (Array.isArray(arr)) for (const s of arr) if (s && s._suspect) suspect++;
+  }
+  return { suspect, dups, dur };
+}
+// Per-set flag toggle (editable later): flags, never values.
+function setSetSuspect(workoutId, key, si, on) {
+  const hist = getHistory();
+  const w = hist.find(x => String(x.id) === String(workoutId));
+  const s = w && w.sets && Array.isArray(w.sets[key]) && w.sets[key][si];
+  if (!s) return false;
+  if (on) s._suspect = { reason: 'flagged by you', at: Date.now(), by: 'user' };
+  else { if (s._suspect) s._unflagged = { was: s._suspect, at: Date.now() }; delete s._suspect; }
+  saveHistory(hist);
+  return true;
+}
+
+// ── Non-destructive edit merge (C) ──────────────────────────────────────────
+// Applies an edited copy of a workout onto the stored original. Changed sets keep the
+// original as _orig; removed sets go to _editArchive; removed exercises are listed in
+// _removedKeys so a stale cloud copy can't bring them back (G).
+function mergeEditedSets(original, editedSets) {
+  const out = {};
+  const now = Date.now();
+  const archive = Array.isArray(original._editArchive) ? original._editArchive.slice() : [];
+  const removedKeys = new Set(Array.isArray(original._removedKeys) ? original._removedKeys : []);
+  let changed = false;
+  const oSets = original.sets || {};
+  const nSets = editedSets || {};
+  const keys = new Set([...Object.keys(oSets), ...Object.keys(nSets)]);
+  for (const k of keys) {
+    const oArr = Array.isArray(oSets[k]) ? oSets[k] : null;
+    const nArr = Array.isArray(nSets[k]) ? nSets[k] : null;
+    if (!nArr || !nArr.some(s => s && (s.r > 0 || k.endsWith('_wu')))) {
+      if (oArr && oArr.some(s => s && s.r > 0)) {
+        oArr.forEach((s, si) => { if (s && s.r > 0) archive.push({ key: k, si, set: s, at: now, why: 'removed in edit' }); });
+        if (!k.endsWith('_wu')) removedKeys.add(k);
+        changed = true;
+      } else if (oArr) out[k] = oArr;   // nothing logged there: keep as it was
+      if (nArr && !oArr) out[k] = nArr;
+      continue;
+    }
+    removedKeys.delete(k);
+    const len = Math.max(oArr ? oArr.length : 0, nArr.length);
+    const arr = [];
+    for (let si = 0; si < len; si++) {
+      const o = oArr ? oArr[si] : null, n = nArr[si];
+      if (!n) {
+        if (o && o.r > 0) { archive.push({ key: k, si, set: o, at: now, why: 'removed in edit' }); changed = true; }
+        continue;
+      }
+      if (!o) { arr.push(n); changed = true; continue; }
+      if (Number(o.w) === Number(n.w) && Number(o.r) === Number(n.r)) {
+        const m = Object.assign({}, o, n);
+        if (o.ts !== undefined) m.ts = o.ts;
+        if (o._isPR !== undefined) m._isPR = o._isPR; else delete m._isPR;
+        if (o._suspect) m._suspect = o._suspect;
+        arr.push(m);
+        if (n.rir !== o.rir && n.rir !== undefined) changed = true;
+      } else {
+        const m = Object.assign({}, n, { _orig: o._orig || { w: o.w, r: o.r, ts: o.ts, _suspect: o._suspect }, _editedAt: now });
+        if (!m._orig._suspect) delete m._orig._suspect;
+        delete m._suspect;
+        arr.push(m); changed = true;
+      }
+    }
+    out[k] = arr;
+  }
+  return { sets: out, archive, removedKeys: [...removedKeys], changed };
+}
+function applyEditToEntry(original, edited) {
+  const r = mergeEditedSets(original, edited.sets);
+  const entry = Object.assign({}, original, edited, { sets: r.sets });
+  if (r.archive.length) entry._editArchive = r.archive; else delete entry._editArchive;
+  if (r.removedKeys.length) entry._removedKeys = r.removedKeys; else delete entry._removedKeys;
+  if (r.changed) entry._editedAt = Date.now();
+  for (const k of ['id', '_dupOf', '_durFix', '_durSuspect', '_unitLb']) if (original[k] !== undefined) entry[k] = original[k];
+  return entry;
+}
+// Duplicate guard (C): another saved workout already holds exactly these sets.
+function findSameSetsWorkout(hist, sets, excludeId) {
+  const sig = setTsSignature(sets);
+  if (!sig) return null;
+  return (hist || []).find(w => w && !w._dupOf && String(w.id) !== String(excludeId) && setTsSignature(w.sets) === sig) || null;
+}
+// Did every programmed exercise get at least one logged set? (D: credit complete sessions)
+function allProgrammedSlotsLogged(programId, sessionId, sets) {
+  const prog = PROGRAMS.find(p => p.id === programId);
+  const sess = prog && prog.sessions.find(s => s.id === sessionId);
+  if (!sess || !sess.exercises.length) return false;
+  return sess.exercises.every((ex, i) => {
+    const arr = sets && sets[`${sess.id}_${i}`];
+    if (Array.isArray(arr) && arr.some(s => s && s.r > 0)) return true;
+    // a slot swapped away after logging keeps its sets on an addition marked _fromSwap — still counts
+    return false;
+  });
+}
+
+// ── Day-specific memory (item 1) ────────────────────────────────────────────
+// An exercise done on two program days (cable crunch, dragon flag) remembers each day.
+const SAME_DAY_MEMORY_MAX_AGE = 42 * 86400000;
+function sameDayEntry(entries, sessionId, zone) {
+  if (!sessionId) return null;
+  const now = Date.now();
+  return entries.find(e => e.sessionId === sessionId && (!zone || !e.zone || e.zone === zone) && now - e.endTime < SAME_DAY_MEMORY_MAX_AGE) || null;
+}
+
+// ── Next-time plan (item 2) ─────────────────────────────────────────────────
+function nextTimePlan(entry) {
+  const out = { up: [], hold: [], build: [] };
+  if (!entry || !entry.sets) return out;
+  const seen = new Set();
+  for (const [k, arr] of Object.entries(entry.sets)) {
+    if (k.endsWith('_wu') || !Array.isArray(arr)) continue;
+    const ws = arr.filter(countsAsWorkSet);
+    if (!ws.length) continue;
+    const name = resolveWorkoutSetExName(entry, k, arr);
+    if (!name || seen.has(normalizeEx(name))) continue;
+    seen.add(normalizeEx(name));
+    const v = progressionVerdict(ws, workoutSlotTarget(entry, k, arr));
+    if (!v) continue;
+    if (v.kind === 'up') out.up.push({ name, weight: suggestedUpWeight(v.weight, name) });
+    else if (v.kind === 'hold') out.hold.push({ name, weight: v.weight });
+    else out.build.push({ name, weight: v.weight });
+  }
+  return out;
+}
+function nextTimePlanHTML(entry) {
+  const p = nextTimePlan(entry);
+  if (!p.up.length && !p.hold.length && !p.build.length) return '';
+  const u = getWeightUnit();
+  const line = (label, items, withW, cls) => items.length ? `<div class="nt-line ${cls}"><b>${label}:</b> ${items.map(i => i.name + (withW && i.weight ? ' ' + formatWeight(dispW(i.weight)) + ' ' + u : '')).join(', ')}.</div>` : '';
+  return `<div class="next-time-card">
+    <div class="nt-title">Next time</div>
+    ${line('Go up', p.up, true, 'up')}${line('Hold', p.hold, false, 'hold')}${line('Build reps', p.build, false, 'build')}
+  </div>`;
+}
+
+// ── Compare to last time (item 3) ───────────────────────────────────────────
+function prevSameSessionWorkout(w) {
+  if (!w || !w.sessionId) return null;
+  const t = w.endTime || w.startTime || 0;
+  return getHistory()
+    .filter(x => x && x.sessionId === w.sessionId && String(x.id) !== String(w.id) && !x._dupOf && (x.endTime || 0) < t && hasLoggedWorkingSets(x))
+    .sort((a, b) => (b.endTime || 0) - (a.endTime || 0))[0] || null;
+}
+function topSetOf(arr) {
+  const ws = (arr || []).filter(countsAsWorkSet);
+  if (!ws.length) return null;
+  return [...ws].sort((a, b) => ((b.w || 0) * (1 + b.r / 30) - (a.w || 0) * (1 + a.r / 30)) || (b.r - a.r))[0];
+}
+function compareToLastText(prevW, name) {
+  if (!prevW) return 'First time on this day';
+  for (const [k, arr] of Object.entries(prevW.sets || {})) {
+    if (k.endsWith('_wu') || !Array.isArray(arr)) continue;
+    const nm = resolveWorkoutSetExName(prevW, k, arr);
+    if (nm && exercisesMatch(nm, name)) return { prevTop: topSetOf(arr), prevKey: k };
+  }
+  return 'Not done last time';
+}
+function diffText(cur, prev) {
+  if (!cur || !prev) return '';
+  const u = getWeightUnit();
+  const dw = Math.round((dispW(Number(cur.w) || 0) - dispW(Number(prev.w) || 0)) * 10) / 10;
+  const dr = (Number(cur.r) || 0) - (Number(prev.r) || 0);
+  const parts = [];
+  if (dw) parts.push((dw > 0 ? '+' : '') + formatWeight(dw) + ' ' + u);
+  if (dr) parts.push((dr > 0 ? '+' : '') + dr + ' rep' + (Math.abs(dr) === 1 ? '' : 's'));
+  return parts.length ? parts.join(', ') : 'Same as last time';
+}
+
+// ── Input check (B): confirm, never block ───────────────────────────────────
+function inputCheckReason(w, r, ref, reps) {
+  const top = repTop(reps);
+  if (!isNaN(top) || reps == null) {
+    const repLimit = Math.max(30, isNaN(top) ? 30 : Math.round(top * 1.5));
+    if (r > repLimit) return `${r} reps is far above this exercise's range.`;
+  }
+  if (ref) {
+    const rw = Number(ref.w) || 0, rr = Number(ref.r) || 0;
+    if (rw > 0 && w > rw * 2) return `${formatWeight(dispW(w))} ${getWeightUnit()} is more than double your last ${formatWeight(dispW(rw))}.`;
+    if (rr >= 3 && r > rr * 2 && r > 12) return `${r} reps is more than double your last ${rr}.`;
+  }
+  return null;
+}
+
+// ── Bodyweight records (G) ──────────────────────────────────────────────────
+function getBestBodyweightReps(name) {
+  let best = 0;
+  for (const w of getHistory()) {
+    if (!w || !w.sets || w._dupOf) continue;
+    for (const [key, sets] of Object.entries(w.sets)) {
+      if (key.endsWith('_wu') || !Array.isArray(sets)) continue;
+      const fb = resolveWorkoutSetExName(w, key, sets);
+      for (const s of sets) {
+        if (!countsAsWorkSet(s) || (Number(s.w) || 0) > 0) continue;
+        const nm = s._name || fb;
+        if (nm && exercisesMatch(name, nm) && s.r > best) best = s.r;
+      }
+    }
+  }
+  return best;
+}
+
+// ── Units (E): stored weights never change; only the display converts ──────
+const LB_PER_KG = 2.20462;
+function getStoreUnit() { const s = getSettings(); return (s && s.weightUnit === 'kg') ? 'kg' : 'lb'; }
+function dispFactor() {
+  const st = getStoreUnit(), du = getWeightUnit();
+  if (st === du) return 1;
+  return du === 'kg' ? 1 / LB_PER_KG : LB_PER_KG;
+}
+function dispW(v) {
+  const n = Number(v);
+  if (!isFinite(n)) return v;
+  const f = dispFactor();
+  if (f === 1) return n;
+  return Math.round(n * f * 10) / 10;
+}
+function storeW(v) {
+  const n = Number(v);
+  if (!isFinite(n)) return 0;
+  const f = dispFactor();
+  if (f === 1) return n;
+  return Math.round((n / f) * 100) / 100;
+}
+function setDisplayUnit(u) {
+  if (u !== 'lb' && u !== 'kg') return;
+  const s = getSettings();
+  const apply = () => { const s2 = getSettings(); s2.displayUnit = u; saveSettings(s2); if (typeof renderSettings === 'function') renderSettings(); };
+  if ((s.displayUnit || s.weightUnit || 'lb') === u) return;
+  confirmSheet({
+    title: `Show weights in ${u}?`,
+    body: `Only how numbers are shown changes. Your saved history stays in ${getStoreUnit()} and nothing is rewritten. You can switch back any time.`,
+    confirmLabel: `Show in ${u}`,
+    onConfirm: apply,
+  });
+  if (typeof renderSettings === 'function' && ST.screen === 'settings') setTimeout(() => { try { const sel = document.getElementById('unit-select'); if (sel) sel.value = getWeightUnit(); } catch (e) {} }, 0);
+}
+
+// ── Sync health (A) ─────────────────────────────────────────────────────────
+function syncHealth() {
+  const s = getSettings();
+  if (!s.sheets) return null;
+  const last = LS.get('dcrgym_last_sync', 0);
+  const q = (LS.get('dcrgym_sync_queue', []) || []).length;
+  const stale = !last || (Date.now() - last > 24 * 3600 * 1000);
+  const err = ST.lastCloudSyncError && ST.lastCloudSyncError !== 'offline' ? ST.lastCloudSyncError : null;
+  if (!stale && !q && !err) return null;
+  const parts = ['Backup ' + (last ? 'last ' + syncRelTime(last) : 'never ran')];
+  if (q) parts.push(q + ' waiting');
+  if (err && /auth|sign/i.test(err)) parts.push('needs Google re-authorization');
+  return { text: parts.join(' · '), stale, queued: q, err };
+}
+function syncBadgeHTML() {
+  const h = syncHealth();
+  if (!h) return '';
+  return `<button class="sync-badge" id="home-sync-badge" onclick="syncNowFromHome()" aria-label="Cloud backup is behind. Tap to sync now.">
+    <span class="sb-dot"></span><span class="sb-text">${h.text}</span><span class="sb-cta">Sync now</span></button>`;
+}
+function syncResultLines(d) {
+  if (!d) return [];
+  const lines = [];
+  lines.push(d.rowsOk ? 'Workout rows: up to date in the Sheet' : (d.rowsPending ? `Workout rows: ${d.rowsPending} still to send` : 'Workout rows: not sent'));
+  lines.push(d.stateOk ? 'Restore backup: saved' : 'Restore backup: not saved' + (d.stateErr ? ' (' + d.stateErr + ')' : ''));
+  if (d.err) lines.push('Cloud says: ' + d.err);
+  return lines;
+}
+async function syncNowFromHome() {
+  const b = document.getElementById('home-sync-badge');
+  if (b) { b.disabled = true; const t = b.querySelector('.sb-cta'); if (t) t.textContent = 'Syncing…'; }
+  let detail = null;
+  try { detail = await runSyncNow(); } catch (e) { detail = { rowsOk: false, stateOk: false, err: 'offline' }; }
+  noticeSheet('Sync result', syncResultLines(detail).map(l => `<div>${l}</div>`).join('') +
+    (detail && detail.err && /auth/i.test(detail.err) ? '<div style="margin-top:8px">Google needs you to allow the DCR Gym script again (Apps Script › Run › Review permissions › Allow).</div>' : ''));
+  if (ST.screen === 'home') renderHome();
+}
+
+// ── Idle prompt (D) ─────────────────────────────────────────────────────────
+const IDLE_PROMPT_MS = 40 * 60 * 1000;
+function liveLastSetTs() { return lastSetTs(ST.workoutSets); }
+function checkIdleWorkout() {
+  if (!ST.currentSession || ST.editingWorkoutId || ST.isBackdated || ST.workoutCommitted) return;
+  const last = liveLastSetTs();
+  if (!last || Date.now() - last < IDLE_PROMPT_MS) return;
+  if (ST._idlePromptFor === last) return;
+  const sheet = document.getElementById('bottom-sheet');
+  if (sheet && sheet.classList.contains('visible')) return;
+  ST._idlePromptFor = last;
+  const t = new Date(last).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  confirmSheet({
+    title: 'Still training?',
+    body: `Your last set was at ${t}. Finish the workout at that time so the date and duration stay right?`,
+    confirmLabel: `Finish at ${t}`,
+    cancelLabel: 'Keep going',
+    onConfirm: () => finishAtLastSet(),
+  });
+}
+function finishAtLastSet() {
+  const last = liveLastSetTs();
+  if (!last || !ST.currentSession) return;
+  const start = ST.workoutStart || firstSetTs(ST.workoutSets) || last;
+  ST.workoutEnd = last;
+  ST.durationSecs = Math.max(60, Math.round((last - start) / 1000) + 60);
+  ST._endedAtLastSet = true;
+  commitWorkout();
+}
+function finishSavedAtLastSet() {
+  const saved = LS.get('dcrgym_current_workout');
+  if (!saved) return;
+  resumeWorkout();
+  setTimeout(finishAtLastSet, 0);
+}
+
+// ── Double-tap a Home muscle (item 4) ───────────────────────────────────────
+function quickStartForMuscle(muscle) {
+  const ns = getNextSession();
+  if (!ns || !ns.prog || !ns.session) { openMuscleGraph(null, muscle); return; }
+  const live = LS.get('dcrgym_current_workout');
+  ST.pendingMuscleFocus = muscle;
+  if (live && live.sessionId && !live.editingWorkoutId && !live.isBackdated) { resumeWorkout(); }
+  else startWorkoutFromHome(ns.prog.id, ns.session.id);
+  setTimeout(applyPendingMuscleFocus, 60);
+}
+function applyPendingMuscleFocus() {
+  const muscle = ST.pendingMuscleFocus;
+  if (!muscle || ST.screen !== 'workout' || !ST.currentSession) return;
+  const cards = [...document.querySelectorAll('#screen-workout .ex-card')];
+  let target = null;
+  for (const c of cards) {
+    const key = c.id.replace('excard-', '');
+    if (ST.completedCards.has(key)) continue;
+    const slot = slotForKey(key);
+    const nm = slot ? liveExName(key, slot.ex) : '';
+    if (nm && getMuscle(nm) === muscle) { target = c; break; }
+  }
+  if (!target) for (const c of cards) { const key = c.id.replace('excard-', ''); const slot = slotForKey(key); if (slot && getMuscle(liveExName(key, slot.ex)) === muscle) { target = c; break; } }
+  ST.pendingMuscleFocus = null;
+  if (!target) { if (typeof showToastMsg === 'function') showToastMsg(`No ${muscle} in this session`); return; }
+  const key = target.id.replace('excard-', '');
+  if (!ST.expandedCards.has(key)) toggleCard(key);
+  const el = document.getElementById('excard-' + key) || target;
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  el.classList.add('muscle-jump');
+  setTimeout(() => el.classList.remove('muscle-jump'), 1800);
+}
+function showToastMsg(msg) {
+  const t = document.createElement('div');
+  t.className = 'ota31-toast'; t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2200);
+}
+
 
 // ── Default swaps (per program slot) ─────────────────────────────────────────
 function getSlotDefaults() { return LS.get('dcrgym_slot_defaults', {}) || {}; }
@@ -6799,18 +7356,8 @@ function getStats() {
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
   const weekStart = (() => { const d = new Date(now); d.setHours(0,0,0,0); d.setDate(d.getDate() - d.getDay()); return d.getTime(); })();
-  const thisMonth = hist.filter(w => w.endTime >= monthStart).length;
-  const thisWeekVol = hist.filter(w => w.endTime >= weekStart).reduce((sum, w) => {
-    if (!w.sets) return sum;
-    let wVol = 0;
-    for (const [k, sArr] of Object.entries(w.sets)) {
-      if (k.endsWith('_wu') || !Array.isArray(sArr)) continue;
-      for (const s of sArr) {
-        if (s && s.w > 0 && s.r > 0) wVol += (s.w * s.r);
-      }
-    }
-    return sum + wVol;
-  }, 0);
+  const thisMonth = hist.filter(w => w.endTime >= monthStart && !w._dupOf).length;
+  const thisWeekVol = hist.filter(w => w.endTime >= weekStart).reduce((sum, w) => sum + workoutVolume(w), 0);
   // Streak: count consecutive weeks with at least 1 workout
   let streak = 0;
   const msPerWeek = 7*24*3600*1000;
@@ -6832,8 +7379,8 @@ function getNextSession() {
   const rot = getProgramRotationState(prog, allHist);
   if (rot.isFirst || !rot.nextSession) return { prog, session: prog.sessions[0], isFirst: true };
   const session = rot.nextSession;
-  const sessHist = allHist.filter(w => isCompletedProgramWorkout(w, dp) && w.sessionId === session.id && w.duration);
-  const avgDur = sessHist.length > 0 ? Math.round(sessHist.reduce((s,w)=>s+w.duration,0)/sessHist.length) : null;
+  const sessHist = allHist.filter(w => isCompletedProgramWorkout(w, dp) && w.sessionId === session.id && workoutDuration(w) && !w._durSuspect);
+  const avgDur = sessHist.length > 0 ? Math.round(sessHist.reduce((s,w)=>s+workoutDuration(w),0)/sessHist.length) : null;
   return { prog, session, avgDur, isFirst: false };
 }
 
@@ -7725,7 +8272,7 @@ function getMuscleVolumeHistory(muscle) {
     const wEnd   = i === 4 ? (now + 86400000) : (now - (4 - i) * msW);
     let sets = 0;
     for (const w of hist) {
-      if (w.endTime < wStart || w.endTime >= wEnd || !w.sets) continue;
+      if (w.endTime < wStart || w.endTime >= wEnd || !w.sets || w._dupOf) continue;
       for (const [key, s] of Object.entries(w.sets)) {
         if (key.endsWith('_wu') || !Array.isArray(s) || s.length === 0) continue;
         const exName = resolveWorkoutSetExName(w, key, s);
@@ -7750,7 +8297,7 @@ function calcE1RM(weight, reps) {
 // Top set = heaviest weight; ties broken by highest reps
 function getTopSetE1RM(sets) {
   if (!sets || !sets.length) return 0;
-  const valid = sets.filter(s => s && s.w > 0 && s.r > 0);
+  const valid = sets.filter(s => s && s.w > 0 && s.r > 0 && !s._suspect);
   if (!valid.length) return 0;
   const top = valid.reduce((best, s) => {
     if (s.w > best.w) return s;
@@ -7826,7 +8373,8 @@ function getEpleyOverloadByMuscle(muscle, numWeeks = 5) {
   return { weeks, driver };
 }
 
-function openQuickLogModal(muscle) {
+function openQuickLogModal(muscle) { return quickStartForMuscle(muscle); }
+function _legacyOpenQuickLogModal(muscle) {
   // Quick-log: jump directly to workout screen filtered to this muscle
   const ns = typeof getNextSession === 'function' ? getNextSession() : null;
   if (ns && ns.prog && ns.session) {
@@ -7932,7 +8480,7 @@ function getTopExercisesForMuscle(muscle) {
       const topSet = [...validSets].sort((a,b) => (b.w * (1 + b.r/30)) - (a.w * (1 + a.r/30)))[0];
       const e1rm = Math.round(topSet.w * (1 + topSet.r / 30));
       if (!map[name] || e1rm > map[name].e1rm) {
-        map[name] = { name, bestSet: `${topSet.w} ${unit} × ${topSet.r}`, e1rm, date: w.endTime };
+        map[name] = { name, bestSet: `${formatWeight(dispW(topSet.w))} ${unit} × ${topSet.r}`, e1rm, date: w.endTime };
       }
     }
   }
@@ -8248,14 +8796,20 @@ function renderHome() {
 
   // ── 2. Resume strip — borderless, no card, no background ─────────────────────
   const resumed    = LS.get('dcrgym_current_workout');
+  // ota-31 (D): a workout left open long after its last set offers to finish at that set.
+  const resumedLast = resumed && !resumed.editingWorkoutId && !resumed.isBackdated ? lastSetTs(resumed.sets) : 0;
+  const resumedIdle = resumedLast && (Date.now() - resumedLast > IDLE_PROMPT_MS);
+  const resumedLastLbl = resumedIdle ? new Date(resumedLast).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '';
   const resumeHTML = resumed ? `
     <div class="premium-resume">
       <div class="premium-resume-info">
         <div class="premium-resume-label">In Progress</div>
         <div class="premium-resume-name">${resumed.sessionName || 'Workout'}</div>
+        ${resumedIdle ? `<div class="premium-resume-idle">Last set ${relDay(resumedLast)} at ${resumedLastLbl}</div>` : ''}
       </div>
       <div class="premium-resume-btns">
-        <button class="premium-resume-continue" onclick="resumeWorkout()">Continue</button>
+        ${resumedIdle ? `<button class="premium-resume-continue" onclick="finishSavedAtLastSet()">Finish at ${resumedLastLbl}</button>` : ''}
+        <button class="premium-resume-continue${resumedIdle ? ' secondary' : ''}" onclick="resumeWorkout()">Continue</button>
         <button class="premium-resume-discard"  onclick="discardWorkout()">Discard</button>
       </div>
     </div>` : '';
@@ -8278,6 +8832,8 @@ function renderHome() {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
       </button>
     </div>
+
+    ${syncBadgeHTML()}
 
     <div class="premium-totem-container">
       ${typeof buildSilhouetteSVG === 'function' ? buildSilhouetteSVG(targets, actuals, checkWeekComplete()) : ''}
@@ -8320,26 +8876,23 @@ function renderHome() {
     const totemEl = container.querySelector('.premium-totem-container');
     if (!totemEl) return;
 
-    // Double-tap velocity state
-    let _lastTapTime = 0;
-    let _lastTapMuscle = null;
-
-    // Delegated click: single tap = graph, rapid double-tap = quick-log
+    // ota-31 (item 4): single tap waits a beat so a double-tap never opens the graph first.
+    // Single tap = graph. Double-tap = start (or continue) the next session, scrolled to that muscle.
+    let _tapTimer = null;
+    let _tapMuscle = null;
     totemEl.addEventListener('click', (e) => {
       const el = e.target.closest('[data-muscle]');
       if (!el) return;
       const muscle = el.dataset.muscle;
-      const now = Date.now();
-      const delta = now - _lastTapTime;
-      if (_lastTapMuscle === muscle && delta < 300) {
-        _lastTapTime = 0;
-        _lastTapMuscle = null;
-        openQuickLogModal(muscle);
-      } else {
-        _lastTapTime = now;
-        _lastTapMuscle = muscle;
-        openMuscleGraph(e, muscle);
+      if (_tapTimer && _tapMuscle === muscle) {
+        clearTimeout(_tapTimer); _tapTimer = null; _tapMuscle = null;
+        quickStartForMuscle(muscle);
+        return;
       }
+      if (_tapTimer) clearTimeout(_tapTimer);
+      const pt = { clientX: e.clientX, clientY: e.clientY };
+      _tapMuscle = muscle;
+      _tapTimer = setTimeout(() => { _tapTimer = null; _tapMuscle = null; openMuscleGraph(pt, muscle); }, 280);
     });
 
     // Haptic topography: vibrate(10) on muscle boundary crossing
@@ -8596,7 +9149,8 @@ function zoneRangeLabel(zone, target) {
 function zoneChipsHTML(key, mem, todayZone, unit) {
   if (!mem || !mem.zone) {
     const e = mem && mem.anyLast;
-    return e ? `<div class="ex-last-perf">Last: ${e.sets[e.sets.length - 1].w} ${unit} × ${e.sets[e.sets.length - 1].r} · ${relDay(e.endTime)}</div>` : '';
+    const e2 = (mem && mem.entry) || e;
+    return e2 ? `<div class="ex-last-perf">Last: ${formatWeight(dispW(e2.sets[e2.sets.length - 1].w))} ${unit} × ${e2.sets[e2.sets.length - 1].r} · ${relDay(e2.endTime)}${mem && mem.sameDay ? ' · same day' : ''}</div>` : '';
   }
   const active = mem.zone;
   const zones = ['heavy', 'moderate', 'light'].filter(z => mem.byZone[z] || z === todayZone);
@@ -8604,8 +9158,8 @@ function zoneChipsHTML(key, mem, todayZone, unit) {
   const chips = zones.map(z => {
     const e = mem.byZone[z];
     let body;
-    if (e) body = `${formatWeight(Number(e.sets[0].w) || 0)} ${unit} × ${e.sets.map(s => s.r).join(', ')} · ${relDay(e.endTime)}`;
-    else if (z === active && mem.estimate) body = `est. ${formatWeight(mem.estimate.w)} ${unit} from your other sets`;
+    if (e) body = `${formatWeight(dispW(Number(e.sets[0].w) || 0))} ${unit} × ${e.sets.map(s => s.r).join(', ')} · ${relDay(e.endTime)}${z === active && mem.sameDay ? ' · same day' : ''}`;
+    else if (z === active && mem.estimate) body = `est. ${formatWeight(dispW(mem.estimate.w))} ${unit} from your other sets`;
     else body = 'No history yet';
     const tgt = e ? e.target : (z === todayZone ? effTargetForKey(key) : null);
     return `<button class="zone-chip${e ? '' : ' empty'}" aria-pressed="${z === active}" onclick="event.stopPropagation();setZoneView('${key}','${z}')">
@@ -8620,12 +9174,12 @@ function verdictHTML(v, unit, exName, live) {
   if (v.kind === 'up') {
     const nw = suggestedUpWeight(v.weight, exName);
     const why = v.legacy ? `Last time every set reached ${v.top}.` : (live ? `Every set reached ${v.top} with ${v.lastRir} in reserve on the last.` : `Last time every set reached ${v.top} and your last set was ${v.lastRir} RIR.`);
-    return `<div class="verdict up">${UI_ICON.up}<div><strong>${lead}${nw ? `Go up to ${formatWeight(nw)} ${unit}.` : 'Go up: add load or slow the tempo.'}</strong> ${why}</div></div>`;
+    return `<div class="verdict up">${UI_ICON.up}<div><strong>${lead}${nw ? `Go up to ${formatWeight(dispW(nw))} ${unit}.` : 'Go up: add load or slow the tempo.'}</strong> ${why}</div></div>`;
   }
   if (v.kind === 'hold') {
-    return `<div class="verdict hold">${UI_ICON.hold}<div><strong>${lead}Hold ${formatWeight(v.weight)} ${unit}.</strong> ${live ? `You hit ${v.top} on every set but the last one was at failure.` : `You hit ${v.top} on every set last time, but the last one was at failure.`}</div></div>`;
+    return `<div class="verdict hold">${UI_ICON.hold}<div><strong>${lead}Hold ${formatWeight(dispW(v.weight))} ${unit}.</strong> ${live ? `You hit ${v.top} on every set but the last one was at failure.` : `You hit ${v.top} on every set last time, but the last one was at failure.`}</div></div>`;
   }
-  return `<div class="verdict build">${UI_ICON.build}<div><strong>${lead}Build reps at ${formatWeight(v.weight)} ${unit}.</strong> Aim for ${v.top} on every set.</div></div>`;
+  return `<div class="verdict build">${UI_ICON.build}<div><strong>${lead}Build reps at ${formatWeight(dispW(v.weight))} ${unit}.</strong> Aim for ${v.top} on every set.</div></div>`;
 }
 function liveVerdictFor(key) {
   const slot = slotForKey(key); if (!slot) return null;
@@ -8691,7 +9245,7 @@ function exerciseCardHTML(ex, key, i, isAddition) {
   // Weight memory by rep range — today's zone unless the user tapped another chip.
   const zoneView = ST.workoutZoneView && ST.workoutZoneView[key];
   const todayZone = repZone(reps);
-  const mem = getZoneMemory(displayName, reps, { zone: zoneView || null, excludeId: ST.editingWorkoutId });
+  const mem = getZoneMemory(displayName, reps, { zone: zoneView || null, excludeId: ST.editingWorkoutId, sessionId: ST.currentSession });
   let lastPerf = null, estimate = null;
   if (mem.entry) lastPerf = mem.entry.sets;
   else if (mem.estimate) estimate = mem.estimate;
@@ -8728,9 +9282,10 @@ function exerciseCardHTML(ex, key, i, isAddition) {
     const defaultR = ex && ex.reps ? (parseInt((String(reps).match(/(\d+)$/) || ['', '8'])[1]) || 8) : 8;
 
     let preW, preR;
-    if (logged) { preW = logged.w; preR = logged.r; }
+    const _dw = v => (v === '' || v == null) ? v : formatWeight(dispW(v)); // ota-31: show stored lb in the chosen unit
+    if (logged) { preW = _dw(logged.w); preR = logged.r; }
     else {
-      preW = draft && draft.w !== '' ? draft.w : (useSugg ? suggestW : (useEst ? estimate.w : (lastSet != null && lastSet.w != null ? lastSet.w : (prevLoggedThisSession ? prevLoggedThisSession.w : ''))));
+      preW = draft && draft.w !== '' ? draft.w : (useSugg ? _dw(suggestW) : (useEst ? _dw(estimate.w) : (lastSet != null && lastSet.w != null ? _dw(lastSet.w) : (prevLoggedThisSession ? _dw(prevLoggedThisSession.w) : ''))));
       preR = draft && draft.r !== '' ? draft.r : ((useSugg && !isNaN(bottomReps)) ? bottomReps : (useEst ? estimate.r : (lastSet != null && lastSet.r != null ? lastSet.r : (prevLoggedThisSession ? prevLoggedThisSession.r : defaultR))));
     }
 
@@ -8739,11 +9294,11 @@ function exerciseCardHTML(ex, key, i, isAddition) {
     const isLogged = !!logged;
     const isActiveFocus = si === activeFocusIdx;
 
-    const prHtml = (isLogged && logged._isPR) ? `<div class="pr-toast">✦ New Record · ${logged.w} ${unit} × ${logged.r}</div>` : '';
+    const prHtml = (isLogged && logged._isPR) ? `<div class="pr-toast">✦ New Record · ${logged.w > 0 ? formatWeight(dispW(logged.w)) + ' ' + unit : 'Bodyweight'} × ${logged.r}</div>` : '';
 
     let trendHtml = '';
     if (!isLogged && !useSugg && histAvgW !== null && preW !== '' && Number(preW) > 0) {
-      const diff = Number(preW) - histAvgW;
+      const diff = Number(preW) - dispW(histAvgW);
       if (Math.abs(diff) >= 0.5) {
         const cls = diff > 0 ? 'trend-arrow-up' : 'trend-arrow-down';
         trendHtml = `<div class="set-trend"><span class="${cls}">${diff > 0 ? '↑' : '↓'}</span><span>${(diff > 0 ? '+' : '') + diff.toFixed(1)} ${unit} vs avg</span></div>`;
@@ -8780,7 +9335,7 @@ function exerciseCardHTML(ex, key, i, isAddition) {
   const wuLogged = ST.workoutSets[wuKey] && ST.workoutSets[wuKey][0];
   const wuDraft = !wuLogged && ST.workoutDrafts && ST.workoutDrafts[key + '-wu'];
   const wuBase = lastPerf && lastPerf[0] && lastPerf[0].w != null ? Number(lastPerf[0].w) : (estimate ? estimate.w : null);
-  const wuPreW = wuLogged ? wuLogged.w : (wuDraft && wuDraft.w !== '' ? wuDraft.w : (wuBase != null ? Math.round(wuBase * 0.5) : ''));
+  const wuPreW = wuLogged ? formatWeight(dispW(wuLogged.w)) : (wuDraft && wuDraft.w !== '' ? wuDraft.w : (wuBase != null ? Math.round(dispW(wuBase) * 0.5) : ''));
   const wuPreR = wuLogged ? wuLogged.r : (wuDraft && wuDraft.r !== '' ? wuDraft.r : '');
   const warmupRowHtml = (!wuDismissed) ? `
     <div class="warmup-row" id="wurow-${key}">
@@ -8968,6 +9523,7 @@ function renderWorkout() {
       if (firstCard) firstCard.classList.add('expanded');
     }
   }
+  if (ST.pendingMuscleFocus) applyPendingMuscleFocus(); // ota-31 item 4
 }
 
 // ── Luxury Action Sheet for Exercises ──────────────────────────────────────────
@@ -9248,7 +9804,7 @@ function updateProgressBadge() {
 
   const volEl = document.getElementById('wh-vol-num');
   if (volEl) {
-    const vol = calcVolume();
+    const vol = Math.round(dispW(calcVolume()));
     volEl.innerHTML = `${vol.toLocaleString()} <span style="font-size:11px;font-weight:500;">${getWeightUnit()}</span>`;
   }
 
@@ -9324,12 +9880,12 @@ function getHistoricalBestE1RM(name) {
   if (!name) return 0;
   let best = 0;
   for (const w of getHistory()) {
-    if (!w || !w.sets) continue;
+    if (!w || !w.sets || w._dupOf) continue;
     for (const [key, sets] of Object.entries(w.sets)) {
       if (key.endsWith('_wu') || !Array.isArray(sets)) continue;
       const fallbackName = resolveWorkoutSetExName(w, key, sets);
       for (const s of sets) {
-        if (!s || !s.w || !s.r || s.w <= 0 || s.r <= 0) continue;
+        if (!s || !s.w || !s.r || s.w <= 0 || s.r <= 0 || s._suspect) continue; // ota-31: flagged typos never set the bar
         const sName = s._name || fallbackName;
         if (sName && exercisesMatch(name, sName)) {
           const e1rm = s.w * (1 + s.r / 30);
@@ -9341,7 +9897,7 @@ function getHistoricalBestE1RM(name) {
   return best;
 }
 
-function logSet(key, si, exIdx) {
+function logSet(key, si, exIdx, force) {
   const prog = PROGRAMS.find(p => p.id === ST.currentProgram);
   const sess = prog && prog.sessions.find(s => s.id === ST.currentSession);
   if (!sess) return;
@@ -9353,9 +9909,30 @@ function logSet(key, si, exIdx) {
   const wi = document.getElementById('wi-' + key + '-' + si);
   const ri = document.getElementById('ri-' + key + '-' + si);
   if (!wi || !ri) return;
-  const w = parseFloat(wi.value) || 0;
+  const w = storeW(parseFloat(wi.value) || 0); // ota-31 (E): typed in the shown unit, saved in the stored unit
   const r = parseInt(ri.value) || 0;
   if (r === 0) { openNumpad(ri, key, si, exIdx, 'r'); return; }
+
+  // ota-31 (B): an unusual number gets a quick check. It never blocks.
+  if (!force) {
+    const _nm = liveExName(key, ex);
+    const _prevHere = (ST.workoutSets[key] || []).slice(0, si).filter(Boolean).pop();
+    const _mem = getZoneMemory(_nm, effReps(key, ex), { excludeId: ST.editingWorkoutId, sessionId: ST.currentSession });
+    const _memE = _mem.entry || _mem.anyLast;
+    const _ref = _prevHere || (_memE && (_memE.sets[si] || _memE.sets[_memE.sets.length - 1])) || null;
+    const _why = inputCheckReason(w, r, _ref, effReps(key, ex));
+    if (_why) {
+      confirmSheet({
+        title: 'Double-check this set?',
+        body: `${_why} Log ${w > 0 ? formatWeight(dispW(w)) + ' ' + getWeightUnit() : 'bodyweight'} × ${r} anyway?`,
+        confirmLabel: 'Log anyway',
+        cancelLabel: 'Fix it',
+        onConfirm: () => { logSet(key, si, exIdx, true); },
+        onCancel: () => { try { wi.focus(); } catch (e) {} },
+      });
+      return;
+    }
+  }
 
   // Lock travel mode after first set
   const wasLocked = ST.travelLocked;
@@ -9379,11 +9956,14 @@ function logSet(key, si, exIdx) {
   const exName = liveExName(key, ex);
   const curE1rm = w * (1 + r / 30);
   const prevBestE1rm = getHistoricalBestE1RM(exName);
-  const isPR = prevBestE1rm > 0 && curE1rm > (prevBestE1rm + 0.5);
+  // ota-31 (G): bodyweight lifts (0 lb) set records by reps.
+  const prevBestBW = w > 0 ? 0 : getBestBodyweightReps(exName);
+  const isPR = w > 0 ? (prevBestE1rm > 0 && curE1rm > (prevBestE1rm + 0.5)) : (prevBestBW > 0 && r > prevBestBW);
 
   // ota-30: rir is always written (0 = failure) so "0" is distinguishable from "not recorded" on older sets;
   // _tgt stamps the rep range this set was logged against (weight memory by rep range).
   ST.workoutSets[key][si] = { w, r, ts: Date.now(), _name: exName, _isPR: isPR, rir: 0, _tgt: String(effReps(key, ex)) };
+  if (force) ST.workoutSets[key][si]._checked = true;
 
   // Draft for this set is now committed — clear it
   if (ST.workoutDrafts) delete ST.workoutDrafts[key + '-' + si];
@@ -9420,7 +10000,7 @@ function logSet(key, si, exIdx) {
       if (!nextEl || !nextEl.classList.contains('pr-toast')) {
         const prToast = document.createElement('div');
         prToast.className = 'pr-toast';
-        prToast.innerHTML = `✦ New Record · ${w} ${getWeightUnit()} × ${r}`;
+        prToast.innerHTML = `✦ New Record · ${w > 0 ? formatWeight(dispW(w)) + ' ' + getWeightUnit() : 'Bodyweight'} × ${r}`;
         row.insertAdjacentElement('afterend', prToast);
       }
     }
@@ -9512,9 +10092,9 @@ function logSet(key, si, exIdx) {
         const nextEx = sess.exercises[nextExIdx];
         const nextKey = `${sess.id}_${nextExIdx}`;
         const nextName = liveExName(nextKey, nextEx);
-        const nextMem = getZoneMemory(nextName, effReps(nextKey, nextEx), { excludeId: ST.editingWorkoutId });
-        const nextW = nextMem.entry && nextMem.entry.sets[0] ? nextMem.entry.sets[0].w + ' ' + unit
-          : (nextMem.estimate ? '~' + formatWeight(nextMem.estimate.w) + ' ' + unit : (nextMem.anyLast && nextMem.anyLast.sets[0] ? nextMem.anyLast.sets[0].w + ' ' + unit : '?'));
+        const nextMem = getZoneMemory(nextName, effReps(nextKey, nextEx), { excludeId: ST.editingWorkoutId, sessionId: ST.currentSession });
+        const nextW = nextMem.entry && nextMem.entry.sets[0] ? formatWeight(dispW(nextMem.entry.sets[0].w)) + ' ' + unit
+          : (nextMem.estimate ? '~' + formatWeight(dispW(nextMem.estimate.w)) + ' ' + unit : (nextMem.anyLast && nextMem.anyLast.sets[0] ? formatWeight(dispW(nextMem.anyLast.sets[0].w)) + ' ' + unit : '?'));
         nextText = 'Exercise done ✓  Up next: ' + nextName + ' · ' + nextW;
       } else {
         nextText = 'Last exercise done ✓';
@@ -9522,7 +10102,7 @@ function logSet(key, si, exIdx) {
     } else {
       const nextSi = si + 1;
       const preW = ST.workoutSets[key] && ST.workoutSets[key][si] ? ST.workoutSets[key][si].w : w;
-      nextText = 'Next: Set ' + (nextSi + 1) + ' · ' + preW + ' ' + unit + ' × ' + r;
+      nextText = 'Next: Set ' + (nextSi + 1) + ' · ' + formatWeight(dispW(preW)) + ' ' + unit + ' × ' + r;
       if (si === totalSets - 2) {
         // Second to last — also show next programmed exercise
         const nextExIdx = exIdx + 1;
@@ -9541,7 +10121,7 @@ function logWarmup(key) {
   const wuwi = document.getElementById('wuwi-' + key);
   const wuri = document.getElementById('wuri-' + key);
   if (!wuwi || !wuri) return;
-  const w = parseFloat(wuwi.value) || 0;
+  const w = storeW(parseFloat(wuwi.value) || 0);
   const r = parseInt(wuri.value) || 0;
   if (!r) { openNumpad(wuri, key, 0, 0, 'r', true); return; }
   const wuKey = key + '_wu';
@@ -9930,12 +10510,12 @@ function libCard(name, muscle, tag, subMuscle = null, badge = '') {
   let detail;
   if (mem.entry) {
     const e = mem.entry;
-    detail = `${mem.zone ? ZONE_LABEL[mem.zone] + ' ' + zoneRangeLabel(mem.zone, e.target) + ' · ' : ''}${formatWeight(Number(e.sets[0].w) || 0)} ${unit} × ${e.sets.map(s => s.r).join(', ')} · ${relDay(e.endTime)}`;
+    detail = `${mem.zone ? ZONE_LABEL[mem.zone] + ' ' + zoneRangeLabel(mem.zone, e.target) + ' · ' : ''}${formatWeight(dispW(Number(e.sets[0].w) || 0))} ${unit} × ${e.sets.map(s => s.r).join(', ')} · ${relDay(e.endTime)}`;
   } else if (mem.estimate) {
-    detail = `${ZONE_LABEL[mem.zone]} · est. ${formatWeight(mem.estimate.w)} ${unit} from your other sets`;
+    detail = `${ZONE_LABEL[mem.zone]} · est. ${formatWeight(dispW(mem.estimate.w))} ${unit} from your other sets`;
     badge = badge || 'Estimate';
   } else if (mem.anyLast) {
-    detail = `${formatWeight(Number(mem.anyLast.sets[0].w) || 0)} ${unit} × ${mem.anyLast.sets[0].r} · ${relDay(mem.anyLast.endTime)}`;
+    detail = `${formatWeight(dispW(Number(mem.anyLast.sets[0].w) || 0))} ${unit} × ${mem.anyLast.sets[0].r} · ${relDay(mem.anyLast.endTime)}`;
   } else {
     detail = 'No history yet';
   }
@@ -10348,6 +10928,7 @@ function beginWorkout(progId, sessId) {
     if (el) el.textContent = formatDuration(ST.durationSecs);
     const pd = document.getElementById('pill-dur');
     if (pd) pd.textContent = formatDuration(ST.durationSecs);
+    if (ST.durationSecs % 30 === 0) checkIdleWorkout(); // ota-31 (D)
   }, 1000);
   // Wake lock
   if (navigator.wakeLock) {
@@ -10397,6 +10978,7 @@ function resumeWorkout() {
       if (el) el.textContent = formatDuration(ST.durationSecs);
       const pd = document.getElementById('pill-dur');
       if (pd) pd.textContent = formatDuration(ST.durationSecs);
+      if (ST.durationSecs % 30 === 0) checkIdleWorkout(); // ota-31 (D)
     }, 1000);
   }
   
@@ -10644,8 +11226,8 @@ function commitWorkout() {
     const idx = hist.findIndex(w => String(w.id) === String(ST.editingWorkoutId));
     if (idx !== -1) {
       const original = hist[idx];
-      entry = {
-        ...original,
+      // ota-31 (C): changed sets keep their original values (_orig); removed ones are archived, never dropped.
+      entry = applyEditToEntry(original, {
         duration,
         travelMode: ST.travelMode,
         sets: ST.workoutSets,
@@ -10657,7 +11239,7 @@ function commitWorkout() {
         completedCards: [...ST.completedCards],
         startTime: ST.workoutStart,
         endTime: ST.workoutEnd || (ST.workoutStart + duration * 1000)
-      };
+      });
       hist[idx] = entry;
     } else {
       entry = {
@@ -10682,8 +11264,10 @@ function commitWorkout() {
   } else {
     const id = Date.now().toString();
     const startTime = ST.workoutStart || Date.now() - duration * 1000;
-    const endTime = ST.isBackdated ? (startTime + duration * 1000) : Date.now();
-    entry = {
+    const endTime = ST.isBackdated ? (startTime + duration * 1000) : ((ST._endedAtLastSet && ST.workoutEnd) ? ST.workoutEnd : Date.now());
+    const sameSets = findSameSetsWorkout(hist, ST.workoutSets, null); // ota-31 (C): duplicate guard
+    if (sameSets) entry = sameSets;
+    else entry = {
       id,
       programId: ST.currentProgram,
       sessionId: ST.currentSession,
@@ -10699,11 +11283,13 @@ function commitWorkout() {
       subSource: ST.workoutSubSource || {},
       additions: ST.workoutAdditions || [],
       completedCards: [...ST.completedCards],
-      _unitLb: getWeightUnit() === 'lb',
+      _unitLb: getStoreUnit() === 'lb',
     };
+    if (!sameSets && ST._endedAtLastSet) entry._endedAtLastSet = true;
 
-    hist.push(entry);
+    if (!sameSets) hist.push(entry);
   }
+  ST._endedAtLastSet = false;
 
   if (ST.currentProgram && ST.currentProgram !== 'import' && PROGRAMS.some(p => p.id === ST.currentProgram)) {
     ST.defaultProgram = ST.currentProgram;
@@ -10803,18 +11389,20 @@ function showFinish() {
       if (k.endsWith('_wu') || !Array.isArray(sets)) continue;
       for (const st of sets) {
         if (st && st.r > 0) {
-          if (st.w > 0) totalVol += (st.w * st.r);
+          if (st.w > 0 && !st._suspect) totalVol += (st.w * st.r);
           totalSetsDone++;
           if (st._isPR) {
-            prsHit.push(`${st._name || 'Movement'} · ${st.w || 'BW'} ${unit} × ${st.r}`);
+            prsHit.push(`${st._name || 'Movement'} · ${st.w > 0 ? formatWeight(dispW(st.w)) + ' ' + unit : 'Bodyweight'} × ${st.r}`);
           }
         }
       }
     }
   }
 
+  totalVol = dispW(totalVol);
   const volStr = Math.round(totalVol).toLocaleString();
   const durText = formatDuration(s.duration || 0);
+  const nextTimeHTML = nextTimePlanHTML(lastEntry); // ota-31 item 2
 
   // Program session timeline across current rotation pass
   const msPerDay = 86400000;
@@ -10904,6 +11492,7 @@ function showFinish() {
       <div style="font-size:12px;color:var(--text-secondary);margin: -4px 0 14px;">
         <strong style="color:var(--text-primary);">${Math.round(totalVol / Math.max(1, (s.duration / 60)))}</strong> ${unit}/min workout density
       </div>` : ''}
+    ${nextTimeHTML}
     ${prog ? `<div class="finish-plan-table">${tableRows}</div>` : ''}
     <button class="btn btn-primary" style="max-width:360px;width:100%;font-size:15px;padding:14px;" onclick="dismissFinish()">Back to Home</button>
   `;
@@ -11069,9 +11658,10 @@ function showProgressGraph(e, exName) {
       if (!exercisesMatch(exName, storedName)) continue;
 
       const weekKey = Math.floor((w.endTime || Date.now()) / (7 * 24 * 3600 * 1000));
+      if (w._dupOf) continue;
       for (const s of sets) {
-        if (!s || s.w == null || s.w === '' || Number(s.w) <= 0) continue;
-        const wVal = Number(s.w);
+        if (!s || s.w == null || s.w === '' || Number(s.w) <= 0 || s._suspect) continue;
+        const wVal = dispW(Number(s.w));
         if (!weekData[weekKey] || wVal > weekData[weekKey].w) {
           weekData[weekKey] = { w: wVal, r: s.r };
         }
@@ -11190,15 +11780,9 @@ function getWeeklyVolumeProgression(numWeeks = 6) {
     const wEnd = now - (numWeeks - 1 - i) * msW;
     let vol = 0;
     for (const w of hist) {
-      if (w.endTime >= wStart && w.endTime < wEnd && w.sets) {
-        for (const [key, sets] of Object.entries(w.sets)) {
-          if (key.endsWith('_wu') || !Array.isArray(sets)) continue;
-          for (const s of sets) {
-            if (s && s.w > 0 && s.r > 0) vol += (s.w * s.r);
-          }
-        }
-      }
+      if (w.endTime >= wStart && w.endTime < wEnd && w.sets) vol += workoutVolume(w);
     }
+    vol = dispW(vol);
     const d = new Date(wStart + msW / 2);
     return {
       dateLabel: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
@@ -11249,17 +11833,17 @@ function renderHistory() {
   // 1. Calculate Lifetime Telemetry
   let totalTonnage = 0;
   for (const w of hist) {
-    if (w.sets) {
-      for (const sets of Object.values(w.sets)) {
-        if (Array.isArray(sets)) {
-          for (const s of sets) {
-            if (s && s.w > 0 && s.r > 0) totalTonnage += (s.w * s.r);
-          }
+    if (!w.sets || w._dupOf) continue;
+    for (const sets of Object.values(w.sets)) {
+      if (Array.isArray(sets)) {
+        for (const s of sets) {
+          if (s && s.w > 0 && s.r > 0 && !s._suspect) totalTonnage += (s.w * s.r);
         }
       }
     }
   }
-  const totalWorkouts = hist.length;
+  totalTonnage = dispW(totalTonnage);
+  const totalWorkouts = hist.filter(w => !w._dupOf).length;
 
   // Streak & consistency (rotation-pass aware)
   const progId = ensureActiveProgram();
@@ -11402,20 +11986,18 @@ function renderRecentWorkoutsFeed() {
     const dateStr = new Date(w.endTime || w.startTime).toLocaleDateString('en-US', {
       weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
     });
-    const durStr = formatDuration(w.duration || 0);
-    let vol = 0;
+    const durStr = formatDuration(workoutDuration(w));
     const exNames = [];
     if (w.sets) {
       for (const [k, sArr] of Object.entries(w.sets)) {
         if (!k.endsWith('_wu') && Array.isArray(sArr)) {
           for (const s of sArr) {
-            if (s && s.w > 0 && s.r > 0) vol += (s.w * s.r);
             if (s && s._name && !exNames.includes(s._name)) exNames.push(s._name);
           }
         }
       }
     }
-    const volStr = Math.round(vol).toLocaleString();
+    const volStr = Math.round(dispW(workoutVolume(w))).toLocaleString();
 
     return `
       <div class="wh-feed-card" onclick="openCalDay('${wid}','${dateStr}')">
@@ -11434,6 +12016,7 @@ function renderRecentWorkoutsFeed() {
           <span>🏋️ ${volStr} ${unit}</span>
           ${exNames.length > 0 ? `<span>📋 ${exNames.length} exercises</span>` : ''}
           ${w.travelMode ? '<span style="color:var(--accent-kinetic)">✈ Travel</span>' : ''}
+          ${w._dupOf ? '<span class="whfc-dup">Duplicate copy, not counted</span>' : ''}
         </div>
       </div>
     `;
@@ -11619,7 +12202,7 @@ function clickOpenCalDay(timestamp, dateStr) {
             <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(42,36,33,0.03);border:1px solid var(--border);border-radius:12px;padding:10px 12px;">
               <div>
                 <div style="font-size:13.5px;font-weight:600;color:var(--text-primary);">${w.sessionName || 'Workout'}</div>
-                <div style="font-size:11px;color:var(--muted);">${formatDuration(w.duration || 0)} · Logged</div>
+                <div style="font-size:11px;color:var(--muted);">${formatDuration(workoutDuration(w))} · Logged${w._dupOf ? ' · duplicate copy' : ''}</div>
               </div>
               <div style="display:flex;gap:6px;">
                 <button class="btn-sheet-ghost" style="font-size:11px;padding:4px 9px;border-radius:10px;" onclick="closeSheet(false); editCompletedWorkout('${w.id || w.endTime}')">Edit</button>
@@ -11828,17 +12411,17 @@ function openCalDay(id, dateStr) {
   const w = getHistory().find(x => String(x.id) === String(id) || String(x.endTime) === String(id));
   if (!w) return;
   const sessName = w.sessionName || 'Workout';
-  const dur = formatDuration(w.duration || 0);
-  let vol = 0;
-  if (w.sets) {
-    for (const [k, sArr] of Object.entries(w.sets)) {
+  const dur = formatDuration(workoutDuration(w));
+  let vol = Math.round(dispW(workoutVolume(w) || (w._dupOf ? 0 : 0)));
+  if (w._dupOf) { // a flagged copy still shows its own numbers in its own popup
+    for (const [k, sArr] of Object.entries(w.sets || {})) {
       if (k.endsWith('_wu') || !Array.isArray(sArr)) continue;
-      for (const s of sArr) {
-        if (s && s.w > 0 && s.r > 0) vol += (s.w * s.r);
-      }
+      for (const s of sArr) if (s && s.w > 0 && s.r > 0 && !s._suspect) vol += dispW(s.w * s.r);
     }
+    vol = Math.round(vol);
   }
-  vol = Math.round(vol);
+  const prevW = prevSameSessionWorkout(w); // ota-31 item 3
+  const notes = w.notes || {};
   const prog = PROGRAMS.find(p => p.id === w.programId);
   const sess = prog && prog.sessions.find(s => s.id === w.sessionId);
   const unit = getWeightUnit();
@@ -11847,13 +12430,21 @@ function openCalDay(id, dateStr) {
   let completedExCount = 0;
   let rowsHTML = '';
 
-  const renderExRow = (name, setArr, subFrom) => {
+  const renderExRow = (name, setArr, subFrom, key) => {
     const done = (setArr || []).filter(s => s && s.r > 0);
     if (done.length === 0) return '';
     completedExCount++;
     const muscle = getMuscle(name);
-    const topSet = [...done].sort((a,b) => (b.w * (1 + b.r/30)) - (a.w * (1 + a.r/30)))[0];
-    const topText = topSet ? `${topSet.w} ${unit} × ${topSet.r}` : `${done.length} sets`;
+    const topSet = topSetOf(done) || done[0];
+    const topText = topSet ? `${topSet.w > 0 ? formatWeight(dispW(topSet.w)) + ' ' + unit : 'BW'} × ${topSet.r}` : `${done.length} sets`;
+    // ota-31 item 3: this session vs the previous same session
+    const cmp = compareToLastText(prevW, name);
+    const cmpText = typeof cmp === 'string' ? cmp : (cmp.prevTop ? `${diffText(topSet, cmp.prevTop)} vs last ${sessName.split(' ')[0] || 'time'}` : 'Not done last time');
+    const cmpCls = typeof cmp === 'string' ? 'flat' : (/^\+/.test(cmpText) ? 'up' : (/^-/.test(cmpText) ? 'down' : 'flat'));
+    const noteKey = Object.keys(notes).find(nk => nk === key || exercisesMatch(nk, name));
+    const note = noteKey && notes[noteKey] ? String(notes[noteKey]).replace(/</g, '&lt;') : '';
+    const flagged = (setArr || []).map((st, si) => ({ st, si })).filter(o => o.st && o.st._suspect);
+    const flagHTML = flagged.map(o => `<div class="cal-flag-line" onclick="event.stopPropagation()">Set ${o.si + 1}: ${formatWeight(dispW(o.st.w))} ${unit} × ${o.st.r} looks like a typo and is left out of records and tonnage. <button class="cal-flag-btn" onclick="event.stopPropagation(); setSetSuspect('${w.id}','${key}',${o.si},false); openCalDay('${w.id}','${String(dateStr).replace(/'/g, "\\'")}')">Count it</button></div>`).join('');
     return `
       <div class="cal-ex-row" onclick="showProgressGraph(event, '${name.replace(/'/g, "\\'")}')" style="cursor:pointer;">
         <span class="cal-ex-check">✓</span>
@@ -11866,6 +12457,9 @@ function openCalDay(id, dateStr) {
           <div style="font-size:10.5px;color:var(--text-tertiary);">${topText}</div>
         </div>
       </div>
+      <div class="cal-cmp ${cmpCls}">${cmpText}</div>
+      ${note ? `<div class="cal-ex-note">“${note}”</div>` : ''}
+      ${flagHTML}
     `;
   };
 
@@ -11877,7 +12471,7 @@ function openCalDay(id, dateStr) {
       const programmed = stripSuperset(ex.name);
       const stamped = (setArr.find(s => s && s._name) || {})._name || programmed;
       const subFrom = (normalizeEx(stamped) !== normalizeEx(programmed)) ? programmed : null;
-      rowsHTML += renderExRow(stamped, setArr, subFrom);
+      rowsHTML += renderExRow(stamped, setArr, subFrom, key);
     });
   }
 
@@ -11889,7 +12483,7 @@ function openCalDay(id, dateStr) {
     const setArr = sets[key];
     if (!Array.isArray(setArr)) continue;
     const nm = (setArr.find(s => s && s._name) || {})._name || 'Added exercise';
-    rowsHTML += renderExRow(nm, setArr, null);
+    rowsHTML += renderExRow(nm, setArr, null, key);
   }
 
   // Safety net: render any logged sets not caught above
@@ -11901,7 +12495,7 @@ function openCalDay(id, dateStr) {
     if (handledKeys.has(key) || key.endsWith('_wu')) continue;
     if (!Array.isArray(setArr) || setArr.length === 0) continue;
     const nm = (setArr.find(s => s && s._name) || {})._name || 'Workout Exercise';
-    rowsHTML += renderExRow(nm, setArr, null);
+    rowsHTML += renderExRow(nm, setArr, null, key);
   }
 
   const volStr = vol.toLocaleString();
@@ -11912,6 +12506,8 @@ function openCalDay(id, dateStr) {
       <div class="cal-popup-session">${sessName}</div>
       <div class="cal-popup-date">📅 ${dateStr}</div>
       <span class="cal-popup-prog">${progName}</span>
+      ${w._dupOf ? `<div class="cal-dup-note">This looks like a second copy of another saved workout, so it isn't counted twice. Nothing was deleted.</div>` : ''}
+      ${w._durFix ? `<div class="cal-dup-note">Duration shown ends at your last set. Saved timer said ${formatDuration(w.duration || 0)}.</div>` : ''}
     </div>
 
     <div class="cal-popup-stats">
@@ -12034,9 +12630,9 @@ function renderSettings() {
     <div class="settings-section">
       <div class="settings-section-title">Profile</div>
       <div class="settings-row"><label>Weight unit</label>
-        <select onchange="saveSetting('weightUnit',this.value)" style="border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:13px;background:var(--bg)">
-          <option value="lb" ${s.weightUnit==='lb'?'selected':''}>lb</option>
-          <option value="kg" ${s.weightUnit==='kg'?'selected':''}>kg</option>
+        <select id="unit-select" onchange="setDisplayUnit(this.value)" style="border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:13px;background:var(--bg)">
+          <option value="lb" ${getWeightUnit()==='lb'?'selected':''}>lb</option>
+          <option value="kg" ${getWeightUnit()==='kg'?'selected':''}>kg</option>
         </select>
       </div>
     </div>
@@ -12053,12 +12649,9 @@ function renderSettings() {
 
     <div class="settings-section">
       <div class="settings-section-title">Data</div>
-      <div class="settings-row"><label>Convert History Units</label>
-        <div style="display:flex;gap:8px">
-          <button onclick="convertHistoryUnits('lb');renderSettings();noticeSheet('Units Converted','All historical weights converted to lbs.');" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer">Convert to lbs</button>
-          <button onclick="convertHistoryUnits('kg');renderSettings();noticeSheet('Units Converted','All historical weights converted to kg.');" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer">Convert to kg</button>
-        </div>
-      </div>
+      <div class="settings-row"><label>Saved weights<br><span style="font-weight:normal;color:var(--muted);font-size:11px">Stored in ${getStoreUnit()}. Changing the unit above only changes how they're shown.</span></label></div>
+      ${(() => { const f = ota31FlagSummary(); if (!f.total) return ''; return `<div class="settings-row"><label>Data check<br><span style="font-weight:normal;color:var(--muted);font-size:11px">${[f.suspect ? f.suspect + ' typo set' + (f.suspect === 1 ? '' : 's') + ' left out of records' : '', f.dup ? f.dup + ' duplicate cop' + (f.dup === 1 ? 'y' : 'ies') + ' not counted twice' : '', f.dur ? f.dur + ' long timer' + (f.dur === 1 ? '' : 's') + ' shown to last set' : ''].filter(Boolean).join(' · ')}. Nothing was deleted.</span></label>
+        <button onclick="confirmSheet({title:'Undo the data check?',body:'Every workout goes back to exactly how it was counted before. No sets are changed either way.',confirmLabel:'Undo',onConfirm:()=>{undoOta31DataFlags();renderSettings();}})" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer">Undo</button></div>`; })()}
       <div class="settings-row"><label>Import Strong CSV</label>
         <input type="file" accept=".csv" onchange="importStrongCSV(this)" style="font-size:13px;max-width:160px">
       </div>
@@ -12078,7 +12671,7 @@ function renderSettings() {
       <div class="settings-row"><label>Recover from cloud</label>
         <button id="recover-btn" onclick="recoverFromCloud()" style="background:oklch(25% 0.01 40);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:13px;cursor:pointer;font-family:var(--font-mono);letter-spacing:0.04em">Recover ↓</button>
       </div>
-      <div class="settings-row"><label>Cloud sync<br><span style="font-weight:normal;color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums">${cloudSyncStatus()}</span></label>
+      <div class="settings-row"><label>Cloud sync<br><span style="font-weight:normal;color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums">${cloudSyncStatus()}</span>${ST.lastSyncDetail ? `<br><span id="sync-detail" style="font-weight:normal;color:var(--muted);font-size:11px">${syncResultLines(ST.lastSyncDetail).join('<br>')}</span>` : ''}</label>
         <button id="sync-now-btn" onclick="manualSync()" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer">Sync Now</button>
       </div>
       <div class="settings-row" style="cursor:pointer" onclick="clearHistoryConfirm()">
@@ -12306,14 +12899,14 @@ function clearHistoryConfirm() {
 
 function exportCSV() {
   const hist = getHistory();
-  let csv = 'Date,Program,Session,Exercise,Set,Weight,Reps\n';
+  let csv = 'Date,Program,Session,Exercise,Set,Weight,Reps,Flag\n';
   for (const w of hist) {
     if (!w || !w.sets) continue;
     const prog = PROGRAMS.find(p => p.id === w.programId);
     const sess = prog && prog.sessions.find(s => s.id === w.sessionId);
     const progName = prog ? prog.name : (w.programId === 'import' ? 'Strong Import' : 'Workout');
     const sessName = w.sessionName || (sess ? sess.name : 'Session');
-    const date = new Date(w.endTime || w.startTime || Date.now()).toISOString().split('T')[0];
+    const date = localDateKey(w.endTime || w.startTime || Date.now()); // ota-31 (G): your local day, not UTC
     for (const [key, sets] of Object.entries(w.sets || {})) {
       if (!Array.isArray(sets) || key.endsWith('_wu')) continue;
       const exIdx = parseInt(key.split('_').pop());
@@ -12321,7 +12914,8 @@ function exportCSV() {
       const escapeCsv = (str) => `"${String(str || '').replace(/"/g, '""')}"`;
       (sets || []).filter(s => s && s.r > 0).forEach((s, i) => {
         const exName = (s && s._name) || fallbackName;
-        csv += `${escapeCsv(date)},${escapeCsv(progName)},${escapeCsv(sessName)},${escapeCsv(stripSuperset(exName))},${i+1},${(s && s.w)||0},${(s && s.r)||0}\n`;
+        const flag = w._dupOf ? 'duplicate copy' : (s._suspect ? 'suspect' : '');
+        csv += `${escapeCsv(date)},${escapeCsv(progName)},${escapeCsv(sessName)},${escapeCsv(stripSuperset(exName))},${i+1},${(s && s.w)||0},${(s && s.r)||0},${escapeCsv(flag)}\n`;
       });
     }
   }
@@ -12614,6 +13208,7 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') {
     if (ST.currentSession && !ST.workoutCommitted) {
       requestWakeLock();
+      setTimeout(() => { try { checkIdleWorkout(); } catch (e) {} }, 400); // ota-31 (D)
     }
     if (ST.restActive) {
       const remaining = Math.ceil((ST.restEndTime - Date.now()) / 1000);
@@ -12937,7 +13532,10 @@ function historyToWorkoutRows(records) {
         if (!name && sess && !isNaN(exIdx) && sess.exercises[exIdx]) name = stripSuperset(sess.exercises[exIdx].name);
         if (!name) name = 'Exercise';
         if (!exMap.has(name)) exMap.set(name, []);
-        exMap.get(name).push({ weight: s.w, reps: s.r });
+        const row = { weight: s.w, reps: s.r };
+        if (s._suspect) row.flag = 'suspect';          // ota-31: Sheet notes it; the value itself is never changed
+        if (s._orig) row.was = { weight: s._orig.w, reps: s._orig.r };
+        exMap.get(name).push(row);
       }
     }
     const exercises = [...exMap.entries()].map(([name, sets]) => ({ name, sets }));
@@ -12949,7 +13547,9 @@ function historyToWorkoutRows(records) {
       sessionName: w.sessionName || (sess ? sess.name : ''),
       duration: w.duration || '',
       totalE1RM: prog ? getSessionE1RM(w, prog) : 0,
+      totalVolume: Math.round(workoutVolume(w)),     // ota-31 (A): the Sheet's "Total Volume" column reads this first
       totalSets: exercises.reduce((n, e) => n + e.sets.length, 0),
+      duplicateOf: w._dupOf || '',
       exercises,
     });
   }
@@ -13002,13 +13602,16 @@ async function bgSyncToSheets(specificEntry, onlyState) {
     ts: Date.now()
   });
 
-  if (onlyState) return stateOk;
+  const _stateErr = stateOk ? null : (ST.lastCloudSyncError || null);
+  if (onlyState) { ST.lastSyncDetail = Object.assign({}, ST.lastSyncDetail || {}, { stateOk, stateErr: _stateErr, at: Date.now() }); return stateOk; }
 
   // No specific workout (app open / Sync Now): with the sync-v2 server, push
   // every workout the sheet doesn't have yet, not just the latest one.
   if (!specificEntry && ST.serverV2) {
     await catchUpRows();
-    return stateOk && unsyncedRowWorkouts().length === 0;
+    const pending = unsyncedRowWorkouts().length;
+    ST.lastSyncDetail = { stateOk, rowsOk: pending === 0, rowsPending: pending, stateErr: _stateErr, err: ST.lastCloudSyncError || null, at: Date.now() };
+    return stateOk && pending === 0;
   }
 
   // Readable rows for the just-finished workout. Built from the history record
@@ -13017,7 +13620,29 @@ async function bgSyncToSheets(specificEntry, onlyState) {
   const rows = historyToWorkoutRows([targetEntry]);
   let rowsOk = true;
   if (rows.length) rowsOk = await postToSheets({ action: 'syncWorkouts', workouts: rows });
+  ST.lastSyncDetail = { stateOk, rowsOk, rowsPending: rowsOk ? 0 : 1, stateErr: _stateErr, err: ST.lastCloudSyncError || null, at: Date.now() };
   return stateOk && rowsOk;
+}
+
+// ota-31 (A): one Sync Now used by Settings and the Home badge. Returns rows and backup as separate results.
+async function runSyncNow() {
+  const s = getSettings();
+  if (!s.sheets) return { stateOk: false, rowsOk: false, err: 'no Sheets URL set', added: 0 };
+  ST.lastCloudSyncError = null;
+  const seedAdded = ensureSeedHistoryMerged();
+  await probeSheetsServer();
+  const cloudAdded = await pullFromSheets();
+  const added = seedAdded + cloudAdded;
+  let pushOk = false;
+  if (!ST.lastCloudSyncError) {
+    await drainSyncQueue();
+    await backfillAllRows();
+  }
+  pushOk = await bgSyncToSheets();
+  const d = Object.assign({ stateOk: false, rowsOk: false }, ST.lastSyncDetail || {}, { added, pushOk });
+  if (!d.err && ST.lastCloudSyncError) d.err = ST.lastCloudSyncError;
+  ST.lastSyncDetail = d;
+  return d;
 }
 
 async function manualSync() {
@@ -13026,19 +13651,13 @@ async function manualSync() {
   const s = getSettings();
   if (!s.sheets) { if (btn) { btn.textContent = 'No URL set'; btn.disabled = false; } return; }
   try {
-    const seedAdded = ensureSeedHistoryMerged();
     // PULL BEFORE PUSH — merge cloud in first, then flush queue, backfill, push.
-    await probeSheetsServer();
-    const cloudAdded = await pullFromSheets();
-    const added = seedAdded + cloudAdded;
-    let pushOk = false;
-    if (!ST.lastCloudSyncError) {
-      await drainSyncQueue();
-      await backfillAllRows();
-      pushOk = await bgSyncToSheets();
-    } else {
-      pushOk = await bgSyncToSheets();
-    }
+    const d = await runSyncNow();
+    const added = d.added || 0;
+    const pushOk = !!d.pushOk;
+    const det = document.getElementById('sync-detail');
+    if (det) det.innerHTML = syncResultLines(d).join('<br>');
+    else if (ST.screen === 'settings' && typeof renderSettings === 'function') setTimeout(() => { try { renderSettings(); } catch (e) {} }, 2600);
     if (added > 0) {
       renderHome();
       if (ST.screen === 'history') renderHistory();
@@ -13117,8 +13736,10 @@ function mergeHistories(local, remote) {
           const eName = resolveWorkoutSetExName(existing, ek, eSets);
           if (eName) existingExNames.push(eName);
         }
+        const removedKeys = new Set((existing._removedKeys || []).map(String)); // ota-31 (G)
         for (const [k, rSets] of Object.entries(w.sets)) {
           if (!Array.isArray(rSets) || rSets.length === 0) continue;
+          if (removedKeys.has(k)) continue;
           if (!existing.sets[k] || (Array.isArray(existing.sets[k]) && existing.sets[k].length === 0)) {
             const rName = resolveWorkoutSetExName(w, k, rSets);
             const alreadyPresentByName = rName && existingExNames.some(en => exercisesMatch(en, rName));
@@ -13310,6 +13931,7 @@ async function bootstrapApp() {
     ST.blacklistedExercises = new Set(LS.get('dcrgym_blacklist', []));
     getSettings();
     migrateStorage();
+    try { runOta31DataFlags(); } catch (e31) { console.warn('[ota-31] data check skipped:', e31); }
   } catch(e) {
     console.warn('[DCR Gym Shell] State hydration notice (non-fatal):', e);
   }
