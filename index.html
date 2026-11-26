@@ -5686,7 +5686,7 @@ function saveMeasurements(m) { LS.set('dcrgym_measurements', m); idbSet('dcrgym_
 // Schema-versioned, non-destructive, with rolling last-good backup.
 // History must survive every app update. Period.
 const SCHEMA_VERSION = 3;
-const APP_BUILD = '2026.11.26 · ota-31 · ledger-batch';
+const APP_BUILD = '2026.11.26 · ota-32 · forgotten-finish';
 const KG_TO_LB_CUTOFF_MS = 1788000000000; // Workouts before Sep 2026 were logged in kg; Sep 2026+ are already in lbs
 
 function hasLoggedWorkingSets(w) {
@@ -6206,6 +6206,7 @@ function buildWorkoutPayload() {
     expandedCards: [...ST.expandedCards],
     completedCards: [...ST.completedCards],
     startTime: ST.workoutStart,
+    startedAt: ST.workoutStartedAt || null,   // ota-32: the real start, kept when the workout is reopened later
     editingWorkoutId: ST.editingWorkoutId || null,
     isBackdated: ST.isBackdated || false,
     workoutEnd: ST.workoutEnd || null
@@ -6475,7 +6476,7 @@ function archiveWorkoutToHistory(snapshot) {
   if (same) return true;
   // ota-31 (D): end at the last set (not "now"), and credit it when every programmed exercise was done.
   const lastTs = lastSetTs(snapshot.sets);
-  const startT = snapshot.startTime || firstSetTs(snapshot.sets) || Date.now();
+  const startT = (snapshot.isBackdated ? snapshot.startTime : trueStartOf(snapshot)) || Date.now(); // ota-32: real start
   const endT = snapshot.isBackdated ? (snapshot.workoutEnd || (startT + (snapshot.durationSecs || 0) * 1000)) : (lastTs || Date.now());
   const complete = allProgrammedSlotsLogged(snapshot.programId, snapshot.sessionId, snapshot.sets);
   const entry = {
@@ -6901,10 +6902,172 @@ function ota31FlagSummary() {
   for (const w of getHistory()) {
     if (!w) continue;
     if (w._dupOf) dups++;
-    if (w._durFix || w._durSuspect) dur++;
+    if ((w._durFix && w._durFix.from === 'last set') || (w._durSuspect && w._durSuspect.by !== 'ota-32')) dur++;
     for (const arr of Object.values(w.sets || {})) if (Array.isArray(arr)) for (const s of arr) if (s && s._suspect) suspect++;
   }
-  return { suspect, dups, dur };
+  // ota-32: the Settings row reads total and dup; without them the Data check row (and its Undo) never showed.
+  return { suspect, dups, dup: dups, dur, total: suspect + dups + dur };
+}
+// ═══════════════════════════════════════════════════════════════════════════
+// ota-32 (Nov 26) — forgotten Finish. Same data rule as ota-31: nothing is
+// deleted. A re-dated workout keeps its original times in _redate and can be
+// undone in Settings. Set counts and values never change.
+// ═══════════════════════════════════════════════════════════════════════════
+const AUTO_FINISH_MS = 2 * 60 * 60 * 1000;      // 2 hours with no new set → the workout finishes itself
+const OTA32_MONDAY_PULL_ID = '1795729085602';   // Pull #1 done Mon Nov 23, closed out Thu Nov 26 5:38 PM
+// When a set was really done: an edited set keeps its first time in _orig.
+function setRealTs(s) { return Number((s && s._orig && s._orig.ts) || (s && s.ts) || 0); }
+function workoutSetTimes(w) {
+  const out = [];
+  for (const arr of Object.values((w && w.sets) || {})) {
+    if (!Array.isArray(arr)) continue;
+    for (const s of arr) { const t = setRealTs(s); if (s && s.r > 0 && t > 0) out.push(t); }
+  }
+  return out.sort((a, b) => a - b);
+}
+// The block of sets done together (no 2-hour gap). If a later tap left a stray set, the biggest block wins.
+function mainSetCluster(times) {
+  if (!times.length) return null;
+  const groups = [[times[0]]];
+  for (let i = 1; i < times.length; i++) {
+    if (times[i] - times[i - 1] > AUTO_FINISH_MS) groups.push([]);
+    groups[groups.length - 1].push(times[i]);
+  }
+  const best = groups.reduce((a, b) => (b.length > a.length ? b : a));
+  return { first: best[0], last: best[best.length - 1], count: best.length, strays: times.length - best.length };
+}
+// True start of a live (or saved) workout: never later than its first set.
+function trueStartOf(snap) {
+  if (!snap) return 0;
+  const c = [Number(snap.startedAt) || 0, Number(snap.startTime) || 0, firstSetTs(snap.sets) || 0].filter(x => x > 0);
+  return c.length ? Math.min(...c) : 0;
+}
+function liveTrueStart() {
+  const c = [Number(ST.workoutStartedAt) || 0, firstSetTs(ST.workoutSets) || 0].filter(x => x > 0);
+  return c.length ? Math.min(...c) : (ST.workoutStart || 0);
+}
+
+// Items 3 + 4: workouts that were closed out long after their last set get their real day back.
+function runOta32Fixes(histInput) {
+  const hist = Array.isArray(histInput) ? histInput : getHistory();
+  const report = { redated: 0, durFix: 0, durSuspect: 0, ids: [] };
+  if (!hist.length) return report;
+  if (LS.get('dcrgym_ota32_fix_undone', false)) return report;   // he undid it: never re-apply on its own
+  if (LS.get('dcrgym_ota32_fix', null)) return report;           // runs once
+  const at = Date.now();
+  const before = JSON.stringify(hist);
+  let changed = false;
+  for (const w of hist) {
+    if (!w || !w.sets || w._dupOf || w._redate || w.programId === 'import') continue;
+    const end = Number(w.endTime) || 0, start = Number(w.startTime) || 0;
+    if (!end) continue;
+    const cl = mainSetCluster(workoutSetTimes(w));
+    if (cl) {
+      // Only ever moves a workout EARLIER, to where its sets were really done (edits and backdated logs never move).
+      const realEnd = cl.last;
+      const realStart = (start && start <= cl.first && cl.first - start < AUTO_FINISH_MS) ? start : cl.first;
+      const dayOff = localDateKey(end) !== localDateKey(realEnd) || (start && localDateKey(start) !== localDateKey(realStart));
+      const secs = Math.round((realEnd - realStart) / 1000) + 60;
+      const dur = Number(w.duration) || 0;
+      if (dayOff && realEnd < end) {
+        w._redate = { from: { startTime: w.startTime, endTime: w.endTime }, to: { startTime: realStart, endTime: realEnd },
+                      why: 'finished ' + localDateKey(end) + ', last set ' + localDateKey(realEnd), at, by: 'ota-32' };
+        w.startTime = realStart;
+        w.endTime = realEnd;
+        if (!w._durFix) w._durFix = { secs, from: 'ota-32 set times', at };
+        report.redated++; report.ids.push(String(w.id)); changed = true;
+        continue;
+      }
+      // Same day, but the timer is clearly wrong (left running, or a 1-minute stub): corrected duration beside the original.
+      if (!w._durFix && !w._durSuspect && realEnd > realStart && cl.count >= 3 &&
+          (dur > secs + AUTO_FINISH_MS / 1000 || (dur < 300 && secs > 600))) {
+        w._durFix = { secs, from: 'ota-32 set times', at };
+        report.durFix++; report.ids.push(String(w.id)); changed = true;
+      }
+      continue;
+    }
+    // No set times to go by: flag a clearly wrong timer, never guess a new one.
+    const dur = Number(w.duration) || 0;
+    if (!w._durFix && !w._durSuspect && (dur > 4 * 3600 || (dur > 0 && dur < 300 && hasLoggedWorkingSets(w)))) {
+      w._durSuspect = { reason: dur > 4 * 3600 ? 'timer left running; no set times to correct from' : 'timer stopped too soon; no set times to correct from', at, by: 'ota-32' };
+      report.durSuspect++; changed = true;
+    }
+  }
+  // Item 3: Monday's Pull. If its set times couldn't place it, he told us the day: Monday Nov 23 (same clock time).
+  const pull = hist.find(w => w && String(w.id) === OTA32_MONDAY_PULL_ID && !w._redate);
+  if (pull && localDateKey(pull.endTime || pull.startTime) === '2026-11-26') {
+    const shift = (t) => { const d = new Date(Number(t)); d.setDate(d.getDate() - 3); return d.getTime(); };
+    pull._redate = { from: { startTime: pull.startTime, endTime: pull.endTime }, to: { startTime: shift(pull.startTime || pull.endTime), endTime: shift(pull.endTime) },
+                     why: 'done Monday Nov 23 (his word), closed out Nov 26; no set times to place it', at, by: 'ota-32' };
+    pull.startTime = pull._redate.to.startTime;
+    pull.endTime = pull._redate.to.endTime;
+    if (pull._durSuspect && pull._durSuspect.by === 'ota-32') delete pull._durSuspect;
+    if (!pull._durFix) pull._durSuspect = { reason: 'closed out days later; real length unknown', at, by: 'ota-32' };
+    report.redated++; report.ids.push(OTA32_MONDAY_PULL_ID); changed = true;
+  }
+  if (changed) {
+    try { idbSet('dcrgym_history_backup_ota32', { at, build: APP_BUILD, note: 'before ota-32 fixes', history: JSON.parse(before) }); } catch (e) {}
+    hist.sort((a, b) => ((a.endTime || a.startTime || 0) - (b.endTime || b.startTime || 0)));
+    saveHistory(hist);
+  }
+  LS.set('dcrgym_ota32_fix', { at, redated: report.redated, durFix: report.durFix, durSuspect: report.durSuspect, ids: report.ids });
+  return report;
+}
+// Undo every ota-32 fix: original times come back exactly.
+function undoOta32Fixes() {
+  const hist = getHistory();
+  for (const w of hist) {
+    if (!w) continue;
+    if (w._redate && w._redate.by === 'ota-32') {
+      w.startTime = w._redate.from.startTime;
+      w.endTime = w._redate.from.endTime;
+      if (w.startTime === undefined) delete w.startTime;
+      if (w.endTime === undefined) delete w.endTime;
+      delete w._redate;
+    }
+    if (w._durFix && w._durFix.from === 'ota-32 set times') delete w._durFix;
+    if (w._durSuspect && w._durSuspect.by === 'ota-32') delete w._durSuspect;
+  }
+  hist.sort((a, b) => ((a.endTime || a.startTime || 0) - (b.endTime || b.startTime || 0)));
+  saveHistory(hist);
+  LS.set('dcrgym_ota32_fix_undone', true);
+}
+function ota32FixSummary() {
+  let redated = 0, dur = 0;
+  for (const w of getHistory()) {
+    if (!w) continue;
+    if (w._redate && w._redate.by === 'ota-32') redated++;
+    else if ((w._durFix && w._durFix.from === 'ota-32 set times') || (w._durSuspect && w._durSuspect.by === 'ota-32')) dur++;
+  }
+  return { redated, dur, total: redated + dur };
+}
+
+// Item 2: auto-finish. Live workout with no new set for 2 hours → saved at its last set.
+function autoFinishLive() {
+  if (!ST.currentSession || ST.editingWorkoutId || ST.isBackdated || ST.workoutCommitted) return false;
+  const last = liveLastSetTs();
+  if (!last || Date.now() - last < AUTO_FINISH_MS) return false;
+  ST._autoFinished = true;
+  finishAtLastSet();
+  return true;
+}
+// Same, for a workout left open when the app was closed (runs on open and on return).
+function autoFinishSavedIfIdle() {
+  if (ST.currentSession && !ST.workoutCommitted) return autoFinishLive();
+  const saved = LS.get('dcrgym_current_workout');
+  if (!saved || !saved.sessionId || saved.editingWorkoutId || saved.isBackdated) return false;
+  const last = lastSetTs(saved.sets);
+  if (!last || Date.now() - last < AUTO_FINISH_MS) return false;
+  resumeWorkout();
+  ST._autoFinished = true;
+  finishAtLastSet();
+  return true;
+}
+function autoFinishNotice(entry) {
+  if (!entry) return;
+  const t = new Date(entry.endTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  const day = new Date(entry.endTime).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+  noticeSheet('Workout saved', `${entry.sessionName || 'Your workout'} was still open, so it was finished at your last set: ${day}, ${t}. Every set is saved.`);
 }
 // Per-set flag toggle (editable later): flags, never values.
 function setSetSuspect(workoutId, key, si, on) {
@@ -7184,6 +7347,7 @@ const IDLE_PROMPT_MS = 40 * 60 * 1000;
 function liveLastSetTs() { return lastSetTs(ST.workoutSets); }
 function checkIdleWorkout() {
   if (!ST.currentSession || ST.editingWorkoutId || ST.isBackdated || ST.workoutCommitted) return;
+  if (autoFinishLive()) return; // ota-32 (2): 2 hours with no new set → finished at the last set
   const last = liveLastSetTs();
   if (!last || Date.now() - last < IDLE_PROMPT_MS) return;
   if (ST._idlePromptFor === last) return;
@@ -7202,7 +7366,8 @@ function checkIdleWorkout() {
 function finishAtLastSet() {
   const last = liveLastSetTs();
   if (!last || !ST.currentSession) return;
-  const start = ST.workoutStart || firstSetTs(ST.workoutSets) || last;
+  const start = Math.min(liveTrueStart() || last, last); // ota-32: the real start, never "now"
+  ST.workoutStart = start;
   ST.workoutEnd = last;
   ST.durationSecs = Math.max(60, Math.round((last - start) / 1000) + 60);
   ST._endedAtLastSet = true;
@@ -8860,16 +9025,7 @@ function renderHome() {
 
     ${resumeHTML}
 
-    ${ns && ns.session ? (() => {
-      const sessMuscles = [...new Set(ns.session.exercises.map(ex => getMuscle(stripSuperset(ex.name))).filter(m => m && m !== 'Other'))].slice(0, 3).join(' · ');
-      const exCount = ns.session.exercises.length;
-      return `<div class="boarding-card" style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 22px 22px;">
-        <div class="bc-label" style="margin-bottom: 4px; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-tertiary);">Next Up · Session</div>
-        <div class="bc-name" style="font-family: var(--font-hero); font-style: italic; font-size: 19px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; max-width: 90%; line-height: 1.25;">${ns.session.name}</div>
-        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 14px;">${exCount} exercises${sessMuscles ? ' · ' + sessMuscles : ''}</div>
-        <button class="premium-action-pill" onclick="${ctaOnclick}">START WORKOUT</button>
-      </div>`;
-    })() : `<button class="premium-action-pill" onclick="${ctaOnclick}">CHOOSE A PROGRAM</button>`}`;
+    ${ns && ns.session ? '' : `<button class="premium-action-pill" onclick="${ctaOnclick}">CHOOSE A PROGRAM</button>`}`; // ota-32 (1): next session lives on the Workouts tab only
 
   // ── Silhouette interactive layer ─────────────────────────────────────────────
   requestAnimationFrame(() => {
@@ -10921,6 +11077,7 @@ function beginWorkout(progId, sessId) {
   ST.completedCards = new Set();
   ST.durationSecs = 0;
   ST.workoutStart = Date.now();
+  ST.workoutStartedAt = ST.workoutStart; // ota-32
   if (ST.durationTimer) clearInterval(ST.durationTimer);
   ST.durationTimer = setInterval(() => {
     ST.durationSecs = Math.floor((Date.now() - ST.workoutStart) / 1000);
@@ -10964,6 +11121,8 @@ function resumeWorkout() {
   ST.isBackdated = saved.isBackdated || false;
   ST.workoutEnd = saved.workoutEnd || null;
   ST.durationSecs = saved.durationSecs || 0;
+  // ota-32: reopening used to reset the start to "now", which moved Monday's Pull to Thursday. Keep the real one.
+  ST.workoutStartedAt = (!ST.editingWorkoutId && !ST.isBackdated) ? (trueStartOf(saved) || null) : null;
   
   if (ST.editingWorkoutId || ST.isBackdated) {
     ST.workoutStart = saved.startTime || Date.now();
@@ -11186,6 +11345,20 @@ function commitWorkout() {
   if (ST.durationTimer) clearInterval(ST.durationTimer);
   if (ST.wakeLock) ST.wakeLock.release().catch(()=>{});
   cancelRestTimer();
+  // ota-32 (2): Finish pressed 2+ hours after the last set, or on a later day → it ends at the last set,
+  // so it stays on the day it was done.
+  if (!ST.editingWorkoutId && !ST.isBackdated) {
+    const tStart = liveTrueStart();
+    if (tStart) ST.workoutStart = tStart;
+    const lastT = liveLastSetTs();
+    if (!ST._endedAtLastSet && lastT && (Date.now() - lastT >= AUTO_FINISH_MS || localDateKey(Date.now()) !== localDateKey(tStart || lastT))) {
+      const st = Math.min(tStart || lastT, lastT);
+      ST.workoutStart = st;
+      ST.workoutEnd = lastT;
+      ST.durationSecs = Math.max(60, Math.round((lastT - st) / 1000) + 60);
+      ST._endedAtLastSet = true;
+    }
+  }
   const duration = ST.durationSecs;
 
   // Save to history
@@ -11346,6 +11519,7 @@ function commitWorkout() {
 
 
   ST.lastSummary = { entryId: entry.id, duration, prevDur, biggestGain, e1rmDelta, curE1RM, programId: ST.currentProgram, sessionId: ST.currentSession };
+  const wasAuto = !!ST._autoFinished; ST._autoFinished = false;
 
   // Belt-and-suspenders: workout is fully done. Null the live session markers
   // so that saveNow() is blocked and the floating workout-pill is hidden immediately.
@@ -11355,6 +11529,8 @@ function commitWorkout() {
     clearInterval(ST.durationTimer);
     ST.durationTimer = null;
   }
+
+  if (wasAuto) { Maps('home'); autoFinishNotice(entry); return; } // ota-32 (2): saved quietly, he sees a note on Home
 
   const milestone = checkMilestone();
   if (milestone) {
@@ -12508,6 +12684,7 @@ function openCalDay(id, dateStr) {
       <span class="cal-popup-prog">${progName}</span>
       ${w._dupOf ? `<div class="cal-dup-note">This looks like a second copy of another saved workout, so it isn't counted twice. Nothing was deleted.</div>` : ''}
       ${w._durFix ? `<div class="cal-dup-note">Duration shown ends at your last set. Saved timer said ${formatDuration(w.duration || 0)}.</div>` : ''}
+      ${w._redate && w._redate.by === 'ota-32' ? `<div class="cal-dup-note">Moved back to the day of its sets. It had been finished on ${new Date(Number(w._redate.from.endTime)).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}. Undo in Settings.</div>` : ''}
     </div>
 
     <div class="cal-popup-stats">
@@ -12652,6 +12829,8 @@ function renderSettings() {
       <div class="settings-row"><label>Saved weights<br><span style="font-weight:normal;color:var(--muted);font-size:11px">Stored in ${getStoreUnit()}. Changing the unit above only changes how they're shown.</span></label></div>
       ${(() => { const f = ota31FlagSummary(); if (!f.total) return ''; return `<div class="settings-row"><label>Data check<br><span style="font-weight:normal;color:var(--muted);font-size:11px">${[f.suspect ? f.suspect + ' typo set' + (f.suspect === 1 ? '' : 's') + ' left out of records' : '', f.dup ? f.dup + ' duplicate cop' + (f.dup === 1 ? 'y' : 'ies') + ' not counted twice' : '', f.dur ? f.dur + ' long timer' + (f.dur === 1 ? '' : 's') + ' shown to last set' : ''].filter(Boolean).join(' · ')}. Nothing was deleted.</span></label>
         <button onclick="confirmSheet({title:'Undo the data check?',body:'Every workout goes back to exactly how it was counted before. No sets are changed either way.',confirmLabel:'Undo',onConfirm:()=>{undoOta31DataFlags();renderSettings();}})" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer">Undo</button></div>`; })()}
+      ${(() => { const f = ota32FixSummary(); if (!f.total) return ''; return `<div class="settings-row"><label>Forgotten finishes<br><span style="font-weight:normal;color:var(--muted);font-size:11px">${[f.redated ? f.redated + ' workout' + (f.redated === 1 ? '' : 's') + ' moved back to the day of the sets' : '', f.dur ? f.dur + ' timer' + (f.dur === 1 ? '' : 's') + ' corrected' : ''].filter(Boolean).join(' · ')}. Original times kept.</span></label>
+        <button onclick="confirmSheet({title:'Undo the date fixes?',body:'Those workouts go back to the dates and times they had before. No sets are changed either way.',confirmLabel:'Undo',onConfirm:()=>{undoOta32Fixes();renderSettings();}})" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer">Undo</button></div>`; })()}
       <div class="settings-row"><label>Import Strong CSV</label>
         <input type="file" accept=".csv" onchange="importStrongCSV(this)" style="font-size:13px;max-width:160px">
       </div>
@@ -13209,6 +13388,8 @@ document.addEventListener('visibilitychange', () => {
     if (ST.currentSession && !ST.workoutCommitted) {
       requestWakeLock();
       setTimeout(() => { try { checkIdleWorkout(); } catch (e) {} }, 400); // ota-31 (D)
+    } else {
+      setTimeout(() => { try { autoFinishSavedIfIdle(); } catch (e) {} }, 400); // ota-32 (2)
     }
     if (ST.restActive) {
       const remaining = Math.ceil((ST.restEndTime - Date.now()) / 1000);
@@ -13932,6 +14113,7 @@ async function bootstrapApp() {
     getSettings();
     migrateStorage();
     try { runOta31DataFlags(); } catch (e31) { console.warn('[ota-31] data check skipped:', e31); }
+    try { runOta32Fixes(); } catch (e32) { console.warn('[ota-32] date check skipped:', e32); }
   } catch(e) {
     console.warn('[DCR Gym Shell] State hydration notice (non-fatal):', e);
   }
@@ -14014,6 +14196,7 @@ async function bootstrapApp() {
       if (home) home.style.display = 'block';
       if (nav)  nav.style.display  = 'flex';
       Maps('home');
+      setTimeout(() => { try { autoFinishSavedIfIdle(); } catch (e) { console.warn('[ota-32] auto-finish skipped:', e); } }, 300); // ota-32 (2)
     }
   } catch(err) {
     console.error('[DCR Gym Shell] Router fault:', err);
