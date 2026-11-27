@@ -1,6 +1,6 @@
 
-const CACHE = 'dcr-gym-v47';
-const ASSETS = ['./index.html', './programs.js', './fitbit-overlay.js', './manifest.json', './Resources/icon-192.png', './Resources/icon-512.png'];
+const CACHE = 'dcr-gym-v48';
+const ASSETS = ['./index.html', './fitbit-overlay.js', './manifest.json', './Resources/icon-192.png', './Resources/icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
@@ -19,19 +19,26 @@ self.addEventListener('activate', e => {
 // Navigations: network-first. Every launch with signal gets the newest build;
 // cache is the offline fallback only.
 // Same-origin assets: stale-while-revalidate. Served instantly from cache,
-// refreshed in the background — programs.js updates flow without reinstalls
-// or even a service-worker version bump.
+// refreshed in the background.
+// Preview builds (/preview/) are never cached and never replace the real app.
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET') return;
+
+  // Preview builds live under /preview/. Straight to network, never cached,
+  // so a test build can never replace the app on this phone.
+  if (url.origin === self.location.origin && /\/preview\//.test(url.pathname)) return;
 
   const isNav = e.request.mode === 'navigate' || url.pathname.endsWith('/index.html');
   if (isNav) {
     e.respondWith(
       fetch(e.request)
         .then(r => {
-          const copy = r.clone();
-          caches.open(CACHE).then(c => c.put('./index.html', copy)).catch(() => {});
+          // Only the app's own page becomes the offline copy (not privacy.html or any other page).
+          if (r && r.ok && /\/(index\.html)?$/.test(url.pathname)) {
+            const copy = r.clone();
+            caches.open(CACHE).then(c => c.put('./index.html', copy)).catch(() => {});
+          }
           return r;
         })
         .catch(() => caches.match('./index.html'))

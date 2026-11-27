@@ -1,0 +1,7 @@
+{
+  "name": "muscle-ladder-tests",
+  "private": true,
+  "description": "Data-safety and display tests for DCR Gym. Synthetic data and the public seed history only.",
+  "scripts": { "test": "node run-all.js" },
+  "devDependencies": { "jsdom": "24.1.3" }
+}

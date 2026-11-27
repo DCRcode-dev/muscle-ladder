@@ -1,0 +1,23 @@
+name: tests
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install jsdom
+        working-directory: tests
+        run: npm install --no-audit --no-fund
+      - name: Run tests
+        working-directory: tests
+        env:
+          TZ: America/Puerto_Rico
+        run: npm test
+      - name: Service worker parses
+        run: node -e "new Function(require('fs').readFileSync('sw.js','utf8'))"

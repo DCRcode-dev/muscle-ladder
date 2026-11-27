@@ -1,5 +1,7 @@
 # Muscle Ladder — Project Status
 
+> **ota-36 note:** this guide is historical. `programs.js` and `apps-script.gs` are no longer in the repo. Do **not** paste any old copy of `apps-script.gs` into the live Apps Script, it can wipe Sheet history. See `Resources/Scripts/README.md`.
+
 **Last updated:** May 2026  
 **Status:** App is built and patched. Awaiting user review before deployment.
 

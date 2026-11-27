@@ -11,3 +11,7 @@ Resources/Workouts/
 # local junk drawer (not for deploy)
 _Archive/
 Archive/
+
+# test dependencies
+tests/node_modules/
+tests/package-lock.json

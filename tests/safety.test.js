@@ -1,0 +1,343 @@
+// Data safety (from ota-36). Runs on every push. Uses only the public seed history from index.html.
+// Then: the save guard, delete with restore, the queue race, the private key, extras backup,
+// cloud deletes that never remove local workouts, preview mode, time limit, one pull per open.
+const assert = require('assert'), fs = require('fs');
+const { boot, dumpStore, wait } = require('./harness');
+const path = require('path');
+const NEW = process.argv[2] || path.join(__dirname, '..', 'index.html');
+const HIST = require('./seed')(NEW);
+let passed = 0;
+const norm = x => x === undefined ? x : JSON.parse(JSON.stringify(x));
+const eq = (a, b, m) => { assert.deepStrictEqual(norm(a), norm(b), m); passed++; };
+const ok = (c, m) => { assert.ok(c, m); passed++; };
+const cleanErr = errs => errs.filter(e => !/Failed to fetch|Not implemented|offline|navigation|timed out|preview: cloud/i.test(e));
+const clone = x => JSON.parse(JSON.stringify(x));
+const AST = (y, mo, d, h, mi = 0) => Date.UTC(y, mo - 1, d, h + 4, mi);
+const NOW = AST(2026, 11, 27, 19);
+const KEY = 'k9Qz3fT7wLp2Xv8sN4bR6hYc';
+const phone = () => clone(HIST).sort((a, b) => a.endTime - b.endTime);
+const baseStore = (hist, more = {}) => Object.assign({ dcrgym_history: hist, dcrgym_onboarded: true, dcrgym_schema_version: 3, dcrgym_default_prog: 'p14',
+  dcrgym_settings: { sound: false, sheets: 'https://script.google.com/macros/s/x/exec', weightUnit: 'lb' }, dcrgym_rows_synced: hist.map(w => String(w.id)), dcrgym_rows_backfilled: true }, more);
+const allSets = hist => { const out = []; for (const w of hist) for (const [k, a] of Object.entries(w.sets || {})) if (Array.isArray(a)) a.forEach((s, i) => out.push([String(w.id), k, i, JSON.stringify(s)])); return out.sort((a, b) => (a.join('|') < b.join('|') ? -1 : 1)); };
+const countSets = hist => hist.reduce((n, w) => n + Object.entries(w.sets || {}).reduce((m, [k, a]) => m + (Array.isArray(a) && !k.endsWith('_wu') ? a.filter(s => s && s.r > 0).length : 0), 0), 0);
+
+// ── a small IndexedDB stand-in (the vault), shared across opens like the phone's ──
+function fakeIDB(data) {
+  let made = false;
+  const cp = v => v === undefined ? undefined : JSON.parse(JSON.stringify(v));
+  return { open() {
+    const req = {};
+    setTimeout(() => {
+      const db = { objectStoreNames: { contains: () => made }, createObjectStore: () => { made = true; },
+        transaction: () => ({ objectStore: () => ({
+          get(k) { const r = {}; setTimeout(() => { r.result = data.has(k) ? cp(data.get(k)) : undefined; r.onsuccess && r.onsuccess(); }, 0); return r; },
+          put(v, k) { data.set(k, cp(v)); },
+        }) }) };
+      req.result = db;
+      if (!made && req.onupgradeneeded) req.onupgradeneeded({ target: { result: db } });
+      made = true;
+      req.onsuccess && req.onsuccess();
+    }, 0);
+    return req;
+  } };
+}
+// ── a stand-in for his Google script: records every call, answers like sync-v2 ──
+function fakeServer(cfg = {}) {
+  const calls = [];
+  const srv = { calls, cfg };
+  srv.fetch = async (url, init) => {
+    const u = new URL(url);
+    const method = (init && init.method) || 'GET';
+    const body = init && init.body ? JSON.parse(init.body) : null;
+    const action = method === 'GET' ? u.searchParams.get('action') : body && body.action;
+    const key = method === 'GET' ? u.searchParams.get('key') : body && body.key;
+    calls.push({ method, action, key, body, url });
+    if (cfg.hang) return new Promise((_, rej) => { if (init && init.signal) init.signal.addEventListener('abort', () => rej(Object.assign(new Error('aborted'), { name: 'AbortError' }))); });
+    if (cfg.delay) await new Promise(r => setTimeout(r, cfg.delay));
+    const mode = cfg.keyMode || 'off';
+    const keyOk = key === KEY;
+    let out;
+    if (action === 'ping') out = { ok: true, build: 'sync-v2', keyMode: mode, ...(key ? { keyOk } : {}) };
+    else if (mode === 'enforce' && !keyOk) out = { ok: false, error: 'unauthorized' };   // what the ota-36 script answers
+    else if (action === 'pullState') out = Object.assign({ ok: true }, cfg.pull || {});
+    else out = { ok: true };
+    return { ok: true, status: 200, text: async () => JSON.stringify(out) };
+  };
+  return srv;
+}
+async function run(store, opts = {}) {
+  const idb = opts.idb || new Map();
+  const srv = opts.srv || null;
+  const b = boot(NEW, store, { now: opts.now || NOW, url: opts.url, setup(win) {
+    win.indexedDB = fakeIDB(idb);
+    if (srv) win.fetch = srv.fetch;
+    if (opts.setup) opts.setup(win);
+  } });
+  await wait(opts.wait || 1800);
+  return Object.assign(b, { idb, srv });
+}
+const H = win => JSON.parse(win.localStorage.getItem('dcrgym_history'));
+
+(async () => {
+  // ── A. Open twice: the second open changes nothing ──
+  const idb = new Map();
+  let s35;
+  { const b = await run(baseStore(phone()), { idb }); s35 = dumpStore(b.win); b.win.close(); }
+  const h35 = JSON.parse(s35.dcrgym_history);
+  const A = await run(s35, { idb });
+  eq(cleanErr(A.errors), [], 'boots clean');
+  const SA = dumpStore(A.win), hA = JSON.parse(SA.dcrgym_history);
+  eq(SA.dcrgym_history, s35.dcrgym_history, 'reopen: stored history byte-identical');
+  eq(hA.length, h35.length, `workout count unchanged (${hA.length})`);
+  eq(countSets(hA), countSets(h35), `set count unchanged (${countSets(hA)})`);
+  eq(allSets(hA), allSets(h35), 'every set identical, field by field');
+  ok(SA.dcrgym_repairs_frozen, 'old repairs frozen after this open');
+  eq(JSON.stringify(idb.get('dcrgym_history')), SA.dcrgym_history, 'vault copy matches');
+  { const again = await run(dumpStore(A.win), { idb }); eq(dumpStore(again.win).dcrgym_history, SA.dcrgym_history, 'second open changes nothing'); again.win.close(); }
+  eq(A.win.eval('unsyncedRowWorkouts().length'), 0, 'nothing new for the Sheet');
+  for (const k of ['dcrgym_ota31_flags', 'dcrgym_ota32_fix', 'dcrgym_ota33_fix']) eq(SA[k], s35[k], `${k} kept as it was`);
+  console.log(`  seed: ${hA.length} workouts, ${countSets(hA)} sets, identical`);
+  A.win.close();
+
+  // ── B. Frozen means the old repairs don't run on open ──
+  {
+    const st = clone(SA); for (const k of ['dcrgym_ota31_flags', 'dcrgym_ota32_fix', 'dcrgym_ota33_fix']) delete st[k];
+    const b = await run(st);   // fresh vault so nothing restores the flags
+    const S = dumpStore(b.win);
+    ok(!S.dcrgym_ota32_fix && !S.dcrgym_ota33_fix, 'with the freeze set, the ota-32/33 repairs did not run');
+    eq(S.dcrgym_history, SA.dcrgym_history, 'and history is untouched');
+    b.win.close();
+  }
+
+  // ── C. The guard: no save can make workouts disappear ──
+  {
+    const b = await run(SA, { idb: new Map() });
+    const r = b.win.eval(`saveHistory(getHistory().slice(3))`);
+    eq(r, false, 'a save that would drop 3 workouts is refused');
+    eq(H(b.win).length, hA.length, 'history still has every workout');
+    const ref = JSON.parse(b.win.localStorage.getItem('dcrgym_save_refused'));
+    eq(ref.ids.length, 3, 'the refusal is logged with the 3 ids');
+    eq(b.win.eval(`saveHistory(getHistory().concat([]))`), true, 'a normal save still works');
+    b.win.close();
+  }
+
+  // ── D. Delete hides a workout; Restore brings it back exactly ──
+  {
+    const vault = new Map();
+    const b = await run(SA, { idb: vault });
+    const seedId = b.win.eval(`String(SEED_RECOVERED_HISTORY[5].id)`);
+    ok(hA.some(w => String(w.id) === seedId), 'test target is a seed workout he has');
+    const before = b.win.localStorage.getItem('dcrgym_history');
+    b.win.eval(`softDeleteWorkout('${seedId}')`);
+    await wait(100);
+    eq(H(b.win).length, hA.length - 1, 'deleted workout leaves the history');
+    ok(JSON.parse(b.win.localStorage.getItem('dcrgym_deleted_archive'))[seedId], 'full copy kept in the deleted archive');
+    ok(vault.get('dcrgym_deleted_archive')[seedId], 'and in the vault');
+    b.win.eval(`Maps('settings')`);
+    ok(/Deleted workouts/.test(b.win.document.getElementById('screen-settings').textContent), 'Settings lists it under Deleted workouts');
+    const st = dumpStore(b.win); b.win.close();
+    const c = await run(st, { idb: vault });
+    eq(H(c.win).length, hA.length - 1, 'stays deleted after reopening (the seed does not bring it back)');
+    c.win.eval(`restoreDeletedWorkout('${seedId}')`);
+    eq(c.win.localStorage.getItem('dcrgym_history'), before, 'Restore: history byte-identical to before the delete');
+    const st2 = dumpStore(c.win); c.win.close();
+    const d = await run(st2, { idb: vault });
+    eq(d.win.localStorage.getItem('dcrgym_history'), before, 'still identical after reopening');
+    d.win.close();
+  }
+
+  // ── E. Queue: one sender at a time; something queued mid-send stays queued ──
+  {
+    const srv = fakeServer({ delay: 200 });
+    const b = await run(SA, { srv, wait: 2500 });
+    srv.calls.length = 0;
+    b.win.eval(`enqueueSyncPayload({ action: 'syncWorkouts', workouts: [{ id: 'q1' }] })`);
+    const p1 = b.win.eval(`drainSyncQueue()`), p2 = b.win.eval(`drainSyncQueue()`);
+    ok(p1 === p2, 'a second drain joins the one already running');
+    await wait(50);
+    b.win.eval(`enqueueSyncPayload({ action: 'syncWorkouts', workouts: [{ id: 'q2' }] })`);
+    await p1;
+    const q = b.win.eval(`JSON.stringify(LS.get('dcrgym_sync_queue', []))`);
+    const ids = JSON.parse(q).map(i => i.payload.workouts[0].id);
+    eq(ids, ['q2'], 'item sent is gone, item queued mid-send is still queued');
+    eq(srv.calls.filter(c => c.body && c.body.workouts && c.body.workouts[0].id === 'q1').length, 1, 'q1 sent once');
+    b.win.close();
+  }
+
+  // ── F. Private key: added at send time, never stored in the queue or the code ──
+  {
+    ok(!fs.readFileSync(NEW, 'utf8').includes(KEY), 'no key in the code');
+    const srv = fakeServer({ keyMode: 'log' });
+    const b = await run(SA, { srv, wait: 2500 });
+    eq(b.win.eval(`setSyncKey('short')`), false, 'a too-short key is rejected');
+    eq(b.win.eval(`setSyncKey('${KEY}')`), true, 'key saved');
+    ok(b.win.eval(`sheetsGetUrl('https://x/exec','pullState')`).endsWith('&key=' + KEY), 'GET carries &key=');
+    srv.cfg.hang = false; srv.cfg.delay = 0;
+    b.win.fetch = async () => { throw new TypeError('Failed to fetch'); };
+    b.win.eval(`postToSheets({ action: 'syncWorkouts', workouts: [{ id: 'k1' }] })`);
+    await wait(100);
+    const q = JSON.parse(b.win.localStorage.getItem('dcrgym_sync_queue'));
+    ok(q.length && q.every(i => !('key' in i.payload)), 'queued item holds no key');
+    b.win.fetch = srv.fetch; srv.calls.length = 0;
+    await b.win.eval(`drainSyncQueue()`);
+    const post = srv.calls.find(c => c.method === 'POST');
+    eq(post && post.key, KEY, 'POST body carries the key when sent');
+    eq(JSON.parse(b.win.localStorage.getItem('dcrgym_sync_queue')).length, 0, 'sent and cleared');
+    b.win.close();
+  }
+
+  // ── G. Script enforcing the key, phone without it: everything stays queued, clear message ──
+  {
+    const srv = fakeServer({ keyMode: 'enforce' });
+    const st = clone(SA); st.dcrgym_sync_queue = JSON.stringify([{ payload: { action: 'syncWorkouts', workouts: [{ id: 'g1' }], _qid: 'g1' }, ts: 1 }]);
+    const b = await run(st, { srv, wait: 2500 });
+    eq(JSON.parse(b.win.localStorage.getItem('dcrgym_sync_queue')).map(i => i.payload._qid), ['g1'], 'queued item kept');
+    eq(b.win.eval('ST.lastCloudSyncError'), 'sync key needed', 'error says key, not offline');
+    eq(b.win.eval(`[isKeyRefusal({ ok: false, error: 'key' }), isKeyRefusal({ ok: false, error: 'unauthorized' }), isKeyRefusal({ ok: false, error: 'busy' })]`), [true, true, false], 'both refusal words read as key; busy does not');
+    srv.calls.length = 0;
+    const d = await b.win.eval(`runSyncNow()`);
+    b.win.__d = d;
+    const lines = b.win.eval(`JSON.stringify(syncResultLines(window.__d))`);
+    console.log('  Sync Now lines:', lines);
+    ok(/key missing/i.test(lines) && !/offline/i.test(lines), 'Sync Now shows "Cloud: key missing"');
+    ok(JSON.parse(b.win.localStorage.getItem('dcrgym_sync_queue')).some(i => i.payload._qid === 'g1'), 'still queued after Sync Now');
+    eq(H(b.win).length, hA.length, 'history untouched');
+    b.win.close();
+  }
+
+  // ── H. Pairing link: saved once, removed from the address bar ──
+  {
+    const vault = new Map();
+    const srv = fakeServer({ keyMode: 'log' });
+    const b = await run(SA, { idb: vault, srv, url: 'https://dcrcode-dev.github.io/muscle-ladder/#k=' + KEY, wait: 2500 });
+    eq(b.win.localStorage.getItem('dcrgym_sync_key'), JSON.stringify(KEY), 'key saved from the link');
+    eq(vault.get('dcrgym_sync_key'), KEY, 'key in the vault too');
+    ok(!b.win.location.href.includes(KEY), 'key removed from the address bar');
+    ok(srv.calls.filter(c => c.action === 'pullState').every(c => c.key === KEY), 'pull uses the key');
+    const st = dumpStore(b.win); delete st.dcrgym_sync_key; b.win.close();
+    const c = await run(st, { idb: vault });
+    eq(c.win.eval('getSyncKey()'), KEY, 'key comes back from the vault after a storage wipe');
+    c.win.close();
+  }
+
+  // ── I. Extras survive a wipe: measurements, swaps, custom and hidden exercises, rest times ──
+  {
+    const vault = new Map();
+    const extras = {
+      dcrgym_measurements: [{ id: 'm1', date: '2026-11-01', weight: 145.5 }, { id: 'm2', date: '2026-11-20', weight: 146.2 }],
+      dcrgym_slot_defaults: { p14_s1_1: { name: 'Machine Chest Press', at: 1 } },
+      dcrgym_custom_exercises: [{ name: 'Seal Row', muscle: 'Back' }],
+      dcrgym_blacklist: ['Dips'],
+      dcrgym_rest: { 'Bench Press': 150 },
+    };
+    const b = await run(Object.assign(clone(SA), Object.fromEntries(Object.entries(extras).map(([k, v]) => [k, JSON.stringify(v)]))), { idb: vault });
+    for (const k of Object.keys(extras)) eq(vault.get(k), extras[k], `${k} copied to the vault`);
+    const extrasSent = b.win.eval(`JSON.stringify(buildCloudExtras())`);
+    ok(JSON.parse(extrasSent).measurements.length === 2 && JSON.parse(extrasSent).hiddenExercises[0] === 'Dips', 'cloud copy carries them');
+    b.win.close();
+    const wiped = clone(SA); for (const k of Object.keys(extras)) delete wiped[k];
+    const c = await run(wiped, { idb: vault });
+    for (const k of Object.keys(extras)) eq(JSON.parse(c.win.localStorage.getItem(k)), extras[k], `${k} back after storage wipe`);
+    eq(c.win.localStorage.getItem('dcrgym_history'), SA.dcrgym_history, 'history untouched by the restore');
+    c.win.close();
+    // what's on the phone wins
+    const mine = Object.assign(clone(SA), { dcrgym_slot_defaults: JSON.stringify({ p14_s2_0: { name: 'Hack Squat', at: 2 } }) });
+    const d = await run(mine, { idb: vault });
+    eq(JSON.parse(d.win.localStorage.getItem('dcrgym_slot_defaults')), { p14_s2_0: { name: 'Hack Squat', at: 2 } }, 'phone swaps not overwritten by the vault');
+    d.win.close();
+    // and from the cloud copy on a new phone
+    const srv = fakeServer({ pull: { extras: { v: 1, measurements: extras.dcrgym_measurements, slotDefaults: extras.dcrgym_slot_defaults, customExercises: extras.dcrgym_custom_exercises, hiddenExercises: ['Dips'], restTimes: extras.dcrgym_rest } } });
+    const e = await run(wiped, { srv, wait: 2500 });
+    eq(JSON.parse(e.win.localStorage.getItem('dcrgym_measurements')), extras.dcrgym_measurements, 'measurements back from the cloud copy');
+    eq(JSON.parse(e.win.localStorage.getItem('dcrgym_custom_exercises')), extras.dcrgym_custom_exercises, 'custom exercises back from the cloud copy');
+    e.win.close();
+  }
+
+  // ── J. Cloud delete list blocks incoming copies; never removes a workout on this phone ──
+  {
+    const localId = String(hA[hA.length - 1].id);
+    const ghost = { id: '1795800000000', programId: 'p14', sessionId: 'p14_s1', sessionName: 'Upper', startTime: 1795796400000, endTime: 1795800000000, duration: 3600, sets: { p14_s1_0: [{ w: 100, r: 8, _name: 'Bench Press' }] } };
+    const fresh = Object.assign(clone(ghost), { id: '1795900000000', endTime: 1795900000000, startTime: 1795896400000 });
+    const srv = fakeServer({ pull: { deletedIds: [localId, ghost.id], history: [ghost, fresh] } });
+    const b = await run(SA, { srv, wait: 2500 });
+    const h = H(b.win);
+    ok(h.some(w => String(w.id) === localId), 'his workout stays even though the cloud list names it');
+    ok(!h.some(w => String(w.id) === ghost.id), 'a cloud-deleted workout is not brought in');
+    ok(h.some(w => String(w.id) === fresh.id), 'a real new cloud workout still comes in');
+    eq(h.length, hA.length + 1, 'only the one new workout added');
+    b.win.close();
+  }
+
+  // ── K. Preview build: reads his data, writes nothing anywhere ──
+  {
+    const vault = new Map([['dcrgym_history', clone(hA)]]);
+    const srv = fakeServer();
+    const b = await run(SA, { idb: vault, srv, url: 'https://dcrcode-dev.github.io/muscle-ladder/preview/', wait: 2000 });
+    const startLS = clone(SA);
+    eq(b.win.eval('IS_PREVIEW'), true, 'preview mode on');
+    eq(b.win.eval('getHistory().length'), hA.length, 'shows his workouts');
+    b.win.eval(`softDeleteWorkout('${hA[2].id}')`);
+    b.win.eval(`LS.set('dcrgym_rest', { x: 1 })`);
+    eq(b.win.eval('getHistory().length'), hA.length - 1, 'changes show inside the preview');
+    await wait(300);
+    eq(dumpStore(b.win), startLS, 'phone storage unchanged');
+    eq(JSON.stringify(vault.get('dcrgym_history')), JSON.stringify(hA), 'vault unchanged');
+    ok(!vault.has('dcrgym_deleted_archive') && !vault.has('dcrgym_repairs_frozen'), 'nothing new in the vault');
+    eq(srv.calls.length, 0, 'nothing sent to the Sheet');
+    b.win.close();
+  }
+
+  // ── L. Time limit: a script that never answers stops waiting ──
+  {
+    const srv = fakeServer({ hang: true });
+    const b = await run(SA, { srv, wait: 300, setup(win) { win.__dcrSheetsTimeoutMs = 400; } });
+    await wait(1500);
+    eq(b.win.eval('ST.lastCloudSyncError'), 'timed out', 'hung ping gives up and says timed out');
+    const r = await b.win.eval(`pullFromSheets()`);
+    eq(r, 0, 'hung pull gives up');
+    eq(b.win.eval('ST.lastCloudSyncError'), 'timed out', 'and says timed out');
+    eq(H(b.win).length, hA.length, 'history untouched');
+    b.win.close();
+  }
+
+  // ── M. One cloud pull per open; coming back within 2 minutes doesn't pull again ──
+  {
+    const srv = fakeServer();
+    const b = await run(SA, { srv, wait: 3500 });
+    eq(srv.calls.filter(c => c.action === 'pullState').length, 1, 'one pull on open');
+    Object.defineProperty(b.win.document, 'visibilityState', { configurable: true, get: () => 'visible' });
+    b.win.document.dispatchEvent(new b.win.Event('visibilitychange'));
+    await wait(200);
+    eq(srv.calls.filter(c => c.action === 'pullState').length, 1, 'no second pull right after');
+    b.win.close();
+  }
+
+  // ── N. Sheet rows say their unit; the backup copy carries the extras ──
+  {
+    const b = await run(SA);
+    const rows = JSON.parse(b.win.eval(`JSON.stringify(historyToWorkoutRows(getHistory().slice(-2)))`));
+    ok(rows.length > 0 && rows.every(r => r.unit === 'lb'), 'every workout row has unit lb');
+    b.win.close();
+  }
+
+  // ── O. Delete and restore tell the Sheet (its delete log never removes rows) ──
+  {
+    const srv = fakeServer();
+    const b = await run(SA, { srv, wait: 2500 });
+    srv.calls.length = 0;
+    const id = String(hA[4].id);
+    b.win.eval(`softDeleteWorkout('${id}')`); await wait(300);
+    ok(srv.calls.some(c => c.action === 'deleteWorkout' && String(c.body.id) === id), 'delete sends deleteWorkout');
+    const st = srv.calls.filter(c => c.action === 'saveState').pop();
+    ok(st && st.body.extras && st.body.extras.deletedIds.includes(id) && st.body.extras.deletedArchive[id], 'backup copy carries the deleted list and the archived workout');
+    srv.calls.length = 0;
+    b.win.eval(`restoreDeletedWorkout('${id}')`); await wait(300);
+    ok(srv.calls.some(c => c.action === 'undeleteWorkout' && String(c.body.id) === id), 'restore sends undeleteWorkout');
+    ok(srv.calls.some(c => c.action === 'syncWorkouts' && c.body.workouts.some(w => String(w.id) === id)), 'and resends its rows');
+    eq(b.win.localStorage.getItem('dcrgym_history'), SA.dcrgym_history, 'history back to exactly how it was');
+    b.win.close();
+  }
+
+  console.log(`safety tests: ${passed} passed`);
+  process.exit(0);
+})().catch(e => { console.error('FAIL:', e.message); console.error(e.stack.split('\n').slice(1, 4).join('\n')); console.log(`(${passed} passed before the failure)`); process.exit(1); });

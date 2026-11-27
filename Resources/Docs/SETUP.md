@@ -1,5 +1,7 @@
 # Muscle Ladder — Setup Guide
 
+> **ota-36 note:** this guide is historical. `programs.js` and `apps-script.gs` are no longer in the repo. Do **not** paste any old copy of `apps-script.gs` into the live Apps Script, it can wipe Sheet history. See `Resources/Scripts/README.md`.
+
 ## What you have
 
 ```

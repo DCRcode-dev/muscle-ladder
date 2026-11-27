@@ -5639,6 +5639,7 @@ async function idbGet(key) {
   } catch(e) { return null; }
 }
 async function idbSet(key, val) {
+  if (IS_PREVIEW) return;   // ota-36: preview never writes
   try {
     const db = await getIDB();
     if (!db) return;
@@ -5651,8 +5652,14 @@ async function idbSet(key, val) {
 // ── localStorage ─────────────────────────────────────────────────────────────
 // Safe Storage Sandbox Proxy — survives WebKit/Safari sandbox DOMException traps
 // Falls back to an in-memory store so the app keeps running even if storage is locked.
+// ota-36: a build opened at …/preview/ is a look-only copy. It reads the real data on this phone
+// but every save stays in memory, nothing is sent to the Sheet, and closing it leaves no trace.
+const IS_PREVIEW = (() => { try { return /\/preview\/(index\.html)?$/.test(location.pathname); } catch (e) { return false; } })();
 const LS = {
   get(k, def = null) {
+    if (IS_PREVIEW && window.__dcr_preview_store && Object.prototype.hasOwnProperty.call(window.__dcr_preview_store, k)) {
+      const pv = window.__dcr_preview_store[k]; return pv === undefined ? def : JSON.parse(pv);
+    }
     try {
       const v = localStorage.getItem(k);
       return v !== null ? JSON.parse(v) : def;
@@ -5662,6 +5669,7 @@ const LS = {
     }
   },
   set(k, v) {
+    if (IS_PREVIEW) { (window.__dcr_preview_store = window.__dcr_preview_store || {})[k] = JSON.stringify(v); return; }
     try {
       localStorage.setItem(k, JSON.stringify(v));
     } catch(e) {
@@ -5671,6 +5679,7 @@ const LS = {
     }
   },
   remove(k) {
+    if (IS_PREVIEW) { (window.__dcr_preview_store = window.__dcr_preview_store || {})[k] = undefined; return; }
     try {
       localStorage.removeItem(k);
     } catch(e) {
@@ -5736,12 +5745,28 @@ let ST = {
 
 // ── History helpers ───────────────────────────────────────────────────────────
 function getHistory() { return LS.get('dcrgym_history', []); }
-function saveHistory(h) {
+function saveHistory(h, opts) {
   const arr = Array.isArray(h)
     ? [...h].sort((a, b) => ((a && (a.endTime || a.startTime)) || 0) - ((b && (b.endTime || b.startTime)) || 0))
     : [];
+  // ota-36 guard: a save may never make workouts disappear unless he deleted them (or cleared
+  // history himself). Anything else is a bug, so the old copy is kept and nothing is written.
+  if (!(opts && opts.allowDrop)) {
+    const cur = LS.get('dcrgym_history', []);
+    if (Array.isArray(cur) && arr.length < cur.length) {
+      const keep = new Set(arr.map(w => String(w && w.id)));
+      const del = new Set((LS.get('dcrgym_deleted_ids', []) || []).map(String));
+      const lost = cur.filter(w => w && w.id != null && !keep.has(String(w.id)) && !del.has(String(w.id)) && !del.has(String(w.endTime)));
+      if (lost.length) {
+        console.warn('[DCR Gym] save refused: it would drop ' + lost.length + ' workout(s)');
+        LS.set('dcrgym_save_refused', { at: Date.now(), build: APP_BUILD, ids: lost.slice(0, 20).map(w => String(w.id)), from: cur.length, to: arr.length });
+        return false;
+      }
+    }
+  }
   LS.set('dcrgym_history', arr);
   idbSet('dcrgym_history', arr);
+  return true;
 }
 function getNotes() { return LS.get('dcrgym_notes', {}); }
 function saveNotes(n) { LS.set('dcrgym_notes', n); idbSet('dcrgym_notes', n); }
@@ -5793,7 +5818,7 @@ function saveMeasurements(m) { LS.set('dcrgym_measurements', m); idbSet('dcrgym_
 // Schema-versioned, non-destructive, with rolling last-good backup.
 // History must survive every app update. Period.
 const SCHEMA_VERSION = 3;
-const APP_BUILD = '2026.11.27 · ota-35 · progress';
+const APP_BUILD = '2026.11.27 · ota-36 · safe-sync';
 const KG_TO_LB_CUTOFF_MS = 1788000000000; // Workouts before Sep 2026 were logged in kg; Sep 2026+ are already in lbs
 
 function hasLoggedWorkingSets(w) {
@@ -7318,7 +7343,7 @@ function autoFinishNotice(entry) {
   if (!entry) return;
   const t = new Date(entry.endTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
   const day = new Date(entry.endTime).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
-  noticeSheet('Workout saved', `${entry.sessionName || 'Your workout'} was still open, so it was finished at your last set: ${day}, ${t}. Every set is saved.`);
+  noticeSheet('Workout saved', `${escHtml(entry.sessionName || 'Your workout')} was still open, so it was finished at your last set: ${day}, ${t}. Every set is saved.`);
 }
 // Per-set flag toggle (editable later): flags, never values.
 function setSetSuspect(workoutId, key, si, on) {
@@ -7446,7 +7471,7 @@ function nextTimePlanHTML(entry) {
   const p = nextTimePlan(entry);
   if (!p.up.length && !p.hold.length && !p.build.length) return '';
   const u = getWeightUnit();
-  const line = (label, items, withW, cls) => items.length ? `<div class="nt-line ${cls}"><b>${label}:</b> ${items.map(i => i.name + (withW && i.weight ? ' ' + formatWeight(dispW(i.weight)) + ' ' + u : '')).join(', ')}.</div>` : '';
+  const line = (label, items, withW, cls) => items.length ? `<div class="nt-line ${cls}"><b>${label}:</b> ${items.map(i => escHtml(i.name) + (withW && i.weight ? ' ' + formatWeight(dispW(i.weight)) + ' ' + u : '')).join(', ')}.</div>` : '';
   return `<div class="next-time-card">
     <div class="nt-title">Next time</div>
     ${line('Go up', p.up, true, 'up')}${line('Hold', p.hold, false, 'hold')}${line('Build reps', p.build, false, 'build')}
@@ -7562,11 +7587,12 @@ function syncHealth() {
   const last = LS.get('dcrgym_last_sync', 0);
   const q = (LS.get('dcrgym_sync_queue', []) || []).length;
   const stale = !last || (Date.now() - last > 24 * 3600 * 1000);
-  const err = ST.lastCloudSyncError && ST.lastCloudSyncError !== 'offline' && ST.lastCloudSyncError !== BACKUP_FULL_MSG ? ST.lastCloudSyncError : null;
+  const err = ST.lastCloudSyncError && ST.lastCloudSyncError !== 'offline' && ST.lastCloudSyncError !== 'timed out' && ST.lastCloudSyncError !== BACKUP_FULL_MSG ? ST.lastCloudSyncError : null;
   if (!stale && !q && !err) return null;
   const parts = ['Backup ' + (last ? 'last ' + syncRelTime(last) : 'never ran')];
   if (q) parts.push(q + ' waiting');
   if (err && /auth|sign/i.test(err)) parts.push('needs Google re-authorization');
+  else if (err === SYNC_KEY_MSG) parts.push('sync key missing');   // ota-36
   return { text: parts.join(' · '), stale, queued: q, err };
 }
 function syncBadgeHTML() {
@@ -7575,13 +7601,34 @@ function syncBadgeHTML() {
   return `<button class="sync-badge" id="home-sync-badge" onclick="syncNowFromHome()" aria-label="Cloud backup is behind. Tap to sync now.">
     <span class="sb-dot"></span><span class="sb-text">${h.text}</span><span class="sb-cta">Sync now</span></button>`;
 }
+// ota-36: Settings line for the private key
+function syncKeyLine() {
+  const has = !!getSyncKey();
+  if (ST.keyOk === true) return 'Cloud key: OK';
+  if (ST.keyMode === 'enforce' && !has) return 'Cloud key: missing on this phone';
+  if (has && ST.keyOk === false) return 'Cloud key: not the one the script expects';
+  if (has) return 'Cloud key: saved on this phone';
+  return '';
+}
+function saveSyncKeyFromSettings() {
+  const el = document.getElementById('sync-key-input');
+  const v = el ? el.value : '';
+  if (!v.trim()) return;
+  if (!setSyncKey(v)) { noticeSheet('Sync key', 'That doesn\'t look like a sync key. Use the pairing link, or paste the whole key.'); return; }
+  if (el) el.value = '';
+  showToastMsg('Sync key saved on this phone');
+  probeSheetsServer().finally(() => { if (ST.screen === 'settings') renderSettings(); });
+}
 function syncResultLines(d) {
   if (!d) return [];
   const lines = [];
   lines.push(d.rowsOk ? 'Workout rows: up to date in the Sheet' : (d.rowsPending ? `Workout rows: ${d.rowsPending} still to send` : 'Workout rows: not sent'));
   const full = !d.stateOk && (d.stateErr === BACKUP_FULL_MSG || d.err === BACKUP_FULL_MSG);
-  lines.push(d.stateOk ? 'Restore backup: saved' : full ? 'Restore backup: not saved. The Google script\'s backup cell is full and needs the script update. Your workouts are safe in the Sheet and on this phone.' : 'Restore backup: not saved' + (d.stateErr ? ' (' + d.stateErr + ')' : ''));
-  if (d.err && !full) lines.push('Cloud says: ' + d.err);
+  const keyErr = d.err === SYNC_KEY_MSG || d.stateErr === SYNC_KEY_MSG;
+  lines.push(d.stateOk ? 'Restore backup: saved' : full ? 'Restore backup: not saved. The Google script\'s backup cell is full and needs the script update. Your workouts are safe in the Sheet and on this phone.' : keyErr ? 'Restore backup: waiting for the sync key' : 'Restore backup: not saved' + (d.stateErr ? ' (' + escHtml(d.stateErr) + ')' : ''));
+  if (keyErr) lines.push('Cloud: key missing. Open the pairing link once (or paste the key in Settings). Everything stays on this phone and waits.');
+  else if (d.err && !full) lines.push('Cloud says: ' + escHtml(d.err));
+  const km = syncKeyLine(); if (km) lines.push(km);
   return lines;
 }
 async function syncNowFromHome() {
@@ -9101,7 +9148,7 @@ function renderHome() {
     <div class="premium-resume">
       <div class="premium-resume-info">
         <div class="premium-resume-label">In Progress</div>
-        <div class="premium-resume-name">${resumed.sessionName || 'Workout'}</div>
+        <div class="premium-resume-name">${escHtml(resumed.sessionName || 'Workout')}</div>
         ${resumedIdle ? `<div class="premium-resume-idle">Last set ${relDay(resumedLast)} at ${resumedLastLbl}</div>` : ''}
       </div>
       <div class="premium-resume-btns">
@@ -9653,15 +9700,15 @@ function exerciseCardHTML(ex, key, i, isAddition) {
       <input class="warmup-input" id="wuri-${key}" type="text" readonly inputmode="none"
         value="${wuPreR}" placeholder="reps" autocomplete="off"
         onclick="openNumpad(this,'${key}',0,${i},'r',true)" oninput="markDraftWu('${key}')">
-      <button class="warmup-dismiss" onclick="dismissWarmup(event,'${key}','${normalizeEx(name)}')" title="Remove warm-up">✕</button>
+      <button class="warmup-dismiss" onclick="dismissWarmup(event,'${key}','${escAttr(normalizeEx(name))}')" title="Remove warm-up">✕</button>
     </div>` : '';
 
   const noteKey = normalizeEx(name);
   const noteVal = notes[noteKey] || '';
   const restSec = restTimes[normalizeEx(name)] || parseRestSeconds(ex.rest);
   const subNote = subbed
-    ? (subIsDefault ? `<div class="ex-sub-note">${UI_ICON.swap}<span>Your default · program has ${name}</span></div>` : `<div class="ex-sub-note">${UI_ICON.swap}<span>Swapped from ${name} today</span></div>`)
-    : (autoSubbed ? `<div class="ex-sub-note">${UI_ICON.swap}<span>Auto-swapped from ${name} (blacklisted)</span></div>`
+    ? (subIsDefault ? `<div class="ex-sub-note">${UI_ICON.swap}<span>Your default · program has ${escHtml(name)}</span></div>` : `<div class="ex-sub-note">${UI_ICON.swap}<span>Swapped from ${escHtml(name)} today</span></div>`)
+    : (autoSubbed ? `<div class="ex-sub-note">${UI_ICON.swap}<span>Auto-swapped from ${escHtml(name)} (blacklisted)</span></div>`
       : (isAddition ? `<div class="ex-sub-note">${UI_ICON.plus}<span>Added exercise</span></div>` : ''));
   const verdictBlock = liveV ? verdictHTML(liveV, unit, displayName, true) : verdictHTML(verdict, unit, displayName, false);
   const gate = totalSets > 0 && !ST.editingWorkoutId ? `<div class="rir-gate">After a set, tap 1 or 2 for reps in reserve. Nothing lit = failure. The last set decides next time's weight.</div>` : '';
@@ -9674,7 +9721,7 @@ function exerciseCardHTML(ex, key, i, isAddition) {
           ${muscleBadgeHtml(muscle)}
           ${isCompleted ? '<span class="ex-check-pill">Done</span>' : ''}
         </div>
-        <div class="ex-name">${displayName}</div>
+        <div class="ex-name">${escHtml(displayName)}</div>
         ${subNote}
         <div class="ex-meta">${totalSets} sets × ${reps} reps · ${formatDuration(restSec)} rest</div>
         ${zoneChipsHTML(key, mem, todayZone, unit)}
@@ -9704,7 +9751,7 @@ function exerciseCardHTML(ex, key, i, isAddition) {
             <span class="rest-time-display" id="rest-lbl-${key}" onclick="editRestTime('${key}',${i},this)" title="Tap to edit">${formatDuration(restSec)}</span>
           </div>
           ${isBarbell(displayName) ? `
-          <button class="plate-calc-trigger" onclick="showPlateCalcSheet('${displayName.replace(/'/g, "\\'")}','${key}')" title="Plate calculator">${UI_ICON.plates}<span>Plates</span></button>` : ''}
+          <button class="plate-calc-trigger" onclick="showPlateCalcSheet('${escAttr(displayName)}','${key}')" title="Plate calculator">${UI_ICON.plates}<span>Plates</span></button>` : ''}
         </div>
         <div class="ex-note-panel${(ST.workoutNotes[key] || noteVal) ? ' open' : ''}" id="notepanel-${key}">
           <textarea class="ex-note-area" id="noteinput-${key}" placeholder="Session notes…"
@@ -9848,7 +9895,7 @@ function showExerciseActionSheet(e, key, exIdx, isAddition) {
     <div class="action-sheet-container" style="padding: 4px 0 12px;">
       <div class="action-sheet-header">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
-          <div class="action-sheet-title">${name}</div>
+          <div class="action-sheet-title">${escHtml(name)}</div>
           ${muscleBadgeHtml(muscle)}
         </div>
         <div class="action-sheet-meta">${effSetCount(key, ex)} Sets · ${effReps(key, ex)} Reps · ${isAddition ? 'Accessory Addition' : 'Programmed Slot'}</div>
@@ -9872,7 +9919,7 @@ function showExerciseActionSheet(e, key, exIdx, isAddition) {
           </div>
         </button>
 
-        <button class="action-sheet-row" onclick="closeSheet(false);showProgressGraph(null,'${baseName}')">
+        <button class="action-sheet-row" onclick="closeSheet(false);showProgressGraph(null,'${escAttr(baseName)}')">
           <div class="action-sheet-icon">📈</div>
           <div class="action-sheet-label">
             <div>Strength History & Progress</div>
@@ -9881,7 +9928,7 @@ function showExerciseActionSheet(e, key, exIdx, isAddition) {
         </button>
 
         ${isBarbell(name) ? `
-        <button class="action-sheet-row" onclick="closeSheet(false);showPlateCalcSheet('${name.replace(/'/g, "\\'")}','${key}')">
+        <button class="action-sheet-row" onclick="closeSheet(false);showPlateCalcSheet('${escAttr(name)}','${key}')">
           <div class="action-sheet-icon">⚖</div>
           <div class="action-sheet-label">
             <div>Barbell Plate Calculator</div>
@@ -10663,7 +10710,7 @@ function blacklistExercisePrompt(e, key) {
     destructive: true,
     onConfirm: () => {
       ST.blacklistedExercises.add(normalizeEx(displayName));
-      LS.set('dcrgym_blacklist', [...ST.blacklistedExercises]);
+      LS.set('dcrgym_blacklist', [...ST.blacklistedExercises]); idbSet('dcrgym_blacklist', [...ST.blacklistedExercises]);
       applyAutoSubstitutions();
       saveNow();
       renderWorkout();
@@ -10711,23 +10758,23 @@ function subsSheetHTML() {
 
   const restoreHtml = activeSub ? (isDefault
     ? `<div class="restore-row">
-         <button class="btn btn-sheet-secondary" onclick="restoreProgramExercise('${ctx.key}', false)">Use ${name} today only</button>
-         <button class="btn btn-sheet-ghost" onclick="restoreProgramExercise('${ctx.key}', true)">Back to ${name} for good</button>
+         <button class="btn btn-sheet-secondary" onclick="restoreProgramExercise('${ctx.key}', false)">Use ${escHtml(name)} today only</button>
+         <button class="btn btn-sheet-ghost" onclick="restoreProgramExercise('${ctx.key}', true)">Back to ${escHtml(name)} for good</button>
        </div>`
-    : `<button class="btn btn-sheet-secondary restore-one" onclick="restoreProgramExercise('${ctx.key}', false)">Back to ${name}</button>`)
-    : (savedDefault ? `<button class="btn btn-sheet-ghost restore-one" onclick="restoreProgramExercise('${ctx.key}', true)">Remove saved default (${savedDefault.name})</button>` : '');
+    : `<button class="btn btn-sheet-secondary restore-one" onclick="restoreProgramExercise('${ctx.key}', false)">Back to ${escHtml(name)}</button>`)
+    : (savedDefault ? `<button class="btn btn-sheet-ghost restore-one" onclick="restoreProgramExercise('${ctx.key}', true)">Remove saved default (${escHtml(savedDefault.name)})</button>` : '');
 
   return `
     <div class="swap-head">
-      <div class="bs-title">Swap ${current}</div>
-      <div class="bs-sub">Same target: <strong>${subMuscle}</strong> · ${exInfo.muscle}${activeSub ? ` · program has ${name}` : ''}</div>
+      <div class="bs-title">Swap ${escHtml(current)}</div>
+      <div class="bs-sub">Same target: <strong>${escHtml(subMuscle)}</strong> · ${escHtml(exInfo.muscle)}${activeSub ? ` · program has ${escHtml(name)}` : ''}</div>
     </div>
     ${restoreHtml}
     <div class="seg" role="group" aria-label="How long to keep this swap">
       <button aria-pressed="${!persist}" onclick="setLibPersist(false)">Today only</button>
       <button aria-pressed="${persist}" onclick="setLibPersist(true)">Make default</button>
     </div>
-    <div class="seg-note" id="seg-note">${persist ? `Every ${ctx.sessName || 'session'} from now on, until you restore ${name}.` : `Back to ${name} next time.`}</div>
+    <div class="seg-note" id="seg-note">${persist ? `Every ${escHtml(ctx.sessName || 'session')} from now on, until you restore ${escHtml(name)}.` : `Back to ${escHtml(name)} next time.`}</div>
 
     ${past.length ? `<div class="bs-section-lbl">Your swaps here</div><div class="lib-section">${pastHtml}</div>` : ''}
     ${progSubs.length ? `<div class="bs-section-lbl">Program recommended</div><div class="lib-section">${progHtml}</div>` : ''}
@@ -10791,7 +10838,7 @@ function addSheetHTML() {
 }
 
 function escAttr(s) { return String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
-function escHtml(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function escHtml(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
 
 function libListHTML(filter, collapsed) {
   const q = (filter || '').trim();
@@ -11172,7 +11219,7 @@ function startWorkoutFromHome(progId, sessId) {
   if (existing && existing.programId === progId && existing.sessionId === sessId && hasLogged) {
     confirmSheet({
       title: 'Workout in progress',
-      body: `You have an unfinished <strong>${existing.sessionName || 'session'}</strong> with logged sets. Pick up where you left off?`,
+      body: `You have an unfinished <strong>${escHtml(existing.sessionName || 'session')}</strong> with logged sets. Pick up where you left off?`,
       confirmLabel: 'Resume workout',
       secondaryLabel: 'Restart from zero',
       cancelLabel: 'Not now',
@@ -11189,7 +11236,7 @@ function startWorkoutFromHome(progId, sessId) {
   if (existing && (existing.programId !== progId || existing.sessionId !== sessId) && hasLogged) {
     confirmSheet({
       title: 'Unfinished workout',
-      body: `Your logged sets from <strong>${existing.sessionName || 'the previous session'}</strong> will be saved to history before starting fresh.`,
+      body: `Your logged sets from <strong>${escHtml(existing.sessionName || 'the previous session')}</strong> will be saved to history before starting fresh.`,
       confirmLabel: 'Start new workout',
       cancelLabel: 'Keep current',
       onConfirm: () => {
@@ -11720,7 +11767,7 @@ function showFinish() {
           if (st.w > 0 && !st._suspect) totalVol += (st.w * st.r);
           totalSetsDone++;
           if (st._isPR) {
-            prsHit.push(`${st._name || 'Movement'} · ${st.w > 0 ? formatWeight(dispW(st.w)) + ' ' + unit : 'Bodyweight'} × ${st.r}`);
+            prsHit.push(`${escHtml(st._name || 'Movement')} · ${st.w > 0 ? formatWeight(dispW(st.w)) + ' ' + unit : 'Bodyweight'} × ${st.r}`);
           }
         }
       }
@@ -12060,7 +12107,7 @@ function showProgressGraph(e, exName) {
     : '—';
 
   document.getElementById('graph-content').innerHTML = `
-    <div class="graph-ex-title">${exName}</div>
+    <div class="graph-ex-title">${escHtml(exName)}</div>
     <div class="graph-meta">Progressive Overload · Max Weight / Week</div>
     <div class="graph-svg-wrap">${chartHtml}</div>
     <div class="graph-stat-row">
@@ -12399,7 +12446,7 @@ function renderFiveWeekCalendar() {
         cellsHTML += `<div class="cal-day-cell cal-day-blank"><span class="cal-day-num">${dayNum}</span></div>`;
       } else if (hasWorkout) {
         const w = workouts[0];
-        const sessName = (w.sessionName || 'Workout').replace(/'/g, "\\'");
+        const sessName = escHtml(w.sessionName || 'Workout');
         const dateStr  = d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }).replace(/'/g, "\\'");
         cellsHTML += `<div class="cal-day-cell cal-day-done${isToday ? ' cal-day-today' : ''}"
           onclick="openCalDay('${w.id || w.endTime}','${dateStr}')"
@@ -12466,7 +12513,7 @@ function renderRecentWorkoutsFeed() {
       <div class="wh-feed-card" onclick="openCalDay('${wid}','${dateStr}')">
         <div class="whfc-head">
           <div style="flex:1;min-width:0;">
-            <div class="whfc-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${w.sessionName || 'Workout Session'}</div>
+            <div class="whfc-title" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(w.sessionName || 'Workout Session')}</div>
             <div class="whfc-date">📅 ${dateStr}</div>
           </div>
           <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;" onclick="event.stopPropagation()">
@@ -12610,30 +12657,13 @@ function deleteCompletedWorkout(workoutId) {
 
   confirmSheet({
     title: 'Delete this workout?',
-    body: `Are you sure you want to permanently delete <strong>${name}</strong> (${dateStr})? This cannot be undone and will remove it from all logs.`,
+    body: `<strong>${escHtml(name)}</strong> (${dateStr}) leaves your history. You can bring it back from Settings › Deleted workouts.`,
     confirmLabel: 'Delete Workout',
     cancelLabel: 'Keep Workout',
     destructive: true,
     onConfirm: () => {
-      const delIds = new Set((LS.get('dcrgym_deleted_ids', []) || []).map(String));
-      if (w.id) delIds.add(String(w.id));
-      if (w.endTime) delIds.add(String(w.endTime));
-      delIds.add(String(workoutId));
-      const delArr = [...delIds];
-      LS.set('dcrgym_deleted_ids', delArr);
-      idbSet('dcrgym_deleted_ids', delArr);
-      let hist = getHistory().filter(x => String(x.id) !== String(workoutId) && String(x.endTime) !== String(workoutId));
-      saveHistory(hist);
-      
-      const s = getSettings();
-      if (s.sheets) {
-        const deletePayload = { action: 'deleteWorkout', id: w.id || w.endTime };
-        (async () => {
-          await postToSheets(deletePayload);
-          await bgSyncToSheets(null, true);
-        })().catch(() => {});
-      }
-
+      softDeleteWorkout(workoutId);   // ota-36: hidden, with Restore in Settings
+      showToastMsg('Workout deleted · Restore in Settings');
       if (ST.screen === 'history') renderHistory();
       else if (ST.screen === 'home') renderHome();
     }
@@ -12664,7 +12694,7 @@ function clickOpenCalDay(timestamp, dateStr) {
           ${dayWorkouts.map(w => `
             <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(42,36,33,0.03);border:1px solid var(--border);border-radius:12px;padding:10px 12px;">
               <div>
-                <div style="font-size:var(--fs-md);font-weight:600;color:var(--text-primary);">${w.sessionName || 'Workout'}</div>
+                <div style="font-size:var(--fs-md);font-weight:600;color:var(--text-primary);">${escHtml(w.sessionName || 'Workout')}</div>
                 <div style="font-size:var(--fs-sm);color:var(--muted);">${formatDuration(workoutDuration(w))} · Logged${w._dupOf ? ' · duplicate copy' : ''}</div>
               </div>
               <div style="display:flex;gap:6px;">
@@ -12820,33 +12850,12 @@ function saveWorkoutDetails() {
 function deleteWorkout(id) {
   confirmSheet({
     title: 'Delete this workout?',
-    body: 'This will permanently remove this workout from your history and Google Sheets.',
+    body: 'This workout leaves your history. You can bring it back from Settings › Deleted workouts.',
     confirmLabel: 'Delete',
     cancelLabel: 'Cancel',
     destructive: true,
     onConfirm: () => {
-      const hist = getHistory();
-      const idx = hist.findIndex(w => String(w.id) === String(id) || String(w.endTime) === String(id));
-      if (idx !== -1) {
-        const w = hist[idx];
-        const delIds = new Set((LS.get('dcrgym_deleted_ids', []) || []).map(String));
-        if (w.id) delIds.add(String(w.id));
-        if (w.endTime) delIds.add(String(w.endTime));
-        delIds.add(String(id));
-        const delArr = [...delIds];
-        LS.set('dcrgym_deleted_ids', delArr);
-        idbSet('dcrgym_deleted_ids', delArr);
-
-        hist.splice(idx, 1);
-        saveHistory(hist);
-        
-        // Sync delete to Google Sheets
-        const s = getSettings();
-        if (s.sheets) {
-          postToSheets({ action: 'deleteWorkout', id: w.id || w.endTime || id }).catch(() => {});
-          bgSyncToSheets(null, true).catch(() => {});
-        }
-      }
+      if (softDeleteWorkout(id)) showToastMsg('Workout deleted · Restore in Settings');   // ota-36
       
       // Clear state
       if (ST.durationTimer) clearInterval(ST.durationTimer);
@@ -12902,18 +12911,18 @@ function openCalDay(id, dateStr) {
     const topText = topSet ? `${topSet.w > 0 ? formatWeight(dispW(topSet.w)) + ' ' + unit : 'BW'} × ${topSet.r}` : `${done.length} sets`;
     // ota-31 item 3: this session vs the previous same session
     const cmp = compareToLastText(prevW, name);
-    const cmpText = typeof cmp === 'string' ? cmp : (cmp.prevTop ? `${diffText(topSet, cmp.prevTop)} vs last ${sessName.split(' ')[0] || 'time'}` : 'Not done last time');
+    const cmpText = typeof cmp === 'string' ? cmp : (cmp.prevTop ? `${diffText(topSet, cmp.prevTop)} vs last ${escHtml(sessName.split(' ')[0] || 'time')}` : 'Not done last time');
     const cmpCls = typeof cmp === 'string' ? 'flat' : (/^\+/.test(cmpText) ? 'up' : (/^-/.test(cmpText) ? 'down' : 'flat'));
     const noteKey = Object.keys(notes).find(nk => nk === key || exercisesMatch(nk, name));
     const note = noteKey && notes[noteKey] ? String(notes[noteKey]).replace(/</g, '&lt;') : '';
     const flagged = (setArr || []).map((st, si) => ({ st, si })).filter(o => o.st && o.st._suspect);
     const flagHTML = flagged.map(o => `<div class="cal-flag-line" onclick="event.stopPropagation()">Set ${o.si + 1}: ${formatWeight(dispW(o.st.w))} ${unit} × ${o.st.r} looks like a typo and is left out of records and tonnage. <button class="cal-flag-btn" onclick="event.stopPropagation(); setSetSuspect('${w.id}','${key}',${o.si},false); openCalDay('${w.id}','${String(dateStr).replace(/'/g, "\\'")}')">Count it</button></div>`).join('');
     return `
-      <div class="cal-ex-row" onclick="showProgressGraph(event, '${name.replace(/'/g, "\\'")}')" style="cursor:pointer;">
+      <div class="cal-ex-row" onclick="showProgressGraph(event, '${escAttr(name)}')" style="cursor:pointer;">
         <span class="cal-ex-check">✓</span>
         <div class="cal-ex-name">
-          <div>${name}</div>
-          ${subFrom ? `<span class="cal-ex-sub">Substituted from ${subFrom}</span>` : `<span class="cal-ex-sub">${muscle}</span>`}
+          <div>${escHtml(name)}</div>
+          ${subFrom ? `<span class="cal-ex-sub">Substituted from ${escHtml(subFrom)}</span>` : `<span class="cal-ex-sub">${escHtml(muscle)}</span>`}
         </div>
         <div style="text-align:right;">
           <div class="cal-ex-vol">${done.length} sets</div>
@@ -12966,7 +12975,7 @@ function openCalDay(id, dateStr) {
 
   document.getElementById('cal-popup-content').innerHTML = `
     <div class="cal-popup-head">
-      <div class="cal-popup-session">${sessName}</div>
+      <div class="cal-popup-session">${escHtml(sessName)}</div>
       <div class="cal-popup-date">📅 ${dateStr}</div>
       <span class="cal-popup-prog">${progName}</span>
       ${w._dupOf ? `<div class="cal-dup-note">This looks like a second copy of another saved workout, so it isn't counted twice. Nothing was deleted.</div>` : ''}
@@ -13080,8 +13089,8 @@ function renderSettings() {
       <div style="font-size:var(--fs-sm);color:var(--muted);margin-bottom:12px;line-height:1.4">Exercises you have blocked. Tap "Remove" to restore them:</div>
       ${blacklist.map(exName => `
         <div class="settings-row">
-          <label style="text-transform:capitalize">${exName}</label>
-          <button onclick="unblacklistExercise('${exName.replace(/'/g, "\\'")}')" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:4px 10px;font-size:var(--fs-sm);cursor:pointer">Remove</button>
+          <label style="text-transform:capitalize">${escHtml(exName)}</label>
+          <button onclick="unblacklistExercise('${escAttr(exName)}')" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:4px 10px;font-size:var(--fs-sm);cursor:pointer">Remove</button>
         </div>
       `).join('')}
     </div>`;
@@ -13134,9 +13143,16 @@ function renderSettings() {
         <input type="file" accept=".json" onchange="importJSON(this)" style="font-size:var(--fs-md);max-width:160px">
       </div>
       <div class="settings-row"><label>Google Sheets URL</label>
-        <input type="url" value="${s.sheets||''}" placeholder="Apps Script URL"
+        <input type="url" value="${escHtml(s.sheets||'').replace(/"/g, '&quot;')}" placeholder="Apps Script URL"
           onchange="saveSetting('sheets',this.value)" style="font-size:var(--fs-sm);width:160px">
       </div>
+      <div class="settings-row"><label>Sync key<br><span class="settings-sub">${escHtml(syncKeyLine() || 'Not set. The pairing link fills it in.')}</span></label>
+        <div style="display:flex;gap:6px;align-items:center">
+          <input id="sync-key-input" type="password" autocomplete="off" placeholder="Paste key" style="font-size:var(--fs-sm);width:110px">
+          <button class="btn-sm" onclick="saveSyncKeyFromSettings()">Save</button>
+        </div>
+      </div>
+      ${deletedWorkoutsSettingsHTML()}
       <div class="settings-row"><label>Recover from cloud</label>
         <button id="recover-btn" onclick="recoverFromCloud()" style="background:oklch(25% 0.01 40);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:var(--fs-md);cursor:pointer;font-family:var(--font-mono);letter-spacing:0.04em">Recover ↓</button>
       </div>
@@ -13336,7 +13352,7 @@ function deleteMeasurement(id) {
 function unblacklistExercise(exName) {
   if (ST.blacklistedExercises) {
     ST.blacklistedExercises.delete(normalizeEx(exName));
-    LS.set('dcrgym_blacklist', [...ST.blacklistedExercises]);
+    LS.set('dcrgym_blacklist', [...ST.blacklistedExercises]); idbSet('dcrgym_blacklist', [...ST.blacklistedExercises]);
     applyAutoSubstitutions();
     saveNow();
     renderSettings();
@@ -13359,7 +13375,7 @@ function clearHistoryConfirm() {
       // Last-good snapshot before the wipe — recoverable, never a true loss
       const hist = getHistory();
       if (hist.length > 0) LS.set('dcrgym_history_backup', { at: Date.now(), reason: 'manual-clear', history: hist });
-      saveHistory([]);
+      saveHistory([], { allowDrop: 'manual-clear' });
       renderSettings();
       noticeSheet('History cleared', 'A backup snapshot was saved locally. Use Recover from Settings if you change your mind.');
     },
@@ -13686,7 +13702,7 @@ document.addEventListener('visibilitychange', () => {
       if (remaining <= 0) { restExpire(); }   // GO morph greets the return
       else { renderRestIsland(); }
     }
-    pullFromSheets().then(added => {
+    if (!IS_PREVIEW && Date.now() - (ST._lastPullAt || 0) > 120000) pullFromSheets().then(added => {
       if (added > 0) {
         if (ST.screen === 'home') renderHome();
         else if (ST.screen === 'history') renderHistory();
@@ -13699,9 +13715,56 @@ document.addEventListener('visibilitychange', () => {
 // Apps Script answers with an HTML page (not JSON) when the script needs to be
 // re-authorized. resp.json() used to throw and the error showed as "offline",
 // hiding the real cause. Read as text and say what actually happened.
+// ── ota-36: private sync key + time limit on every call to the Google script ────
+// The key lives only on this phone (localStorage + the IndexedDB vault), never in the code.
+// It arrives once through a pairing link (…/#k=…) or the Settings field.
+const SHEETS_TIMEOUT_MS = 25000;
+const SYNC_KEY_MSG = 'sync key needed';
+function getSyncKey() { const k = LS.get('dcrgym_sync_key', null); return (typeof k === 'string' && k) ? k : ''; }
+function setSyncKey(k) {
+  k = String(k || '').trim();
+  if (!/^[^\s&#]{16,200}$/.test(k)) return false;
+  LS.set('dcrgym_sync_key', k); idbSet('dcrgym_sync_key', k);
+  return true;
+}
+function takeSyncKeyFromLink() {
+  try {
+    const m = /(?:^#|&)(?:k|synckey)=([^&#\s]{16,400})/.exec(location.hash || '');
+    if (!m) return false;
+    let k = m[1]; try { k = decodeURIComponent(k); } catch (e) {}
+    const ok = setSyncKey(k);
+    try { history.replaceState(history.state, '', location.pathname + location.search); } catch (e) {}
+    return ok;
+  } catch (e) { return false; }
+}
+function sheetsGetUrl(base, action) {
+  const k = getSyncKey();
+  return base + '?action=' + encodeURIComponent(action) + (k ? '&key=' + encodeURIComponent(k) : '');
+}
+function sheetsBody(payload) {
+  const k = getSyncKey();
+  return JSON.stringify(k ? Object.assign({}, payload, { key: k }) : payload);
+}
+async function sheetsFetch(url, init) {
+  if (IS_PREVIEW) throw new TypeError('preview: cloud sync is off');
+  const ctl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+  let timedOut = false;
+  const t = ctl ? setTimeout(() => { timedOut = true; try { ctl.abort(); } catch (e) {} }, window.__dcrSheetsTimeoutMs || SHEETS_TIMEOUT_MS) : null;
+  try { return await fetch(url, ctl ? Object.assign({}, init || {}, { signal: ctl.signal }) : init); }
+  catch (e) { if (timedOut) throw new TypeError('timed out'); throw e; }
+  finally { if (t) clearTimeout(t); }
+}
+function isKeyRefusal(data) {
+  return !!(data && data.ok === false && /^key$|unauthori[sz]ed|bad key|invalid key|wrong key|key missing/i.test(String(data.error || data.message || '').trim()));
+}
+
 async function readSheetsJson(resp) {
   const text = await resp.text();
-  try { return JSON.parse(text); } catch (e) {
+  try {
+    const data = JSON.parse(text);
+    if (isKeyRefusal(data)) { data.error = SYNC_KEY_MSG; ST.keyRefused = true; }
+    return data;
+  } catch (e) {
     ST.lastCloudSyncError = /authoriz|sign in|signin|accounts\.google/i.test(text)
       ? 'needs Google re-authorization' : 'unexpected response';
     return null;
@@ -13729,13 +13792,18 @@ async function probeSheetsServer() {
   const s = getSettings();
   if (!s.sheets) return false;
   try {
-    const resp = await fetch(s.sheets + '?action=ping');
+    const resp = await sheetsFetch(sheetsGetUrl(s.sheets, 'ping'));
     if (!resp.ok) { ST.lastCloudSyncError = 'HTTP ' + resp.status; ST._sheetsOkAt = 0; return false; }
     const data = await readSheetsJson(resp);
     ST.serverV2 = !!(data && data.ok && data.build === 'sync-v2');
     if (data && data.ok) ST._sheetsOkAt = Date.now();   // ota-35: the script answered in this sync
+    // ota-36: the script says whether it checks the key, and whether ours is right
+    ST.keyMode = (data && data.keyMode) ? String(data.keyMode) : null;            // off | log | enforce
+    ST.keyOk = (data && typeof data.keyOk === 'boolean') ? data.keyOk : null;
+    ST.keyRefused = !!(data && data.keyMode === 'enforce' && data.keyOk !== true);
+    if (ST.keyRefused) { ST.lastCloudSyncError = SYNC_KEY_MSG; return false; }
     return !!(data && data.ok);
-  } catch (e) { ST.lastCloudSyncError = 'offline'; ST._sheetsOkAt = 0; return false; }
+  } catch (e) { ST.lastCloudSyncError = (e && e.message === 'timed out') ? 'timed out' : 'offline'; ST._sheetsOkAt = 0; return false; }
 }
 
 async function catchUpRows() {
@@ -13755,8 +13823,9 @@ async function catchUpRows() {
 async function pullFromSheets() {
   const s = getSettings();
   if (!s.sheets) return 0;
+  ST._lastPullAt = Date.now();   // ota-36: coming back to the app pulls again only after 2 minutes
   try {
-    const resp = await fetch(s.sheets + '?action=pullState');
+    const resp = await sheetsFetch(sheetsGetUrl(s.sheets, 'pullState'));
     if (!resp.ok) {
       ST.lastCloudSyncError = 'HTTP ' + resp.status;
       return 0;
@@ -13773,6 +13842,7 @@ async function pullFromSheets() {
           idbSet('dcrgym_default_prog', data.defaultProgram);
         }
       }
+      try { applyCloudExtras(data); } catch (eX) { console.warn('[ota-36] extras not applied', eX); }
       if (data.notes && typeof data.notes === 'object') {
         const localNotes = getNotes();
         let notesAdded = false;
@@ -13822,6 +13892,179 @@ function ensureSeedHistoryMerged() {
   return added;
 }
 
+
+// ── ota-36: everything that used to live only on the phone ─────────────────────
+// Kept in the IndexedDB vault and sent with the cloud restore copy. When the phone has lost one
+// of these (storage reset, new phone), it is filled back in; anything already on the phone wins,
+// so nothing he changed or removed comes back.
+const VAULT_EXTRA_KEYS = ['dcrgym_measurements', 'dcrgym_slot_defaults', 'dcrgym_custom_exercises', 'dcrgym_blacklist',
+  'dcrgym_rest', 'dcrgym_rows_synced', 'dcrgym_deleted_archive', 'dcrgym_restored_ids', 'dcrgym_schema_version',
+  'dcrgym_sync_key', 'dcrgym_repairs_frozen', 'dcrgym_cloud_deleted_ids'];
+function _isEmptyVal(v) {
+  if (v === null || v === undefined) return true;
+  if (Array.isArray(v)) return v.length === 0;
+  if (typeof v === 'object') return Object.keys(v).length === 0;
+  return false;
+}
+function _measurementsLost(local) {
+  if (!Array.isArray(local) || local.length === 0) return true;
+  const init = new Set((INITIAL_MEASUREMENTS || []).map(m => String(m && m.id)));
+  return local.every(m => init.has(String(m && m.id)));   // only the built-in Aug 25 entry is left
+}
+function _fillIfLost(key, val) {
+  if (_isEmptyVal(val)) return false;
+  const cur = LS.get(key, null);
+  if (key === 'dcrgym_measurements') {
+    if (!_measurementsLost(cur) || !Array.isArray(val) || _measurementsLost(val)) return false;
+    LS.set(key, val); idbSet(key, val); return true;
+  }
+  if (key === 'dcrgym_rows_synced' || key === 'dcrgym_cloud_deleted_ids') {   // lists that only grow
+    const a = new Set((Array.isArray(cur) ? cur : []).map(String)); const n = a.size;
+    for (const x of (Array.isArray(val) ? val : [])) a.add(String(x));
+    if (a.size === n) return false;
+    const arr = [...a]; LS.set(key, arr); idbSet(key, arr); return true;
+  }
+  if (key === 'dcrgym_deleted_archive') {   // grows by id; an entry already here wins
+    const a = (cur && typeof cur === 'object') ? Object.assign({}, cur) : {}; let n = 0;
+    for (const [id, e] of Object.entries(val || {})) if (!a[id]) { a[id] = e; n++; }
+    if (!n) return false;
+    LS.set(key, a); idbSet(key, a); return true;
+  }
+  if (!_isEmptyVal(cur)) return false;
+  LS.set(key, val); idbSet(key, val); return true;
+}
+async function restoreVaultExtras() {
+  let restored = 0;
+  for (const k of VAULT_EXTRA_KEYS) {
+    try {
+      const cur = LS.get(k, null);
+      const v = await idbGet(k);
+      if (v !== null && v !== undefined && _fillIfLost(k, v)) restored++;
+      else if (cur !== null && !IS_PREVIEW) idbSet(k, k === 'dcrgym_measurements' && _measurementsLost(cur) && Array.isArray(v) && !_measurementsLost(v) ? v : cur);
+    } catch (e) {}
+  }
+  // the deleted list grows only; a copy in the vault with more ids is merged in
+  try {
+    const cur = (LS.get('dcrgym_deleted_ids', []) || []).map(String), v = await idbGet('dcrgym_deleted_ids');
+    const restoredIds = new Set((LS.get('dcrgym_restored_ids', []) || []).map(String));
+    const set = new Set(cur); for (const x of (Array.isArray(v) ? v : [])) if (!restoredIds.has(String(x))) set.add(String(x));
+    if (set.size !== cur.length) { const arr = [...set]; LS.set('dcrgym_deleted_ids', arr); idbSet('dcrgym_deleted_ids', arr); }
+  } catch (e) {}
+  return restored;
+}
+function buildCloudExtras() {
+  const m = LS.get('dcrgym_measurements', null);
+  return {
+    v: 1,
+    measurements: Array.isArray(m) ? m : [],
+    slotDefaults: getSlotDefaults(),
+    customExercises: getCustomExercises(),
+    hiddenExercises: LS.get('dcrgym_blacklist', []) || [],
+    restTimes: getRestTimes(),
+    deletedIds: (LS.get('dcrgym_deleted_ids', []) || []).map(String),
+    restoredIds: (LS.get('dcrgym_restored_ids', []) || []).map(String),
+    deletedArchive: LS.get('dcrgym_deleted_archive', {}) || {},
+  };
+}
+function applyCloudExtras(data) {
+  const x = data && data.extras && typeof data.extras === 'object' ? data.extras : null;
+  let n = 0;
+  if (x) {
+    if (_fillIfLost('dcrgym_measurements', x.measurements)) n++;
+    if (_fillIfLost('dcrgym_slot_defaults', x.slotDefaults)) n++;
+    if (_fillIfLost('dcrgym_custom_exercises', x.customExercises)) { n++; try { mergeCustomExercises(); } catch (e) {} }
+    if (_fillIfLost('dcrgym_blacklist', x.hiddenExercises)) { n++; ST.blacklistedExercises = new Set(LS.get('dcrgym_blacklist', [])); }
+    if (_fillIfLost('dcrgym_rest', x.restTimes)) n++;
+    if (_fillIfLost('dcrgym_deleted_archive', x.deletedArchive)) n++;
+  }
+  // Deleted on another phone (or before a reset): never brought back from the cloud or the seed.
+  // These only stop copies from coming in; they never remove a workout that is on this phone.
+  const restored = new Set((LS.get('dcrgym_restored_ids', []) || []).map(String));
+  const cloudDel = [].concat(Array.isArray(data && data.deletedIds) ? data.deletedIds : [], x && Array.isArray(x.deletedIds) ? x.deletedIds : [])
+    .map(String).filter(id => id && !restored.has(id));
+  if (cloudDel.length && _fillIfLost('dcrgym_cloud_deleted_ids', cloudDel)) n++;
+  return n;
+}
+
+// ── ota-36: delete hides a workout, with Undo ───────────────────────────────────
+// The full workout is kept in an archive (on the phone, in the vault and in the cloud copy).
+// Restore puts it back exactly as it was.
+function softDeleteWorkout(workoutId) {
+  const hist = getHistory();
+  const w = hist.find(x => String(x.id) === String(workoutId) || String(x.endTime) === String(workoutId));
+  if (!w) return null;
+  const archive = LS.get('dcrgym_deleted_archive', {}) || {};
+  archive[String(w.id || w.endTime)] = { at: Date.now(), build: APP_BUILD, workout: JSON.parse(JSON.stringify(w)) };
+  LS.set('dcrgym_deleted_archive', archive); idbSet('dcrgym_deleted_archive', archive);
+  const delIds = new Set((LS.get('dcrgym_deleted_ids', []) || []).map(String));
+  if (w.id) delIds.add(String(w.id));
+  if (w.endTime) delIds.add(String(w.endTime));
+  delIds.add(String(workoutId));
+  const delArr = [...delIds];
+  LS.set('dcrgym_deleted_ids', delArr); idbSet('dcrgym_deleted_ids', delArr);
+  const restored = (LS.get('dcrgym_restored_ids', []) || []).map(String).filter(id => !delIds.has(id));
+  LS.set('dcrgym_restored_ids', restored); idbSet('dcrgym_restored_ids', restored);
+  saveHistory(hist.filter(x => x !== w));
+  const s = getSettings();
+  if (s.sheets) {
+    (async () => {
+      await postToSheets({ action: 'deleteWorkout', id: w.id || w.endTime || workoutId });
+      await bgSyncToSheets(null, true);
+    })().catch(() => {});
+  }
+  return w;
+}
+function restoreDeletedWorkout(id) {
+  const archive = LS.get('dcrgym_deleted_archive', {}) || {};
+  const e = archive[String(id)];
+  if (!e || !e.workout) return false;
+  const w = e.workout;
+  const ids = new Set([String(id), String(w.id), String(w.endTime)]);
+  const del = (LS.get('dcrgym_deleted_ids', []) || []).map(String).filter(x => !ids.has(x));
+  LS.set('dcrgym_deleted_ids', del); idbSet('dcrgym_deleted_ids', del);
+  const cd = (LS.get('dcrgym_cloud_deleted_ids', []) || []).map(String).filter(x => !ids.has(x));
+  LS.set('dcrgym_cloud_deleted_ids', cd); idbSet('dcrgym_cloud_deleted_ids', cd);
+  const restored = new Set((LS.get('dcrgym_restored_ids', []) || []).map(String)); ids.forEach(x => x && x !== 'undefined' && restored.add(x));
+  const rArr = [...restored]; LS.set('dcrgym_restored_ids', rArr); idbSet('dcrgym_restored_ids', rArr);
+  const hist = getHistory();
+  if (!hist.some(x => String(x.id) === String(w.id))) { hist.push(JSON.parse(JSON.stringify(w))); saveHistory(hist); }
+  delete archive[String(id)];
+  LS.set('dcrgym_deleted_archive', archive); idbSet('dcrgym_deleted_archive', archive);
+  const rows = getRowsSyncedIds(); rows.delete(String(w.id));
+  LS.set('dcrgym_rows_synced', [...rows]); idbSet('dcrgym_rows_synced', [...rows]);
+  if (getSettings().sheets) {
+    (async () => {
+      await postToSheets({ action: 'undeleteWorkout', id: w.id || w.endTime || id });   // the Sheet's delete log says "restored"
+      await bgSyncToSheets(w);
+    })().catch(() => {});
+  }
+  return true;
+}
+function confirmRestoreDeleted(id) {
+  const e = (LS.get('dcrgym_deleted_archive', {}) || {})[String(id)];
+  if (!e || !e.workout) return;
+  const w = e.workout;
+  confirmSheet({
+    title: 'Bring this workout back?',
+    body: `${escHtml(w.sessionName || 'Workout')} · ${new Date(w.endTime || w.startTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} goes back into your history exactly as it was.`,
+    confirmLabel: 'Restore',
+    onConfirm: () => {
+      restoreDeletedWorkout(id);
+      showToastMsg('Workout restored');
+      if (ST.screen === 'settings') renderSettings();
+    },
+  });
+}
+function deletedWorkoutsSettingsHTML() {
+  const archive = LS.get('dcrgym_deleted_archive', {}) || {};
+  const items = Object.entries(archive).filter(([, e]) => e && e.workout).sort((a, b) => (b[1].at || 0) - (a[1].at || 0));
+  if (!items.length) return '';
+  const fmt = t => new Date(Number(t)).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return `<div class="settings-row" style="display:block"><label>Deleted workouts<br><span class="settings-sub">Hidden from your history. Restore puts one back exactly as it was.</span></label>
+    ${items.slice(0, 20).map(([id, e]) => `<div class="fix-item"><span>${escHtml(e.workout.sessionName || 'Workout')} · ${fmt(e.workout.endTime || e.workout.startTime)}</span>
+      <button class="btn-sm" onclick="confirmRestoreDeleted('${escAttr(id)}')">Restore</button></div>`).join('')}</div>`;
+}
+
 // ── Sync queue — queue-first persistence layer ────────────────────────────────
 // Every payload is enqueued before the fetch attempt. On fetch success, it is
 // dequeued. On any failure (online or offline), it stays queued and drains on
@@ -13865,7 +14108,15 @@ function dequeueSyncPayload(payload) {
   LS.set('dcrgym_sync_queue', filtered);
 }
 
-async function drainSyncQueue() {
+// ota-36: one sender at a time, and only items that went through leave the queue. Anything queued
+// while this runs (a finish, Sync Now, coming back online) stays queued for the next pass.
+let _drainRun = null;
+function drainSyncQueue() {
+  if (_drainRun) return _drainRun;
+  _drainRun = _drainSyncQueueOnce().finally(() => { _drainRun = null; });
+  return _drainRun;
+}
+async function _drainSyncQueueOnce() {
   const s = getSettings();
   if (!s.sheets) return;
   let queue = LS.get('dcrgym_sync_queue', []);
@@ -13876,13 +14127,15 @@ async function drainSyncQueue() {
     LS.set('dcrgym_sync_queue', queue);
   }
   if (!queue.length) return;
-  const failed = [];
+  const done = new Set();
   let anyOk = false;
+  const sentKey = i => (i && i.payload && i.payload._qid) || ((i && i.payload && i.payload.action) || '') + ((i && i.payload && i.payload.ts) || '') + '@' + ((i && i.ts) || '');
   for (const item of queue) {
+    if (!item || !item.payload) { done.add(sentKey(item)); continue; }
     try {
-      const resp = await fetch(s.sheets, {
+      const resp = await sheetsFetch(s.sheets, {
         method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(item.payload)
+        body: sheetsBody(item.payload)
       });
       if (resp.ok) {
         const data = await readSheetsJson(resp);
@@ -13892,26 +14145,32 @@ async function drainSyncQueue() {
           if (item.payload.action === 'syncWorkouts' && Array.isArray(item.payload.workouts)) {
             markRowsSynced(item.payload.workouts.map(w => w && w.id));
           }
+          if (item.payload.action === 'saveState') LS.remove('dcrgym_backup_blocked');
+          done.add(sentKey(item));
           continue;
         }
         if (data && data.error) ST.lastCloudSyncError = String(data.error).slice(0, 80);
         if (item.payload.action === 'saveState' && isBackupCellFull(data)) {   // ota-33: see postToSheets
           LS.set('dcrgym_backup_blocked', { at: Date.now(), err: ST.lastCloudSyncError });
           ST.lastCloudSyncError = BACKUP_FULL_MSG;
+          done.add(sentKey(item));
           continue;
         }
+        if (ST.keyRefused) break;          // wrong or missing key: keep everything queued
       } else {
         ST.lastCloudSyncError = `HTTP ${resp.status}`;
       }
-      failed.push(item);
-    } catch(e) { failed.push(item); }
+    } catch(e) { ST.lastCloudSyncError = ST.lastCloudSyncError || 'offline'; break; }   // offline: try again later
   }
-  LS.set('dcrgym_sync_queue', failed);
+  if (done.size) {
+    const now = LS.get('dcrgym_sync_queue', []) || [];
+    LS.set('dcrgym_sync_queue', now.filter(i => !done.has(sentKey(i))));
+  }
   if (anyOk) LS.set('dcrgym_last_sync', Date.now());
 }
 
 // Drain on connectivity restore AND on every boot (see bootstrapApp)
-window.addEventListener('online', () => { drainSyncQueue().catch(() => {}); });
+window.addEventListener('online', () => { if (!IS_PREVIEW) drainSyncQueue().catch(() => {}); });
 
 // ── JSON full-fidelity backup export ─────────────────────────────────────────
 function exportJSON() {
@@ -13970,13 +14229,13 @@ function isBackupCellFull(data) {
 }
 async function postToSheets(payload) {
   const s = getSettings();
-  if (!s.sheets) return false;
+  if (!s.sheets || IS_PREVIEW) return false;
   enqueueSyncPayload(payload);
   try {
-    const r = await fetch(s.sheets, {
+    const r = await sheetsFetch(s.sheets, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload),
+      body: sheetsBody(payload),
     });
     if (r.ok) {
       const data = await readSheetsJson(r);
@@ -14067,6 +14326,7 @@ function historyToWorkoutRows(records) {
       totalVolume: Math.round(workoutVolume(w)),     // ota-31 (A): the Sheet's "Total Volume" column reads this first
       totalSets: exercises.reduce((n, e) => n + e.sets.length, 0),
       duplicateOf: w._dupOf || '',
+      unit: 'lb',                                     // ota-36: every weight the app sends is in lb
       exercises,
     });
   }
@@ -14123,6 +14383,7 @@ async function bgSyncToSheets(specificEntry, onlyState) {
     notes: getNotes(),
     slotDefaults: getSlotDefaults(),          // ota-30 (current server ignores; kept for a later server paste)
     customExercises: getCustomExercises(),    // ota-30
+    extras: buildCloudExtras(),               // ota-36: everything else that used to live only on the phone
     ts: Date.now()
   });
 
@@ -14159,6 +14420,8 @@ async function runSyncNow() {
   const s = getSettings();
   if (!s.sheets) return { stateOk: false, rowsOk: false, err: 'no Sheets URL set', added: 0 };
   ST.lastCloudSyncError = null;
+  ST.keyRefused = false;
+  if (IS_PREVIEW) return { stateOk: false, rowsOk: false, err: 'preview: cloud sync is off', added: 0 };
   const seedAdded = ensureSeedHistoryMerged();
   await probeSheetsServer();
   const cloudAdded = await pullFromSheets();
@@ -14241,18 +14504,22 @@ async function recoverFromCloud() {
 
 function mergeHistories(local, remote) {
   const deletedIds = new Set((LS.get('dcrgym_deleted_ids', []) || []).map(String));
+  const cloudDeleted = new Set((LS.get('dcrgym_cloud_deleted_ids', []) || []).map(String));   // ota-36: incoming only
+  const frozen = !!LS.get('dcrgym_repairs_frozen', null);
   const map = new Map();
   for (const rawW of (local || [])) {
     if (!rawW || !rawW.id) continue;
     const id = String(rawW.id);
     if (deletedIds.has(id)) continue;
-    const w = normalizeWorkoutUnits(rawW);
+    // ota-36: once frozen, records already cleaned are kept exactly as stored (no every-open rewrite);
+    // only a record that never went through the clean-up gets it, once.
+    const w = (frozen && rawW._unitLb) ? rawW : normalizeWorkoutUnits(rawW);
     map.set(id, w);
   }
   for (const rawW of (remote || [])) {
     if (!rawW || !rawW.id) continue;
     const id = String(rawW.id);
-    if (deletedIds.has(id)) continue;
+    if (deletedIds.has(id) || cloudDeleted.has(id)) continue;
     if (!hasLoggedWorkingSets(rawW)) continue;
     const w = normalizeWorkoutUnits(JSON.parse(JSON.stringify(rawW)));
     if (!map.has(id)) {
@@ -14304,6 +14571,9 @@ function checkWeekComplete() {
 // ── Fault-tolerant bootstrap — all state access inside try/catch, LS proxy only ──
 async function bootstrapApp() {
   console.log('[DCR Gym Shell] Booting application...');
+  // ota-36: one-time pairing link carries the private sync key; it's saved on this phone only.
+  ST._keyJustPaired = !IS_PREVIEW && takeSyncKeyFromLink();
+  if (IS_PREVIEW) { try { document.documentElement.classList.add('is-preview'); } catch (e) {} }
 
   // ota-30: one-time copy of the full history in the IndexedDB vault before this build touches anything.
   // Read-only snapshot; nothing ever restores over live data automatically.
@@ -14412,6 +14682,9 @@ async function bootstrapApp() {
       const idbDel = await idbGet('dcrgym_deleted_ids');
       if (Array.isArray(idbDel)) LS.set('dcrgym_deleted_ids', idbDel);
     }
+    // ota-36: measurements, swaps, custom and hidden exercises, rest times, the deleted archive,
+    // the sync key and the schema/freeze markers come back from the vault if the phone lost them.
+    try { await restoreVaultExtras(); } catch (eV) { console.warn('[ota-36] vault extras skipped', eV); }
 
     // 1. Dual-layer non-destructive union merge between localStorage, IndexedDB, and embedded historical vault!
     const localHist = LS.get('dcrgym_history', []);
@@ -14463,16 +14736,23 @@ async function bootstrapApp() {
     getSettings();
     migrateStorage();
     try { await restoreFixFlags(); } catch (e34) {}
-    try { runOta31DataFlags(); } catch (e31) { console.warn('[ota-31] data check skipped:', e31); }
-    try { runOta32Fixes(); } catch (e32) { console.warn('[ota-32] date check skipped:', e32); }
-    try { runOta33Fixes(); } catch (e33) { console.warn('[ota-33] Monday fix skipped:', e33); }
+    // ota-36: the ota-31/32/33 one-time repairs have run on his phone. They keep their results (and
+    // their Undo in Settings) but no longer run on open. A phone that never ran them runs them once.
+    if (!LS.get('dcrgym_repairs_frozen', null)) {
+      try { runOta31DataFlags(); } catch (e31) { console.warn('[ota-31] data check skipped:', e31); }
+      try { runOta32Fixes(); } catch (e32) { console.warn('[ota-32] date check skipped:', e32); }
+      try { runOta33Fixes(); } catch (e33) { console.warn('[ota-33] Monday fix skipped:', e33); }
+      const fz = { at: Date.now(), build: APP_BUILD };
+      LS.set('dcrgym_repairs_frozen', fz); idbSet('dcrgym_repairs_frozen', fz);
+    }
     try { mirrorFixFlags(); } catch (e34) {}
+    try { idbSet('dcrgym_schema_version', LS.get('dcrgym_schema_version', null)); } catch (e36) {}
   } catch(e) {
     console.warn('[DCR Gym Shell] State hydration notice (non-fatal):', e);
   }
 
-  // Service worker — registered with a live OTA update watcher.
-  if ('serviceWorker' in navigator) {
+  // Service worker — registered with a live OTA update watcher. (Never from a preview copy.)
+  if ('serviceWorker' in navigator && !IS_PREVIEW) {
     if ('Notification' in window) {
       ST.notifEnabled = Notification.permission === 'granted';
     }
@@ -14484,7 +14764,7 @@ async function bootstrapApp() {
 
   // ── Cloud sync & Auto-Hydration for fresh devices ──────────────────────────
   let didInitialPull = false;
-  if (getHistory().length === 0) {
+  if (getHistory().length === 0 && !IS_PREVIEW) {
     try {
       const added = await pullFromSheets();
       didInitialPull = true;
@@ -14497,7 +14777,7 @@ async function bootstrapApp() {
   }
 
   // ── Cloud sync on every app open — PULL BEFORE PUSH (never clobber cloud) ──
-  (async () => {
+  if (!IS_PREVIEW) (async () => {
     try {
       await probeSheetsServer();
       if (!didInitialPull) {
@@ -14549,7 +14829,9 @@ async function bootstrapApp() {
       if (home) home.style.display = 'block';
       if (nav)  nav.style.display  = 'flex';
       Maps('home');
-      setTimeout(() => { try { autoFinishSavedIfIdle(); } catch (e) { console.warn('[ota-32] auto-finish skipped:', e); } }, 300); // ota-32 (2)
+      if (!IS_PREVIEW) setTimeout(() => { try { autoFinishSavedIfIdle(); } catch (e) { console.warn('[ota-32] auto-finish skipped:', e); } }, 300); // ota-32 (2)
+      if (IS_PREVIEW) setTimeout(() => { try { noticeSheet('Preview build', 'This is a look-only copy of the next update, using the workouts on this phone. Nothing you do here is saved or sent to the Sheet. Close it and open the app as usual to go back.'); } catch (e) {} }, 400);
+      else if (ST._keyJustPaired) setTimeout(() => { try { showToastMsg('Sync key saved on this phone'); } catch (e) {} }, 600);
     }
   } catch(err) {
     console.error('[DCR Gym Shell] Router fault:', err);
@@ -14564,8 +14846,7 @@ async function bootstrapApp() {
     return;
   }
 
-  // Background sync — idle, never blocks render path
-  setTimeout(() => { pullFromSheets().catch(() => {}); }, 2500);
+  // ota-36: one cloud pull per open (the open-time sync above already pulled).
 }
 
 function runBootSequence() {

@@ -1,5 +1,7 @@
 # Gym & Hypertrophy Spoke — Master Operating Manual & Sitemap
 
+> **ota-36:** `programs.js` and `Resources/Scripts/apps-script.gs` were removed (never loaded / unsafe to paste). Programs live in `index.html`; the live server script lives only in the Sheet's Apps Script project.
+
 ## 1. Domain Scope & Schedule Anchor
 - **Spoke Focus**: Daniel Cruz Rosso (DCR)'s strength and hypertrophy progression tracking, Muscle Ladder workout definitions, and workout logging.
 - **Daily Anchor**: `17:30 (5:30 PM AST)` non-negotiable hypertrophy training window.
