@@ -60,6 +60,7 @@ function fakeServer(cfg = {}) {
     if (action === 'ping') out = { ok: true, build: 'sync-v2', keyMode: mode, ...(key ? { keyOk } : {}) };
     else if (mode === 'enforce' && !keyOk) out = { ok: false, error: 'unauthorized' };   // what the ota-36 script answers
     else if (action === 'pullState') out = Object.assign({ ok: true }, cfg.pull || {});
+    else if (action === 'workoutHeartRate') out = cfg.hrUnknown ? { ok: false, message: 'Unknown action: workoutHeartRate' } : { ok: true, hr: cfg.hr ? cfg.hr(body.windows) : {} };
     else out = { ok: true };
     return { ok: true, status: 200, text: async () => JSON.stringify(out) };
   };
@@ -336,6 +337,65 @@ const H = win => JSON.parse(win.localStorage.getItem('dcrgym_history'));
     ok(srv.calls.some(c => c.action === 'syncWorkouts' && c.body.workouts.some(w => String(w.id) === id)), 'and resends its rows');
     eq(b.win.localStorage.getItem('dcrgym_history'), SA.dcrgym_history, 'history back to exactly how it was');
     b.win.close();
+  }
+
+  // ── P. Strain on Home: from watch heart rate, vs his average for that workout type ──
+  {
+    const pullW = (id, end, mins) => ({ id: String(id), programId: 'p14', sessionId: 'p14_s4', sessionName: 'Pull #1 (Hypertrophy Focus)', startTime: end - mins * 60000, endTime: end, duration: mins * 60,
+      sets: { p14_s4_0: [{ w: 100, r: 8, _name: 'Lat Pulldown' }] } });
+    const flat = (n, b, peak) => { const a = Array(n).fill(b); if (peak) a[0] = peak; return a; };
+    const e1 = AST(2026, 10, 10, 18), e2 = AST(2026, 11, 5, 18), e3 = NOW - 3600000, old = AST(2026, 8, 20, 18);
+    const h = clone(hA).concat([pullW(old, old, 60), pullW(e1, e1, 60), pullW(e2, e2, 50), pullW(e3, e3, 60)]);
+    const hr = { [old]: { bpm: flat(60, 170, 180), at: 1 }, [e1]: { bpm: flat(60, 140, 180), at: 1 }, [e2]: { bpm: flat(50, 140), at: 1 }, [e3]: { bpm: flat(60, 160), at: 1 } };
+    const st = baseStore(h, { dcrgym_hr: hr });
+    const b = await run(st);
+    eq(b.win.eval('strainHrMax()'), 180, 'zones from his highest recorded heart rate (floor 175)');
+    eq(b.win.eval(`workoutStrain(getHistory().find(w => w.id === '${e1}'))`), 182, '60 min mostly at 78% of max, one minute at max = 182');
+    eq(b.win.eval(`strainAverage('pull', '${e3}')`), { avg: 166, n: 2 }, 'Pull average since Sep 1 (Aug workout not counted, today not counted)');
+    const home = b.win.document.getElementById('screen-home').textContent.replace(/\s+/g, ' ');
+    const svgTxt = [...b.win.document.querySelectorAll('#screen-home svg text')].map(t => t.textContent.trim().toUpperCase());
+    ok(!svgTxt.includes('FRONT') && !svgTxt.includes('BACK'), 'Home figure has no Front/Back labels');
+    ok(b.win.document.querySelector('.premium-metrics-grid .metric-strain svg'), 'strain sits in the bottom stats row with its icon');
+    ok(/strain 2\d\d ?↑/.test(home), 'Home after a workout: "strain 240 ↑" (' + (home.match(/strain[^│]*/) || [''])[0] + ')');
+    b.win.eval(`showStrainInfo()`);
+    ok(/more than usual/.test(b.win.document.body.textContent), 'tap explains: more than usual vs the Pull average');
+    const before = JSON.parse(b.win.eval(`JSON.stringify(strainStatus({ session: { name: 'Pull #1 (Hypertrophy Focus)' } }))`));
+    eq(before.mode, 'after', 'same day: still shows the workout just done');
+    eq(b.win.localStorage.getItem('dcrgym_history'), JSON.stringify(JSON.parse(b.win.localStorage.getItem('dcrgym_history'))), 'history stored as is');
+    eq(JSON.parse(b.win.localStorage.getItem('dcrgym_history')).length, h.length, 'no workout added or removed');
+    b.win.close();
+    const c = await run(st, { now: NOW + 30 * 3600000 });
+    const bf = JSON.parse(c.win.eval(`JSON.stringify(strainStatus({ session: { name: 'Pull #1 (Hypertrophy Focus)' } }))`));
+    eq([bf.mode, bf.value, bf.n], ['before', 191, 3], 'next day: Pull target is his Pull average (191 over 3)');
+    eq(c.win.eval(`strainStatus({ session: { name: 'Legs #1' } })`), null, 'no Legs heart rate yet: nothing shown');
+    c.win.close();
+    const d = await run(baseStore(h));
+    ok(!d.win.document.querySelector('.metric-strain'), 'no heart rate at all: the stat stays hidden');
+    d.win.close();
+    const noHr = clone(hr); delete noHr[e3];
+    const d2 = await run(baseStore(h, { dcrgym_hr: noHr }));
+    ok(!d2.win.document.querySelector('.metric-strain'), 'today\'s workout has no heart rate: hidden, no dash');
+    d2.win.close();
+    // fetching from the script
+    const srv = fakeServer({ hr: wins => Object.fromEntries(wins.map(w => [w.id, { bpm: flat(Math.round((w.end - w.start) / 60000), 135) }])) });
+    const f = await run(baseStore(h), { srv, wait: 3500 });
+    const got = JSON.parse(f.win.localStorage.getItem('dcrgym_hr') || '{}');
+    ok(got[e3] && got[e3].bpm.length === 60, 'heart rate fetched for today\'s workout');
+    ok(!got[old], 'nothing fetched before Sep 1');
+    const req = srv.calls.filter(x => x.action === 'workoutHeartRate');
+    ok(req.length >= 1 && req.every(x => x.key === undefined || x.key === null || typeof x.key === 'string'), 'heart-rate call made');
+    srv.calls.length = 0;
+    await f.win.eval('fetchWorkoutHeartRates()');
+    eq(srv.calls.filter(x => x.action === 'workoutHeartRate').length, 0, 'not asked again once stored');
+    eq(JSON.parse(f.win.localStorage.getItem('dcrgym_history')).map(w => w.id).sort(), h.map(w => w.id).sort(), 'history untouched by the fetch');
+    eq(JSON.parse(f.win.localStorage.getItem('dcrgym_history')).length, h.length, 'same workout count after the fetch');
+    f.win.close();
+    const srv2 = fakeServer({ hrUnknown: true });
+    const g = await run(baseStore(h), { srv: srv2, wait: 3500 });
+    eq(g.win.eval('ST.hrUnsupported'), true, 'today\'s script doesn\'t know the call: skipped quietly');
+    eq(srv2.calls.filter(x => x.action === 'workoutHeartRate').length, 1, 'asked once, not in a loop');
+    ok(!g.win.document.querySelector('.metric-strain'), 'and nothing shows');
+    g.win.close();
   }
 
   console.log(`safety tests: ${passed} passed`);
