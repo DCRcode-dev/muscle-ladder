@@ -60,7 +60,7 @@ function fakeServer(cfg = {}) {
     if (action === 'ping') out = { ok: true, build: 'sync-v2', keyMode: mode, ...(key ? { keyOk } : {}) };
     else if (mode === 'enforce' && !keyOk) out = { ok: false, error: 'unauthorized' };   // what the ota-36 script answers
     else if (action === 'pullState') out = Object.assign({ ok: true }, cfg.pull || {});
-    else if (action === 'workoutHeartRate') out = cfg.hrUnknown ? { ok: false, message: 'Unknown action: workoutHeartRate' } : { ok: true, hr: cfg.hr ? cfg.hr(body.windows) : {} };
+    else if (action === 'workoutHeartRate') out = cfg.hrErr ? { ok: false, error: cfg.hrErr } : cfg.hrUnknown ? { ok: false, message: 'Unknown action: workoutHeartRate' } : { ok: true, hr: cfg.hr ? cfg.hr(body.windows) : {} };
     else out = { ok: true };
     return { ok: true, status: 200, text: async () => JSON.stringify(out) };
   };
@@ -390,6 +390,17 @@ const H = win => JSON.parse(win.localStorage.getItem('dcrgym_history'));
     eq(JSON.parse(f.win.localStorage.getItem('dcrgym_history')).map(w => w.id).sort(), h.map(w => w.id).sort(), 'history untouched by the fetch');
     eq(JSON.parse(f.win.localStorage.getItem('dcrgym_history')).length, h.length, 'same workout count after the fetch');
     f.win.close();
+    // the script leaves out ids it ran short on: those are asked again later, not marked as none
+    const srv3 = fakeServer({ hr: wins => ({ [wins[wins.length - 1].id]: { bpm: flat(60, 150) } }) });
+    const k = await run(baseStore(h), { srv: srv3, wait: 3500 });
+    const kc = JSON.parse(k.win.localStorage.getItem('dcrgym_hr') || '{}');
+    ok(kc[e3] && Object.values(kc).every(v => Array.isArray(v.bpm)) && Object.keys(kc).length <= 2, 'only answered workouts are stored (one per batch); left-out ones are not marked as none');
+    k.win.close();
+    const srv4 = fakeServer({ hrErr: 'health-auth' });
+    const m = await run(baseStore(h), { srv: srv4, wait: 3500 });
+    eq(m.win.eval('ST.hrUnsupported'), true, 'Health sign-in to redo: stops asking for this open');
+    eq(m.win.localStorage.getItem('dcrgym_hr'), null, 'nothing stored on an error');
+    m.win.close();
     const srv2 = fakeServer({ hrUnknown: true });
     const g = await run(baseStore(h), { srv: srv2, wait: 3500 });
     eq(g.win.eval('ST.hrUnsupported'), true, 'today\'s script doesn\'t know the call: skipped quietly');

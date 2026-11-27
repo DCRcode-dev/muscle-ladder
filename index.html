@@ -14096,7 +14096,7 @@ async function _fetchWorkoutHeartRatesOnce() {
       if (Array.isArray(c.bpm)) return false;
       return now - (w.endTime || 0) < 3 * 86400000 && now - (c.at || 0) > 6 * 3600000;   // the watch can sync late
     }).slice(-40);
-  let added = 0;
+  let added = 0, changed = false;
   for (let i = 0; i < want.length; i += 20) {
     const batch = want.slice(i, i + 20);
     let data = null;
@@ -14107,16 +14107,20 @@ async function _fetchWorkoutHeartRatesOnce() {
       data = await readSheetsJson(r);
     } catch (e) { break; }
     if (!data) break;
-    if (!data.ok) { if (/unknown action/i.test(String(data.message || data.error || ''))) ST.hrUnsupported = true; break; }
+    // old script, or Health not connected / sign-in to redo: stop asking until the next open (no loop)
+    if (!data.ok) { if (/unknown action|health-not-connected|health-auth/i.test(String(data.message || data.error || ''))) ST.hrUnsupported = true; break; }
     const hr = (data.hr && typeof data.hr === 'object') ? data.hr : {};
     for (const w of batch) {
+      if (!Object.prototype.hasOwnProperty.call(hr, String(w.id))) continue;   // left out = the script ran short, ask again later
       const v = hr[String(w.id)];
       const bpm = v && Array.isArray(v.bpm) ? v.bpm.slice(0, 600).map(n => { n = Math.round(Number(n) || 0); return n > 0 && n < 250 ? n : 0; }) : null;
       if (bpm && bpm.some(n => n > 0)) { cache[String(w.id)] = { bpm, at: now }; added++; }
       else cache[String(w.id)] = { none: 1, at: now };
+      changed = true;
     }
+    if (data.partial) break;
   }
-  if (want.length) { LS.set('dcrgym_hr', cache); idbSet('dcrgym_hr', cache); }
+  if (changed) { LS.set('dcrgym_hr', cache); idbSet('dcrgym_hr', cache); }
   return added;
 }
 
