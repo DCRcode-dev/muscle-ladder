@@ -199,7 +199,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
   display: flex; flex-direction: column; align-items: center;
   gap: 3px; flex: 1; padding: 8px; border: none;
   background: none; cursor: pointer;
-  color: var(--muted); font-size: 10px;
+  color: var(--muted); font-size: var(--fs-xs);
   font-family: var(--font-body);
   transition: color 350ms cubic-bezier(0.16,1,0.3,1);
   min-height: 44px; justify-content: center;
@@ -231,18 +231,18 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
   box-shadow: 0 2px 12px rgba(44,36,26,0.06), 0 8px 32px rgba(44,36,26,0.04);
 }
 .insight-card-eyebrow {
-  font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.18em;
+  font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.18em;
   color: var(--muted); opacity: 0.6; margin-bottom: 8px;
 }
 .insight-card-body {
-  font-size: 12.5px; line-height: 1.65; color: var(--text-secondary);
+  font-size: var(--fs-sm); line-height: 1.65; color: var(--text-secondary);
   font-family: var(--font-body);
 }
 .insight-card-body strong {
   color: var(--charcoal); font-weight: 600;
 }
 .insight-card-meta {
-  margin-top: 10px; font-size: 9.5px; color: var(--muted);
+  margin-top: 10px; font-size: var(--fs-xs); color: var(--muted);
   opacity: 0.5; letter-spacing: 0.06em;
 }
 
@@ -261,7 +261,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
   padding: 56px 28px 72px; text-align: center;
 }
 .ob-eyebrow {
-  font-size: 0.7rem; text-transform: uppercase;
+  font-size: var(--fs-sm); text-transform: uppercase;
   letter-spacing: 0.18em; color: var(--muted); margin-bottom: 24px;
 }
 .ob-question {
@@ -270,7 +270,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
   line-height: 1.12; margin-bottom: 10px;
 }
 .ob-hint {
-  font-size: 14px; color: var(--text-secondary);
+  font-size: var(--fs-md); color: var(--text-secondary);
   margin-bottom: 44px; line-height: 1.55;
 }
 .ob-dots { display: flex; gap: 6px; margin-bottom: 40px; }
@@ -301,22 +301,22 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
   color: var(--accent); line-height: 1;
 }
 .ob-pill-sub {
-  font-size: 0.68rem; font-weight: 600; text-transform: uppercase;
+  font-size: var(--fs-sm); font-weight: 600; text-transform: uppercase;
   letter-spacing: 0.08em; color: var(--text-secondary); margin-top: 4px;
 }
-.ob-pill-name { font-size: 10.5px; color: var(--muted); margin-top: 5px; line-height: 1.35; }
+.ob-pill-name { font-size: var(--fs-xs); color: var(--muted); margin-top: 5px; line-height: 1.35; }
 .ob-cta {
   width: 100%; max-width: 300px; padding: 18px 28px;
   border-radius: 20px; border: none;
   background: var(--charcoal); color: #fff;
-  font-family: var(--font-body); font-size: 15px; font-weight: 600;
+  font-family: var(--font-body); font-size: var(--fs-md); font-weight: 600;
   cursor: pointer; box-shadow: var(--shadow-cta);
   transition: transform 150ms, box-shadow 150ms; margin-bottom: 12px;
 }
 .ob-cta:active { transform: scale(0.97); }
 .ob-cta-ghost {
   background: none; border: none; color: var(--muted);
-  font-size: 14px; cursor: pointer; padding: 12px 20px;
+  font-size: var(--fs-md); cursor: pointer; padding: 12px 20px;
   font-family: var(--font-body); transition: color 150ms;
 }
 
@@ -324,7 +324,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 .btn {
   display: block; width: 100%; padding: 16px 24px;
   border-radius: 16px; border: none;
-  font-family: var(--font-body); font-size: 16px; font-weight: 600;
+  font-family: var(--font-body); font-size: var(--fs-lg); font-weight: 600;
   cursor: pointer; transition: all var(--dur-fast) var(--ease);
   min-height: 52px;
 }
@@ -335,7 +335,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 
 /* ── Themed confirm / notice sheets — system dialogs are banned ── */
 .confirm-body {
-  font-size: 14.5px; line-height: 1.55; color: var(--text-secondary);
+  font-size: var(--fs-md); line-height: 1.55; color: var(--text-secondary);
   margin: 4px 0 18px;
 }
 .confirm-actions { display: flex; flex-direction: column; gap: 10px; padding-bottom: 4px; }
@@ -347,7 +347,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 }
 .btn-sheet-ghost { background: none; border: none; color: var(--muted); font-weight: 500; min-height: 44px; }
 .ex-sub-note {
-  font-size: 11.5px; color: var(--muted); font-style: italic;
+  font-size: var(--fs-sm); color: var(--muted); font-style: italic;
   margin: 1px 0 3px; letter-spacing: 0.01em;
 }
 
@@ -365,12 +365,12 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 #card-menu button {
   display: flex; align-items: center; gap: 12px; width: 100%;
   padding: 13px 16px; border: none; background: none; text-align: left;
-  font-family: var(--font-body); font-size: 14px; color: var(--text);
+  font-family: var(--font-body); font-size: var(--fs-md); color: var(--text);
   cursor: pointer; -webkit-tap-highlight-color: transparent;
 }
 #card-menu button:active { background: rgba(42,36,33,0.04); }
 #card-menu button + button { border-top: 0.5px solid var(--border); }
-.cm-ic { width: 20px; text-align: center; color: var(--text-secondary); font-size: 15px; }
+.cm-ic { width: 20px; text-align: center; color: var(--text-secondary); font-size: var(--fs-md); }
 
 /* ── Boarding-pass Next Session card ── */
 .boarding-card {
@@ -379,10 +379,10 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
   text-align: left;
 }
 .bc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
-.bc-label { font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
-.bc-name { font-family: var(--font-hero); font-style: italic; font-size: 21px; font-weight: 600; color: var(--charcoal); line-height: 1.1; }
+.bc-label { font-size: var(--fs-xs); letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+.bc-name { font-family: var(--font-hero); font-style: italic; font-size: var(--fs-xl); font-weight: 600; color: var(--charcoal); line-height: 1.1; }
 .bc-chip {
-  flex-shrink: 0; font-size: 10px; padding: 5px 10px; border-radius: 11px;
+  flex-shrink: 0; font-size: var(--fs-xs); padding: 5px 10px; border-radius: 11px;
   background: var(--bg); border: 0.5px solid var(--border); color: var(--text-secondary);
   font-variant-numeric: tabular-nums; white-space: nowrap;
 }
@@ -391,11 +391,11 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 .bc-manifest { margin: 10px 0 12px; }
 .bc-ex {
   display: flex; align-items: baseline; justify-content: space-between;
-  font-size: 12px; color: var(--text-secondary); padding: 3.5px 0;
+  font-size: var(--fs-sm); color: var(--text-secondary); padding: 3.5px 0;
 }
 .bc-ex + .bc-ex { border-top: 0.5px solid var(--border); }
-.bc-ex .bc-sets { font-size: 10.5px; color: var(--muted); font-variant-numeric: tabular-nums; flex-shrink: 0; margin-left: 12px; }
-.bc-more { font-size: 10.5px; color: var(--muted); font-style: italic; padding-top: 5px; }
+.bc-ex .bc-sets { font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; flex-shrink: 0; margin-left: 12px; }
+.bc-more { font-size: var(--fs-xs); color: var(--muted); font-style: italic; padding-top: 5px; }
 .boarding-card .premium-action-pill { margin: 0 auto !important; width: auto !important; min-width: 220px !important; max-width: 280px !important; }
 
 /* ── Launch awakening — once per boot, the app wakes rather than loads ── */
@@ -413,7 +413,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 .mg-scrub-tip {
   position: absolute; top: -4px; transform: translateX(-50%);
   background: var(--charcoal); color: #FAF7F2;
-  font-size: 10.5px; font-weight: 600; padding: 4px 9px; border-radius: 9px;
+  font-size: var(--fs-xs); font-weight: 600; padding: 4px 9px; border-radius: 9px;
   white-space: nowrap; pointer-events: none; opacity: 0;
   font-variant-numeric: tabular-nums;
   transition: opacity var(--dur-fast) var(--ease), left 90ms linear;
@@ -430,7 +430,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
   background: var(--charcoal); color: #FAF7F2;
   border: none; border-radius: 19px;
   padding: 10px 18px;
-  font-family: var(--font-body); font-size: 12.5px; font-weight: 600;
+  font-family: var(--font-body); font-size: var(--fs-sm); font-weight: 600;
   letter-spacing: 0.01em; cursor: pointer;
   box-shadow: var(--shadow-deep);
   opacity: 0;
@@ -513,7 +513,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
   display: flex !important; justify-content: center !important;
   align-items: center !important; gap: 16px !important;
   font-family: 'Cormorant Garamond', serif !important;
-  font-size: 1.1rem !important; font-style: italic !important;
+  font-size: var(--fs-lg) !important; font-style: italic !important;
   color: var(--charcoal) !important;
 }
 .premium-metrics-grid .metric-item {
@@ -529,7 +529,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 }
 .premium-metrics-grid span {
   font-family: var(--font-body) !important;
-  font-size: 0.85rem !important; font-weight: 700 !important;
+  font-size: var(--fs-md) !important; font-weight: 700 !important;
   font-style: normal !important; color: var(--charcoal) !important;
   font-variant-numeric: tabular-nums lining-nums !important;
   margin-left: 2px !important;
@@ -540,16 +540,16 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 }
 .premium-resume-info { flex: 1; min-width: 0; }
 .premium-resume-label {
-  font-size: 0.58rem; letter-spacing: 0.14em;
+  font-size: var(--fs-xs); letter-spacing: 0.14em;
   text-transform: uppercase; color: var(--muted); margin-bottom: 2px;
 }
 .premium-resume-name {
-  font-size: 13px; font-weight: 600; color: var(--charcoal);
+  font-size: var(--fs-md); font-weight: 600; color: var(--charcoal);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .premium-resume-btns { display: flex; gap: 6px; flex-shrink: 0; }
 .premium-resume-btns button {
-  padding: 8px 14px; border-radius: 12px; font-size: 11px;
+  padding: 8px 14px; border-radius: 12px; font-size: var(--fs-sm);
   font-weight: 600; border: none; cursor: pointer;
   font-family: var(--font-body); min-height: 36px;
   transition: opacity 200ms, transform 150ms;
@@ -563,7 +563,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
   padding: 14px 24px !important; width: 100% !important; max-width: 320px !important;
   box-sizing: border-box !important;
   text-align: center !important; font-weight: 700 !important;
-  letter-spacing: 0.12em !important; font-size: 0.78rem !important;
+  letter-spacing: 0.12em !important; font-size: var(--fs-sm) !important;
   text-transform: uppercase !important; font-family: var(--font-body) !important;
   box-shadow: var(--shadow-cta) !important;
   cursor: pointer !important; flex-shrink: 0 !important;
@@ -606,7 +606,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 /* Micro-legend beneath the figure */
 .totem-legend {
   display: flex; align-items: center; justify-content: center; gap: 14px;
-  margin: 2px 0 0; font-size: 9px; letter-spacing: 0.13em;
+  margin: 2px 0 0; font-size: var(--fs-xs); letter-spacing: 0.13em;
   text-transform: uppercase; color: var(--muted);
 }
 .tl-dot { width: 7px; height: 7px; border-radius: 4px; display: inline-block; margin-right: 5px; vertical-align: 0; }
@@ -636,7 +636,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 .page-header h1 { font-size: 28px; font-weight: 700; }
 .section-gap { height: 16px; }
 .section-label {
-  font-size: 10px; color: var(--muted); text-transform: uppercase;
+  font-size: var(--fs-xs); color: var(--muted); text-transform: uppercase;
   letter-spacing: 1.5px; margin-bottom: 12px;
 }
 
@@ -652,18 +652,18 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
   background: var(--accent); border-radius: 50%; opacity: 0.15;
 }
 .next-card-label {
-  font-size: 10px; color: rgba(255,255,255,0.5);
+  font-size: var(--fs-xs); color: rgba(255,255,255,0.5);
   text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;
 }
 .next-card-name {
   font-family: var(--font-hero); font-size: 26px; font-weight: 600;
   color: #fff; font-style: italic;
 }
-.next-card-meta { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 6px; }
+.next-card-meta { font-size: var(--fs-sm); color: rgba(255,255,255,0.5); margin-top: 6px; }
 .next-card-cta {
   position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
   background: var(--accent); border-radius: 12px; padding: 10px 16px;
-  color: #fff; font-size: 13px; font-weight: 600;
+  color: #fff; font-size: var(--fs-md); font-weight: 600;
 }
 
 /* ── Workout header (Ultra-Luxury iPhone Frosted Masthead) ── */
@@ -687,7 +687,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
   background: none;
   border: none;
   color: var(--text-secondary);
-  font-size: 15px;
+  font-size: var(--fs-md);
   cursor: pointer;
   padding: 4px 8px 4px 0;
   flex-shrink: 0;
@@ -705,7 +705,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
   min-width: 0;
 }
 .wh-mode-tag {
-  font-size: 9.5px;
+  font-size: var(--fs-xs);
   text-transform: uppercase;
   letter-spacing: 0.10em;
   color: var(--text-tertiary);
@@ -715,7 +715,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 .wh-session {
   font-family: var(--font-hero) !important;
   font-style: italic !important;
-  font-size: 1.45rem !important;
+  font-size: var(--fs-xl) !important;
   font-weight: 600 !important;
   text-align: center !important;
   color: var(--text-primary) !important;
@@ -725,7 +725,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
   letter-spacing: -0.015em;
 }
 .wh-date-chip {
-  font-size: 11px;
+  font-size: var(--fs-sm);
   color: var(--accent-kinetic);
   margin-top: 4px;
   cursor: pointer;
@@ -773,7 +773,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
   flex: 1;
 }
 .wh-hud-label {
-  font-size: 9.5px;
+  font-size: var(--fs-xs);
   text-transform: uppercase;
   letter-spacing: 0.10em;
   color: var(--text-tertiary);
@@ -782,7 +782,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 }
 .wh-hud-val {
   font-family: var(--font-mono);
-  font-size: 15.5px;
+  font-size: var(--fs-lg);
   font-weight: 700;
   color: var(--text-primary);
   line-height: 1.15;
@@ -827,12 +827,12 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 }
 .wh-pct-num {
   font-family: var(--font-mono);
-  font-size: 15px; font-weight: 700; color: var(--text-primary);
+  font-size: var(--fs-md); font-weight: 700; color: var(--text-primary);
   line-height: 1; letter-spacing: -0.5px;
   font-variant-numeric: tabular-nums lining-nums;
 }
 .wh-pct-unit {
-  font-size: 8.5px; color: var(--text-tertiary);
+  font-size: var(--fs-xs); color: var(--text-tertiary);
   letter-spacing: 0.08em; margin-top: 2px; text-transform: uppercase; font-weight: 600;
 }
 .wh-pct-badge.complete .wh-pct-num,
@@ -844,7 +844,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
   margin: 12px 0 0; padding-top: 10px;
   border-top: 1px solid var(--border-subtle);
 }
-.travel-toggle-lbl { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
+.travel-toggle-lbl { font-size: var(--fs-sm); color: var(--text-secondary); font-weight: 500; }
 .toggle-switch { position: relative; width: 40px; height: 22px; }
 .toggle-switch input { opacity: 0; width: 0; height: 0; }
 .toggle-slider {
@@ -913,7 +913,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 }
 #rest-island.go #rest-hud-fill { stroke: #4ADE80; }
 #rest-countdown {
-  font-family: var(--font-mono); font-size: 20px; font-weight: 600;
+  font-family: var(--font-mono); font-size: var(--fs-xl); font-weight: 600;
   color: #FAF7F2; line-height: 1;
   font-variant-numeric: tabular-nums lining-nums;
   letter-spacing: -0.02em; flex-shrink: 0;
@@ -929,14 +929,14 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 #rest-island.expanded #ri-detail,
 #rest-island.go #ri-detail { max-width: 270px; opacity: 1; }
 #ri-next {
-  font-size: 11.5px; line-height: 1.35; color: rgba(250,247,242,0.85);
+  font-size: var(--fs-sm); line-height: 1.35; color: rgba(250,247,242,0.85);
   white-space: normal; max-width: 158px;
   overflow: hidden; display: -webkit-box;
   -webkit-line-clamp: 2; -webkit-box-orient: vertical;
 }
 .ri-btn {
   border: none; border-radius: 14px; padding: 7px 12px;
-  font-family: var(--font-body); font-size: 11px; font-weight: 700;
+  font-family: var(--font-body); font-size: var(--fs-sm); font-weight: 700;
   cursor: pointer; flex-shrink: 0; letter-spacing: 0.02em;
   -webkit-tap-highlight-color: transparent;
   transition: transform 160ms var(--spring-snappy), background 160ms;
@@ -971,7 +971,7 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 .np-chip {
   flex: 1; padding: 11px 0; border-radius: 14px;
   border: 1px solid var(--border); background: var(--card);
-  font-family: var(--font-mono); font-size: 14px; font-weight: 600;
+  font-family: var(--font-mono); font-size: var(--fs-md); font-weight: 600;
   color: var(--text-secondary); cursor: pointer;
   font-variant-numeric: tabular-nums lining-nums;
   -webkit-tap-highlight-color: transparent;
@@ -984,19 +984,19 @@ body.rest-active .screen { padding-top: calc(env(safe-area-inset-top, 0px) + 58p
 .np-key {
   height: 52px; border-radius: 14px; border: none;
   background: var(--card); box-shadow: var(--shadow-sm);
-  font-family: var(--font-mono); font-size: 24px; font-weight: 400;
+  font-family: var(--font-mono); font-size: var(--fs-xl); font-weight: 400;
   color: var(--text-primary); cursor: pointer;
   font-variant-numeric: tabular-nums lining-nums;
   -webkit-tap-highlight-color: transparent;
   transition: transform 120ms var(--spring-snappy), background 120ms;
 }
 .np-key:active { transform: scale(0.93); background: var(--surface-sunken); }
-.np-del { font-size: 18px; color: var(--text-secondary); }
+.np-del { font-size: var(--fs-xl); color: var(--text-secondary); }
 .np-action {
   width: 100%; margin-top: 10px; padding: 16px;
   border: none; border-radius: 18px;
   background: var(--accent-kinetic); color: #fff;
-  font-family: var(--font-body); font-size: 16px; font-weight: 600;
+  font-family: var(--font-body); font-size: var(--fs-lg); font-weight: 600;
   cursor: pointer; -webkit-tap-highlight-color: transparent;
   box-shadow: var(--shadow-md);
   transition: transform var(--dur-fast) var(--spring-snappy), background var(--dur-fast);
@@ -1035,17 +1035,17 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
 }
 @keyframes pillPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.45;transform:scale(0.7)} }
 .pill-session {
-  font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.9);
+  font-size: var(--fs-md); font-weight: 600; color: rgba(255,255,255,0.9);
   flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .pill-dur {
-  font-family: var(--font-hero); font-size: 22px; font-weight: 700;
+  font-family: var(--font-hero); font-size: var(--fs-xl); font-weight: 700;
   color: var(--accent); min-width: 58px; line-height: 1;
   flex-shrink: 0; font-variant-numeric: tabular-nums;
 }
 .pill-resume {
   background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 12px; padding: 7px 14px; font-size: 12px; font-weight: 600;
+  border-radius: 12px; padding: 7px 14px; font-size: var(--fs-sm); font-weight: 600;
   color: rgba(255,255,255,0.6); flex-shrink: 0;
 }
 
@@ -1075,11 +1075,11 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   cursor: pointer; min-height: 64px; gap: 12px;
 }
 .ex-card-header-left { flex: 1; }
-.ex-name { font-size: 16px; font-weight: 600; color: var(--text-primary); transition: color 200ms; letter-spacing: -0.01em; }
+.ex-name { font-size: var(--fs-lg); font-weight: 600; color: var(--text-primary); transition: color 200ms; letter-spacing: -0.01em; }
 .ex-card.completed .ex-name { text-decoration: line-through; color: var(--text-tertiary); }
-.ex-meta { font-size: 12.5px; color: var(--text-secondary); margin-top: 4px; }
+.ex-meta { font-size: var(--fs-sm); color: var(--text-secondary); margin-top: 4px; }
 .muscle-badge {
-  display: inline-block; font-size: 10px; font-weight: 700;
+  display: inline-block; font-size: var(--fs-xs); font-weight: 700;
   letter-spacing: 0.4px; text-transform: uppercase;
   border-radius: 6px; padding: 2px 7px; margin-bottom: 4px;
 }
@@ -1109,17 +1109,17 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
 .ex-card.completed .ex-chevron { color: var(--accent-success); }
 .ex-check { color: var(--accent-success); font-weight: 700; }
 .ex-check-pill {
-  font-size: 8.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
   color: var(--accent-success); background: oklch(72.3% 0.190 145 / 0.12);
   border-radius: 6px; padding: 2px 6px; display: inline-flex; align-items: center;
 }
-.ex-last-perf { font-size: 11.5px; color: var(--text-tertiary); margin-top: 3px; font-style: italic; }
+.ex-last-perf { font-size: var(--fs-sm); color: var(--text-tertiary); margin-top: 3px; font-style: italic; }
 
 /* ── Plate calc quick trigger ── */
 .plate-calc-trigger {
   display: inline-flex; align-items: center; gap: 4px;
   background: var(--surface-sunken); border: 1px solid var(--border-subtle);
-  border-radius: 8px; padding: 4px 8px; font-size: 11px; font-weight: 600;
+  border-radius: 8px; padding: 4px 8px; font-size: var(--fs-sm); font-weight: 600;
   color: var(--text-secondary); cursor: pointer; transition: all 140ms var(--ease);
 }
 .plate-calc-trigger:hover, .plate-calc-trigger:active {
@@ -1132,11 +1132,11 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   border-bottom: 1px solid var(--border-subtle);
 }
 .action-sheet-title {
-  font-family: var(--font-hero); font-style: italic; font-size: 20px; font-weight: 600;
+  font-family: var(--font-hero); font-style: italic; font-size: var(--fs-xl); font-weight: 600;
   color: var(--text-primary); line-height: 1.25; margin-bottom: 4px;
 }
 .action-sheet-meta {
-  font-size: 11.5px; color: var(--text-tertiary); font-weight: 500;
+  font-size: var(--fs-sm); color: var(--text-tertiary); font-weight: 500;
 }
 .action-sheet-list {
   display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px;
@@ -1145,7 +1145,7 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   display: flex; align-items: center; gap: 14px; width: 100%;
   padding: 12px 14px; border-radius: 14px;
   background: var(--surface-card); border: 1px solid var(--border-subtle);
-  color: var(--text-primary); font-size: 14.5px; font-weight: 500;
+  color: var(--text-primary); font-size: var(--fs-md); font-weight: 500;
   cursor: pointer; transition: all 140ms var(--spring-snappy); text-align: left;
 }
 .action-sheet-row:active {
@@ -1157,20 +1157,20 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
 .action-sheet-icon {
   width: 34px; height: 34px; border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 16px; flex-shrink: 0; background: var(--surface-sunken);
+  font-size: var(--fs-lg); flex-shrink: 0; background: var(--surface-sunken);
   color: var(--text-primary);
 }
 .action-sheet-row.danger .action-sheet-icon {
   background: rgba(192,78,42,0.1); color: #C04E2A;
 }
 .action-sheet-label { flex: 1; min-width: 0; }
-.action-sheet-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; line-height: 1.3; }
+.action-sheet-sub { font-size: var(--fs-sm); color: var(--text-tertiary); margin-top: 2px; line-height: 1.3; }
 
 /* Card body */
 .ex-body { display: grid; grid-template-rows: 0fr; overflow: hidden; transition: grid-template-rows 260ms cubic-bezier(0.16, 1, 0.3, 1); }
 .ex-card.expanded .ex-body { grid-template-rows: 1fr; }
 .ex-body-inner { overflow: hidden; min-height: 0; padding: 0 16px 18px; }
-.warmup-hint { font-style: italic; font-size: 12px; color: var(--text-tertiary); margin-bottom: 10px; }
+.warmup-hint { font-style: italic; font-size: var(--fs-sm); color: var(--text-tertiary); margin-bottom: 10px; }
 
 /* ── Warm-up set row ── */
 .warmup-row {
@@ -1180,26 +1180,26 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   border: 1px dashed var(--border-strong);
 }
 .warmup-label {
-  font-size: 10px; font-family: var(--font-mono); letter-spacing: 0.12em;
+  font-size: var(--fs-xs); font-family: var(--font-mono); letter-spacing: 0.12em;
   color: var(--text-tertiary); text-transform: uppercase; white-space: nowrap; flex-shrink: 0;
   font-weight: 600;
 }
 .warmup-input {
   flex: 1; min-width: 0; height: 38px; border: 1px solid var(--border); border-radius: 10px;
-  text-align: center; font-size: 15px; font-weight: 600; font-family: var(--font-mono);
+  text-align: center; font-size: var(--fs-md); font-weight: 600; font-family: var(--font-mono);
   background: var(--card); color: var(--text-primary); outline: none; box-sizing: border-box;
   font-variant-numeric: tabular-nums lining-nums;
 }
-.warmup-sep { font-size: 13px; color: var(--text-tertiary); flex-shrink: 0; }
+.warmup-sep { font-size: var(--fs-md); color: var(--text-tertiary); flex-shrink: 0; }
 .warmup-dismiss {
   width: 28px; height: 28px; flex-shrink: 0; border: none; background: none;
-  cursor: pointer; color: var(--text-tertiary); font-size: 16px; line-height: 1;
+  cursor: pointer; color: var(--text-tertiary); font-size: var(--fs-lg); line-height: 1;
   display: flex; align-items: center; justify-content: center; border-radius: 50%;
   transition: background 150ms, color 150ms;
 }
 .warmup-dismiss:active { background: var(--border-subtle); color: var(--text-primary); }
 .ex-notes {
-  font-style: italic; font-size: 12px; color: var(--text-tertiary);
+  font-style: italic; font-size: var(--fs-sm); color: var(--text-tertiary);
   margin-bottom: 10px; outline: none; width: 100%;
   background: none; border: none; font-family: var(--font-body); cursor: text;
 }
@@ -1227,7 +1227,7 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   width: 100%; padding: 12px 14px;
   border: 1px solid var(--border); border-radius: 14px;
   background: var(--surface-sunken);
-  font-family: var(--font-body); font-size: 13px;
+  font-family: var(--font-body); font-size: var(--fs-md);
   color: var(--text-primary); line-height: 1.55;
   resize: none; outline: none;
   margin-top: 10px; margin-bottom: 6px;
@@ -1268,7 +1268,7 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
 .set-input { min-width: 0; flex: 1 1 0; box-sizing: border-box; }
 .set-num {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: var(--fs-md);
   font-weight: 600;
   color: var(--text-tertiary);
   width: 22px;
@@ -1283,7 +1283,7 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   border: 1px solid var(--border);
   border-radius: 12px;
   text-align: center;
-  font-size: 16.5px;
+  font-size: var(--fs-lg);
   font-weight: 600;
   font-family: var(--font-mono);
   background: var(--surface-canvas);
@@ -1305,7 +1305,7 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   color: var(--accent-success);
   box-shadow: none;
 }
-.set-sep { font-size: 13px; color: var(--text-tertiary); }
+.set-sep { font-size: var(--fs-md); color: var(--text-tertiary); }
 .set-log-btn {
   width: 44px;
   height: 44px;
@@ -1313,7 +1313,7 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   border: none;
   background: var(--accent-kinetic);
   color: #fff;
-  font-size: 18px;
+  font-size: var(--fs-xl);
   cursor: pointer;
   flex-shrink: 0;
   margin-left: auto;
@@ -1331,22 +1331,22 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   transform: scale(1.0);
 }
 .set-log-btn:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
-.set-hint { font-size: 11.5px; color: var(--text-tertiary); margin-top: -4px; margin-bottom: 6px; padding-left: 30px; font-style: italic; }
+.set-hint { font-size: var(--fs-sm); color: var(--text-tertiary); margin-top: -4px; margin-bottom: 6px; padding-left: 30px; font-style: italic; }
 .rest-time-row { display: flex; align-items: center; gap: 6px; font-style: normal; padding-left: 0; }
 .rest-time-display {
-  font-size: 12.5px; font-weight: 600; color: var(--text-primary); cursor: pointer;
+  font-size: var(--fs-sm); font-weight: 600; color: var(--text-primary); cursor: pointer;
   border-bottom: 1px dashed var(--border-strong); padding-bottom: 1px; transition: color 150ms;
 }
 .rest-time-display:hover { color: var(--accent-kinetic); border-color: var(--accent-kinetic); }
 .rest-time-input {
-  font-size: 12.5px; font-weight: 600; width: 54px;
+  font-size: var(--fs-sm); font-weight: 600; width: 54px;
   border: none; border-bottom: 1.5px solid var(--accent-kinetic);
   background: none; color: var(--text-primary); outline: none;
   text-align: center; font-family: var(--font-body); padding: 0 2px 1px;
 }
 .technique-badge {
   display: inline-block; background: var(--accent-kinetic); color: #fff;
-  font-size: 10px; font-weight: 600; border-radius: 8px;
+  font-size: var(--fs-xs); font-weight: 600; border-radius: 8px;
   padding: 2px 8px; margin-left: 8px;
   text-transform: uppercase; letter-spacing: 0.3px;
 }
@@ -1358,11 +1358,11 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
 @keyframes ripple { 0%{opacity:1} 100%{opacity:0;transform:scale(1.04)} }
 .set-trend {
   padding-left: 30px; margin-top: -2px; margin-bottom: 4px;
-  font-size: 10.5px; font-variant-numeric: tabular-nums lining-nums;
+  font-size: var(--fs-xs); font-variant-numeric: tabular-nums lining-nums;
   display: flex; align-items: center; gap: 4px; color: var(--text-tertiary);
 }
-.trend-arrow-up   { color: #C4944A; font-size: 11px; font-weight: 700; }
-.trend-arrow-down { color: #C4876E; font-size: 11px; font-weight: 700; }
+.trend-arrow-up   { color: #C4944A; font-size: var(--fs-sm); font-weight: 700; }
+.trend-arrow-down { color: #C4876E; font-size: var(--fs-sm); font-weight: 700; }
 
 /* PR Celebration Badge */
 .pr-toast {
@@ -1370,7 +1370,7 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   background: linear-gradient(135deg, rgba(234, 179, 8, 0.18), rgba(240, 78, 35, 0.15));
   border: 1px solid rgba(234, 179, 8, 0.45);
   color: #B45309; border-radius: 20px;
-  padding: 4px 12px; font-size: 11px; font-weight: 700;
+  padding: 4px 12px; font-size: var(--fs-sm); font-weight: 700;
   letter-spacing: 0.04em; text-transform: uppercase;
   margin: 4px 0 6px 30px;
   animation: prToastIn 400ms var(--spring-snappy) forwards;
@@ -1388,15 +1388,15 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   border-radius: 16px; padding: 14px 16px; margin-bottom: 10px; box-shadow: var(--shadow-sm);
 }
 .cue-card-head {
-  display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; gap: 8px; font-size: var(--fs-sm); font-weight: 700;
   text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-secondary); margin-bottom: 6px;
 }
-.cue-card-body { font-size: 13px; line-height: 1.5; color: var(--text-primary); }
+.cue-card-body { font-size: var(--fs-md); line-height: 1.5; color: var(--text-primary); }
 
 /* Substitution Sheet Styling */
 .subs-filter-bar { display: flex; gap: 6px; overflow-x: auto; padding: 4px 0 12px; margin-bottom: 8px; -webkit-overflow-scrolling: touch; }
 .subs-tab-btn {
-  padding: 7px 14px; border-radius: 20px; font-size: 11.5px; font-weight: 600;
+  padding: 7px 14px; border-radius: 20px; font-size: var(--fs-sm); font-weight: 600;
   border: 1px solid var(--border-subtle); background: var(--surface-card);
   color: var(--text-secondary); cursor: pointer; white-space: nowrap;
   transition: all var(--dur-fast);
@@ -1410,22 +1410,22 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   box-shadow: var(--shadow-sm); transition: transform var(--dur-fast);
 }
 .sub-card-header { display: flex; justify-content: space-between; align-items: center; }
-.sub-card-name { font-size: 14px; font-weight: 700; color: var(--text-primary); }
-.sub-card-tag { font-size: 10px; font-weight: 700; text-transform: uppercase; background: rgba(240,78,35,0.1); color: var(--accent-kinetic); padding: 2px 7px; border-radius: 8px; }
-.sub-card-detail { font-size: 11.5px; color: var(--text-tertiary); margin: 6px 0 10px; }
+.sub-card-name { font-size: var(--fs-md); font-weight: 700; color: var(--text-primary); }
+.sub-card-tag { font-size: var(--fs-xs); font-weight: 700; text-transform: uppercase; background: rgba(240,78,35,0.1); color: var(--accent-kinetic); padding: 2px 7px; border-radius: 8px; }
+.sub-card-detail { font-size: var(--fs-sm); color: var(--text-tertiary); margin: 6px 0 10px; }
 .sub-use-btn {
   width: 100%; padding: 10px; border-radius: 12px; border: none;
-  background: var(--accent-kinetic); color: #fff; font-size: 13px; font-weight: 700; cursor: pointer;
+  background: var(--accent-kinetic); color: #fff; font-size: var(--fs-md); font-weight: 700; cursor: pointer;
 }
 
 /* Plate calculator */
 .plate-popover {
   background: var(--card); color: var(--text);
-  border-radius: 14px; padding: 10px 14px 11px; font-size: 12px; margin-top: 6px;
+  border-radius: 14px; padding: 10px 14px 11px; font-size: var(--fs-sm); margin-top: 6px;
   box-shadow: var(--shadow-deep); border: 0.5px solid var(--border);
 }
-.plate-popover .plate-title { font-size: 9.5px; color: var(--muted); margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.09em; }
-.plate-total { font-size: 11.5px; color: var(--text-secondary); text-align: center; margin-top: 5px; font-variant-numeric: tabular-nums; }
+.plate-popover .plate-title { font-size: var(--fs-xs); color: var(--muted); margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.09em; }
+.plate-total { font-size: var(--fs-sm); color: var(--text-secondary); text-align: center; margin-top: 5px; font-variant-numeric: tabular-nums; }
 .plate-total strong { font-weight: 600; color: var(--text); }
 
 /* Overload nudge */
@@ -1433,11 +1433,11 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   background: linear-gradient(135deg, #FFF7ED, #FFEDD5);
   border: 1px solid #FED7AA; border-radius: 12px;
   padding: 10px 14px; margin-bottom: 10px;
-  font-size: 13px; color: #92400E;
+  font-size: var(--fs-md); color: #92400E;
   display: flex; align-items: center; gap: 8px;
 }
-.weight-suggestion { font-style: italic; font-size: 11px; color: var(--muted); margin-bottom: 6px; padding-left: 30px; }
-.overload-next { background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 10px; padding: 8px 12px; font-size: 12px; color: #166534; margin-top: 8px; }
+.weight-suggestion { font-style: italic; font-size: var(--fs-sm); color: var(--muted); margin-bottom: 6px; padding-left: 30px; }
+.overload-next { background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 10px; padding: 8px 12px; font-size: var(--fs-sm); color: #166534; margin-top: 8px; }
 
 /* ── Bottom sheet ── */
 .bottom-sheet-overlay {
@@ -1454,51 +1454,51 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
 }
 .bottom-sheet.visible { transform: translateY(0); }
 .bs-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 12px auto 20px; }
-.bs-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
-.bs-section-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.bs-title { font-size: var(--fs-xl); font-weight: 700; margin-bottom: 16px; }
+.bs-section-lbl { font-size: var(--fs-sm); color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
 .sub-card { background: var(--card); border-radius: 12px; margin-bottom: 8px; overflow: hidden; box-shadow: var(--shadow); }
 .sub-card-header { padding: 12px 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; min-height: 44px; }
-.sub-card-name { font-size: 14px; font-weight: 500; }
-.sub-card-tag { font-size: 10px; color: var(--muted); background: var(--border); border-radius: 6px; padding: 2px 6px; }
+.sub-card-name { font-size: var(--fs-md); font-weight: 500; }
+.sub-card-tag { font-size: var(--fs-xs); color: var(--muted); background: var(--border); border-radius: 6px; padding: 2px 6px; }
 .sub-card-body { padding: 0 14px; max-height: 0; overflow: hidden; transition: max-height 200ms ease-out; }
 .sub-card.open .sub-card-body { max-height: 120px; padding-bottom: 12px; }
-.sub-card-detail { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
-.sub-use-btn { width: 100%; background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: 10px; font-size: 13px; font-weight: 600; cursor: pointer; min-height: 40px; }
+.sub-card-detail { font-size: var(--fs-sm); color: var(--text-secondary); margin-bottom: 8px; }
+.sub-use-btn { width: 100%; background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: 10px; font-size: var(--fs-md); font-weight: 600; cursor: pointer; min-height: 40px; }
 .highlighted { background: #FFF7ED; border: 1px solid #FED7AA; }
 .cue-section { margin-bottom: 14px; }
-.cue-section h4 { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-.cue-section p { font-size: 14px; color: var(--text); line-height: 1.6; }
-.cue-tip { background: #FFF7ED; border-left: 3px solid var(--accent); border-radius: 0 10px 10px 0; padding: 10px 14px; font-size: 13px; color: #92400E; margin-top: 8px; }
+.cue-section h4 { font-size: var(--fs-sm); color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.cue-section p { font-size: var(--fs-md); color: var(--text); line-height: 1.6; }
+.cue-tip { background: #FFF7ED; border-left: 3px solid var(--accent); border-radius: 0 10px 10px 0; padding: 10px 14px; font-size: var(--fs-md); color: #92400E; margin-top: 8px; }
 
 /* ── Exercise picker sheet — library search, set/rep picker (Decisions 1,2,6,7) ── */
-.bs-sub { font-size: 12.5px; color: var(--muted); line-height: 1.5; margin: -8px 0 16px; }
+.bs-sub { font-size: var(--fs-sm); color: var(--muted); line-height: 1.5; margin: -8px 0 16px; }
 .bs-search {
   width: 100%; box-sizing: border-box; padding: 11px 14px; min-height: 44px;
   border: 1px solid var(--border); border-radius: 12px; background: #fff;
-  font-size: 14px; font-family: var(--font-body); color: var(--text);
+  font-size: var(--fs-md); font-family: var(--font-body); color: var(--text);
   margin-bottom: 12px; -webkit-appearance: none; outline: none;
   transition: border-color 160ms ease;
 }
 .bs-search:focus { border-color: var(--accent); }
 .bs-search::placeholder { color: var(--muted); }
 .lib-section { margin-bottom: 14px; }
-.lib-muscle-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); font-weight: 600; margin: 14px 2px 6px; }
-.lib-empty { font-size: 13px; color: var(--muted); font-style: italic; text-align: center; padding: 18px 4px; }
+.lib-muscle-lbl { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 1px; color: var(--muted); font-weight: 600; margin: 14px 2px 6px; }
+.lib-empty { font-size: var(--fs-md); color: var(--muted); font-style: italic; text-align: center; padding: 18px 4px; }
 
 .srp { margin: 4px 0 8px; }
 .srp-row { display: flex; align-items: center; justify-content: space-between; padding: 16px 2px; border-bottom: 1px solid var(--border); }
 .srp-row:last-child { border-bottom: none; }
-.srp-lbl { font-size: 15px; font-weight: 600; color: var(--text); }
-.srp-hint { font-size: 11px; font-weight: 400; color: var(--muted); margin-left: 3px; }
+.srp-lbl { font-size: var(--fs-md); font-weight: 600; color: var(--text); }
+.srp-hint { font-size: var(--fs-sm); font-weight: 400; color: var(--muted); margin-left: 3px; }
 .srp-stepper { display: flex; align-items: center; gap: 6px; }
 .srp-btn {
   width: 42px; height: 42px; border-radius: 12px; border: 1px solid var(--border);
-  background: #fff; color: var(--text); font-size: 22px; line-height: 1; cursor: pointer;
+  background: #fff; color: var(--text); font-size: var(--fs-xl); line-height: 1; cursor: pointer;
   display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent;
   transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
 }
 .srp-btn:active { transform: scale(0.92); border-color: var(--accent); background: #FFF7ED; }
-.srp-val { min-width: 52px; text-align: center; font-size: 22px; font-weight: 700; color: var(--charcoal); font-variant-numeric: tabular-nums lining-nums; }
+.srp-val { min-width: 52px; text-align: center; font-size: var(--fs-xl); font-weight: 700; color: var(--charcoal); font-variant-numeric: tabular-nums lining-nums; }
 .srp-preview {
   text-align: center; font-family: var(--font-hero); font-style: italic;
   font-size: 34px; color: var(--accent); margin: 8px 0 14px;
@@ -1506,7 +1506,7 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
 }
 
 /* ── Additions in the workout list (Decisions 4,5) ── */
-.add-group-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); font-weight: 600; margin: 18px 2px 8px; }
+.add-group-lbl { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); font-weight: 600; margin: 18px 2px 8px; }
 .ex-card-add { position: relative; }
 .ex-card-add::before { content: ''; position: absolute; top: 14px; bottom: 14px; left: 0; width: 3px; border-radius: 0 3px 3px 0; background: rgba(240,78,35,0.32); }
 .ex-remove-btn { color: var(--muted); }
@@ -1514,23 +1514,23 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
 .add-ex-pill {
   width: 100%; box-sizing: border-box; margin: 10px 0 6px; padding: 16px;
   border-radius: 16px; border: 1.5px dashed rgba(240,78,35,0.38); background: #fff;
-  color: var(--accent); font-size: 15px; font-weight: 600; font-family: var(--font-body);
+  color: var(--accent); font-size: var(--fs-md); font-weight: 600; font-family: var(--font-body);
   cursor: pointer; box-shadow: var(--shadow); min-height: 56px;
   display: flex; align-items: center; justify-content: center; gap: 9px;
   -webkit-tap-highlight-color: transparent; transition: background 140ms ease, border-color 140ms ease, transform 120ms ease;
 }
 .add-ex-pill:active { background: #FFF7ED; border-color: var(--accent); transform: scale(0.99); }
-.add-ex-plus { font-size: 20px; font-weight: 400; line-height: 1; }
+.add-ex-plus { font-size: var(--fs-xl); font-weight: 400; line-height: 1; }
 
 /* ── History popup: grouped exercise list (Decisions 3,5) ── */
 .cal-ex-list { margin-top: 16px; border-top: 1px solid var(--border); padding-top: 10px; text-align: left; max-height: 38vh; overflow-y: auto; }
-.cal-ex-group-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted); font-weight: 600; margin: 12px 0 4px; }
+.cal-ex-group-lbl { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted); font-weight: 600; margin: 12px 0 4px; }
 .cal-ex-group-add { color: var(--accent); }
-.cal-ex-row { display: flex; align-items: baseline; gap: 8px; padding: 6px 0; font-size: 13.5px; }
-.cal-ex-check { color: #22C55E; font-size: 11px; flex-shrink: 0; }
+.cal-ex-row { display: flex; align-items: baseline; gap: 8px; padding: 6px 0; font-size: var(--fs-md); }
+.cal-ex-check { color: #22C55E; font-size: var(--fs-sm); flex-shrink: 0; }
 .cal-ex-name { flex: 1; color: var(--text); }
-.cal-ex-sub { font-size: 11px; color: var(--muted); font-style: italic; margin-left: 6px; }
-.cal-ex-vol { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums lining-nums; flex-shrink: 0; }
+.cal-ex-sub { font-size: var(--fs-sm); color: var(--muted); font-style: italic; margin-left: 6px; }
+.cal-ex-vol { font-size: var(--fs-sm); color: var(--muted); font-variant-numeric: tabular-nums lining-nums; flex-shrink: 0; }
 
 /* ── Finish screen ── */
 #finish-screen {
@@ -1546,25 +1546,25 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   margin-bottom: 4px; text-align: center; letter-spacing: -0.02em;
 }
 .finish-session-label {
-  font-size: 13px; color: var(--text-secondary); margin-bottom: 24px;
+  font-size: var(--fs-md); color: var(--text-secondary); margin-bottom: 24px;
   text-align: center; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600;
 }
 .finish-plan-table { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
 .finish-row { border-radius: 16px; padding: 14px 18px; display: flex; align-items: center; gap: 12px; position: relative; overflow: hidden; }
 .finish-row-done-prior { background: var(--surface-sunken); border: 1px solid var(--border-subtle); }
-.finish-row-done-prior .fr-name { text-decoration: line-through; color: var(--text-tertiary); font-size: 14px; }
-.finish-row-done-prior .fr-date { font-size: 11px; color: var(--text-tertiary); }
+.finish-row-done-prior .fr-name { text-decoration: line-through; color: var(--text-tertiary); font-size: var(--fs-md); }
+.finish-row-done-prior .fr-date { font-size: var(--fs-sm); color: var(--text-tertiary); }
 .finish-row-done-prior .fr-icon { opacity: 0.4; }
 .finish-row-remaining { background: var(--surface-sunken); border: 1px solid var(--border-subtle); opacity: 0.75; }
-.finish-row-remaining .fr-name { color: var(--text-secondary); font-size: 14px; }
-.finish-row-remaining .fr-date { font-size: 11px; color: var(--text-tertiary); }
+.finish-row-remaining .fr-name { color: var(--text-secondary); font-size: var(--fs-md); }
+.finish-row-remaining .fr-date { font-size: var(--fs-sm); color: var(--text-tertiary); }
 .finish-row-now {
   background: linear-gradient(135deg, rgba(201, 168, 76, 0.14) 0%, rgba(201, 168, 76, 0.04) 100%);
   border: 1px solid rgba(201, 168, 76, 0.45);
   box-shadow: 0 4px 20px rgba(201, 168, 76, 0.16), inset 0 1px 0 rgba(255,255,255,0.9);
 }
-.finish-row-now .fr-name { font-size: 15px; font-weight: 700; color: var(--text-primary); }
-.finish-row-now .fr-date { font-size: 11.5px; color: rgba(160, 120, 20, 0.9); font-weight: 600; }
+.finish-row-now .fr-name { font-size: var(--fs-md); font-weight: 700; color: var(--text-primary); }
+.finish-row-now .fr-date { font-size: var(--fs-sm); color: rgba(160, 120, 20, 0.9); font-weight: 600; }
 .finish-row-now::after {
   content: ''; position: absolute; top: 0; left: -60%;
   width: 40%; height: 100%;
@@ -1572,7 +1572,7 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   animation: goldSweep 2.8s ease-in-out infinite 0.5s;
 }
 @keyframes goldSweep { 0%{left:-60%} 100%{left:130%} }
-.fr-icon { font-size: 16px; flex-shrink: 0; width: 24px; text-align: center; }
+.fr-icon { font-size: var(--fs-lg); flex-shrink: 0; width: 24px; text-align: center; }
 .fr-info { flex: 1; }
 .fr-name { font-weight: 600; }
 .fr-date { margin-top: 2px; }
@@ -1582,10 +1582,10 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   box-shadow: var(--shadow-sm); border: 1px solid var(--border-subtle);
 }
 .finish-stat-val {
-  font-family: var(--font-mono); font-size: 21px; font-weight: 600; color: var(--text-primary);
+  font-family: var(--font-mono); font-size: var(--fs-xl); font-weight: 600; color: var(--text-primary);
   font-variant-numeric: tabular-nums lining-nums; letter-spacing: -0.02em;
 }
-.finish-stat-lbl { font-size: 9.5px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; font-weight: 600; }
+.finish-stat-lbl { font-size: var(--fs-xs); color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; font-weight: 600; }
 
 /* ── Milestone screen ── */
 #milestone-screen {
@@ -1599,9 +1599,9 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   color: var(--accent); line-height: 1; opacity: 0.15; position: absolute;
 }
 .milestone-content { position: relative; text-align: center; }
-.milestone-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; }
+.milestone-label { font-size: var(--fs-sm); color: var(--muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; }
 .milestone-title { font-family: var(--font-hero); font-size: 44px; font-weight: 700; color: var(--charcoal); margin-bottom: 16px; }
-.milestone-quote { font-family: var(--font-hero); font-style: italic; font-size: 20px; color: var(--text-secondary); margin-bottom: 40px; line-height: 1.5; }
+.milestone-quote { font-family: var(--font-hero); font-style: italic; font-size: var(--fs-xl); color: var(--text-secondary); margin-bottom: 40px; line-height: 1.5; }
 
 /* ── HISTORY SCREEN ── */
 /* ── True iOS segmented control — one sliding raised thumb ── */
@@ -1623,7 +1623,7 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
 .history-tabs:has(.hist-tab:nth-child(2).active)::before { transform: translateX(100%); }
 .hist-tab {
   flex: 1; padding: 9px; text-align: center;
-  font-size: 13px; font-weight: 600; border-radius: 11px;
+  font-size: var(--fs-md); font-weight: 600; border-radius: 11px;
   cursor: pointer; transition: color var(--dur-med) var(--ease);
   color: var(--text-tertiary); border: none; background: none;
   position: relative; z-index: 1;
@@ -1660,7 +1660,7 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   min-width: 0;
 }
 .hsi-label {
-  font-size: 9.5px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -1670,7 +1670,7 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
 }
 .hsi-val {
   font-family: var(--font-mono);
-  font-size: 18px;
+  font-size: var(--fs-xl);
   font-weight: 700;
   color: var(--text-primary);
   line-height: 1.15;
@@ -1705,7 +1705,7 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
 .cal-card-title {
   font-family: var(--font-hero);
   font-style: italic;
-  font-size: 17px;
+  font-size: var(--fs-lg);
   font-weight: 600;
   color: var(--text-primary);
   letter-spacing: -0.01em;
@@ -1714,7 +1714,7 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 11px;
+  font-size: var(--fs-sm);
   color: var(--text-tertiary);
 }
 .cal-legend-dot {
@@ -1742,7 +1742,7 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
 }
 .cal-dow-cell {
   text-align: center;
-  font-size: 10px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   color: var(--text-tertiary);
   letter-spacing: 0.04em;
@@ -1799,7 +1799,7 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
 
 .recent-feed-header {
   padding: 0 20px 8px;
-  font-size: 0.65rem;
+  font-size: var(--fs-xs);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--text-tertiary);
@@ -1835,13 +1835,13 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
 .whfc-title {
   font-family: var(--font-hero);
   font-style: italic;
-  font-size: 18px;
+  font-size: var(--fs-xl);
   font-weight: 600;
   color: var(--text-primary);
   line-height: 1.15;
 }
 .whfc-date {
-  font-size: 11px;
+  font-size: var(--fs-sm);
   color: var(--text-tertiary);
   margin-top: 2px;
   font-weight: 500;
@@ -1855,7 +1855,7 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   border-radius: 12px;
   margin-bottom: 10px;
   font-family: var(--font-mono);
-  font-size: 11.5px;
+  font-size: var(--fs-sm);
   font-variant-numeric: tabular-nums lining-nums;
   color: var(--text-secondary);
 }
@@ -1876,7 +1876,7 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   border: 1px solid var(--border-subtle);
   padding: 3px 8px;
   border-radius: 8px;
-  font-size: 10.5px;
+  font-size: var(--fs-xs);
   color: var(--text-secondary);
 }
 .whfc-detail {
@@ -1894,7 +1894,7 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   border-top: 1px solid var(--border-subtle);
 }
 .whfc-chevron {
-  font-size: 11px;
+  font-size: var(--fs-sm);
   color: var(--text-tertiary);
   transition: transform 240ms ease;
   display: inline-flex;
@@ -1918,7 +1918,7 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   padding: 8px 12px;
 }
 .whfc-detail-ex-name {
-  font-size: 12.5px;
+  font-size: var(--fs-sm);
   font-weight: 600;
   color: var(--text-primary);
   margin-bottom: 6px;
@@ -1936,7 +1936,7 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
   padding: 3px 8px;
-  font-size: 11px;
+  font-size: var(--fs-sm);
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums lining-nums;
   color: var(--text-secondary);
@@ -1944,10 +1944,10 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
 .whfc-set-idx {
   font-weight: 700;
   color: var(--text-tertiary);
-  font-size: 9.5px;
+  font-size: var(--fs-xs);
 }
 .whfc-set-pr {
-  font-size: 9px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   color: #C4944A;
   background: rgba(196, 148, 74, 0.15);
@@ -1986,7 +1986,7 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   position: absolute; top: 16px; right: 16px;
   width: 32px; height: 32px; border-radius: 50%;
   background: var(--surface-sunken); border: 1px solid var(--border-subtle);
-  cursor: pointer; font-size: 14px; color: var(--text-secondary);
+  cursor: pointer; font-size: var(--fs-md); color: var(--text-secondary);
   display: flex; align-items: center; justify-content: center;
   transition: transform var(--dur-fast) var(--ease);
 }
@@ -1997,11 +1997,11 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   font-size: 26px; font-weight: 600; color: var(--text-primary); line-height: 1.1;
 }
 .cal-popup-date {
-  font-size: 11px; color: var(--text-tertiary);
+  font-size: var(--fs-sm); color: var(--text-tertiary);
   font-weight: 600; margin-top: 4px; display: flex; align-items: center; gap: 6px;
 }
 .cal-popup-prog {
-  display: inline-block; font-size: 10px; font-weight: 700;
+  display: inline-block; font-size: var(--fs-xs); font-weight: 700;
   text-transform: uppercase; letter-spacing: 0.06em;
   color: var(--accent-kinetic); background: rgba(240, 78, 35, 0.10);
   border: 1px solid rgba(240, 78, 35, 0.20);
@@ -2012,9 +2012,9 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   background: var(--surface-sunken); border: 1px solid var(--border-subtle);
   border-radius: 14px; padding: 10px 8px; text-align: center;
 }
-.cal-popup-stat-val { font-family: var(--font-mono); font-size: 15px; font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums lining-nums; }
+.cal-popup-stat-val { font-family: var(--font-mono); font-size: var(--fs-md); font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums lining-nums; }
 .cal-popup-stat-lbl {
-  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  font-size: var(--fs-xs); font-weight: 700; text-transform: uppercase;
   letter-spacing: 0.06em; color: var(--text-tertiary); margin-top: 2px;
 }
 .cal-ex-list { display: flex; flex-direction: column; gap: 8px; max-height: 240px; overflow-y: auto; margin-bottom: 16px; padding-right: 2px; }
@@ -2025,12 +2025,12 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
 .cal-ex-check {
   width: 20px; height: 20px; border-radius: 50%;
   background: rgba(16, 185, 129, 0.15); color: var(--accent-success);
-  font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  font-size: var(--fs-sm); font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
-.cal-ex-name { font-size: 13px; font-weight: 600; color: var(--text-primary); flex: 1; }
-.cal-ex-sub { display: block; font-size: 10px; color: var(--text-tertiary); font-weight: normal; margin-top: 1px; }
+.cal-ex-name { font-size: var(--fs-md); font-weight: 600; color: var(--text-primary); flex: 1; }
+.cal-ex-sub { display: block; font-size: var(--fs-xs); color: var(--text-tertiary); font-weight: normal; margin-top: 1px; }
 .cal-ex-vol {
-  font-family: var(--font-mono); font-size: 12px; font-weight: 700;
+  font-family: var(--font-mono); font-size: var(--fs-sm); font-weight: 700;
   color: var(--accent-kinetic); font-variant-numeric: tabular-nums lining-nums; flex-shrink: 0;
 }
 .cal-popup-actions { display: flex; flex-direction: column; gap: 8px; }
@@ -2044,13 +2044,13 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   font-size: 26px; font-weight: 600; color: var(--text-primary); line-height: 1.1;
 }
 .preview-sheet-meta {
-  font-size: 11.5px; color: var(--text-tertiary); font-weight: 500;
+  font-size: var(--fs-sm); color: var(--text-tertiary); font-weight: 500;
 }
 .preview-muscle-chips {
   display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px;
 }
 .preview-muscle-chip {
-  padding: 3px 9px; border-radius: 10px; font-size: 10px;
+  padding: 3px 9px; border-radius: 10px; font-size: var(--fs-xs);
   font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
 }
 .preview-card-list {
@@ -2065,19 +2065,19 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
 .preview-mc-num {
   width: 26px; height: 26px; border-radius: 8px;
   background: var(--surface-sunken); border: 1px solid var(--border-subtle);
-  font-family: var(--font-mono); font-size: 12px; font-weight: 700;
+  font-family: var(--font-mono); font-size: var(--fs-sm); font-weight: 700;
   color: var(--text-secondary); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   margin-top: 2px;
 }
 .preview-mc-info { flex: 1; min-width: 0; }
 .preview-mc-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-.preview-mc-name { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+.preview-mc-name { font-size: var(--fs-md); font-weight: 700; color: var(--text-primary); }
 .preview-mc-target {
-  font-family: var(--font-mono); font-size: 12px; color: var(--accent-kinetic);
+  font-family: var(--font-mono); font-size: var(--fs-sm); color: var(--accent-kinetic);
   font-weight: 600; margin-bottom: 4px;
 }
 .preview-mc-last {
-  font-size: 11px; color: var(--text-tertiary); background: var(--surface-sunken);
+  font-size: var(--fs-sm); color: var(--text-tertiary); background: var(--surface-sunken);
   border-radius: 8px; padding: 4px 8px; display: inline-block;
 }
 
@@ -2122,20 +2122,20 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   position: absolute; top: 18px; right: 18px;
   width: 30px; height: 30px; border-radius: 50%;
   background: rgba(42,36,33,0.10); border: 1px solid rgba(42,36,33,0.08);
-  cursor: pointer; font-size: 14px; color: var(--charcoal);
+  cursor: pointer; font-size: var(--fs-md); color: var(--charcoal);
   display: flex; align-items: center; justify-content: center;
 }
 .graph-ex-title {
   font-family: var(--font-hero); font-style: italic;
-  font-size: 22px; font-weight: 600; color: var(--charcoal);
+  font-size: var(--fs-xl); font-weight: 600; color: var(--charcoal);
   margin-bottom: 2px; position: relative;
 }
 .graph-meta {
-  font-size: 10px; color: rgba(42,36,33,0.45);
+  font-size: var(--fs-xs); color: rgba(42,36,33,0.45);
   text-transform: uppercase; letter-spacing: 1.2px;
   margin-bottom: 20px; position: relative;
 }
-.graph-no-data { font-size: 13px; color: rgba(42,36,33,0.45); font-style: italic; margin: 24px 0; text-align: center; position: relative; }
+.graph-no-data { font-size: var(--fs-md); color: rgba(42,36,33,0.45); font-style: italic; margin: 24px 0; text-align: center; position: relative; }
 .graph-svg-wrap { position: relative; width: 100%; }
 .graph-stat-row { display: flex; gap: 12px; margin-top: 20px; position: relative; }
 .graph-stat {
@@ -2143,8 +2143,8 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   border-radius: 14px; padding: 12px;
   border: 1px solid rgba(255,255,255,0.5);
 }
-.graph-stat-val { font-size: 18px; font-weight: 700; color: var(--charcoal); font-variant-numeric: tabular-nums; }
-.graph-stat-lbl { font-size: 9px; color: rgba(42,36,33,0.45); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px; }
+.graph-stat-val { font-size: var(--fs-xl); font-weight: 700; color: var(--charcoal); font-variant-numeric: tabular-nums; }
+.graph-stat-lbl { font-size: var(--fs-xs); color: rgba(42,36,33,0.45); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px; }
 
 /* ── Muscle glass overlay ── */
 #muscle-graph-overlay {
@@ -2162,7 +2162,7 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
 .silhouette-focus-active .muscle-group.muscle-focused { opacity: 1 !important; }
 /* recovery rings + ghost trace */
 .mg-recovery-rings { display: flex; gap: 6px; margin-bottom: 10px; align-items: center; }
-.mg-ring-label { font-size: 9.5px; color: rgba(255,255,255,0.42); font-family: var(--font-mono); letter-spacing: 0.06em; margin-left: 4px; }
+.mg-ring-label { font-size: var(--fs-xs); color: rgba(255,255,255,0.42); font-family: var(--font-mono); letter-spacing: 0.06em; margin-left: 4px; }
 .mg-ghost-trace { opacity: 0.25; }
 #muscle-graph-panel {
   width: 100%; max-width: 380px; max-height: 88vh;
@@ -2181,7 +2181,7 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   position: absolute; top: 16px; right: 16px;
   width: 32px; height: 32px; border-radius: 50%;
   background: var(--surface-sunken); border: 1px solid var(--border-subtle);
-  cursor: pointer; font-size: 14px; color: var(--text-secondary);
+  cursor: pointer; font-size: var(--fs-md); color: var(--text-secondary);
   display: flex; align-items: center; justify-content: center;
   z-index: 2; -webkit-tap-highlight-color: transparent;
   transition: transform var(--dur-fast) var(--ease);
@@ -2193,16 +2193,16 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   font-size: 28px; font-weight: 600; color: var(--text-primary); line-height: 1.05;
 }
 .mg-meta {
-  font-size: 9.5px; color: var(--text-tertiary);
+  font-size: var(--fs-xs); color: var(--text-tertiary);
   text-transform: uppercase; letter-spacing: 0.12em; margin-top: 3px; font-weight: 700;
 }
 .mg-delta {
-  font-family: var(--font-mono); font-size: 15px; font-weight: 700;
+  font-family: var(--font-mono); font-size: var(--fs-md); font-weight: 700;
   font-variant-numeric: tabular-nums lining-nums; white-space: nowrap; padding-top: 4px;
 }
 .mg-delta-up   { color: var(--accent-success); }
 .mg-delta-down { color: var(--accent-kinetic); }
-.mg-delta-none { font-family: var(--font-hero); font-style: italic; font-size: 13px; color: var(--text-tertiary); }
+.mg-delta-none { font-family: var(--font-hero); font-style: italic; font-size: var(--fs-md); color: var(--text-tertiary); }
 .mg-switcher {
   display: flex; gap: 6px; overflow-x: auto; margin: 4px -20px 12px; padding: 2px 20px 6px;
   scrollbar-width: none; -webkit-overflow-scrolling: touch;
@@ -2211,7 +2211,7 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
 .mg-chip {
   flex-shrink: 0; padding: 6px 14px; border-radius: 16px;
   border: 1px solid var(--border-subtle); background: var(--surface-card);
-  font-size: 11.5px; font-weight: 600; color: var(--text-secondary);
+  font-size: var(--fs-sm); font-weight: 600; color: var(--text-secondary);
   font-family: var(--font-body); cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: all var(--dur-fast) var(--spring-snappy);
@@ -2228,16 +2228,16 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   border-radius: 14px; padding: 10px 8px; text-align: center;
 }
 .mg-stat-lbl {
-  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  font-size: var(--fs-xs); font-weight: 700; text-transform: uppercase;
   letter-spacing: 0.06em; color: var(--text-tertiary); margin-bottom: 4px;
 }
 .mg-stat-num {
-  font-family: var(--font-mono); font-size: 14px; font-weight: 700;
+  font-family: var(--font-mono); font-size: var(--fs-md); font-weight: 700;
   color: var(--text-primary); font-variant-numeric: tabular-nums lining-nums;
 }
 .mg-chart-wrap { margin-bottom: 6px; background: var(--surface-sunken); border-radius: 16px; padding: 10px 8px; border: 1px solid var(--border-subtle); }
 .mg-empty {
-  font-family: var(--font-hero); font-style: italic; font-size: 14px;
+  font-family: var(--font-hero); font-style: italic; font-size: var(--fs-md);
   color: var(--text-tertiary); margin: 26px 0; text-align: center;
 }
 .mg-line-draw {
@@ -2255,32 +2255,32 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
   border-radius: 14px; padding: 10px 14px; display: flex;
   justify-content: space-between; align-items: center;
 }
-.mg-dc-name { font-size: 12.5px; font-weight: 600; color: var(--text-primary); }
-.mg-dc-sub { font-size: 10.5px; color: var(--text-tertiary); margin-top: 2px; }
+.mg-dc-name { font-size: var(--fs-sm); font-weight: 600; color: var(--text-primary); }
+.mg-dc-sub { font-size: var(--fs-xs); color: var(--text-tertiary); margin-top: 2px; }
 .mg-dc-val {
-  font-family: var(--font-mono); font-size: 13.5px; font-weight: 700;
+  font-family: var(--font-mono); font-size: var(--fs-md); font-weight: 700;
   color: var(--accent-kinetic); text-align: right; font-variant-numeric: tabular-nums lining-nums;
 }
 .mg-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
 .mg-range { display: flex; background: var(--surface-sunken); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 2px; gap: 0; }
 .mg-range-btn {
   border: none; background: none; padding: 5px 12px; border-radius: 8px;
-  font-size: 11px; font-weight: 600; color: var(--text-tertiary); cursor: pointer;
+  font-size: var(--fs-sm); font-weight: 600; color: var(--text-tertiary); cursor: pointer;
   font-family: var(--font-body); -webkit-tap-highlight-color: transparent;
   transition: all var(--dur-fast) var(--ease);
 }
 .mg-range-btn.active { background: var(--surface-card); color: var(--text-primary); box-shadow: var(--shadow-sm); }
-.mg-now { font-size: 11.5px; color: var(--text-tertiary); font-variant-numeric: tabular-nums; }
+.mg-now { font-size: var(--fs-sm); color: var(--text-tertiary); font-variant-numeric: tabular-nums; }
 .mg-now strong { color: var(--text-primary); font-weight: 600; }
 
 /* ── Program picker ── */
 .prog-picker-header { padding: calc(env(safe-area-inset-top, 0px) + 32px) 24px 16px; }
 .prog-picker-header h2 { font-family: var(--font-hero); font-size: 32px; font-weight: 600; font-style: italic; color: var(--text-primary); letter-spacing: -0.015em; }
-.prog-picker-header p { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
+.prog-picker-header p { font-size: var(--fs-md); color: var(--text-secondary); margin-top: 4px; }
 .day-selector { display: flex; gap: 8px; padding: 4px 24px 20px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .day-chip {
   flex-shrink: 0; padding: 8px 18px; border-radius: 20px;
-  border: 1px solid var(--border-subtle); font-size: 13.5px; font-weight: 600;
+  border: 1px solid var(--border-subtle); font-size: var(--fs-md); font-weight: 600;
   cursor: pointer; transition: all 150ms var(--spring-snappy); background: var(--surface-card); color: var(--text-secondary);
   box-shadow: var(--shadow-sm);
 }
@@ -2298,36 +2298,36 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
 .prog-card-days {
   width: 48px; height: 48px; border-radius: 14px; background: var(--surface-sunken);
   display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-mono); font-size: 20px; font-weight: 700; color: var(--accent-kinetic); flex-shrink: 0;
+  font-family: var(--font-mono); font-size: var(--fs-xl); font-weight: 700; color: var(--accent-kinetic); flex-shrink: 0;
   font-variant-numeric: tabular-nums lining-nums;
 }
-.prog-card-info h3 { font-size: 16px; font-weight: 600; color: var(--text-primary); letter-spacing: -0.01em; }
-.prog-card-info p { font-size: 12.5px; color: var(--text-secondary); margin-top: 3px; }
+.prog-card-info h3 { font-size: var(--fs-lg); font-weight: 600; color: var(--text-primary); letter-spacing: -0.01em; }
+.prog-card-info p { font-size: var(--fs-sm); color: var(--text-secondary); margin-top: 3px; }
 
 
 /* ── Settings ── */
 .settings-section { margin: 20px 16px; background: var(--surface-card); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-sm); border: 1px solid var(--border-subtle); }
-.settings-section-title { font-size: 11.5px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.09em; padding: 18px 18px 10px; }
+.settings-section-title { font-size: var(--fs-sm); font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.09em; padding: 18px 18px 10px; }
 .settings-row { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; min-height: 54px; position: relative; }
 .settings-row + .settings-row::before { content: ''; position: absolute; top: 0; left: 18px; right: 0; height: 0.5px; background: var(--border-subtle); }
 .settings-row:active { background: var(--surface-sunken); }
 .settings-row:first-of-type { border-top: none; }
-.settings-row label { font-size: 14.5px; color: var(--text-primary); font-weight: 500; }
-.settings-row input[type=text], .settings-row input[type=url] { border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; font-size: 13.5px; width: 160px; font-family: var(--font-body); outline: none; background: var(--surface-canvas); }
+.settings-row label { font-size: var(--fs-md); color: var(--text-primary); font-weight: 500; }
+.settings-row input[type=text], .settings-row input[type=url] { border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; font-size: var(--fs-md); width: 160px; font-family: var(--font-body); outline: none; background: var(--surface-canvas); }
 .settings-row input:focus { border-color: var(--accent-kinetic); }
 .settings-danger { color: var(--accent-danger) !important; }
 
 /* ── Empty state ── */
 .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 24px; text-align: center; }
 .empty-title { font-family: var(--font-hero); font-size: 36px; font-weight: 600; font-style: italic; color: var(--text-primary); margin-bottom: 12px; }
-.empty-sub { font-size: 14px; color: var(--text-secondary); margin-bottom: 32px; font-style: italic; }
+.empty-sub { font-size: var(--fs-md); color: var(--text-secondary); margin-bottom: 32px; font-style: italic; }
 
 /* ── Progress row ── */
 .progress-table { margin: 0 16px; }
 .prog-row { display: flex; align-items: center; gap: 10px; padding: 14px; background: var(--surface-card); border-radius: 16px; margin-bottom: 8px; cursor: pointer; box-shadow: var(--shadow-sm); min-height: 56px; border: 1px solid var(--border-subtle); }
-.prog-row-muscle { font-size: 14px; font-weight: 500; flex: 1; }
+.prog-row-muscle { font-size: var(--fs-md); font-weight: 500; flex: 1; }
 .prog-row-sparkline { width: 60px; height: 24px; }
-.prog-row-1rm { font-size: 13px; font-weight: 600; color: var(--text); text-align: right; min-width: 50px; font-variant-numeric: tabular-nums; }
+.prog-row-1rm { font-size: var(--fs-md); font-weight: 600; color: var(--text); text-align: right; min-width: 50px; font-variant-numeric: tabular-nums; }
 .status-dot { width: 8px; height: 8px; border-radius: 4px; flex-shrink: 0; }
 .dot-green { background: var(--green); }
 .dot-amber { background: #F59E0B; }
@@ -2348,14 +2348,14 @@ body.numpad-open #bottom-nav { transform: translateX(-50%) translateY(140%); }
 #confetti-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 299; }
 
 /* ── Deload banner ── */
-.deload-banner { margin: 0 24px 16px; background: #FFF7ED; border: 1px solid #FED7AA; border-radius: 14px; padding: 12px 16px; font-size: 13px; color: #92400E; }
+.deload-banner { margin: 0 24px 16px; background: #FFF7ED; border: 1px solid #FED7AA; border-radius: 14px; padding: 12px 16px; font-size: var(--fs-md); color: #92400E; }
 
 /* ── Stats / metrics ── */
 .stats-row { display: flex; gap: 0; margin: 0 24px 20px; background: var(--card); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden; }
 .stat-item { flex: 1; padding: 14px 10px; text-align: center; border-right: 1px solid var(--border); }
 .stat-item:last-child { border-right: none; }
-.stat-val { font-size: 25px; font-weight: 300; color: var(--charcoal); font-variant-numeric: tabular-nums lining-nums; letter-spacing: -0.01em; }
-.stat-lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+.stat-val { font-size: var(--fs-xl); font-weight: 300; color: var(--charcoal); font-variant-numeric: tabular-nums lining-nums; letter-spacing: -0.01em; }
+.stat-lbl { font-size: var(--fs-xs); color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
 
 /* Tabular lining for all numeric metrics globally */
 .stat-val, .wh-duration, #rest-countdown,
@@ -2405,12 +2405,12 @@ body { font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
 .ex-card.completed { border-left: 0; box-shadow: inset 0 0 0 1.5px rgba(95,138,92,0.30), 0 4px 14px rgba(42,36,33,0.04); }
 .ex-card-header { padding: 16px 16px 14px 18px; align-items: flex-start; }
 .ex-kicker { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
-.ex-name { font-size: 17px; font-weight: 700; letter-spacing: -0.015em; line-height: 1.25; }
+.ex-name { font-size: var(--fs-lg); font-weight: 700; letter-spacing: -0.015em; line-height: 1.25; }
 .ex-card.completed .ex-name { text-decoration: none; color: var(--sage-ink); }
-.ex-meta { font-size: 12.5px; color: var(--text-secondary); font-weight: 500; margin-top: 3px; font-variant-numeric: tabular-nums; }
-.ex-check-pill { font-size: 10px; letter-spacing: .06em; color: var(--sage-ink); background: var(--sage-bg); border-radius: 999px; padding: 2px 8px; }
+.ex-meta { font-size: var(--fs-sm); color: var(--text-secondary); font-weight: 500; margin-top: 3px; font-variant-numeric: tabular-nums; }
+.ex-check-pill { font-size: var(--fs-xs); letter-spacing: .06em; color: var(--sage-ink); background: var(--sage-bg); border-radius: 999px; padding: 2px 8px; }
 .ex-card.completed .ex-chevron { color: var(--sage); }
-.ex-sub-note { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-top: 3px; font-style: normal; }
+.ex-sub-note { display: flex; align-items: center; gap: 6px; font-size: var(--fs-sm); font-weight: 600; color: var(--text-secondary); margin-top: 3px; font-style: normal; }
 .ex-sub-note svg { width: 13px; height: 13px; flex-shrink: 0; color: var(--accent-kinetic); }
 .ex-cue-btn, .ex-graph-btn, .ex-menu-btn, .ex-note-btn { border: 0; background: var(--tile); }
 .ex-note-btn.has-note { border: 0; }
@@ -2419,7 +2419,7 @@ body { font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
 .muscle-badge {
   background: transparent !important; color: var(--text-secondary) !important;
   display: inline-flex; align-items: center; gap: 6px; padding: 0; margin: 0;
-  font-size: 11px; font-weight: 700; letter-spacing: .03em; text-transform: none;
+  font-size: var(--fs-sm); font-weight: 700; letter-spacing: .03em; text-transform: none;
 }
 .muscle-badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--mdot, #a39b92); opacity: .85; }
 
@@ -2430,15 +2430,15 @@ body { font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
   border-radius: 12px; padding: 7px 10px; background: var(--tile); color: var(--text-secondary);
   transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
 }
-.zone-chip b { display: block; font-size: 10px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
-.zone-chip span { display: block; font-size: 12.5px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.zone-chip b { display: block; font-size: var(--fs-xs); font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
+.zone-chip span { display: block; font-size: var(--fs-sm); font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .zone-chip[aria-pressed="true"] { background: color-mix(in oklab, var(--accent-kinetic) 12%, var(--surface-card)); color: var(--text-primary); }
 .zone-chip[aria-pressed="true"] b { color: var(--accent-kinetic); }
 .zone-chip.empty span { font-style: italic; font-weight: 500; }
 .ex-last-perf { font-style: normal; font-weight: 500; font-variant-numeric: tabular-nums; }
 
 /* Progression verdict */
-.verdict { display: flex; gap: 10px; align-items: flex-start; margin: 2px 0 12px; padding: 10px 12px; border-radius: 14px; background: var(--sage-bg); font-size: 13px; line-height: 1.4; color: var(--text-primary); }
+.verdict { display: flex; gap: 10px; align-items: flex-start; margin: 2px 0 12px; padding: 10px 12px; border-radius: 14px; background: var(--sage-bg); font-size: var(--fs-md); line-height: 1.4; color: var(--text-primary); }
 .verdict svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; color: var(--sage); }
 .verdict strong { color: var(--sage-ink); font-weight: 700; }
 .verdict.hold { background: var(--hold-bg); }
@@ -2456,24 +2456,24 @@ body { font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
   box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--accent-kinetic) 55%, transparent);
 }
 .set-row.is-logged { background: var(--sage-bg); }
-.set-num { width: auto; font-family: var(--font-body); font-size: 12px; font-weight: 700; color: var(--text-ghost); }
+.set-num { width: auto; font-family: var(--font-body); font-size: var(--fs-sm); font-weight: 700; color: var(--text-ghost); }
 .set-row.active-focus .set-num { color: var(--accent-kinetic); }
 .set-tile { position: relative; display: block; min-width: 0; }
 .set-tile::after {
   content: attr(data-unit); position: absolute; right: 9px; bottom: 9px; pointer-events: none;
-  font-size: 10.5px; font-weight: 600; color: var(--text-tertiary); letter-spacing: 0;
+  font-size: var(--fs-xs); font-weight: 600; color: var(--text-tertiary); letter-spacing: 0;
 }
 .set-tile .set-input {
   width: 100%; height: 48px; border: 0; border-radius: 12px; box-shadow: none;
   background: var(--tile); color: var(--text-primary);
-  font-family: var(--font-body); font-size: 21px; font-weight: 700; letter-spacing: -0.02em;
+  font-family: var(--font-body); font-size: var(--fs-xl); font-weight: 700; letter-spacing: -0.02em;
   padding: 0 26px 0 8px; text-align: center; font-variant-numeric: tabular-nums;
 }
-.set-tile .set-input::placeholder { color: var(--text-ghost); font-size: 14px; font-weight: 600; }
+.set-tile .set-input::placeholder { color: var(--text-ghost); font-size: var(--fs-md); font-weight: 600; }
 .set-tile .set-input:focus, .set-tile .set-input.np-focus { box-shadow: inset 0 0 0 2px var(--accent-kinetic); border: 0; }
 .set-tile.sugg .set-input { box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--sage) 55%, transparent); color: var(--sage-ink); background: var(--surface-card); }
 .set-tile.est .set-input { background: transparent; box-shadow: inset 0 0 0 1.5px var(--tile-strong); color: var(--text-secondary); }
-.set-tile.est::before { content: "est."; position: absolute; left: 8px; top: 5px; font-size: 9px; font-weight: 800; letter-spacing: .06em; color: var(--text-tertiary); text-transform: uppercase; }
+.set-tile.est::before { content: "est."; position: absolute; left: 8px; top: 5px; font-size: var(--fs-xs); font-weight: 800; letter-spacing: .06em; color: var(--text-tertiary); text-transform: uppercase; }
 .set-input.logged { background: transparent !important; color: var(--sage-ink) !important; box-shadow: none !important; border: 0; }
 .set-row.is-logged .set-tile::after { color: var(--sage); opacity: .8; }
 .set-act { display: flex; align-items: center; gap: 6px; }
@@ -2486,18 +2486,18 @@ body { font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
 
 /* RIR pills */
 .rir-pills { display: inline-flex; gap: 3px; padding: 3px; border-radius: 999px; background: var(--surface-card); box-shadow: 0 0 0 1px var(--line-soft); }
-.rir-pill { width: 28px; height: 28px; border-radius: 50%; border: 0; cursor: pointer; background: transparent; color: var(--text-secondary); font: 700 12.5px var(--font-body); font-variant-numeric: tabular-nums; }
+.rir-pill { width: 28px; height: 28px; border-radius: 50%; border: 0; cursor: pointer; background: transparent; color: var(--text-secondary); font: 700 var(--fs-sm) var(--font-body); font-variant-numeric: tabular-nums; }
 .rir-pill[aria-pressed="true"] { background: var(--sage); color: #fff; }
 .set-row.is-last.is-logged .rir-pills { box-shadow: 0 0 0 1.5px color-mix(in oklab, var(--sage) 55%, transparent); }
-.rir-gate { font-size: 11px; line-height: 1.4; color: var(--text-tertiary); padding: 2px 4px 0 28px; }
+.rir-gate { font-size: var(--fs-sm); line-height: 1.4; color: var(--text-tertiary); padding: 2px 4px 0 28px; }
 .ex-foot { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line-soft); display: flex; align-items: center; justify-content: space-between; }
-.ex-foot-lbl { font-size: 12px; color: var(--text-tertiary); font-weight: 600; }
+.ex-foot-lbl { font-size: var(--fs-sm); color: var(--text-tertiary); font-weight: 600; }
 .plate-calc-trigger { border: 0; background: var(--tile); border-radius: 999px; padding: 6px 11px; gap: 6px; }
 .plate-calc-trigger svg { width: 14px; height: 14px; }
 .warmup-row { border-radius: 14px; }
 
 @media (max-width: 350px) {
-  .set-tile .set-input { font-size: 18px; padding: 0 6px; }
+  .set-tile .set-input { font-size: var(--fs-xl); padding: 0 6px; }
   .set-tile::after { display: none; }
   .rir-pill { width: 26px; height: 26px; }
   .set-log-btn { width: 42px; height: 42px; }
@@ -2506,18 +2506,18 @@ body { font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
 /* Swap / library sheet */
 .bs-title { letter-spacing: -0.015em; margin-bottom: 8px; }
 .bs-sub { margin: 0 0 14px; color: var(--text-secondary); }
-.bs-section-lbl { font-size: 10.5px; font-weight: 800; letter-spacing: .08em; color: var(--text-tertiary); margin: 18px 2px 6px; }
+.bs-section-lbl { font-size: var(--fs-xs); font-weight: 800; letter-spacing: .08em; color: var(--text-tertiary); margin: 18px 2px 6px; }
 .swap-head .bs-sub strong { color: var(--accent-kinetic); font-weight: 700; }
 .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; padding: 3px; border-radius: 12px; background: var(--tile); }
-.seg button { border: 0; cursor: pointer; font: 700 13px var(--font-body); padding: 10px 6px; border-radius: 10px; background: transparent; color: var(--text-secondary); min-height: 40px; }
+.seg button { border: 0; cursor: pointer; font: 700 var(--fs-md) var(--font-body); padding: 10px 6px; border-radius: 10px; background: transparent; color: var(--text-secondary); min-height: 40px; }
 .seg button[aria-pressed="true"] { background: var(--surface-card); color: var(--text-primary); box-shadow: 0 1px 3px rgba(42,36,33,.12); }
-.seg-note { font-size: 11.5px; color: var(--text-secondary); margin: 7px 2px 0; }
+.seg-note { font-size: var(--fs-sm); color: var(--text-secondary); margin: 7px 2px 0; }
 .restore-row { display: grid; gap: 6px; margin-bottom: 12px; }
 .restore-one { width: 100%; margin-bottom: 12px; }
 .equip-chips { display: flex; gap: 6px; overflow-x: auto; margin: 14px 0 2px; padding-bottom: 2px; scrollbar-width: none; }
 .equip-chips.wrap { flex-wrap: wrap; overflow: visible; margin-top: 4px; }
 .equip-chips::-webkit-scrollbar { display: none; }
-.equip-chips button { flex-shrink: 0; border: 0; cursor: pointer; font: 700 12px var(--font-body); padding: 7px 12px; border-radius: 999px; background: var(--tile); color: var(--text-secondary); min-height: 32px; }
+.equip-chips button { flex-shrink: 0; border: 0; cursor: pointer; font: 700 var(--fs-sm) var(--font-body); padding: 7px 12px; border-radius: 999px; background: var(--tile); color: var(--text-secondary); min-height: 32px; }
 .equip-chips button[aria-pressed="true"] { background: var(--text-primary); color: var(--surface-card); }
 .lib-section { display: flex; flex-direction: column; }
 .opt-row {
@@ -2528,17 +2528,17 @@ body { font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
 .lib-section .opt-row:first-child { border-top: 0; }
 .opt-row:active { background: var(--tile); }
 .opt-main { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.opt-main b { font-size: 14px; font-weight: 700; letter-spacing: -0.01em; }
-.opt-main small { font-size: 12px; color: var(--text-secondary); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.opt-main b { font-size: var(--fs-md); font-weight: 700; letter-spacing: -0.01em; }
+.opt-main small { font-size: var(--fs-sm); color: var(--text-secondary); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .opt-side { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; }
-.opt-side em { font-style: normal; font-size: 10.5px; font-weight: 800; color: var(--accent-kinetic); letter-spacing: .03em; }
-.opt-side i { font-style: normal; font-size: 10.5px; font-weight: 600; color: var(--text-tertiary); }
+.opt-side em { font-style: normal; font-size: var(--fs-xs); font-weight: 800; color: var(--accent-kinetic); letter-spacing: .03em; }
+.opt-side i { font-style: normal; font-size: var(--fs-xs); font-weight: 600; color: var(--text-tertiary); }
 .lib-more { margin-top: 12px; }
-.lib-more summary { cursor: pointer; list-style: none; font-size: 13px; font-weight: 700; color: var(--text-secondary); padding: 10px 2px; border-top: 1px solid var(--line-soft); }
+.lib-more summary { cursor: pointer; list-style: none; font-size: var(--fs-md); font-weight: 700; color: var(--text-secondary); padding: 10px 2px; border-top: 1px solid var(--line-soft); }
 .lib-more summary::-webkit-details-marker { display: none; }
 .lib-more summary::after { content: " +"; color: var(--text-tertiary); }
 .lib-more[open] summary::after { content: " −"; }
-.lib-add-custom { display: flex; align-items: center; gap: 8px; width: 100%; margin-top: 10px; padding: 12px; border: 1.5px dashed var(--border-strong); border-radius: 14px; background: transparent; cursor: pointer; font: 700 13px var(--font-body); color: var(--text-primary); }
+.lib-add-custom { display: flex; align-items: center; gap: 8px; width: 100%; margin-top: 10px; padding: 12px; border: 1.5px dashed var(--border-strong); border-radius: 14px; background: transparent; cursor: pointer; font: 700 var(--fs-md) var(--font-body); color: var(--text-primary); }
 .lib-add-custom svg { width: 16px; height: 16px; color: var(--accent-kinetic); }
 .bs-search { border-radius: 12px; }
 
@@ -2549,30 +2549,97 @@ body { font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
 @keyframes ota30-check { from { transform: scale(.4) rotate(-12deg); opacity: 0; } to { transform: scale(1) rotate(0); opacity: 1; } }
 
 /* ── ota-31: ledger batch (cream base, sage = done) ─────────────────────── */
-.sync-badge { display:flex; align-items:center; gap:8px; width:calc(100% - 32px); margin:4px 16px 10px; padding:9px 12px; border-radius:14px; border:1px solid var(--border-strong); background:var(--surface-raised); color:var(--text-secondary); font:500 12.5px var(--font-body); text-align:left; cursor:pointer; }
+.sync-badge { display:flex; align-items:center; gap:8px; width:calc(100% - 32px); margin:4px 16px 10px; padding:9px 12px; border-radius:14px; border:1px solid var(--border-strong); background:var(--surface-raised); color:var(--text-secondary); font:500 var(--fs-sm) var(--font-body); text-align:left; cursor:pointer; }
 .sync-badge .sb-dot { width:8px; height:8px; border-radius:50%; background:var(--accent-timer); flex-shrink:0; }
 .sync-badge .sb-text { flex:1; min-width:0; }
 .sync-badge .sb-cta { color:var(--accent); font-weight:600; white-space:nowrap; }
 .sync-badge:disabled { opacity:.7; }
 .next-time-card { width:100%; max-width:360px; margin:0 auto 14px; padding:12px 14px; border-radius:16px; background:var(--surface-raised); border:1px solid var(--border); text-align:left; }
-.next-time-card .nt-title { font:700 10px var(--font-body); letter-spacing:.08em; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:6px; }
-.next-time-card .nt-line { font-size:13.5px; line-height:1.45; color:var(--text-primary); margin:2px 0; }
+.next-time-card .nt-title { font:700 var(--fs-xs) var(--font-body); letter-spacing:.08em; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:6px; }
+.next-time-card .nt-line { font-size:var(--fs-md); line-height:1.45; color:var(--text-primary); margin:2px 0; }
 .next-time-card .nt-line b { font-weight:600; }
 .next-time-card .nt-line.up b { color:var(--sage-ink); }
 .next-time-card .nt-line.hold b { color:var(--text-secondary); }
 .next-time-card .nt-line.build b { color:var(--accent); }
-.cal-cmp { font-size:11.5px; margin:-2px 0 6px 26px; color:var(--text-tertiary); font-variant-numeric:tabular-nums; }
+.cal-cmp { font-size:var(--fs-sm); margin:-2px 0 6px 26px; color:var(--text-tertiary); font-variant-numeric:tabular-nums; }
 .cal-cmp.up { color:var(--sage-ink); }
 .cal-cmp.down { color:var(--accent); }
-.cal-ex-note { font-size:11.5px; font-style:italic; color:var(--text-secondary); margin:-2px 0 6px 26px; }
-.cal-flag-line { font-size:11px; color:var(--text-secondary); background:var(--surface-sunken); border-radius:10px; padding:6px 8px; margin:0 0 6px 26px; }
-.cal-flag-btn { margin-left:6px; border:1px solid var(--border-strong); background:var(--card); border-radius:8px; padding:2px 8px; font-size:11px; cursor:pointer; }
-.cal-dup-note { font-size:11.5px; color:var(--text-secondary); background:var(--surface-sunken); border-radius:10px; padding:6px 10px; margin-top:8px; }
+.cal-ex-note { font-size:var(--fs-sm); font-style:italic; color:var(--text-secondary); margin:-2px 0 6px 26px; }
+.cal-flag-line { font-size:var(--fs-sm); color:var(--text-secondary); background:var(--surface-sunken); border-radius:10px; padding:6px 8px; margin:0 0 6px 26px; }
+.cal-flag-btn { margin-left:6px; border:1px solid var(--border-strong); background:var(--card); border-radius:8px; padding:2px 8px; font-size:var(--fs-sm); cursor:pointer; }
+.cal-dup-note { font-size:var(--fs-sm); color:var(--text-secondary); background:var(--surface-sunken); border-radius:10px; padding:6px 10px; margin-top:8px; }
 .whfc-dup { color:var(--text-tertiary); font-style:italic; }
-.premium-resume-idle { font-size:11px; color:var(--text-tertiary); margin-top:2px; }
+.premium-resume-idle { font-size:var(--fs-sm); color:var(--text-tertiary); margin-top:2px; }
 .premium-resume-continue.secondary { background:transparent; color:var(--charcoal); border:1px solid var(--border-strong); }
 .ex-card.muscle-jump { box-shadow:0 0 0 2px var(--sage), var(--shadow-sm); transition:box-shadow .6s ease; }
-.ota31-toast { position:fixed; left:50%; bottom:calc(92px + env(safe-area-inset-bottom)); transform:translateX(-50%); background:var(--surface-glass-dark); color:#fff; padding:9px 14px; border-radius:12px; font-size:13px; z-index:9999; max-width:86vw; text-align:center; pointer-events:none; }
+.ota31-toast { position:fixed; left:50%; bottom:calc(92px + env(safe-area-inset-bottom)); transform:translateX(-50%); background:var(--surface-glass-dark); color:#fff; padding:9px 14px; border-radius:12px; font-size:var(--fs-md); z-index:9999; max-width:86vw; text-align:center; pointer-events:none; }
+
+/* ── ota-34 (8): one type scale. Five text sizes; big display numbers keep their own size. ── */
+:root {
+  --fs-xs: 10px;   /* labels, captions */
+  --fs-sm: 12px;   /* secondary text */
+  --fs-md: 14px;   /* body */
+  --fs-lg: 16px;   /* emphasis, list titles */
+  --fs-xl: 20px;   /* section headings, stat numbers */
+}
+.t-sm { font-size: var(--fs-sm); }
+.in-field { width:100%; padding:6px; border:1px solid var(--border); border-radius:6px; }
+.in-field-lg { width:100%; padding:8px; border:1px solid var(--border); border-radius:8px; }
+.btn-sm { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:6px 12px; font-size:var(--fs-sm); cursor:pointer; color:var(--text-primary); }
+.settings-sub { font-weight:normal; color:var(--muted); font-size:var(--fs-sm); }
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.pill-btn { padding:8px 12px; font-size:var(--fs-md); font-weight:700; border-radius:12px; }
+.fix-item { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 0 0; font-size:var(--fs-sm); color:var(--text-secondary); }
+.fix-item span { min-width:0; }
+
+/* ── ota-34 (1): workouts this month ── */
+.hist-month-card { background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:18px; padding:14px 16px 12px; margin:0 16px 16px; box-shadow:var(--shadow-sm); }
+.hm-top { display:flex; align-items:baseline; justify-content:space-between; gap:12px; }
+.hm-top .hsi-label { margin:0; }
+.hm-val { font-family:var(--font-mono); font-variant-numeric:tabular-nums lining-nums; white-space:nowrap; }
+.hm-count { font-size:var(--fs-xl); font-weight:700; color:var(--text-primary); }
+.hm-of { font-size:var(--fs-md); color:var(--text-tertiary); font-weight:600; }
+.hm-bar { height:8px; border-radius:6px; background:var(--border); margin:10px 0 8px; overflow:hidden; }
+.hm-fill { height:100%; border-radius:6px; background:oklch(70% 0.110 82 / 0.86); transition:width 600ms cubic-bezier(0.16,1,0.3,1); }
+.hm-fill.hm-done { background:oklch(56% 0.075 145 / 0.92); }
+.hm-sub { font-size:var(--fs-sm); color:var(--text-tertiary); }
+
+/* ── ota-34 (3): strength by muscle ── */
+.growth-card { background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:20px; padding:14px 16px; margin:0 16px 16px; box-shadow:var(--shadow-sm); }
+.gc-head { display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:6px; }
+.gc-head .hsi-label { margin:0; }
+.gc-sub { font-size:var(--fs-sm); color:var(--text-tertiary); }
+.gc-body { display:flex; align-items:center; gap:14px; }
+.gc-figure { width:42%; max-width:150px; flex-shrink:0; }
+.gc-figure svg { width:100%; height:auto; display:block; }
+.gc-legend { display:flex; flex-direction:column; gap:7px; font-size:var(--fs-sm); color:var(--text-secondary); }
+.gc-legend > div { display:flex; align-items:center; gap:8px; }
+.gc-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.gc-hint { color:var(--text-tertiary); font-size:var(--fs-xs); margin-top:2px; }
+
+/* ── ota-34 (9): loading placeholders ── */
+.skel-wrap { padding-left:20px; padding-right:20px; }
+.skel { background:linear-gradient(90deg, oklch(93% 0.010 72) 25%, oklch(96.5% 0.008 72) 50%, oklch(93% 0.010 72) 75%); background-size:200% 100%; border-radius:10px; animation:skelShimmer 1.3s ease-in-out infinite; }
+.skel-line { height:12px; margin:12px 0; }
+.skel-title { height:30px; margin:10px 0 22px; border-radius:12px; }
+.skel-figure { height:300px; width:62%; margin:0 auto 20px; border-radius:80px 80px 40px 40px; }
+.skel-card { height:72px; margin:0 0 16px; border-radius:18px; }
+@keyframes skelShimmer { from { background-position:200% 0; } to { background-position:-200% 0; } }
+
+/* ── ota-34 (11): motion ── */
+@media (prefers-reduced-motion: no-preference) {
+  .screen.tab-enter .screen-content > * { animation: tabRise 360ms cubic-bezier(0.16,1,0.3,1) both; }
+  .screen.tab-enter .screen-content > *:nth-child(2) { animation-delay: 30ms; }
+  .screen.tab-enter .screen-content > *:nth-child(3) { animation-delay: 60ms; }
+  .screen.tab-enter .screen-content > *:nth-child(4) { animation-delay: 90ms; }
+  .screen.tab-enter .screen-content > *:nth-child(n+5) { animation-delay: 120ms; }
+}
+@keyframes tabRise { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+.pr-burst { position:absolute; right:22px; top:50%; width:0; height:0; pointer-events:none; z-index:5; }
+.pr-burst .pb-ring { position:absolute; left:-18px; top:-18px; width:36px; height:36px; border-radius:50%; border:2px solid oklch(70% 0.110 82 / 0.9); animation:pbRing 700ms cubic-bezier(0.16,1,0.3,1) forwards; }
+.pr-burst .pb-spark { position:absolute; left:-3px; top:-3px; width:6px; height:6px; border-radius:50%; background:oklch(70% 0.130 70); transform:rotate(var(--a)) translateX(0); animation:pbSpark 800ms cubic-bezier(0.16,1,0.3,1) forwards; }
+@keyframes pbRing { from { transform:scale(.3); opacity:1; } to { transform:scale(1.8); opacity:0; } }
+@keyframes pbSpark { 0% { transform:rotate(var(--a)) translateX(4px) scale(1); opacity:1; } 100% { transform:rotate(var(--a)) translateX(34px) scale(.4); opacity:0; } }
 </style>
 </head>
 <body>
@@ -2590,7 +2657,15 @@ body { font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
 <!-- ═══ PRE-RENDERED DOM SHELL — exists before any JS executes ═══ -->
 <div id="app">
   <div id="splash" class="screen active" style="display:flex;align-items:center;justify-content:center;background-color:oklch(97.8% 0.005 50);height:100svh;width:100vw;position:fixed;top:0;left:0;z-index:10000;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:32px;font-weight:300;color:oklch(25% 0.01 40);letter-spacing:-0.01em;">DCR Gym</div>
-  <div id="screen-home"             class="screen" style="display:none"></div>
+  <!-- ota-34 (9): placeholder shapes while the app loads, replaced by the real Home -->
+  <div id="screen-home"             class="screen active" style="display:block"><div class="screen-content skel-wrap" aria-busy="true" aria-label="Loading">
+    <div class="skel skel-line" style="width:38%;margin-top:calc(env(safe-area-inset-top, 0px) + 28px)"></div>
+    <div class="skel skel-title" style="width:62%"></div>
+    <div class="skel skel-figure"></div>
+    <div class="skel skel-card"></div>
+    <div class="skel skel-line" style="width:70%"></div>
+    <div class="skel skel-line" style="width:48%"></div>
+  </div></div>
   <div id="screen-prog"             class="screen" style="display:none"></div>
   <div id="screen-session"          class="screen" style="display:none"></div>
   <div id="screen-workout"          class="screen" style="display:none"></div>
@@ -2683,9 +2758,9 @@ window.onerror = function(msg, url, line, col, error) {
     '<h2 style="font-family:Cormorant Garamond,serif;font-style:italic;font-weight:400;color:oklch(25% 0.01 40);margin:0 0 24px">[DCR Gym] Script Error</h2>' +
     '<p><b>Fault:</b> ' + msg + '</p>' +
     '<p><b>Location:</b> Line ' + line + ', Col ' + col + '</p>' +
-    '<pre style="background:#fff;padding:16px;border-radius:6px;overflow-x:auto;border:1px solid #ddd;font-size:11px;white-space:pre-wrap">' + (error ? error.stack : '') + '</pre>' +
-    '<button onclick="(function(){if(\'caches\' in window){caches.keys().then(function(k){k.forEach(function(n){caches.delete(n)})})}; if(\'serviceWorker\' in navigator){navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister()})})}; setTimeout(function(){location.reload(true)},300)})()" style="margin-top:20px;padding:12px 24px;background:oklch(25% 0.01 40);color:#fff;border:none;border-radius:30px;cursor:pointer;font-size:12px;letter-spacing:1px;text-transform:lowercase;font-family:monospace">clear cache &amp; reload</button>' +
-    '<p style="margin-top:12px;font-size:10px;color:oklch(50% 0.01 40);font-family:monospace">your workout history is preserved — only app cache is cleared</p>' +
+    '<pre style="background:#fff;padding:16px;border-radius:6px;overflow-x:auto;border:1px solid #ddd;font-size:var(--fs-sm);white-space:pre-wrap">' + (error ? error.stack : '') + '</pre>' +
+    '<button onclick="(function(){if(\'caches\' in window){caches.keys().then(function(k){k.forEach(function(n){caches.delete(n)})})}; if(\'serviceWorker\' in navigator){navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister()})})}; setTimeout(function(){location.reload(true)},300)})()" style="margin-top:20px;padding:12px 24px;background:oklch(25% 0.01 40);color:#fff;border:none;border-radius:30px;cursor:pointer;font-size:var(--fs-sm);letter-spacing:1px;text-transform:lowercase;font-family:monospace">clear cache &amp; reload</button>' +
+    '<p style="margin-top:12px;font-size:var(--fs-xs);color:oklch(50% 0.01 40);font-family:monospace">your workout history is preserved — only app cache is cleared</p>' +
     '</div>';
   return false;
 };
@@ -5686,7 +5761,7 @@ function saveMeasurements(m) { LS.set('dcrgym_measurements', m); idbSet('dcrgym_
 // Schema-versioned, non-destructive, with rolling last-good backup.
 // History must survive every app update. Period.
 const SCHEMA_VERSION = 3;
-const APP_BUILD = '2026.11.26 · ota-33 · monday-push';
+const APP_BUILD = '2026.11.27 · ota-34 · history-growth';
 const KG_TO_LB_CUTOFF_MS = 1788000000000; // Workouts before Sep 2026 were logged in kg; Sep 2026+ are already in lbs
 
 function hasLoggedWorkingSets(w) {
@@ -6812,6 +6887,16 @@ function localDateKey(ts) {
   const d = new Date(Number(ts) || 0);
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
+// ota-34 (5): the moment a workout counts on, for calendar, week and month counts. A session
+// that runs past midnight counts on the day it started (start and end on different days,
+// under 6 h apart, ending before 6 AM). Stored times are never changed.
+function workoutDayTs(w) {
+  if (!w) return 0;
+  const e = Number(w.endTime) || 0, s = Number(w.startTime) || 0;
+  if (!e) return s;
+  if (s && s < e && e - s <= 6 * 3600 * 1000 && localDateKey(s) !== localDateKey(e) && new Date(e).getHours() < 6) return s;
+  return e;
+}
 
 // What DCR approved on Nov 26 ("Do it all for me"): flag the Oct 23 OHP 90 × 100 sets,
 // mark the June duplicate copies, add a corrected duration beside the 3 runaway ones.
@@ -6896,6 +6981,7 @@ function undoOta31DataFlags() {
   saveHistory(hist);
   LS.set('dcrgym_ota31_flags_undone', true);
   LS.remove('dcrgym_ota31_flags');
+  mirrorFixFlags();
 }
 function ota31FlagSummary() {
   let suspect = 0, dups = 0, dur = 0;
@@ -6957,7 +7043,7 @@ function runOta32Fixes(histInput) {
   const before = JSON.stringify(hist);
   let changed = false;
   for (const w of hist) {
-    if (!w || !w.sets || w._dupOf || w._redate || w.programId === 'import') continue;
+    if (!w || !w.sets || w._dupOf || w._redate || w._dateFixUndone || w.programId === 'import') continue;
     const end = Number(w.endTime) || 0, start = Number(w.startTime) || 0;
     if (!end) continue;
     const cl = mainSetCluster(workoutSetTimes(w));
@@ -7020,6 +7106,7 @@ function undoOta32Fixes() {
   hist.sort((a, b) => ((a.endTime || a.startTime || 0) - (b.endTime || b.startTime || 0)));
   saveHistory(hist);
   LS.set('dcrgym_ota32_fix_undone', true);
+  mirrorFixFlags();
 }
 function ota32FixSummary() {
   let redated = 0, dur = 0;
@@ -7104,8 +7191,72 @@ function undoOta33Fixes() {
   hist.sort((a, b) => ((a.endTime || a.startTime || 0) - (b.endTime || b.startTime || 0)));
   saveHistory(hist);
   LS.set('dcrgym_ota33_fix_undone', true);
+  mirrorFixFlags();
 }
 function undoDateFixes() { undoOta33Fixes(); undoOta32Fixes(); }
+
+// ── ota-34 (6): Undo one date fix at a time ───────────────────────────────────
+// Monday's Push stays on Monday: he said so, so it isn't offered. The Pull that ota-33 put
+// back on its own day isn't offered either (undoing that would bring the bug back).
+// Undo keeps a record (_dateFixUndone) so nothing is lost and no fix re-applies on its own.
+function dateFixItems() {
+  const out = [];
+  for (const w of getHistory()) {
+    if (!w || String(w.id) === OTA33_PUSH_ID) continue;
+    const moved = w._redate && (w._redate.by === 'ota-32' || w._redate.by === 'ota-33');
+    const timer = w._durFix && w._durFix.from === 'ota-32 set times';
+    if (!moved && !timer) continue;
+    out.push({ id: String(w.id), name: w.sessionName || 'Workout', day: workoutDayTs(w), moved: !!moved, from: moved ? Number(w._redate.from.endTime) : null });
+  }
+  return out.sort((a, b) => b.day - a.day);
+}
+function undoDateFixFor(id) {
+  if (String(id) === OTA33_PUSH_ID) return false;
+  const hist = getHistory();
+  const w = hist.find(x => x && String(x.id) === String(id));
+  if (!w) return false;
+  const rec = { at: Date.now(), by: 'ota-34 undo' };
+  if (w._redate && (w._redate.by === 'ota-32' || w._redate.by === 'ota-33')) {
+    rec.redate = w._redate;
+    w.startTime = w._redate.from.startTime;
+    w.endTime = w._redate.from.endTime;
+    if (w.startTime === undefined) delete w.startTime;
+    if (w.endTime === undefined) delete w.endTime;
+    delete w._redate;
+  }
+  if (w._durFix && w._durFix.from === 'ota-32 set times') { rec.durFix = w._durFix; delete w._durFix; }
+  if (w._durSuspect && w._durSuspect.by === 'ota-32') { rec.durSuspect = w._durSuspect; delete w._durSuspect; }
+  if (!rec.redate && !rec.durFix && !rec.durSuspect) return false;
+  w._dateFixUndone = rec;
+  hist.sort((a, b) => ((a.endTime || a.startTime || 0) - (b.endTime || b.startTime || 0)));
+  saveHistory(hist);
+  mirrorFixFlags();
+  return true;
+}
+function confirmUndoDateFix(id) {
+  const it = dateFixItems().find(x => x.id === String(id));
+  if (!it) return;
+  const fmt = t => new Date(Number(t)).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  confirmSheet({
+    title: 'Undo this fix?',
+    body: it.moved ? `${it.name} goes back to ${fmt(it.from)}. No sets change.` : `${it.name} shows its saved timer again. No sets change.`,
+    confirmLabel: 'Undo', onConfirm: () => { undoDateFixFor(id); renderSettings(); },
+  });
+}
+
+// ── ota-34 (7): one-time fix flags kept in IndexedDB too ──────────────────────
+// If local storage is cleared and history comes back from IndexedDB, a fix that already ran
+// (or that he undid) must not run again.
+const FIX_FLAG_KEYS = ['dcrgym_ota31_flags', 'dcrgym_ota31_flags_undone', 'dcrgym_ota32_fix', 'dcrgym_ota32_fix_undone', 'dcrgym_ota33_fix', 'dcrgym_ota33_fix_undone'];
+async function restoreFixFlags() {
+  for (const k of FIX_FLAG_KEYS) {
+    if (LS.get(k, null) !== null) continue;
+    try { const v = await idbGet(k); if (v !== null && v !== undefined) LS.set(k, v); } catch (e) {}
+  }
+}
+function mirrorFixFlags() {
+  for (const k of FIX_FLAG_KEYS) { try { idbSet(k, LS.get(k, null)); } catch (e) {} }   // null clears a removed flag
+}
 
 // Item 2: auto-finish. Live workout with no new set for 2 hours → saved at its last set.
 function autoFinishLive() {
@@ -7129,6 +7280,7 @@ function autoFinishSavedIfIdle() {
   return true;
 }
 function autoFinishNotice(entry) {
+  haptic('saved');   // ota-34 (10)
   if (!entry) return;
   const t = new Date(entry.endTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
   const day = new Date(entry.endTime).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
@@ -7587,14 +7739,14 @@ function getStats() {
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
   const weekStart = (() => { const d = new Date(now); d.setHours(0,0,0,0); d.setDate(d.getDate() - d.getDay()); return d.getTime(); })();
-  const thisMonth = hist.filter(w => w.endTime >= monthStart && !w._dupOf).length;
-  const thisWeekVol = hist.filter(w => w.endTime >= weekStart).reduce((sum, w) => sum + workoutVolume(w), 0);
+  const thisMonth = hist.filter(w => workoutDayTs(w) >= monthStart && !w._dupOf).length;
+  const thisWeekVol = hist.filter(w => workoutDayTs(w) >= weekStart).reduce((sum, w) => sum + workoutVolume(w), 0);
   // Streak: count consecutive weeks with at least 1 workout
   let streak = 0;
   const msPerWeek = 7*24*3600*1000;
   let checkWeek = weekStart;
   for (let i = 0; i < 52; i++) {
-    const inWeek = hist.some(w => w.endTime >= checkWeek && w.endTime < checkWeek + msPerWeek);
+    const inWeek = hist.some(w => !w._dupOf && workoutDayTs(w) >= checkWeek && workoutDayTs(w) < checkWeek + msPerWeek);
     if (inWeek) { streak++; checkWeek -= msPerWeek; }
     else break;
   }
@@ -7639,7 +7791,7 @@ function getWeeklyVolumeByMuscle(programId) {
     if (w && w.id) activeWorkoutsMap.set(String(w.id), w);
   }
   for (const w of allHist) {
-    if (isCompletedProgramWorkout(w, programId) && (w.endTime || 0) >= weekStart) {
+    if (isCompletedProgramWorkout(w, programId) && workoutDayTs(w) >= weekStart) {
       activeWorkoutsMap.set(String(w.id), w);
     }
   }
@@ -8064,6 +8216,20 @@ function checkSVG() {
     <path d="M4 12.5 L9.5 18 L20 6.5"/></svg>`;
 }
 
+// ── ota-34 (11): short PR celebration, a ring and sparks on the set row ────────
+function prCelebrate(row) {
+  try {
+    if (!row || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+    const b = document.createElement('div');
+    b.className = 'pr-burst';
+    b.setAttribute('aria-hidden', 'true');
+    b.innerHTML = '<span class="pb-ring"></span>' + Array.from({ length: 8 }, (_, i) => `<span class="pb-spark" style="--a:${i * 45}deg"></span>`).join('');
+    row.style.position = row.style.position || 'relative';
+    row.appendChild(b);
+    setTimeout(() => { try { b.remove(); } catch (e) {} }, 950);
+  } catch (e) {}
+}
+
 // ── Haptic vocabulary — the hand learns the language without looking ────────
 function haptic(type) {
   if (!navigator.vibrate) return;
@@ -8074,6 +8240,10 @@ function haptic(type) {
     restDone:  [300, 100, 300, 100, 400], // insistent: rest expired
     finish:    [24, 60, 24, 60, 24, 60, 90],   // celebration wave
     milestone: [30, 70, 30, 70, 30, 70, 150],  // long milestone wave
+    pr:        [30, 50, 30, 50, 120],          // ota-34: new record, a rising burst
+    nav:       6,                              // ota-34: tab change
+    undo:      [10, 30, 10],                   // ota-34: set taken back
+    saved:     [18, 60, 40],                   // ota-34: workout saved (Finish pressed / auto-finish)
   };
   try { navigator.vibrate(P[type] !== undefined ? P[type] : 10); } catch(e) {}
 }
@@ -8088,6 +8258,7 @@ let _transitionTimer = null;
 function Maps(to, data={}) {
   const from = ST.screen;
   ST.screen = to;
+  if (from && from !== to && SCREEN_ORDER.includes(to)) haptic('nav');   // ota-34 (10)
   if (typeof closeNumpad === 'function') closeNumpad();
 
   // Cancel any pending transition cleanup timer from a rapid previous navigation
@@ -8135,6 +8306,8 @@ function Maps(to, data={}) {
   const fromEl = from ? document.getElementById('screen-' + from) : null;
   const toEl   = document.getElementById('screen-' + to);
   if (!toEl) return;
+  // ota-34 (11): cards rise in softly when a tab opens (CSS; off with reduced motion)
+  if (from && from !== to && SCREEN_ORDER.includes(to)) { toEl.classList.remove('tab-enter'); void toEl.offsetWidth; toEl.classList.add('tab-enter'); setTimeout(() => toEl.classList.remove('tab-enter'), 700); }
 
   // Instantly hide all screens that are neither source nor destination
   for (const id of SCREENS) {
@@ -8220,7 +8393,7 @@ function updateWorkoutPill() {
 
 // ── Command Center helpers ────────────────────────────────────────────────────
 
-function buildSilhouetteSVG(targets, actuals, weekComplete) {
+function buildSilhouetteSVG(targets, actuals, weekComplete, opts) {
   // ── 4 unmistakable states ─────────────────────────────────────────────────
   //  dormant   (no sets)   flat warm-grey ink — clearly asleep
   //  behind    (<50%)      DEEP TERRACOTTA — attention, not reward
@@ -8233,6 +8406,7 @@ function buildSilhouetteSVG(targets, actuals, weekComplete) {
     return a / t;
   }
   function col(muscle) {
+    if (opts && opts.color) return opts.color(muscle);   // ota-34: History growth figure
     const p = pct(muscle);
     if (p === null)  return 'oklch(76% 0.014 60 / 0.30)';  // dormant ink
     if (p < 0.50)    return 'oklch(48% 0.130 35 / 0.85)';  // behind — deep terracotta
@@ -8244,6 +8418,7 @@ function buildSilhouetteSVG(targets, actuals, weekComplete) {
     return t > 0 && a > 0;
   }
   function glowFilter(muscle) {
+    if (opts && opts.glow) return opts.glow(muscle);
     const p = pct(muscle);
     if (p === null) return 'none';
     if (p >= 1.00)  return 'url(#glowGreen)';  // bloom is EARNED, only at 100% — emerald
@@ -8252,6 +8427,7 @@ function buildSilhouetteSVG(targets, actuals, weekComplete) {
   }
   function pulse(muscle) {
     // Only neglected muscles breathe — the eye goes where the work is owed
+    if (opts && opts.noPulse) return false;
     const p = pct(muscle);
     return p !== null && p < 0.50;
   }
@@ -8753,7 +8929,7 @@ function renderMuscleGraphContent() {
   } else {
     const weekStart = (() => { const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() - d.getDay()); return d.getTime(); })();
     for (const w of getHistory()) {
-      if ((w.endTime || 0) >= weekStart && w.sets) {
+      if (workoutDayTs(w) >= weekStart && w.sets) {
         for (const [key, sets] of Object.entries(w.sets)) {
           if (key.endsWith('_wu') || !Array.isArray(sets)) continue;
           const nm = resolveWorkoutSetExName(w, key, sets);
@@ -8790,7 +8966,7 @@ function renderMuscleGraphContent() {
   if (topExs.length > 0) {
     topExsHTML = `
       <div style="margin-top:14px;">
-        <div style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:6px;">Key Contributing Movements</div>
+        <div style="font-size:var(--fs-xs);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:6px;">Key Contributing Movements</div>
         <div class="mg-driver-list">
           ${topExs.map(ex => `
             <div class="mg-driver-card" onclick="showProgressGraph(event, '${ex.name.replace(/'/g, "\\'")}')" style="cursor:pointer;">
@@ -8800,7 +8976,7 @@ function renderMuscleGraphContent() {
               </div>
               <div style="display:flex;align-items:center;gap:8px;">
                 <div class="mg-dc-val">${ex.e1rm} ${unit}</div>
-                <span style="color:var(--accent-kinetic);font-size:12px;">↗</span>
+                <span style="color:var(--accent-kinetic);font-size:var(--fs-sm);">↗</span>
               </div>
             </div>
           `).join('')}
@@ -9207,8 +9383,8 @@ function renderSession(data={}) {
             <p>${s.exercises.length} exercises</p>
           </div>
           <div style="display:flex;align-items:center;gap:8px">
-            <button class="preview-btn" onclick="previewSession('${prog.id}','${s.id}')" style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:6px 12px;font-size:12px;color:var(--text-secondary);cursor:pointer;min-height:36px">Preview</button>
-            <div class="start-arrow" style="color:var(--muted);font-size:20px;cursor:pointer" onclick="startWorkoutFromHome('${prog.id}','${s.id}')">→</div>
+            <button class="preview-btn" onclick="previewSession('${prog.id}','${s.id}')" style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:6px 12px;font-size:var(--fs-sm);color:var(--text-secondary);cursor:pointer;min-height:36px">Preview</button>
+            <div class="start-arrow" style="color:var(--muted);font-size:var(--fs-xl);cursor:pointer" onclick="startWorkoutFromHome('${prog.id}','${s.id}')">→</div>
           </div>
         </div>`;
       }).join('')}
@@ -9218,6 +9394,23 @@ function renderSession(data={}) {
 
 
 // ── Workouts Browser ─────────────────────────────────────────────────────────
+// ── ota-34 (4): shrink a long title to fit one line; if it still can't, break after a slash ──
+function fitTitles(root) {
+  const els = (root || document).querySelectorAll('.fit-title');
+  els.forEach(h => {
+    if (!h.dataset.fs) h.dataset.fs = h.style.fontSize || '';   // its own size, kept across re-fits
+    h.style.fontSize = h.dataset.fs; h.style.whiteSpace = 'nowrap';
+    if (!h.clientWidth) { h.style.whiteSpace = ''; return; }   // not on screen yet
+    const cs = String(getComputedStyle(h).fontSize || '');
+    let size = (/rem$/.test(cs) ? parseFloat(cs) * 16 : parseFloat(cs)) || 38;
+    const min = 26;
+    while (h.scrollWidth > h.clientWidth + 1 && size > min) { size = Math.max(min, Math.floor(size) === size ? size - 1 : Math.floor(size)); h.style.fontSize = size + 'px'; }
+    if (h.scrollWidth > h.clientWidth + 1) h.style.whiteSpace = 'normal';   // wraps at the <wbr> after each slash
+  });
+}
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { try { fitTitles(); } catch (e) {} });
+window.addEventListener('resize', () => { try { fitTitles(); } catch (e) {} });
+
 function renderWorkoutsBrowser() {
   const el = document.getElementById('screen-workouts-browser');
   if (!el) return;
@@ -9241,9 +9434,9 @@ function renderWorkoutsBrowser() {
     el.innerHTML = `
     <div class="screen-content" style="padding:0 0 calc(var(--nav-h) + 24px)">
       <div style="padding:56px 28px 8px">
-        <div style="font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:14px">Training</div>
+        <div style="font-size:var(--fs-xs);letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:14px">Training</div>
         <h1 style="font-family:var(--font-hero);font-size:2.4rem;font-weight:700;color:var(--charcoal);line-height:1.05;letter-spacing:-0.5px">Program<br><em style="font-weight:400;font-style:italic">Library</em></h1>
-        <p style="margin-top:16px;font-size:0.85rem;color:var(--text-secondary);line-height:1.5">Choose a program to begin logging sessions.</p>
+        <p style="margin-top:16px;font-size:var(--fs-md);color:var(--text-secondary);line-height:1.5">Choose a program to begin logging sessions.</p>
       </div>
       <div style="padding:20px 20px 0">
         ${PROGRAMS.map(p => `
@@ -9251,10 +9444,10 @@ function renderWorkoutsBrowser() {
                style="display:flex;align-items:center;gap:20px;padding:20px 4px;border-bottom:1px solid var(--border);cursor:pointer;-webkit-tap-highlight-color:transparent">
             <div style="font-family:var(--font-hero);font-size:2rem;font-weight:700;color:var(--accent);min-width:36px;line-height:1">${p.daysPerWeek}</div>
             <div style="flex:1">
-              <div style="font-size:0.92rem;font-weight:600;color:var(--charcoal);margin-bottom:3px">${p.name}</div>
-              <div style="font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">${p.sessions.length} sessions · ${p.timeEstimate || '45–60 min'}</div>
+              <div style="font-size:var(--fs-md);font-weight:600;color:var(--charcoal);margin-bottom:3px">${p.name}</div>
+              <div style="font-size:var(--fs-sm);letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">${p.sessions.length} sessions · ${p.timeEstimate || '45–60 min'}</div>
             </div>
-            <div style="color:var(--muted);font-size:18px;padding-right:4px">›</div>
+            <div style="color:var(--muted);font-size:var(--fs-xl);padding-right:4px">›</div>
           </div>`).join('')}
       </div>
     </div>`;
@@ -9271,16 +9464,16 @@ function renderWorkoutsBrowser() {
 
     <!-- ── Header ── -->
     <div style="padding:56px 28px 0">
-      <div style="font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:14px">Training Program</div>
-      <h1 style="font-family:var(--font-hero);font-size:2.4rem;font-weight:700;color:var(--charcoal);line-height:1.05;letter-spacing:-0.5px">${prog.name}</h1>
-      <div style="margin-top:10px;font-size:0.7rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)">${prog.daysPerWeek} days / week · Program #${prog.number} · ${prog.timeEstimate || '45–60 min'}</div>
+      <div style="font-size:var(--fs-xs);letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:14px">Training Program</div>
+      <h1 class="fit-title" style="font-family:var(--font-hero);font-size:2.4rem;font-weight:700;color:var(--charcoal);line-height:1.05;letter-spacing:-0.5px">${String(prog.name).replace(/</g, '&lt;').replace(/\//g, '/<wbr>')}</h1>
+      <div style="margin-top:10px;font-size:var(--fs-sm);letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)">${prog.daysPerWeek} days / week · Program #${prog.number} · ${prog.timeEstimate || '45–60 min'}</div>
     </div>
 
     <!-- ── Change program link ── -->
     <div style="padding:20px 28px 4px;display:flex;align-items:center;justify-content:space-between">
-      <div style="font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">${prog.sessions.length} Sessions</div>
+      <div style="font-size:var(--fs-sm);letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">${prog.sessions.length} Sessions</div>
       <button onclick="Maps('prog')"
-              style="font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);background:none;border:none;cursor:pointer;padding:0;font-family:var(--font-body)">
+              style="font-size:var(--fs-sm);letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);background:none;border:none;cursor:pointer;padding:0;font-family:var(--font-body)">
         Change →
       </button>
     </div>
@@ -9302,23 +9495,23 @@ function renderWorkoutsBrowser() {
         <div style="display:flex;align-items:center;gap:0;padding:22px 4px;border-bottom:1px solid var(--border)">
 
           <!-- Day number -->
-          <div style="font-family:var(--font-hero);font-size:1.6rem;font-weight:700;color:${done ? 'var(--muted)' : isNext ? 'var(--accent)' : 'var(--charcoal)'};min-width:44px;line-height:1;flex-shrink:0">
+          <div style="font-family:var(--font-hero);font-size:var(--fs-xl);font-weight:700;color:${done ? 'var(--muted)' : isNext ? 'var(--accent)' : 'var(--charcoal)'};min-width:44px;line-height:1;flex-shrink:0">
             ${String(idx + 1).padStart(2,'0')}
           </div>
 
           <!-- Session info — tapping opens preview -->
           <div style="flex:1;cursor:pointer;min-width:0" onclick="previewSession('${prog.id}','${s.id}')">
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
-              <span style="font-size:0.97rem;font-weight:600;color:var(--charcoal)">${s.name}</span>
-              ${isNext && !done ? `<span style="font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);border:1px solid var(--accent);border-radius:20px;padding:2px 7px">Next</span>` : ''}
-              ${done ? `<span style="font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--green);border:1px solid var(--green);border-radius:20px;padding:2px 7px">✓ ${dl}</span>` : ''}
+              <span style="font-size:var(--fs-lg);font-weight:600;color:var(--charcoal)">${s.name}</span>
+              ${isNext && !done ? `<span style="font-size:var(--fs-xs);letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);border:1px solid var(--accent);border-radius:20px;padding:2px 7px">Next</span>` : ''}
+              ${done ? `<span style="font-size:var(--fs-xs);letter-spacing:0.1em;text-transform:uppercase;color:var(--green);border:1px solid var(--green);border-radius:20px;padding:2px 7px">✓ ${dl}</span>` : ''}
             </div>
-            <div style="font-size:0.75rem;color:var(--text-secondary)">${exCount} exercises${muscles ? ' · ' + muscles : ''}</div>
+            <div style="font-size:var(--fs-sm);color:var(--text-secondary)">${exCount} exercises${muscles ? ' · ' + muscles : ''}</div>
           </div>
 
           <!-- Quick-start arrow -->
           <button onclick="startWorkoutFromHome('${prog.id}','${s.id}')"
-                  style="flex-shrink:0;width:40px;height:40px;border-radius:50%;background:${isNext && !done ? 'var(--accent)' : 'transparent'};border:${isNext && !done ? 'none' : '1px solid var(--border)'};color:${isNext && !done ? '#fff' : 'var(--muted)'};font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-left:12px;transition:background 150ms">
+                  style="flex-shrink:0;width:40px;height:40px;border-radius:50%;background:${isNext && !done ? 'var(--accent)' : 'transparent'};border:${isNext && !done ? 'none' : '1px solid var(--border)'};color:${isNext && !done ? '#fff' : 'var(--muted)'};font-size:var(--fs-xl);cursor:pointer;display:flex;align-items:center;justify-content:center;margin-left:12px;transition:background 150ms">
             ›
           </button>
         </div>`;
@@ -9327,12 +9520,13 @@ function renderWorkoutsBrowser() {
 
     <!-- ── Rotation summary footer ── -->
     <div style="padding:28px 28px 0;text-align:center">
-      <div style="font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">
+      <div style="font-size:var(--fs-sm);letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">
         ${Object.keys(doneThisWeek).length} of ${prog.sessions.length} sessions completed in current rotation
       </div>
     </div>
 
   </div>`;
+  requestAnimationFrame(() => fitTitles(el));   // ota-34 (4): long program names fit on one line
 }
 
 // Select a program from the workouts browser (no-nav version of selectProgram)
@@ -9676,7 +9870,7 @@ function renderWorkout() {
         <div class="wh-session">${sess.name}</div>
         ${showDateHeader ? `
           <div class="wh-date-chip" onclick="editWorkoutDateTime()">
-            📅 ${new Date(ST.workoutStart).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} <span style="font-size:9px;opacity:0.8;">(edit)</span>
+            📅 ${new Date(ST.workoutStart).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} <span style="font-size:var(--fs-xs);opacity:0.8;">(edit)</span>
           </div>
         ` : ''}
       </div>
@@ -9692,7 +9886,7 @@ function renderWorkout() {
       <div class="wh-hud-divider"></div>
       <div class="wh-hud-stat">
         <span class="wh-hud-label">Volume</span>
-        <span class="wh-hud-val" id="wh-vol-num">${vol.toLocaleString()} <span style="font-size:11px;font-weight:500;">${unit}</span></span>
+        <span class="wh-hud-val" id="wh-vol-num">${vol.toLocaleString()} <span style="font-size:var(--fs-sm);font-weight:500;">${unit}</span></span>
       </div>
       <div class="wh-hud-divider"></div>
       <div class="wh-hud-stat">
@@ -9884,7 +10078,7 @@ function showPlateCalcSheet(name, key, defaultWeight) {
   const html = `
     <div class="plate-calc-container" style="padding: 4px 0 16px;">
       <div class="action-sheet-header">
-        <div class="action-sheet-title" style="font-size: 20px;">Plate Calculator</div>
+        <div class="action-sheet-title" style="font-size: var(--fs-xl);">Plate Calculator</div>
         <div class="action-sheet-meta">${name || 'Barbell Exercise'} · ${barW} ${unit} Olympic Bar</div>
       </div>
       <div id="plate-calc-visual" style="margin: 12px 0;">
@@ -9892,21 +10086,21 @@ function showPlateCalcSheet(name, key, defaultWeight) {
       </div>
       <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin: 16px 0 20px;">
         ${unit === 'lb' ? `
-        <button class="btn-sheet-ghost" style="padding: 8px 12px; font-size: 13px; font-weight: 700; border-radius: 12px;" onclick="adjustPlateCalcWeight(-10)">-10</button>
-        <button class="btn-sheet-ghost" style="padding: 8px 12px; font-size: 13px; font-weight: 700; border-radius: 12px;" onclick="adjustPlateCalcWeight(-5)">-5</button>
+        <button class="btn-sheet-ghost pill-btn" onclick="adjustPlateCalcWeight(-10)">-10</button>
+        <button class="btn-sheet-ghost pill-btn" onclick="adjustPlateCalcWeight(-5)">-5</button>
         ` : `
-        <button class="btn-sheet-ghost" style="padding: 8px 12px; font-size: 13px; font-weight: 700; border-radius: 12px;" onclick="adjustPlateCalcWeight(-5)">-5</button>
-        <button class="btn-sheet-ghost" style="padding: 8px 12px; font-size: 13px; font-weight: 700; border-radius: 12px;" onclick="adjustPlateCalcWeight(-2.5)">-2.5</button>
+        <button class="btn-sheet-ghost pill-btn" onclick="adjustPlateCalcWeight(-5)">-5</button>
+        <button class="btn-sheet-ghost pill-btn" onclick="adjustPlateCalcWeight(-2.5)">-2.5</button>
         `}
-        <div style="min-width: 110px; text-align: center; font-family: var(--font-mono); font-size: 22px; font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums;" id="plate-calc-weight-lbl">
-          ${_currentPlateCalcWeight} <span style="font-size: 13px; color: var(--text-tertiary); font-weight: 500;">${unit}</span>
+        <div style="min-width: 110px; text-align: center; font-family: var(--font-mono); font-size: var(--fs-xl); font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums;" id="plate-calc-weight-lbl">
+          ${_currentPlateCalcWeight} <span style="font-size: var(--fs-md); color: var(--text-tertiary); font-weight: 500;">${unit}</span>
         </div>
         ${unit === 'lb' ? `
-        <button class="btn-sheet-ghost" style="padding: 8px 12px; font-size: 13px; font-weight: 700; border-radius: 12px;" onclick="adjustPlateCalcWeight(5)">+5</button>
-        <button class="btn-sheet-ghost" style="padding: 8px 12px; font-size: 13px; font-weight: 700; border-radius: 12px;" onclick="adjustPlateCalcWeight(10)">+10</button>
+        <button class="btn-sheet-ghost pill-btn" onclick="adjustPlateCalcWeight(5)">+5</button>
+        <button class="btn-sheet-ghost pill-btn" onclick="adjustPlateCalcWeight(10)">+10</button>
         ` : `
-        <button class="btn-sheet-ghost" style="padding: 8px 12px; font-size: 13px; font-weight: 700; border-radius: 12px;" onclick="adjustPlateCalcWeight(2.5)">+2.5</button>
-        <button class="btn-sheet-ghost" style="padding: 8px 12px; font-size: 13px; font-weight: 700; border-radius: 12px;" onclick="adjustPlateCalcWeight(5)">+5</button>
+        <button class="btn-sheet-ghost pill-btn" onclick="adjustPlateCalcWeight(2.5)">+2.5</button>
+        <button class="btn-sheet-ghost pill-btn" onclick="adjustPlateCalcWeight(5)">+5</button>
         `}
       </div>
       <div style="display: flex; gap: 8px;">
@@ -9925,7 +10119,7 @@ function adjustPlateCalcWeight(delta) {
   const vis = document.getElementById('plate-calc-visual');
   const lbl = document.getElementById('plate-calc-weight-lbl');
   if (vis) vis.innerHTML = renderPlatePopover(_currentPlateCalcWeight);
-  if (lbl) lbl.innerHTML = `${_currentPlateCalcWeight} <span style="font-size: 13px; color: var(--text-tertiary); font-weight: 500;">${unit}</span>`;
+  if (lbl) lbl.innerHTML = `${_currentPlateCalcWeight} <span style="font-size: var(--fs-md); color: var(--text-tertiary); font-weight: 500;">${unit}</span>`;
   haptic('tick');
 }
 
@@ -10027,7 +10221,7 @@ function updateProgressBadge() {
   const volEl = document.getElementById('wh-vol-num');
   if (volEl) {
     const vol = Math.round(dispW(calcVolume()));
-    volEl.innerHTML = `${vol.toLocaleString()} <span style="font-size:11px;font-weight:500;">${getWeightUnit()}</span>`;
+    volEl.innerHTML = `${vol.toLocaleString()} <span style="font-size:var(--fs-sm);font-weight:500;">${getWeightUnit()}</span>`;
   }
 
   const segs = document.querySelectorAll('.wh-seg');
@@ -10195,7 +10389,8 @@ function logSet(key, si, exIdx, force) {
 
   // Haptic
   if (isPR) {
-    if (navigator.vibrate) navigator.vibrate([40, 60, 80]);
+    haptic('pr');
+    prCelebrate(document.getElementById('setrow-' + key + '-' + si));   // ota-34 (11)
   } else {
     haptic('set');
   }
@@ -10377,6 +10572,7 @@ function unlogSet(key, si, exIdx) {
   if (!ST.workoutSets[key]) return;
   ST.workoutSets[key][si] = null;
   saveNow();
+  haptic('undo');   // ota-34 (10)
 
   // Update UI
   const wi = document.getElementById('wi-' + key + '-' + si);
@@ -10545,7 +10741,7 @@ function showCue(e, key, exIdx) {
   openSheet(`
     <div class="cue-dossier-hero">
       <div class="cue-dossier-title">${name}</div>
-      <div style="font-size:12px;color:var(--text-tertiary);margin-top:4px;">Technique & Execution Guide · ${muscle}</div>
+      <div style="font-size:var(--fs-sm);color:var(--text-tertiary);margin-top:4px;">Technique & Execution Guide · ${muscle}</div>
     </div>
     ${content}
     <div style="margin-top:14px;">
@@ -11261,13 +11457,13 @@ function discardWorkout() {
   
   openSheet(`
     <div class="bs-title">Discard Active Workout?</div>
-    <div style="font-size:13px;color:var(--text-secondary);margin-bottom:18px;line-height:1.45;">
+    <div style="font-size:var(--fs-md);color:var(--text-secondary);margin-bottom:18px;line-height:1.45;">
       You have an unfinished workout session. Do you want to permanently delete this workout or archive your logged sets?
     </div>
     <div style="display:flex;flex-direction:column;gap:10px;">
-      <button class="btn" style="background:#C04E2A;color:#fff;padding:12px;font-size:14px;border-radius:12px;" onclick="confirmDeleteDraftWorkout()">Delete Workout Permanently</button>
-      <button class="btn btn-primary" style="padding:12px;font-size:14px;border-radius:12px;" onclick="archiveAndExitSavedWorkout()">Save & Exit</button>
-      <button class="btn btn-sheet-ghost" style="padding:12px;font-size:14px;border-radius:12px;" onclick="closeSheet()">Keep Training</button>
+      <button class="btn" style="background:#C04E2A;color:#fff;padding:12px;font-size:var(--fs-md);border-radius:12px;" onclick="confirmDeleteDraftWorkout()">Delete Workout Permanently</button>
+      <button class="btn btn-primary" style="padding:12px;font-size:var(--fs-md);border-radius:12px;" onclick="archiveAndExitSavedWorkout()">Save & Exit</button>
+      <button class="btn btn-sheet-ghost" style="padding:12px;font-size:var(--fs-md);border-radius:12px;" onclick="closeSheet()">Keep Training</button>
     </div>
   `);
 }
@@ -11336,13 +11532,13 @@ function cancelWorkout() {
 
   openSheet(`
     <div class="bs-title">Exit Workout?</div>
-    <div style="font-size:13px;color:var(--text-secondary);margin-bottom:18px;line-height:1.45;">
+    <div style="font-size:var(--fs-md);color:var(--text-secondary);margin-bottom:18px;line-height:1.45;">
       You have logged sets in this workout. Would you like to permanently delete this session or save your progress?
     </div>
     <div style="display:flex;flex-direction:column;gap:10px;">
-      <button class="btn" style="background:#C04E2A;color:#fff;padding:12px;font-size:14px;border-radius:12px;" onclick="promptConfirmDeleteLiveWorkout()">Delete Workout</button>
-      <button class="btn btn-primary" style="padding:12px;font-size:14px;border-radius:12px;" onclick="saveAndExitLiveWorkout()">Save & Exit</button>
-      <button class="btn btn-sheet-ghost" style="padding:12px;font-size:14px;border-radius:12px;" onclick="closeSheet()">Keep Training</button>
+      <button class="btn" style="background:#C04E2A;color:#fff;padding:12px;font-size:var(--fs-md);border-radius:12px;" onclick="promptConfirmDeleteLiveWorkout()">Delete Workout</button>
+      <button class="btn btn-primary" style="padding:12px;font-size:var(--fs-md);border-radius:12px;" onclick="saveAndExitLiveWorkout()">Save & Exit</button>
+      <button class="btn btn-sheet-ghost" style="padding:12px;font-size:var(--fs-md);border-radius:12px;" onclick="closeSheet()">Keep Training</button>
     </div>
   `);
 }
@@ -11695,8 +11891,8 @@ function showFinish() {
   if (prsHit.length > 0) {
     prSectionHTML = `
       <div style="margin: 0 auto 16px; padding: 14px 18px; border-radius: 18px; background: linear-gradient(135deg, rgba(234,179,8,0.15), rgba(240,78,35,0.12)); border: 1px solid rgba(234,179,8,0.38); max-width: 340px; text-align: left;">
-        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #B45309; margin-bottom: 6px;">✦ New Records Established</div>
-        ${prsHit.map(pr => `<div style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px;">• ${pr}</div>`).join('')}
+        <div style="font-size: var(--fs-sm); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #B45309; margin-bottom: 6px;">✦ New Records Established</div>
+        ${prsHit.map(pr => `<div style="font-size: var(--fs-md); font-weight: 600; color: var(--text-primary); margin-bottom: 3px;">• ${pr}</div>`).join('')}
       </div>
     `;
   }
@@ -11710,11 +11906,11 @@ function showFinish() {
         background:${up ? 'rgba(16, 185, 129, 0.08)' : 'rgba(239, 68, 68, 0.08)'};
         border:1px solid ${up ? 'rgba(16, 185, 129, 0.25)' : 'rgba(239, 68, 68, 0.25)'};
         text-align:center;max-width:340px">
-        <div style="font-family:var(--font-mono);font-size:22px;font-weight:700;
+        <div style="font-family:var(--font-mono);font-size:var(--fs-xl);font-weight:700;
           color:${up ? 'var(--accent-success)' : 'var(--accent-destructive)'};">
           ${up ? '▲' : '▼'} ${up ? '+' : ''}${s.e1rmDelta}%
         </div>
-        <div style="font-size:11px;color:var(--text-tertiary);margin-top:2px;">Progression Delta vs Previous Session</div>
+        <div style="font-size:var(--fs-sm);color:var(--text-tertiary);margin-top:2px;">Progression Delta vs Previous Session</div>
       </div>`;
   }
 
@@ -11731,12 +11927,12 @@ function showFinish() {
       <div class="finish-stat"><div class="finish-stat-val">${totalSetsDone}</div><div class="finish-stat-lbl">Sets Logged</div></div>
     </div>
     ${(s.duration > 0 && totalVol > 0) ? `
-      <div style="font-size:12px;color:var(--text-secondary);margin: -4px 0 14px;">
+      <div style="font-size:var(--fs-sm);color:var(--text-secondary);margin: -4px 0 14px;">
         <strong style="color:var(--text-primary);">${Math.round(totalVol / Math.max(1, (s.duration / 60)))}</strong> ${unit}/min workout density
       </div>` : ''}
     ${nextTimeHTML}
     ${prog ? `<div class="finish-plan-table">${tableRows}</div>` : ''}
-    <button class="btn btn-primary" style="max-width:360px;width:100%;font-size:15px;padding:14px;" onclick="dismissFinish()">Back to Home</button>
+    <button class="btn btn-primary" style="max-width:360px;width:100%;font-size:var(--fs-md);padding:14px;" onclick="dismissFinish()">Back to Home</button>
   `;
   document.body.appendChild(el);
   requestAnimationFrame(() => tickStats(el));
@@ -11980,7 +12176,7 @@ function showProgressGraph(e, exName) {
     <div class="graph-stat-row">
       <div class="graph-stat"><div class="graph-stat-val">${latestW}</div><div class="graph-stat-lbl">Latest</div></div>
       <div class="graph-stat"><div class="graph-stat-val">${peakW}</div><div class="graph-stat-lbl">Peak</div></div>
-      <div class="graph-stat" style="flex:1.5"><div class="graph-stat-val" style="font-size:14px">${trend}</div><div class="graph-stat-lbl">Trend</div></div>
+      <div class="graph-stat" style="flex:1.5"><div class="graph-stat-val" style="font-size:var(--fs-md)">${trend}</div><div class="graph-stat-lbl">Trend</div></div>
     </div>
   `;
   const bd = document.getElementById('graph-backdrop');
@@ -12066,40 +12262,110 @@ function renderWeeklyVolumeChart(weeks) {
   `;
 }
 
+// ── ota-34 (1): workouts this month and the 4.5-a-week target ────────────────
+function monthWorkoutTarget(nowTs) {
+  const now = new Date(nowTs || Date.now());
+  const start = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  const end = new Date(now.getFullYear(), now.getMonth() + 1, 1).getTime();
+  const days = Math.round((end - start) / 86400000);
+  const count = getHistory().filter(w => w && !w._dupOf && workoutDayTs(w) >= start && workoutDayTs(w) < end).length;
+  return { count, target: Math.round(4.5 * days / 7), days, monthName: now.toLocaleDateString('en-US', { month: 'long' }) };
+}
+
+// ── ota-34 (3): estimated 1RM change by muscle, this month vs last month ─────
+// Per exercise: best estimated 1RM this month vs last month (exercises done in both).
+// A muscle's change is the median of its exercises' changes.
+const GROWTH_MUSCLES = ['Chest','Back','Shoulders','Biceps','Triceps','Core','Glutes','Quads','Hamstrings','Calves','Traps'];
+function getMonthlyGrowthByMuscle(nowTs) {
+  const now = new Date(nowTs || Date.now());
+  const thisStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  const lastStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).getTime();
+  const best = {};   // muscle -> exercise -> { cur, prev, name }
+  for (const w of getHistory()) {
+    if (!w || !w.sets || w._dupOf || w.partial) continue;
+    const t = workoutDayTs(w);
+    if (t < lastStart) continue;
+    const slot = t >= thisStart ? 'cur' : 'prev';
+    for (const [key, sets] of Object.entries(w.sets)) {
+      if (key.endsWith('_wu') || !Array.isArray(sets) || !sets.length) continue;
+      const nm = resolveWorkoutSetExName(w, key, sets);
+      if (!nm) continue;
+      const m = getMuscle(nm);
+      if (!m || GROWTH_MUSCLES.indexOf(m) < 0) continue;
+      const e = getTopSetE1RM(sets);
+      if (!(e > 0)) continue;
+      const k = normalizeEx(nm);
+      const b = ((best[m] = best[m] || {})[k] = best[m][k] || { cur: 0, prev: 0, name: stripSuperset(nm) });
+      if (e > b[slot]) b[slot] = e;
+    }
+  }
+  const out = {};
+  for (const m of GROWTH_MUSCLES) {
+    const exs = Object.values(best[m] || {}).filter(x => x.cur > 0 && x.prev > 0)
+      .map(x => ({ name: x.name, prev: x.prev, cur: x.cur, pct: (x.cur - x.prev) / x.prev * 100 }))
+      .sort((a, b) => b.pct - a.pct);
+    if (!exs.length) { out[m] = { pct: null, exercises: [], onlyThis: Object.values(best[m] || {}).some(x => x.cur > 0) }; continue; }
+    const ps = exs.map(x => x.pct).sort((a, b) => a - b);
+    const mid = ps.length % 2 ? ps[(ps.length - 1) / 2] : (ps[ps.length / 2 - 1] + ps[ps.length / 2]) / 2;
+    out[m] = { pct: Math.round(mid * 10) / 10, exercises: exs };
+  }
+  return { muscles: out, thisMonth: now.toLocaleDateString('en-US', { month: 'long' }), lastMonth: new Date(lastStart).toLocaleDateString('en-US', { month: 'long' }) };
+}
+function growthColor(p) {
+  if (p === null || p === undefined) return 'oklch(76% 0.014 60 / 0.30)';   // no data to compare
+  if (p >= 1)  return 'oklch(56% 0.075 145 / 0.92)';                         // growing: sage
+  if (p <= -1) return 'oklch(48% 0.130 35 / 0.85)';                          // down: terracotta
+  return 'oklch(66% 0.020 60 / 0.62)';                                       // holding: warm grey
+}
+function renderGrowthFigure() {
+  let g;
+  try { g = getMonthlyGrowthByMuscle(); } catch (e) { return ''; }
+  ST._growth = g;
+  const svg = buildSilhouetteSVG({}, {}, false, { color: m => growthColor(g.muscles[m] ? g.muscles[m].pct : null), glow: () => 'none', noPulse: true })
+    .replace(/id="([^"]+)"/g, 'id="hg-$1"').replace(/url\(#([^)]+)\)/g, 'url(#hg-$1)');
+  const ups = GROWTH_MUSCLES.filter(m => g.muscles[m].pct !== null && g.muscles[m].pct >= 1).length;
+  const downs = GROWTH_MUSCLES.filter(m => g.muscles[m].pct !== null && g.muscles[m].pct <= -1).length;
+  return `<div class="growth-card">
+    <div class="gc-head"><span class="hsi-label">Strength by muscle</span><span class="gc-sub">${g.thisMonth} vs ${g.lastMonth}</span></div>
+    <div class="gc-body">
+      <div class="gc-figure" onclick="growthMuscleTap(event)" role="img" aria-label="Estimated 1RM change by muscle">${svg}</div>
+      <div class="gc-legend">
+        <div><span class="gc-dot" style="background:${growthColor(5)}"></span>Stronger${ups ? ' · ' + ups : ''}</div>
+        <div><span class="gc-dot" style="background:${growthColor(0)}"></span>Holding</div>
+        <div><span class="gc-dot" style="background:${growthColor(-5)}"></span>Weaker${downs ? ' · ' + downs : ''}</div>
+        <div><span class="gc-dot" style="background:${growthColor(null)}"></span>Not enough data</div>
+        <div class="gc-hint">Tap a muscle for its %</div>
+      </div>
+    </div>
+  </div>`;
+}
+function growthMuscleTap(e) {
+  const el = e && e.target && e.target.closest ? e.target.closest('[data-muscle]') : null;
+  if (!el) return;
+  haptic('tick');
+  const m = el.dataset.muscle, g = ST._growth || getMonthlyGrowthByMuscle(), d = g.muscles[m];
+  const sign = p => (p > 0 ? '+' : '') + (Math.round(p * 10) / 10) + '%';
+  const unit = getWeightUnit();
+  const fmtE = v => Math.round(dispW(v));
+  let body;
+  if (!d || d.pct === null) {
+    body = d && d.onlyThis ? `Trained in ${g.thisMonth}, but none of these exercises were done in ${g.lastMonth} to compare.` : `No ${m.toLowerCase()} lifts with weight in both ${g.lastMonth} and ${g.thisMonth} yet.`;
+  } else {
+    body = `<div style="margin-bottom:8px"><b>${sign(d.pct)}</b> estimated 1RM, ${g.thisMonth} vs ${g.lastMonth}.</div>` +
+      d.exercises.slice(0, 5).map(x => `<div>${x.name}: ${fmtE(x.prev)} → ${fmtE(x.cur)} ${unit} (${sign(x.pct)})</div>`).join('');
+  }
+  noticeSheet(m, body);
+}
+
 function renderHistory() {
   const el = document.getElementById('screen-history');
   if (!el) return;
   const hist = getHistory();
   const unit = getWeightUnit();
 
-  // 1. Calculate Lifetime Telemetry
-  let totalTonnage = 0;
-  for (const w of hist) {
-    if (!w.sets || w._dupOf) continue;
-    for (const sets of Object.values(w.sets)) {
-      if (Array.isArray(sets)) {
-        for (const s of sets) {
-          if (s && s.w > 0 && s.r > 0 && !s._suspect) totalTonnage += (s.w * s.r);
-        }
-      }
-    }
-  }
-  totalTonnage = dispW(totalTonnage);
-  const totalWorkouts = hist.filter(w => !w._dupOf).length;
-
-  // Streak & consistency (rotation-pass aware)
-  const progId = ensureActiveProgram();
-  const prog = progId ? PROGRAMS.find(p => p.id === progId) : null;
-  const weekStartMs = (() => { const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() - d.getDay()); return d.getTime(); })();
-  const rot = prog ? getProgramRotationState(prog, hist) : null;
-  const doneThisWeek = new Set(hist.filter(w => (!progId || w.programId === progId) && (w.endTime || 0) >= weekStartMs).map(w => w.sessionId || w.id));
-  const midStatLabel = rot ? 'In Rotation' : 'This Week';
-  const midStatVal = rot ? `${rot.completedCount}/${rot.totalSessions}` : String(doneThisWeek.size);
-
-  // Format Total Tonnage
-  const tonnageStr = totalTonnage >= 1000000
-    ? (totalTonnage / 1000000).toFixed(1) + 'M'
-    : (totalTonnage >= 1000 ? (totalTonnage / 1000).toFixed(1) + 'k' : totalTonnage);
+  // ota-34 (1, 2): top of History = workouts this month against 4.5 a week on average.
+  const mt = monthWorkoutTarget();
+  const mtPct = mt.target > 0 ? Math.min(100, Math.round(mt.count / mt.target * 100)) : 0;
 
   const calHTML = renderFiveWeekCalendar();
   const feedHTML = renderRecentWorkoutsFeed();
@@ -12107,30 +12373,25 @@ function renderHistory() {
   el.innerHTML = `
   <div class="screen-content history-screen-wrap">
     <div style="padding: calc(env(safe-area-inset-top, 0px) + 24px) 20px 10px;">
-      <div style="font-size: 0.65rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 4px; font-weight: 700;">Training Log</div>
+      <div style="font-size: var(--fs-xs); letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 4px; font-weight: 700;">Training Log</div>
       <h1 style="font-family: var(--font-hero); font-style: italic; font-size: 2.1rem; font-weight: 600; color: var(--text-primary); line-height: 1.1; letter-spacing: -0.015em; margin: 0;">History</h1>
     </div>
 
-    <!-- Quick 3-Stat Summary Bar -->
-    <div class="hist-summary-card">
-      <div class="hist-stat-item">
-        <span class="hsi-label">Total Workouts</span>
-        <span class="hsi-val">${totalWorkouts}</span>
+    <!-- ota-34 (1): workouts this month vs target -->
+    <div class="hist-month-card" aria-label="${mt.count} of ${mt.target} workouts this month">
+      <div class="hm-top">
+        <span class="hsi-label">Workouts in ${mt.monthName}</span>
+        <span class="hm-val"><span class="hm-count">${mt.count}</span><span class="hm-of"> / ${mt.target}</span></span>
       </div>
-      <div class="hist-stat-sep"></div>
-      <div class="hist-stat-item">
-        <span class="hsi-label">${midStatLabel}</span>
-        <span class="hsi-val">${midStatVal}</span>
-      </div>
-      <div class="hist-stat-sep"></div>
-      <div class="hist-stat-item">
-        <span class="hsi-label">Volume Moved</span>
-        <span class="hsi-val">${tonnageStr} <span style="font-size:10px;font-weight:500;color:var(--text-tertiary)">${unit}</span></span>
-      </div>
+      <div class="hm-bar"><div class="hm-fill${mt.count >= mt.target ? ' hm-done' : ''}" style="width:${mtPct}%"></div></div>
+      <div class="hm-sub">Target ${mt.target}: 4.5 a week on average</div>
     </div>
 
     <!-- Calendar View -->
     ${calHTML}
+
+    <!-- ota-34 (3): strength growth by muscle, this month vs last -->
+    ${renderGrowthFigure()}
 
     <!-- Recent Workouts Feed -->
     <div class="recent-feed-header">Recent Workouts</div>
@@ -12148,7 +12409,7 @@ function renderFiveWeekCalendar() {
   // Map dateKey → array of workout entries
   const workoutByDay = {};
   for (const w of hist) {
-    const d = new Date(w.endTime);
+    const d = new Date(workoutDayTs(w));   // ota-34 (5): past-midnight sessions sit on their start day
     const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
     if (!workoutByDay[key]) workoutByDay[key] = [];
     workoutByDay[key].push(w);
@@ -12220,7 +12481,7 @@ function renderRecentWorkoutsFeed() {
   const unit = getWeightUnit();
 
   if (hist.length === 0) {
-    return `<div style="padding:24px 20px;text-align:center;color:var(--text-tertiary);font-size:13px;font-style:italic">No workouts logged yet. Start your first session from the Home tab!</div>`;
+    return `<div style="padding:24px 20px;text-align:center;color:var(--text-tertiary);font-size:var(--fs-md);font-style:italic">No workouts logged yet. Start your first session from the Home tab!</div>`;
   }
 
   return hist.slice(0, 15).map(w => {
@@ -12249,8 +12510,8 @@ function renderRecentWorkoutsFeed() {
             <div class="whfc-date">📅 ${dateStr}</div>
           </div>
           <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;" onclick="event.stopPropagation()">
-            <button class="btn-sheet-ghost" style="font-size:11px;padding:4px 9px;border-radius:10px;" onclick="editCompletedWorkout('${wid}')">Edit</button>
-            <button class="btn-sheet-ghost" style="font-size:11px;padding:4px 9px;border-radius:10px;color:#C04E2A;border-color:rgba(192,78,42,0.25);" onclick="deleteCompletedWorkout('${wid}')">Delete</button>
+            <button class="btn-sheet-ghost" style="font-size:var(--fs-sm);padding:4px 9px;border-radius:10px;" onclick="editCompletedWorkout('${wid}')">Edit</button>
+            <button class="btn-sheet-ghost" style="font-size:var(--fs-sm);padding:4px 9px;border-radius:10px;color:#C04E2A;border-color:rgba(192,78,42,0.25);" onclick="deleteCompletedWorkout('${wid}')">Delete</button>
           </div>
         </div>
         <div class="whfc-ribbon">
@@ -12438,17 +12699,17 @@ function clickOpenCalDay(timestamp, dateStr) {
     let existingHtml = '';
     if (dayWorkouts.length > 0) {
       existingHtml = `
-        <div style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:8px;">Logged on this day:</div>
+        <div style="font-size:var(--fs-xs);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:8px;">Logged on this day:</div>
         <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px;">
           ${dayWorkouts.map(w => `
             <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(42,36,33,0.03);border:1px solid var(--border);border-radius:12px;padding:10px 12px;">
               <div>
-                <div style="font-size:13.5px;font-weight:600;color:var(--text-primary);">${w.sessionName || 'Workout'}</div>
-                <div style="font-size:11px;color:var(--muted);">${formatDuration(workoutDuration(w))} · Logged${w._dupOf ? ' · duplicate copy' : ''}</div>
+                <div style="font-size:var(--fs-md);font-weight:600;color:var(--text-primary);">${w.sessionName || 'Workout'}</div>
+                <div style="font-size:var(--fs-sm);color:var(--muted);">${formatDuration(workoutDuration(w))} · Logged${w._dupOf ? ' · duplicate copy' : ''}</div>
               </div>
               <div style="display:flex;gap:6px;">
-                <button class="btn-sheet-ghost" style="font-size:11px;padding:4px 9px;border-radius:10px;" onclick="closeSheet(false); editCompletedWorkout('${w.id || w.endTime}')">Edit</button>
-                <button class="btn-sheet-ghost" style="font-size:11px;padding:4px 9px;border-radius:10px;color:#C04E2A;border-color:rgba(192,78,42,0.25);" onclick="closeSheet(false); deleteCompletedWorkout('${w.id || w.endTime}')">Delete</button>
+                <button class="btn-sheet-ghost" style="font-size:var(--fs-sm);padding:4px 9px;border-radius:10px;" onclick="closeSheet(false); editCompletedWorkout('${w.id || w.endTime}')">Edit</button>
+                <button class="btn-sheet-ghost" style="font-size:var(--fs-sm);padding:4px 9px;border-radius:10px;color:#C04E2A;border-color:rgba(192,78,42,0.25);" onclick="closeSheet(false); deleteCompletedWorkout('${w.id || w.endTime}')">Delete</button>
               </div>
             </div>
           `).join('')}
@@ -12459,21 +12720,21 @@ function clickOpenCalDay(timestamp, dateStr) {
     let html = `
       <div class="bs-title">${dateStr}</div>
       ${existingHtml}
-      <div style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:8px;text-align:left;">Log a Routine on this date:</div>
+      <div style="font-size:var(--fs-xs);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:8px;text-align:left;">Log a Routine on this date:</div>
       <div style="max-height:280px;overflow-y:auto;text-align:left">
     `;
     
     PROGRAMS.forEach(p => {
-      html += `<div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin:12px 0 6px">${p.name}</div>`;
+      html += `<div style="font-size:var(--fs-sm);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin:12px 0 6px">${p.name}</div>`;
       p.sessions.forEach(s => {
         html += `
           <div onclick="closeSheet(false); beginBackdatedWorkout('${p.id}', '${s.id}', ${timestamp})"
                style="display:flex;align-items:center;justify-content:space-between;padding:10px 8px;border-bottom:1px solid var(--border);cursor:pointer;">
             <div style="flex:1">
-              <div style="font-size:13.5px;font-weight:600;color:var(--charcoal)">${s.name}</div>
-              <div style="font-size:11.5px;color:var(--muted)">${s.exercises.length} exercises</div>
+              <div style="font-size:var(--fs-md);font-weight:600;color:var(--charcoal)">${s.name}</div>
+              <div style="font-size:var(--fs-sm);color:var(--muted)">${s.exercises.length} exercises</div>
             </div>
-            <div style="color:var(--accent);font-size:16px;font-weight:bold;padding-right:8px">＋</div>
+            <div style="color:var(--accent);font-size:var(--fs-lg);font-weight:bold;padding-right:8px">＋</div>
           </div>
         `;
       });
@@ -12557,12 +12818,12 @@ function editWorkoutDateTime() {
     <div class="bs-title">Workout Details</div>
     <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 16px; text-align: left;">
       <div>
-        <label style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); display: block; margin-bottom: 6px;">Workout Date & Time</label>
-        <input type="datetime-local" id="edit-workout-datetime" style="width: 100%; border: 1px solid var(--border); border-radius: 12px; padding: 12px; font-size: 15px; background: rgba(255,255,255,0.6); color: var(--charcoal); -webkit-appearance: none; box-sizing: border-box;" value="${localISOTime}">
+        <label style="font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); display: block; margin-bottom: 6px;">Workout Date & Time</label>
+        <input type="datetime-local" id="edit-workout-datetime" style="width: 100%; border: 1px solid var(--border); border-radius: 12px; padding: 12px; font-size: var(--fs-md); background: rgba(255,255,255,0.6); color: var(--charcoal); -webkit-appearance: none; box-sizing: border-box;" value="${localISOTime}">
       </div>
       <div>
-        <label style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); display: block; margin-bottom: 6px;">Duration (Minutes)</label>
-        <input type="number" id="edit-workout-duration" pattern="[0-9]*" inputmode="numeric" style="width: 100%; border: 1px solid var(--border); border-radius: 12px; padding: 12px; font-size: 15px; background: rgba(255,255,255,0.6); color: var(--charcoal); box-sizing: border-box;" value="${Math.round(ST.durationSecs / 60)}">
+        <label style="font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); display: block; margin-bottom: 6px;">Duration (Minutes)</label>
+        <input type="number" id="edit-workout-duration" pattern="[0-9]*" inputmode="numeric" style="width: 100%; border: 1px solid var(--border); border-radius: 12px; padding: 12px; font-size: var(--fs-md); background: rgba(255,255,255,0.6); color: var(--charcoal); box-sizing: border-box;" value="${Math.round(ST.durationSecs / 60)}">
       </div>
       <div style="display: flex; gap: 10px; margin-top: 8px;">
         <button class="btn btn-primary" style="flex: 1;" onclick="saveWorkoutDetails()">Apply</button>
@@ -12696,7 +12957,7 @@ function openCalDay(id, dateStr) {
         </div>
         <div style="text-align:right;">
           <div class="cal-ex-vol">${done.length} sets</div>
-          <div style="font-size:10.5px;color:var(--text-tertiary);">${topText}</div>
+          <div style="font-size:var(--fs-xs);color:var(--text-tertiary);">${topText}</div>
         </div>
       </div>
       <div class="cal-cmp ${cmpCls}">${cmpText}</div>
@@ -12768,12 +13029,12 @@ function openCalDay(id, dateStr) {
       </div>
     </div>
 
-    <div style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:8px;">Completed Movements</div>
-    <div class="cal-ex-list">${rowsHTML || '<div style="padding:12px;color:var(--text-tertiary);text-align:center;font-size:12px;">No logged sets found.</div>'}</div>
+    <div style="font-size:var(--fs-xs);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:8px;">Completed Movements</div>
+    <div class="cal-ex-list">${rowsHTML || '<div style="padding:12px;color:var(--text-tertiary);text-align:center;font-size:var(--fs-sm);">No logged sets found.</div>'}</div>
 
     <div class="cal-popup-actions">
-      <button class="btn btn-primary" style="width:100%;font-size:14px;padding:12px;" onclick="closeCalPopup(false); editCompletedWorkout('${w.id || w.endTime}')">Edit Workout & Sets</button>
-      <button class="btn btn-sheet-ghost" style="width:100%;font-size:12px;" onclick="closeCalPopup(false); ST.editingWorkoutId='${w.id || w.endTime}'; ST.workoutStart=${w.startTime || w.endTime}; ST.durationSecs=${w.duration || 0}; editWorkoutDateTime()">Change Date, Time or Delete</button>
+      <button class="btn btn-primary" style="width:100%;font-size:var(--fs-md);padding:12px;" onclick="closeCalPopup(false); editCompletedWorkout('${w.id || w.endTime}')">Edit Workout & Sets</button>
+      <button class="btn btn-sheet-ghost" style="width:100%;font-size:var(--fs-sm);" onclick="closeCalPopup(false); ST.editingWorkoutId='${w.id || w.endTime}'; ST.workoutStart=${w.startTime || w.endTime}; ST.durationSecs=${w.duration || 0}; editWorkoutDateTime()">Change Date, Time or Delete</button>
     </div>
   `;
   popup.style.display = 'flex';
@@ -12829,7 +13090,7 @@ function showMuscleDetail(muscle) {
   const chartSvg = p.values.length > 1 ? `
     <svg viewBox="0 0 300 100" style="width:100%;height:80px;margin:12px 0">
       ${renderDetailChart(p.values)}
-    </svg>` : '<p style="color:var(--muted);font-size:13px;margin:12px 0">Not enough data yet — log more sessions.</p>';
+    </svg>` : '<p style="color:var(--muted);font-size:var(--fs-md);margin:12px 0">Not enough data yet — log more sessions.</p>';
   const insight = p.dot === 'red' && p.daysSince >= 7 ? `${muscle} hasn't been worked in ${p.daysSince} days. Get it in this week.`
     : p.dot === 'red' ? `${muscle} has been flat for 3+ sessions. Consider pushing intensity or adding a set.`
     : p.dot === 'amber' ? `${muscle} has been flat for 2 sessions. Try adding ${step} next time.`
@@ -12837,10 +13098,10 @@ function showMuscleDetail(muscle) {
 
   openSheet(`
     <div class="bs-title">${muscle} Progress</div>
-    <div style="font-size:13px;color:var(--muted)">Estimated 1RM (Epley) · 4 weeks</div>
+    <div style="font-size:var(--fs-md);color:var(--muted)">Estimated 1RM (Epley) · 4 weeks</div>
     ${chartSvg}
-    <div style="background:rgba(240,78,35,0.06);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:12px 14px;font-size:13px;color:var(--text-secondary);margin-top:8px">${insight}</div>
-    <div style="margin-top:16px;font-size:13px;color:var(--text-secondary)">Current 1RM estimate: <b>${p.latest > 0 ? p.latest + ' ' + unit : 'No data'}</b></div>
+    <div style="background:rgba(240,78,35,0.06);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:12px 14px;font-size:var(--fs-md);color:var(--text-secondary);margin-top:8px">${insight}</div>
+    <div style="margin-top:16px;font-size:var(--fs-md);color:var(--text-secondary)">Current 1RM estimate: <b>${p.latest > 0 ? p.latest + ' ' + unit : 'No data'}</b></div>
   `);
 }
 
@@ -12856,11 +13117,11 @@ function renderSettings() {
     blacklistHtml = `
     <div class="settings-section">
       <div class="settings-section-title">Blacklisted Exercises</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.4">Exercises you have blocked. Tap "Remove" to restore them:</div>
+      <div style="font-size:var(--fs-sm);color:var(--muted);margin-bottom:12px;line-height:1.4">Exercises you have blocked. Tap "Remove" to restore them:</div>
       ${blacklist.map(exName => `
         <div class="settings-row">
           <label style="text-transform:capitalize">${exName}</label>
-          <button onclick="unblacklistExercise('${exName.replace(/'/g, "\\'")}')" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:4px 10px;font-size:12px;cursor:pointer">Remove</button>
+          <button onclick="unblacklistExercise('${exName.replace(/'/g, "\\'")}')" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:4px 10px;font-size:var(--fs-sm);cursor:pointer">Remove</button>
         </div>
       `).join('')}
     </div>`;
@@ -12873,7 +13134,7 @@ function renderSettings() {
     <div class="settings-section">
       <div class="settings-section-title">Profile</div>
       <div class="settings-row"><label>Weight unit</label>
-        <select id="unit-select" onchange="setDisplayUnit(this.value)" style="border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:13px;background:var(--bg)">
+        <select id="unit-select" onchange="setDisplayUnit(this.value)" style="border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:var(--fs-md);background:var(--bg)">
           <option value="lb" ${getWeightUnit()==='lb'?'selected':''}>lb</option>
           <option value="kg" ${getWeightUnit()==='kg'?'selected':''}>kg</option>
         </select>
@@ -12884,40 +13145,43 @@ function renderSettings() {
     <div class="settings-section">
       <div class="settings-section-title" style="display:flex;justify-content:space-between;align-items:center">
         <span>Body Measurements & Assessment</span>
-        <button onclick="openAddMeasurementModal()" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer">+ Add New</button>
+        <button onclick="openAddMeasurementModal()" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:var(--fs-sm);font-weight:600;cursor:pointer">+ Add New</button>
       </div>
-      <div style="font-size:11.5px;color:var(--muted);margin-top:2px;margin-bottom:8px">Logged body part circumferences and gym physical fitness evaluations:</div>
+      <div style="font-size:var(--fs-sm);color:var(--muted);margin-top:2px;margin-bottom:8px">Logged body part circumferences and gym physical fitness evaluations:</div>
       ${renderMeasurementListHTML()}
     </div>
 
     <div class="settings-section">
       <div class="settings-section-title">Data</div>
-      <div class="settings-row"><label>Saved weights<br><span style="font-weight:normal;color:var(--muted);font-size:11px">Stored in ${getStoreUnit()}. Changing the unit above only changes how they're shown.</span></label></div>
-      ${(() => { const f = ota31FlagSummary(); if (!f.total) return ''; return `<div class="settings-row"><label>Data check<br><span style="font-weight:normal;color:var(--muted);font-size:11px">${[f.suspect ? f.suspect + ' typo set' + (f.suspect === 1 ? '' : 's') + ' left out of records' : '', f.dup ? f.dup + ' duplicate cop' + (f.dup === 1 ? 'y' : 'ies') + ' not counted twice' : '', f.dur ? f.dur + ' long timer' + (f.dur === 1 ? '' : 's') + ' shown to last set' : ''].filter(Boolean).join(' · ')}. Nothing was deleted.</span></label>
-        <button onclick="confirmSheet({title:'Undo the data check?',body:'Every workout goes back to exactly how it was counted before. No sets are changed either way.',confirmLabel:'Undo',onConfirm:()=>{undoOta31DataFlags();renderSettings();}})" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer">Undo</button></div>`; })()}
-      ${(() => { const f = ota32FixSummary(); if (!f.total) return ''; return `<div class="settings-row"><label>Forgotten finishes<br><span style="font-weight:normal;color:var(--muted);font-size:11px">${[f.redated ? f.redated + ' workout' + (f.redated === 1 ? '' : 's') + ' moved back to the day of the sets' : '', f.dur ? f.dur + ' timer' + (f.dur === 1 ? '' : 's') + ' corrected' : '', f.restored ? f.restored + ' put back on the day it was done' : ''].filter(Boolean).join(' · ')}. Original times kept.</span></label>
-        <button onclick="confirmSheet({title:'Undo the date fixes?',body:'Those workouts go back to the dates and times they had before. No sets are changed either way.',confirmLabel:'Undo',onConfirm:()=>{undoDateFixes();renderSettings();}})" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer">Undo</button></div>`; })()}
+      <div class="settings-row"><label>Saved weights<br><span class="settings-sub">Stored in ${getStoreUnit()}. Changing the unit above only changes how they're shown.</span></label></div>
+      ${(() => { const f = ota31FlagSummary(); if (!f.total) return ''; return `<div class="settings-row"><label>Data check<br><span class="settings-sub">${[f.suspect ? f.suspect + ' typo set' + (f.suspect === 1 ? '' : 's') + ' left out of records' : '', f.dup ? f.dup + ' duplicate cop' + (f.dup === 1 ? 'y' : 'ies') + ' not counted twice' : '', f.dur ? f.dur + ' long timer' + (f.dur === 1 ? '' : 's') + ' shown to last set' : ''].filter(Boolean).join(' · ')}. Nothing was deleted.</span></label>
+        <button onclick="confirmSheet({title:'Undo the data check?',body:'Every workout goes back to exactly how it was counted before. No sets are changed either way.',confirmLabel:'Undo',onConfirm:()=>{undoOta31DataFlags();renderSettings();}})" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:var(--fs-sm);cursor:pointer">Undo</button></div>`; })()}
+      ${(() => { const items = dateFixItems(); if (!items.length) return '';   // ota-34 (6): one workout at a time
+        const fmt = t => new Date(Number(t)).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        return `<div class="settings-row" style="display:block"><label>Forgotten finishes<br><span class="settings-sub">Fixed from set times. Original times kept. Monday's Push stays on Monday.</span></label>
+          ${items.map(it => `<div class="fix-item"><span>${it.name.replace(/</g, '&lt;')} · ${fmt(it.day)}${it.moved ? ' (was ' + fmt(it.from) + ')' : ' · timer'}</span>
+            <button class="btn-sm" onclick="confirmUndoDateFix('${it.id}')">Undo</button></div>`).join('')}</div>`; })()}
       <div class="settings-row"><label>Import Strong CSV</label>
-        <input type="file" accept=".csv" onchange="importStrongCSV(this)" style="font-size:13px;max-width:160px">
+        <input type="file" accept=".csv" onchange="importStrongCSV(this)" style="font-size:var(--fs-md);max-width:160px">
       </div>
       <div class="settings-row"><label>Export history</label>
         <div style="display:flex;gap:8px">
-          <button onclick="exportCSV()" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer">CSV</button>
-          <button onclick="exportJSON()" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer">JSON</button>
+          <button onclick="exportCSV()" class="btn-sm">CSV</button>
+          <button onclick="exportJSON()" class="btn-sm">JSON</button>
         </div>
       </div>
       <div class="settings-row"><label>Restore from JSON</label>
-        <input type="file" accept=".json" onchange="importJSON(this)" style="font-size:13px;max-width:160px">
+        <input type="file" accept=".json" onchange="importJSON(this)" style="font-size:var(--fs-md);max-width:160px">
       </div>
       <div class="settings-row"><label>Google Sheets URL</label>
         <input type="url" value="${s.sheets||''}" placeholder="Apps Script URL"
-          onchange="saveSetting('sheets',this.value)" style="font-size:12px;width:160px">
+          onchange="saveSetting('sheets',this.value)" style="font-size:var(--fs-sm);width:160px">
       </div>
       <div class="settings-row"><label>Recover from cloud</label>
-        <button id="recover-btn" onclick="recoverFromCloud()" style="background:oklch(25% 0.01 40);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:13px;cursor:pointer;font-family:var(--font-mono);letter-spacing:0.04em">Recover ↓</button>
+        <button id="recover-btn" onclick="recoverFromCloud()" style="background:oklch(25% 0.01 40);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:var(--fs-md);cursor:pointer;font-family:var(--font-mono);letter-spacing:0.04em">Recover ↓</button>
       </div>
-      <div class="settings-row"><label>Cloud sync<br><span style="font-weight:normal;color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums">${cloudSyncStatus()}</span>${ST.lastSyncDetail ? `<br><span id="sync-detail" style="font-weight:normal;color:var(--muted);font-size:11px">${syncResultLines(ST.lastSyncDetail).join('<br>')}</span>` : ''}</label>
-        <button id="sync-now-btn" onclick="manualSync()" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer">Sync Now</button>
+      <div class="settings-row"><label>Cloud sync<br><span style="font-weight:normal;color:var(--muted);font-size:var(--fs-sm);font-variant-numeric:tabular-nums">${cloudSyncStatus()}</span>${ST.lastSyncDetail ? `<br><span id="sync-detail" class="settings-sub">${syncResultLines(ST.lastSyncDetail).join('<br>')}</span>` : ''}</label>
+        <button id="sync-now-btn" onclick="manualSync()" class="btn-sm">Sync Now</button>
       </div>
       <div class="settings-row" style="cursor:pointer" onclick="clearHistoryConfirm()">
         <label class="settings-danger" style="cursor:pointer">Clear all history</label>
@@ -12934,13 +13198,13 @@ function renderSettings() {
         </label>
       </div>
       <div class="settings-row"><label>Notifications</label>
-        <button onclick="requestNotif()" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer">
+        <button onclick="requestNotif()" class="btn-sm">
           ${ST.notifEnabled ? 'Enabled ✓' : 'Enable'}
         </button>
       </div>
       <div class="settings-row" onclick="checkForUpdateManual()" style="cursor:pointer">
         <label style="pointer-events:none">Build</label>
-        <span style="font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums">${APP_BUILD} · tap to check</span>
+        <span style="font-size:var(--fs-sm);color:var(--muted);font-variant-numeric:tabular-nums">${APP_BUILD} · tap to check</span>
       </div>
     </div>
   </div>`;
@@ -12949,7 +13213,7 @@ function renderSettings() {
 function renderMeasurementListHTML() {
   const list = getMeasurements();
   if (!list || list.length === 0) {
-    return `<div style="padding:12px;font-size:13px;color:var(--muted)">No measurements recorded yet.</div>`;
+    return `<div style="padding:12px;font-size:var(--fs-md);color:var(--muted)">No measurements recorded yet.</div>`;
   }
 
   return list.map((m, idx) => {
@@ -12957,23 +13221,23 @@ function renderMeasurementListHTML() {
     <div style="background:var(--card-bg, #fff);border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:10px;box-shadow:0 1px 3px rgba(0,0,0,0.05)">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
         <div>
-          <strong style="font-size:15px;color:var(--charcoal)">${m.title || `Measurement #${idx+1}`}</strong>
-          <div style="font-size:12px;color:var(--muted)">${m.displayDate || m.date}${m.clientName ? ` · ${m.clientName}` : ''}</div>
+          <strong style="font-size:var(--fs-md);color:var(--charcoal)">${m.title || `Measurement #${idx+1}`}</strong>
+          <div style="font-size:var(--fs-sm);color:var(--muted)">${m.displayDate || m.date}${m.clientName ? ` · ${m.clientName}` : ''}</div>
         </div>
-        <button onclick="deleteMeasurement('${m.id}')" style="background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:4px" title="Delete">✕</button>
+        <button onclick="deleteMeasurement('${m.id}')" style="background:none;border:none;color:var(--muted);font-size:var(--fs-md);cursor:pointer;padding:4px" title="Delete">✕</button>
       </div>
 
       <!-- Quick stats summary -->
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-        ${m.weight ? `<span style="background:rgba(42,36,33,0.06);padding:3px 8px;border-radius:6px;font-size:12px;font-weight:600">${m.weight} lbs</span>` : ''}
-        ${m.bodyFat ? `<span style="background:rgba(42,36,33,0.06);padding:3px 8px;border-radius:6px;font-size:12px;font-weight:600">${m.bodyFat}% Body Fat</span>` : ''}
-        ${m.height ? `<span style="background:rgba(42,36,33,0.06);padding:3px 8px;border-radius:6px;font-size:12px">${m.height}</span>` : ''}
-        ${m.age ? `<span style="background:rgba(42,36,33,0.06);padding:3px 8px;border-radius:6px;font-size:12px">Age ${m.age}</span>` : ''}
+        ${m.weight ? `<span style="background:rgba(42,36,33,0.06);padding:3px 8px;border-radius:6px;font-size:var(--fs-sm);font-weight:600">${m.weight} lbs</span>` : ''}
+        ${m.bodyFat ? `<span style="background:rgba(42,36,33,0.06);padding:3px 8px;border-radius:6px;font-size:var(--fs-sm);font-weight:600">${m.bodyFat}% Body Fat</span>` : ''}
+        ${m.height ? `<span style="background:rgba(42,36,33,0.06);padding:3px 8px;border-radius:6px;font-size:var(--fs-sm)">${m.height}</span>` : ''}
+        ${m.age ? `<span style="background:rgba(42,36,33,0.06);padding:3px 8px;border-radius:6px;font-size:var(--fs-sm)">Age ${m.age}</span>` : ''}
       </div>
 
       <!-- Body Measurements Grid -->
-      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:6px">Body Part Circumferences (Inches)</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:13px;margin-bottom:12px">
+      <div style="font-size:var(--fs-sm);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:6px">Body Part Circumferences (Inches)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:var(--fs-md);margin-bottom:12px">
         <div>Pecho (Chest): <strong>${m.chest ?? '—'}"</strong></div>
         <div>Biceps (R/L): <strong>${m.bicepsR ?? '—'}" / ${m.bicepsL ?? '—'}"</strong></div>
         <div>Cintura (Waist): <strong>${m.waist ?? '—'}"</strong></div>
@@ -12983,8 +13247,8 @@ function renderMeasurementListHTML() {
       </div>
 
       <!-- Fitness Assessment Grid -->
-      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:6px">Physical Fitness Assessment</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:13px">
+      <div style="font-size:var(--fs-sm);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:6px">Physical Fitness Assessment</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:var(--fs-md)">
         <div>3-Min Step/Treadmill: <strong>${m.stepTestHR ?? '—'} bpm</strong></div>
         <div>Push-ups (1 min): <strong>${m.pushups1Min ?? '—'} reps</strong></div>
         <div>Abdominales (1 min): <strong>${m.crunches1Min ?? '—'} reps</strong></div>
@@ -13003,45 +13267,45 @@ function openAddMeasurementModal() {
   
   openSheet(`
     <div style="padding:16px">
-      <h2 style="font-size:18px;margin-bottom:12px;color:var(--charcoal)">Add Measurement #${nextNum}</h2>
-      <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;max-height:70vh;overflow-y:auto;padding-right:4px">
+      <h2 style="font-size:var(--fs-xl);margin-bottom:12px;color:var(--charcoal)">Add Measurement #${nextNum}</h2>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:var(--fs-md);max-height:70vh;overflow-y:auto;padding-right:4px">
         <div>
           <label style="display:block;font-weight:600;margin-bottom:2px">Title</label>
-          <input id="m-title" type="text" value="Measurement #${nextNum}" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:13px">
+          <input id="m-title" type="text" value="Measurement #${nextNum}" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:var(--fs-md)">
         </div>
         <div>
           <label style="display:block;font-weight:600;margin-bottom:2px">Date (Call out: August 25, 2026)</label>
-          <input id="m-date" type="date" value="${todayStr}" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:13px">
+          <input id="m-date" type="date" value="${todayStr}" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:var(--fs-md)">
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <div><label style="font-weight:600">Weight (lbs)</label><input id="m-weight" type="number" step="0.5" placeholder="146" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px"></div>
-          <div><label style="font-weight:600">Body Fat %</label><input id="m-bf" type="number" step="0.1" placeholder="7" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px"></div>
+        <div class="grid-2">
+          <div><label style="font-weight:600">Weight (lbs)</label><input id="m-weight" type="number" step="0.5" placeholder="146" class="in-field-lg"></div>
+          <div><label style="font-weight:600">Body Fat %</label><input id="m-bf" type="number" step="0.1" placeholder="7" class="in-field-lg"></div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <div><label style="font-weight:600">Height</label><input id="m-height" type="text" placeholder="5'7&quot;" value="5'7&quot;" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px"></div>
-          <div><label style="font-weight:600">Age</label><input id="m-age" type="number" placeholder="30" value="30" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px"></div>
-        </div>
-
-        <div style="font-weight:700;margin-top:8px;color:var(--muted);text-transform:uppercase;font-size:11px">Body Circumferences (in)</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <div><label style="font-size:12px">Pecho (Chest)</label><input id="m-chest" type="number" step="0.25" placeholder="34.5" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:6px"></div>
-          <div><label style="font-size:12px">Cintura (Waist)</label><input id="m-waist" type="number" step="0.25" placeholder="29.0" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:6px"></div>
-          <div><label style="font-size:12px">Biceps Right</label><input id="m-bic-r" type="number" step="0.25" placeholder="13.5" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:6px"></div>
-          <div><label style="font-size:12px">Biceps Left</label><input id="m-bic-l" type="number" step="0.25" placeholder="13.0" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:6px"></div>
-          <div><label style="font-size:12px">Cadera (Hips)</label><input id="m-hips" type="number" step="0.25" placeholder="35.0" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:6px"></div>
-          <div><label style="font-size:12px">Muslo R (Thigh 5")</label><input id="m-thigh-r" type="number" step="0.25" placeholder="19.5" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:6px"></div>
-          <div><label style="font-size:12px">Muslo L (Thigh 5")</label><input id="m-thigh-l" type="number" step="0.25" placeholder="19.0" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:6px"></div>
-          <div><label style="font-size:12px">Pantorrillas R (Calf)</label><input id="m-calf-r" type="number" step="0.25" placeholder="13.5" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:6px"></div>
+        <div class="grid-2">
+          <div><label style="font-weight:600">Height</label><input id="m-height" type="text" placeholder="5'7&quot;" value="5'7&quot;" class="in-field-lg"></div>
+          <div><label style="font-weight:600">Age</label><input id="m-age" type="number" placeholder="30" value="30" class="in-field-lg"></div>
         </div>
 
-        <div style="font-weight:700;margin-top:8px;color:var(--muted);text-transform:uppercase;font-size:11px">Fitness Evaluation</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <div><label style="font-size:12px">3-Min Step/Tread HR</label><input id="m-hr" type="number" placeholder="101" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:6px"></div>
-          <div><label style="font-size:12px">Push-ups (1 min)</label><input id="m-pushups" type="number" placeholder="37" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:6px"></div>
-          <div><label style="font-size:12px">Crunches (1 min)</label><input id="m-crunches" type="number" placeholder="35" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:6px"></div>
-          <div><label style="font-size:12px">Squats (1 min)</label><input id="m-squats" type="number" placeholder="39" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:6px"></div>
-          <div><label style="font-size:12px">Static Plank</label><input id="m-plank" type="text" placeholder="3:05" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:6px"></div>
-          <div><label style="font-size:12px">Sit & Reach</label><input id="m-reach" type="number" step="0.1" placeholder="4.5" style="width:100%;padding:6px;border:1px solid var(--border);border-radius:6px"></div>
+        <div style="font-weight:700;margin-top:8px;color:var(--muted);text-transform:uppercase;font-size:var(--fs-sm)">Body Circumferences (in)</div>
+        <div class="grid-2">
+          <div><label class="t-sm">Pecho (Chest)</label><input id="m-chest" type="number" step="0.25" placeholder="34.5" class="in-field"></div>
+          <div><label class="t-sm">Cintura (Waist)</label><input id="m-waist" type="number" step="0.25" placeholder="29.0" class="in-field"></div>
+          <div><label class="t-sm">Biceps Right</label><input id="m-bic-r" type="number" step="0.25" placeholder="13.5" class="in-field"></div>
+          <div><label class="t-sm">Biceps Left</label><input id="m-bic-l" type="number" step="0.25" placeholder="13.0" class="in-field"></div>
+          <div><label class="t-sm">Cadera (Hips)</label><input id="m-hips" type="number" step="0.25" placeholder="35.0" class="in-field"></div>
+          <div><label class="t-sm">Muslo R (Thigh 5")</label><input id="m-thigh-r" type="number" step="0.25" placeholder="19.5" class="in-field"></div>
+          <div><label class="t-sm">Muslo L (Thigh 5")</label><input id="m-thigh-l" type="number" step="0.25" placeholder="19.0" class="in-field"></div>
+          <div><label class="t-sm">Pantorrillas R (Calf)</label><input id="m-calf-r" type="number" step="0.25" placeholder="13.5" class="in-field"></div>
+        </div>
+
+        <div style="font-weight:700;margin-top:8px;color:var(--muted);text-transform:uppercase;font-size:var(--fs-sm)">Fitness Evaluation</div>
+        <div class="grid-2">
+          <div><label class="t-sm">3-Min Step/Tread HR</label><input id="m-hr" type="number" placeholder="101" class="in-field"></div>
+          <div><label class="t-sm">Push-ups (1 min)</label><input id="m-pushups" type="number" placeholder="37" class="in-field"></div>
+          <div><label class="t-sm">Crunches (1 min)</label><input id="m-crunches" type="number" placeholder="35" class="in-field"></div>
+          <div><label class="t-sm">Squats (1 min)</label><input id="m-squats" type="number" placeholder="39" class="in-field"></div>
+          <div><label class="t-sm">Static Plank</label><input id="m-plank" type="text" placeholder="3:05" class="in-field"></div>
+          <div><label class="t-sm">Sit & Reach</label><input id="m-reach" type="number" step="0.1" placeholder="4.5" class="in-field"></div>
         </div>
 
         <div style="display:flex;gap:8px;margin-top:16px">
@@ -13388,14 +13652,14 @@ function previewSession(progId, sessId) {
   const musclesInSession = [...new Set(sess.exercises.map(ex => getMuscle(stripSuperset(ex.name))).filter(m => m && m !== 'Other'))];
   const muscleChipsHTML = musclesInSession.map(muscle => {
     const c = MUSCLE_COLORS[muscle] || { bg: 'rgba(240,78,35,0.12)', color: 'var(--accent-kinetic)' };
-    return `<span style="font-size:10px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;padding:3px 9px;border-radius:8px;background:${c.bg};color:${c.color};display:inline-block;">${muscle}</span>`;
+    return `<span style="font-size:var(--fs-xs);font-weight:700;letter-spacing:0.04em;text-transform:uppercase;padding:3px 9px;border-radius:8px;background:${c.bg};color:${c.color};display:inline-block;">${muscle}</span>`;
   }).join('');
 
   const exList = sess.exercises.map((ex, i) => {
     const name = stripSuperset(ex.name);
     return `
-      <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:0.5px solid rgba(42,36,33,0.06);font-size:13px;color:var(--text-primary);font-weight:500;">
-        <span style="width:20px;height:20px;border-radius:50%;background:rgba(42,36,33,0.05);color:var(--text-tertiary);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i + 1}</span>
+      <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:0.5px solid rgba(42,36,33,0.06);font-size:var(--fs-md);color:var(--text-primary);font-weight:500;">
+        <span style="width:20px;height:20px;border-radius:50%;background:rgba(42,36,33,0.05);color:var(--text-tertiary);font-size:var(--fs-xs);font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i + 1}</span>
         <span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</span>
       </div>
     `;
@@ -13405,10 +13669,10 @@ function previewSession(progId, sessId) {
     <div style="max-height:54vh;overflow:hidden;display:flex;flex-direction:column;box-sizing:border-box;">
       <div style="margin-bottom:8px;flex-shrink:0;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
-          <span style="font-size:9.5px;font-family:var(--font-mono);letter-spacing:0.08em;text-transform:uppercase;color:var(--text-tertiary);">${prog ? prog.name : 'Workout Plan'}</span>
-          <span style="font-size:10px;font-family:var(--font-mono);color:var(--text-tertiary);">${sess.exercises.length} Exercises</span>
+          <span style="font-size:var(--fs-xs);font-family:var(--font-mono);letter-spacing:0.08em;text-transform:uppercase;color:var(--text-tertiary);">${prog ? prog.name : 'Workout Plan'}</span>
+          <span style="font-size:var(--fs-xs);font-family:var(--font-mono);color:var(--text-tertiary);">${sess.exercises.length} Exercises</span>
         </div>
-        <div style="font-family:var(--font-hero);font-style:italic;font-size:19px;font-weight:600;color:var(--text-primary);line-height:1.2;margin-bottom:6px;">${sess.name}</div>
+        <div style="font-family:var(--font-hero);font-style:italic;font-size:var(--fs-xl);font-weight:600;color:var(--text-primary);line-height:1.2;margin-bottom:6px;">${sess.name}</div>
         <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px;">
           ${muscleChipsHTML}
         </div>
@@ -13417,8 +13681,8 @@ function previewSession(progId, sessId) {
         ${exList}
       </div>
       <div style="display:flex;gap:8px;padding-top:4px;flex-shrink:0;">
-        <button class="btn btn-primary" style="flex:1;font-size:13.5px;padding:11px 14px;border-radius:12px;" onclick="closeSheet(false);startWorkoutFromHome('${progId}','${sessId}')">Start Workout</button>
-        <button class="btn btn-sheet-ghost" style="padding:11px 16px;border-radius:12px;font-size:13px;" onclick="closeSheet()">Close</button>
+        <button class="btn btn-primary" style="flex:1;font-size:var(--fs-md);padding:11px 14px;border-radius:12px;" onclick="closeSheet(false);startWorkoutFromHome('${progId}','${sessId}')">Start Workout</button>
+        <button class="btn btn-sheet-ghost" style="padding:11px 16px;border-radius:12px;font-size:var(--fs-md);" onclick="closeSheet()">Close</button>
       </div>
     </div>
   `);
@@ -14210,9 +14474,11 @@ async function bootstrapApp() {
     ST.blacklistedExercises = new Set(LS.get('dcrgym_blacklist', []));
     getSettings();
     migrateStorage();
+    try { await restoreFixFlags(); } catch (e34) {}
     try { runOta31DataFlags(); } catch (e31) { console.warn('[ota-31] data check skipped:', e31); }
     try { runOta32Fixes(); } catch (e32) { console.warn('[ota-32] date check skipped:', e32); }
     try { runOta33Fixes(); } catch (e33) { console.warn('[ota-33] Monday fix skipped:', e33); }
+    try { mirrorFixFlags(); } catch (e34) {}
   } catch(e) {
     console.warn('[DCR Gym Shell] State hydration notice (non-fatal):', e);
   }
@@ -14303,9 +14569,9 @@ async function bootstrapApp() {
       '<div style="padding:40px;font-family:sans-serif;background:#FAF7F2;color:oklch(44% 0.025 55);min-height:100vh">' +
       '<h2 style="font-family:serif;font-style:italic">[System Boot Fault]</h2>' +
       '<p style="margin-top:10px">' + err.message + '</p>' +
-      '<pre style="background:#fff;padding:12px;font-size:11px;overflow-x:auto;margin-top:10px">' + (err.stack || '') + '</pre>' +
+      '<pre style="background:#fff;padding:12px;font-size:var(--fs-sm);overflow-x:auto;margin-top:10px">' + (err.stack || '') + '</pre>' +
       '<button onclick="(function(){if(\'caches\' in window){caches.keys().then(function(k){k.forEach(function(n){caches.delete(n)})})}; if(\'serviceWorker\' in navigator){navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister()})})}; setTimeout(function(){location.reload(true)},300)})()" style="margin-top:20px;padding:10px 20px;background:#2A2421;color:#fff;border:none;border-radius:8px;cursor:pointer">Clear Cache &amp; Reload</button>' +
-      '<p style="margin-top:8px;font-size:11px;color:#888;font-family:sans-serif">Workout history is preserved.</p>' +
+      '<p style="margin-top:8px;font-size:var(--fs-sm);color:#888;font-family:sans-serif">Workout history is preserved.</p>' +
       '</div>';
     return;
   }
@@ -14324,9 +14590,9 @@ function runBootSequence() {
       '<div style="padding:40px;font-family:sans-serif;background:#FAF7F2;color:oklch(44% 0.025 55);min-height:100vh">' +
       '<h2 style="font-family:serif;font-style:italic">[System Boot Fault]</h2>' +
       '<p style="margin-top:10px">' + fatalError.message + '</p>' +
-      '<pre style="background:#fff;padding:12px;font-size:11px;overflow-x:auto;margin-top:10px">' + (fatalError.stack || '') + '</pre>' +
+      '<pre style="background:#fff;padding:12px;font-size:var(--fs-sm);overflow-x:auto;margin-top:10px">' + (fatalError.stack || '') + '</pre>' +
       '<button onclick="(function(){if(\'caches\' in window){caches.keys().then(function(k){k.forEach(function(n){caches.delete(n)})})}; if(\'serviceWorker\' in navigator){navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister()})})}; setTimeout(function(){location.reload(true)},300)})()" style="margin-top:20px;padding:10px 20px;background:#2A2421;color:#fff;border:none;border-radius:8px;cursor:pointer">Clear Cache &amp; Reload</button>' +
-      '<p style="margin-top:8px;font-size:11px;color:#888;font-family:sans-serif">Workout history is preserved.</p>' +
+      '<p style="margin-top:8px;font-size:var(--fs-sm);color:#888;font-family:sans-serif">Workout history is preserved.</p>' +
       '</div>';
   }
 }
