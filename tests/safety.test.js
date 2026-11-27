@@ -458,6 +458,31 @@ const H = win => JSON.parse(win.localStorage.getItem('dcrgym_history'));
     g.win.close();
   }
 
+  // ── Q. ota-38: a start time after the finish is set from the first set, with its own Undo ──
+  {
+    const e1 = AST(2026, 11, 20, 9, 30), e2 = AST(2026, 11, 21, 9, 0);
+    const wA = { id: 'sx1', programId: 'p14', sessionId: 'p14_s4', sessionName: 'Pull #1 (Hypertrophy Focus)', startTime: e1 + 7 * 3600000, endTime: e1, duration: 2900,
+      sets: { p14_s4_0: [{ w: 100, r: 8, ts: e1 - 48 * 60000, _name: 'Lat Pulldown' }, { w: 100, r: 8, ts: e1, _name: 'Lat Pulldown' }] } };
+    const wB = { id: 'sx2', programId: 'p14', sessionId: 'p14_s2', sessionName: 'Lower #1 (Strength Focus)', startTime: e2 + 3600000, endTime: e2, duration: 3000,
+      sets: { p14_s2_0: [{ w: 200, r: 5, _name: 'Deadlift' }] } };
+    const h = clone(hA).concat([wA, wB]);
+    const b = await run(baseStore(h));
+    const got = H(b.win);
+    const a = got.find(w => w.id === 'sx1'), bb = got.find(w => w.id === 'sx2');
+    eq([a.startTime, a._startFix.from, a.endTime], [e1 - 48 * 60000, e1 + 7 * 3600000, e1], 'start from the first set, old start kept, end unchanged');
+    eq([bb.startTime, bb._startFix.from], [e2 - 3000 * 1000, e2 + 3600000], 'no set times: start = end minus the saved duration');
+    eq(got.filter(w => !w.id.startsWith('sx')), JSON.parse(JSON.stringify(hA)).map(w => got.find(x => x.id === w.id)), 'other workouts untouched');
+    eq(got.filter(w => w._startFix).length, 2, 'only the two bad ones fixed');
+    eq(b.win.eval(`undoDateFixFor('start:sx1')`), true, 'Undo works');
+    const u = H(b.win).find(w => w.id === 'sx1');
+    eq([u.startTime, !!u._startFix, !!(u._dateFixUndone && u._dateFixUndone.startFix)], [e1 + 7 * 3600000, false, true], 'old start back, undo recorded');
+    const st = dumpStore(b.win); b.win.close();
+    const c = await run(st);
+    eq(c.win.localStorage.getItem('dcrgym_history'), st.dcrgym_history, 'undone fix is not redone; reopen changes nothing');
+    eq(H(c.win).length, h.length, 'no workout added or removed');
+    c.win.close();
+  }
+
   console.log(`safety tests: ${passed} passed`);
   process.exit(0);
 })().catch(e => { console.error('FAIL:', e.message); console.error(e.stack.split('\n').slice(1, 4).join('\n')); console.log(`(${passed} passed before the failure)`); process.exit(1); });

@@ -5820,7 +5820,7 @@ function saveMeasurements(m) { LS.set('dcrgym_measurements', m); idbSet('dcrgym_
 // Schema-versioned, non-destructive, with rolling last-good backup.
 // History must survive every app update. Period.
 const SCHEMA_VERSION = 3;
-const APP_BUILD = '2026.11.27 · ota-37 · own-key';
+const APP_BUILD = '2026.11.27 · ota-38 · start-fix';
 const KG_TO_LB_CUTOFF_MS = 1788000000000; // Workouts before Sep 2026 were logged in kg; Sep 2026+ are already in lbs
 
 function hasLoggedWorkingSets(w) {
@@ -7269,14 +7269,63 @@ function dateFixItems() {
     if (!moved && !timer) continue;
     out.push({ id: String(w.id), name: w.sessionName || 'Workout', day: workoutDayTs(w), moved: !!moved, from: moved ? Number(w._redate.from.endTime) : null });
   }
+  // ota-38: start times that came after the finish, fixed from the first set (own Undo)
+  for (const w of getHistory()) {
+    if (!w || !w._startFix || w._startFix.by !== 'ota-38') continue;
+    out.push({ id: 'start:' + String(w.id), name: w.sessionName || 'Workout', day: workoutDayTs(w), moved: false, start: true,
+      startNow: Number(w.startTime), from: Number(w._startFix.from) });
+  }
   return out.sort((a, b) => b.day - a.day);
 }
+
+// ── ota-38: a start time after the finish ───────────────────────────────────────
+// Some workouts kept a start time later than their end (an old finish fix kept the original
+// start). The start is set to the first set's time, the way auto-finish does it; the old value
+// is kept on the workout with an Undo. Nothing else on the workout changes. Runs on open; once
+// fixed (or undone) a workout is never touched again.
+function startFromSets(w) {
+  const end = Number(w.endTime) || 0;
+  let first = 0;
+  for (const [k, a] of Object.entries(w.sets || {})) {
+    if (!Array.isArray(a)) continue;
+    for (const st of a) { const t = Number(st && st.ts) || 0; if (t > 0 && t <= end && (!first || t < first)) first = t; }
+  }
+  if (first) return first;
+  const d = Number(w.duration) || 0;
+  return d > 0 && end - d * 1000 > 0 ? end - d * 1000 : 0;
+}
+function fixStartsAfterEnd() {
+  const hist = getHistory();
+  let n = 0;
+  for (const w of hist) {
+    if (!w || w._startFix || (w._dateFixUndone && w._dateFixUndone.startFix)) continue;
+    const s0 = Number(w.startTime) || 0, e0 = Number(w.endTime) || 0;
+    if (!s0 || !e0 || s0 <= e0) continue;
+    const ns = startFromSets(w);
+    if (!ns || ns >= e0) continue;
+    w._startFix = { from: w.startTime, to: ns, at: Date.now(), by: 'ota-38', why: 'start was after the finish; set from the first set' };
+    w.startTime = ns;
+    n++;
+  }
+  if (n) saveHistory(hist);
+  return n;
+}
 function undoDateFixFor(id) {
+  if (String(id).startsWith('start:')) {   // ota-38: only the start time goes back
+    const hist = getHistory();
+    const w = hist.find(x => x && String(x.id) === String(id).slice(6));
+    if (!w || !w._startFix || w._startFix.by !== 'ota-38') return false;
+    w.startTime = w._startFix.from;
+    w._dateFixUndone = Object.assign({}, w._dateFixUndone || {}, { startFix: w._startFix, startAt: Date.now() });
+    delete w._startFix;
+    saveHistory(hist);
+    return true;
+  }
   if (String(id) === OTA33_PUSH_ID) return false;
   const hist = getHistory();
   const w = hist.find(x => x && String(x.id) === String(id));
   if (!w) return false;
-  const rec = { at: Date.now(), by: 'ota-34 undo' };
+  const rec = Object.assign({}, w._dateFixUndone && w._dateFixUndone.startFix ? { startFix: w._dateFixUndone.startFix, startAt: w._dateFixUndone.startAt } : {}, { at: Date.now(), by: 'ota-34 undo' });
   if (w._redate && (w._redate.by === 'ota-32' || w._redate.by === 'ota-33')) {
     rec.redate = w._redate;
     w.startTime = w._redate.from.startTime;
@@ -7300,7 +7349,8 @@ function confirmUndoDateFix(id) {
   const fmt = t => new Date(Number(t)).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
   confirmSheet({
     title: 'Undo this fix?',
-    body: it.moved ? `${it.name} goes back to ${fmt(it.from)}. No sets change.` : `${it.name} shows its saved timer again. No sets change.`,
+    body: it.start ? `${it.name} gets its old start time back (${new Date(it.from).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}). No sets change.`
+      : it.moved ? `${it.name} goes back to ${fmt(it.from)}. No sets change.` : `${it.name} shows its saved timer again. No sets change.`,
     confirmLabel: 'Undo', onConfirm: () => { undoDateFixFor(id); renderSettings(); },
   });
 }
@@ -13125,8 +13175,9 @@ function renderSettings() {
         <button onclick="confirmSheet({title:'Undo the data check?',body:'Every workout goes back to exactly how it was counted before. No sets are changed either way.',confirmLabel:'Undo',onConfirm:()=>{undoOta31DataFlags();renderSettings();}})" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:var(--fs-sm);cursor:pointer">Undo</button></div>`; })()}
       ${(() => { const items = dateFixItems(); if (!items.length) return '';   // ota-34 (6): one workout at a time
         const fmt = t => new Date(Number(t)).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const tm = t => new Date(Number(t)).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
         return `<div class="settings-row" style="display:block"><label>Forgotten finishes<br><span class="settings-sub">Fixed from set times. Original times kept. Monday's Push stays on Monday.</span></label>
-          ${items.map(it => `<div class="fix-item"><span>${it.name.replace(/</g, '&lt;')} · ${fmt(it.day)}${it.moved ? ' (was ' + fmt(it.from) + ')' : ' · timer'}</span>
+          ${items.map(it => `<div class="fix-item"><span>${it.name.replace(/</g, '&lt;')} · ${fmt(it.day)}${it.start ? ' · start ' + tm(it.startNow) + ' (was ' + tm(it.from) + ')' : it.moved ? ' (was ' + fmt(it.from) + ')' : ' · timer'}</span>
             <button class="btn-sm" onclick="confirmUndoDateFix('${it.id}')">Undo</button></div>`).join('')}</div>`; })()}
       <div class="settings-row"><label>Import Strong CSV</label>
         <input type="file" accept=".csv" onchange="importStrongCSV(this)" style="font-size:var(--fs-md);max-width:160px">
@@ -14920,6 +14971,7 @@ async function bootstrapApp() {
       LS.set('dcrgym_repairs_frozen', fz); idbSet('dcrgym_repairs_frozen', fz);
     }
     try { mirrorFixFlags(); } catch (e34) {}
+    try { if (!IS_PREVIEW) fixStartsAfterEnd(); } catch (e38) { console.warn('[ota-38] start-time check skipped:', e38); }
     try { idbSet('dcrgym_schema_version', LS.get('dcrgym_schema_version', null)); } catch (e36) {}
   } catch(e) {
     console.warn('[DCR Gym Shell] State hydration notice (non-fatal):', e);
