@@ -5820,7 +5820,7 @@ function saveMeasurements(m) { LS.set('dcrgym_measurements', m); idbSet('dcrgym_
 // Schema-versioned, non-destructive, with rolling last-good backup.
 // History must survive every app update. Period.
 const SCHEMA_VERSION = 3;
-const APP_BUILD = '2026.11.27 · ota-38 · start-fix';
+const APP_BUILD = '2026.11.27 · ota-39 · strain-vs-avg';
 const KG_TO_LB_CUTOFF_MS = 1788000000000; // Workouts before Sep 2026 were logged in kg; Sep 2026+ are already in lbs
 
 function hasLoggedWorkingSets(w) {
@@ -14112,13 +14112,35 @@ function strainAverage(type, exceptId, cache) {
   if (!vals.length) return null;
   return { avg: Math.round(vals.reduce((a, b) => a + b, 0) / vals.length), n: vals.length };
 }
+// ota-39: strain is only ever shown as a comparison with his usual workout of the same type,
+// never as a bare score (the raw number sits on a different scale from Fitbit's Cardio Load).
+const STRAIN_BAND_PCT = 10;        // within ±10% of his average reads as "about avg"
+const STRAIN_MIN_OTHERS = 2;       // a comparison needs at least 2 other workouts of that type
 function strainVerdict(v, avg) {
   if (v == null || avg == null || !avg) return null;
-  const r = v / avg;
-  return r > 1.1 ? 'more' : r < 0.9 ? 'less' : 'about';
+  const pct = Math.round((v / avg - 1) * 100);
+  return pct > STRAIN_BAND_PCT ? 'more' : pct < -STRAIN_BAND_PCT ? 'less' : 'about';
 }
-// What the Home stat shows: right after a workout, its strain against his average for that
-// type; later, the average for the next workout as the day's target.
+function strainPct(v, avg) { return (v == null || !avg) ? null : Math.round((v / avg - 1) * 100); }
+function strainTypeLabel(name) { return String(name || '').trim().split(/[\s#(]+/)[0] || 'Workout'; }
+// Each workout of one type since Sep 1 that has heart rate, compared with the average of the
+// others of that type. Newest first.
+function strainComparisons(type, cache) {
+  cache = cache || getHrCache();
+  const max = strainHrMax(cache);
+  const rows = getHistory().filter(w => w && !w._dupOf && (w.endTime || 0) >= STRAIN_FROM_MS && workoutTypeKey(w) === type)
+    .map(w => ({ w, v: workoutStrain(w, cache, max) })).filter(r => r.v != null);
+  const out = [];
+  for (const r of rows) {
+    const others = rows.filter(o => o !== r);
+    if (others.length < STRAIN_MIN_OTHERS) continue;
+    const avg = others.reduce((a, o) => a + o.v, 0) / others.length;
+    out.push({ id: String(r.w.id), end: r.w.endTime, pct: strainPct(r.v, avg), verdict: strainVerdict(r.v, avg) });
+  }
+  return out.sort((a, b) => (b.end || 0) - (a.end || 0));
+}
+// What the Home stat shows: right after a workout, how it compared with his average for that
+// type; later, how the last workout of the next session's type compared ("last Pull ↑ 12%").
 function strainStatus(ns) {
   const cache = getHrCache();
   if (!Object.keys(cache).length) return null;
@@ -14129,41 +14151,57 @@ function strainStatus(ns) {
     const v = workoutStrain(last, cache);
     if (v == null) return null;
     const type = workoutTypeKey(last), a = strainAverage(type, last.id, cache);
-    return { mode: 'after', value: v, avg: a && a.avg, n: a ? a.n : 0, verdict: a ? strainVerdict(v, a.avg) : null, name: last.sessionName || 'Workout' };
+    if (!a || a.n < STRAIN_MIN_OTHERS) return null;
+    return { mode: 'after', type, value: v, avg: a.avg, n: a.n, pct: strainPct(v, a.avg), verdict: strainVerdict(v, a.avg), name: last.sessionName || 'Workout', id: String(last.id) };
   }
   const nextName = ns && ns.session && ns.session.name;
   if (!nextName) return null;
-  const a = strainAverage(workoutTypeKey({ sessionName: nextName }), null, cache);
-  if (!a) return null;
-  return { mode: 'before', value: a.avg, avg: a.avg, n: a.n, verdict: null, name: nextName };
+  const type = workoutTypeKey({ sessionName: nextName });
+  const prev = strainComparisons(type, cache)[0];
+  if (!prev) return null;
+  return { mode: 'before', type, pct: prev.pct, verdict: prev.verdict, lastId: prev.id, name: nextName };
+}
+// The words on Home, as plain text (tests and the sheet use the same words).
+function strainLabelText(st) {
+  if (!st) return '';
+  const t = strainTypeLabel(st.name);
+  if (st.mode === 'before') return `last ${t} ${st.verdict === 'more' ? `↑ ${st.pct}%` : st.verdict === 'less' ? `↓ ${Math.abs(st.pct)}%` : 'about avg'}`;
+  if (st.verdict === 'more') return `strain ↑ ${st.pct}% vs avg ${t}`;
+  if (st.verdict === 'less') return `strain ↓ ${Math.abs(st.pct)}% vs avg ${t}`;
+  return `strain about avg ${t}`;
 }
 const STRAIN_ICON = '<svg viewBox="0 0 24 24"><path d="M3 12h4l2.5-6 4 12 2.5-6H21"/></svg>';
 function strainMetricHTML(ns) {
   let st = null; try { st = strainStatus(ns); } catch (e) { st = null; }
   if (!st) return '';
   ST._strainStatus = st;
-  const dir = st.verdict === 'more' ? '↑' : st.verdict === 'less' ? '↓' : st.verdict === 'about' ? '≈' : '';
+  const t = escHtml(strainTypeLabel(st.name));
+  let inner;
+  if (st.mode === 'before') inner = `last ${t} <span>${st.verdict === 'more' ? `↑ ${st.pct}%` : st.verdict === 'less' ? `↓ ${Math.abs(st.pct)}%` : 'about avg'}</span>`;
+  else if (st.verdict === 'more') inner = `strain <span>↑ ${st.pct}%</span> vs avg ${t}`;
+  else if (st.verdict === 'less') inner = `strain <span>↓ ${Math.abs(st.pct)}%</span> vs avg ${t}`;
+  else inner = `strain <span>about</span> avg ${t}`;
   return `<span style="opacity:0.15;font-style:normal;">│</span>
-        <div class="metric-item metric-strain" onclick="showStrainInfo()" aria-label="Strain">
+        <div class="metric-item metric-strain" onclick="showStrainInfo()" aria-label="${escHtml(strainLabelText(st))}">
           ${STRAIN_ICON}
-          ${st.mode === 'before' ? 'goal' : 'strain'} <span>${st.value}</span>${dir ? `<span class="ms-dir">${dir}</span>` : ''}
+          ${inner}
         </div>`;
+}
+function strainRowText(r) {
+  return r.verdict === 'more' ? `↑ ${r.pct}%` : r.verdict === 'less' ? `↓ ${Math.abs(r.pct)}%` : 'about avg';
 }
 function showStrainInfo() {
   const st = ST._strainStatus;
   if (!st) return;
-  const type = escHtml(String(st.name).split(/[\s#(]+/)[0] || 'workout');
-  const since = 'since Sep 1';
-  let body;
-  if (st.mode === 'after') {
-    const word = st.verdict === 'more' ? 'more than usual' : st.verdict === 'less' ? 'less than usual' : st.verdict === 'about' ? 'about your usual' : '';
-    body = st.avg != null
-      ? `This ${type}: <strong>${st.value}</strong>. Your ${type} average ${since}: <strong>${st.avg}</strong> (${st.n} workout${st.n === 1 ? '' : 's'}), so ${word}.`
-      : `This ${type}: <strong>${st.value}</strong>. Your first ${type} with heart rate ${since}, so there's no average yet.`;
-  } else {
-    body = `Your ${type} average ${since} is <strong>${st.value}</strong> (${st.n} workout${st.n === 1 ? '' : 's'}). That's the target for today's ${type}.`;
-  }
-  noticeSheet('Strain', body + '<div style="margin-top:8px;color:var(--muted)">Worked out from your watch\'s heart rate during the workout: minutes in each heart-rate zone, harder zones count more.</div>');
+  const t = escHtml(strainTypeLabel(st.name));
+  const rows = strainComparisons(st.type || workoutTypeKey({ sessionName: st.name })).slice(0, 5);
+  const day = ms => {
+    const d = new Date(ms), n = new Date();
+    if (d.getFullYear() === n.getFullYear() && d.getMonth() === n.getMonth() && d.getDate() === n.getDate()) return 'Today';
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+  const list = rows.length ? `<div style="margin-top:12px">${rows.map((r, i) => `<div style="display:flex;justify-content:space-between;padding:7px 0;${i ? 'border-top:1px solid var(--border-subtle);' : ''}"><span>${day(r.end)}</span><span style="font-variant-numeric:tabular-nums">${strainRowText(r)}</span></div>`).join('')}</div>` : '';
+  noticeSheet('Strain', `How hard each ${t} was on your heart, from your watch's heart rate, compared with your average ${t} since Sep 1. It isn't Fitbit's Cardio Load.${list}`);
 }
 // Ask the script for heart rate of workouts that don't have it yet (read-only, never queued).
 let _hrRun = null;
