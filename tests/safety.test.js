@@ -55,9 +55,16 @@ function fakeServer(cfg = {}) {
     if (cfg.hang) return new Promise((_, rej) => { if (init && init.signal) init.signal.addEventListener('abort', () => rej(Object.assign(new Error('aborted'), { name: 'AbortError' }))); });
     if (cfg.delay) await new Promise(r => setTimeout(r, cfg.delay));
     const mode = cfg.keyMode || 'off';
-    const keyOk = key === KEY;
+    const held = cfg.serverKey !== undefined ? cfg.serverKey : (mode !== 'off' ? KEY : null);
+    const keyOk = !!held && key === held;
     let out;
-    if (action === 'ping') out = { ok: true, build: 'sync-v2', keyMode: mode, ...(key ? { keyOk } : {}) };
+    if (action === 'ping') out = { ok: true, build: 'sync-v2', keyMode: mode, ...(cfg.pairing ? { keyHeld: !!held, pairingOpen: !!cfg.pairingOpen } : {}), ...(key && held ? { keyOk } : {}) };
+    else if (action === 'registerKey') {
+      if (held) out = { ok: false, error: 'already-paired' };
+      else if (!cfg.pairingOpen) out = { ok: false, error: 'pairing-closed' };
+      else if (typeof key !== 'string' || key.length < 32) out = { ok: false, error: 'bad-key' };
+      else { cfg.serverKey = key; cfg.pairingOpen = false; out = { ok: true, paired: true }; }
+    }
     else if (mode === 'enforce' && !keyOk) out = { ok: false, error: 'unauthorized' };   // what the ota-36 script answers
     else if (action === 'pullState') out = Object.assign({ ok: true }, cfg.pull || {});
     else if (action === 'workoutHeartRate') out = cfg.hrErr ? { ok: false, error: cfg.hrErr } : cfg.hrUnknown ? { ok: false, message: 'Unknown action: workoutHeartRate' } : { ok: true, hr: cfg.hr ? cfg.hr(body.windows) : {} };
@@ -200,25 +207,67 @@ const H = win => JSON.parse(win.localStorage.getItem('dcrgym_history'));
     b.win.__d = d;
     const lines = b.win.eval(`JSON.stringify(syncResultLines(window.__d))`);
     console.log('  Sync Now lines:', lines);
-    ok(/key missing/i.test(lines) && !/offline/i.test(lines), 'Sync Now shows "Cloud: key missing"');
+    ok(/isn't paired/i.test(lines) && !/offline/i.test(lines), 'Sync Now says the phone isn\'t paired yet, not offline');
     ok(JSON.parse(b.win.localStorage.getItem('dcrgym_sync_queue')).some(i => i.payload._qid === 'g1'), 'still queued after Sync Now');
     eq(H(b.win).length, hA.length, 'history untouched');
     b.win.close();
   }
 
-  // ── H. Pairing link: saved once, removed from the address bar ──
+  // ── H. ota-37: the phone makes its own key and registers it once; no key ever comes in a link ──
   {
     const vault = new Map();
-    const srv = fakeServer({ keyMode: 'log' });
-    const b = await run(SA, { idb: vault, srv, url: 'https://dcrcode-dev.github.io/muscle-ladder/#k=' + KEY, wait: 2500 });
-    eq(b.win.localStorage.getItem('dcrgym_sync_key'), JSON.stringify(KEY), 'key saved from the link');
-    eq(vault.get('dcrgym_sync_key'), KEY, 'key in the vault too');
-    ok(!b.win.location.href.includes(KEY), 'key removed from the address bar');
-    ok(srv.calls.filter(c => c.action === 'pullState').every(c => c.key === KEY), 'pull uses the key');
-    const st = dumpStore(b.win); delete st.dcrgym_sync_key; b.win.close();
-    const c = await run(st, { idb: vault });
-    eq(c.win.eval('getSyncKey()'), KEY, 'key comes back from the vault after a storage wipe');
+    const srv = fakeServer({ pairing: true, serverKey: null, pairingOpen: true });
+    const b = await run(SA, { idb: vault, srv, wait: 3000 });
+    const k = b.win.eval('getSyncKey()');
+    ok(/^[A-Za-z0-9_-]{32}$/.test(k), 'phone made a 32-character key');
+    const regs = srv.calls.filter(c => c.action === 'registerKey');
+    eq(regs.length, 1, 'registered once');
+    eq(regs[0].key, k, 'register sends the phone\'s own key');
+    eq(srv.cfg.serverKey, k, 'script now holds that key, window closed');
+    ok(JSON.parse(b.win.localStorage.getItem('dcrgym_key_paired')).at > 0, 'phone remembers it is paired');
+    eq(vault.get('dcrgym_sync_key'), k, 'key kept in the phone vault too');
+    srv.calls.length = 0;
+    await b.win.eval('runSyncNow()');
+    const posts = srv.calls.filter(c => c.method === 'POST');
+    ok(posts.length && posts.every(c => c.key === k), 'every later call carries the key');
+    const stateCall = posts.find(c => c.action === 'saveState');
+    ok(stateCall, 'restore copy sent');
+    const { key: _drop, ...saved } = stateCall.body;
+    ok(!JSON.stringify(saved).includes(k), 'the key is not inside the restore copy (history, notes, extras)');
+    ok(!JSON.stringify(b.win.eval('buildCloudExtras()')).includes(k), 'extras never carry the key');
+    ok(!(b.win.localStorage.getItem('dcrgym_sync_queue') || '').includes(k), 'queue never stores the key');
+    ok(b.win.eval('syncKeyLine()').includes('paired with this phone'), 'Settings: paired with this phone');
+    eq(H(b.win).length, hA.length, 'history untouched');
+    const st = dumpStore(b.win); b.win.close();
+    const again = await run(st, { idb: vault, srv, wait: 3000 });
+    eq(srv.calls.filter(c => c.action === 'registerKey').length, 0, 'not registered again on the next open');
+    eq(again.win.eval('getSyncKey()'), k, 'same key on the next open');
+    const wiped = dumpStore(again.win); delete wiped.dcrgym_sync_key; delete wiped.dcrgym_key_paired; again.win.close();
+    const c = await run(wiped, { idb: vault, srv, wait: 3000 });
+    eq(c.win.eval('getSyncKey()'), k, 'key comes back from the vault after a storage wipe');
+    eq(srv.calls.filter(x => x.action === 'registerKey').length, 0, 'and no new key is made');
     c.win.close();
+  }
+  {
+    const srv = fakeServer({ pairing: true, serverKey: null, pairingOpen: false });
+    const b = await run(SA, { srv, wait: 3000 });
+    eq(srv.calls.filter(c => c.action === 'registerKey').length, 0, 'window closed: nothing sent');
+    eq(b.win.eval('getSyncKey()'), '', 'and no key made yet');
+    b.win.close();
+    const srv2 = fakeServer({ pairing: true, serverKey: 'someone-elses-key-0123456789abcdef', pairingOpen: true });
+    const d = await run(SA, { srv: srv2, wait: 3000 });
+    eq(srv2.calls.filter(c => c.action === 'registerKey').length, 0, 'script already holds a key: no attempt to replace it');
+    ok(d.win.eval('syncKeyLine()').includes('another key'), 'Settings says the script is paired with another key');
+    eq(H(d.win).length, hA.length, 'history untouched');
+    d.win.close();
+    const srv3 = fakeServer({ keyMode: 'off' });   // today's live script: no pairing fields
+    const e = await run(SA, { srv: srv3, wait: 3000 });
+    eq(srv3.calls.filter(c => c.action === 'registerKey').length, 0, 'today\'s script: nothing new sent');
+    e.win.close();
+    const f = await run(SA, { srv: fakeServer({ keyMode: 'log' }), url: 'https://dcrcode-dev.github.io/muscle-ladder/#k=' + KEY, wait: 2500 });
+    ok(!f.win.eval('getSyncKey()'), 'an old pairing link is not saved');
+    ok(!f.win.location.href.includes(KEY), 'and is cleared from the address bar');
+    f.win.close();
   }
 
   // ── I. Extras survive a wipe: measurements, swaps, custom and hidden exercises, rest times ──

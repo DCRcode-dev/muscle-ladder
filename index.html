@@ -5820,7 +5820,7 @@ function saveMeasurements(m) { LS.set('dcrgym_measurements', m); idbSet('dcrgym_
 // Schema-versioned, non-destructive, with rolling last-good backup.
 // History must survive every app update. Period.
 const SCHEMA_VERSION = 3;
-const APP_BUILD = '2026.11.27 · ota-36 · safe-sync';
+const APP_BUILD = '2026.11.27 · ota-37 · own-key';
 const KG_TO_LB_CUTOFF_MS = 1788000000000; // Workouts before Sep 2026 were logged in kg; Sep 2026+ are already in lbs
 
 function hasLoggedWorkingSets(w) {
@@ -7605,21 +7605,18 @@ function syncBadgeHTML() {
 }
 // ota-36: Settings line for the private key
 function syncKeyLine() {
-  const has = !!getSyncKey();
-  if (ST.keyOk === true) return 'Cloud key: OK';
-  if (ST.keyMode === 'enforce' && !has) return 'Cloud key: missing on this phone';
-  if (has && ST.keyOk === false) return 'Cloud key: not the one the script expects';
-  if (has) return 'Cloud key: saved on this phone';
+  if (ST.keyOk === true || ST.pairState === 'paired') return 'Cloud key: paired with this phone';
+  if (ST.pairState === 'other' || (getSyncKey() && ST.keyOk === false)) return 'Cloud key: the script is paired with another key';
+  if (ST.keyMode === 'enforce') return 'Cloud key: not paired yet';
+  if (ST.pairState === 'waiting' && getSyncKey()) return 'Cloud key: made on this phone, waiting for the script';
   return '';
 }
-function saveSyncKeyFromSettings() {
-  const el = document.getElementById('sync-key-input');
-  const v = el ? el.value : '';
-  if (!v.trim()) return;
-  if (!setSyncKey(v)) { noticeSheet('Sync key', 'That doesn\'t look like a sync key. Use the pairing link, or paste the whole key.'); return; }
-  if (el) el.value = '';
-  showToastMsg('Sync key saved on this phone');
-  probeSheetsServer().finally(() => { if (ST.screen === 'settings') renderSettings(); });
+function pairKeyFromSettings() {
+  ST._pairTried = false;
+  probeSheetsServer().finally(() => {
+    if (ST.screen === 'settings') renderSettings();
+    showToastMsg(ST.pairState === 'paired' ? 'Paired with the script' : 'The script isn\'t taking a new key right now');
+  });
 }
 function syncResultLines(d) {
   if (!d) return [];
@@ -7628,7 +7625,7 @@ function syncResultLines(d) {
   const full = !d.stateOk && (d.stateErr === BACKUP_FULL_MSG || d.err === BACKUP_FULL_MSG);
   const keyErr = d.err === SYNC_KEY_MSG || d.stateErr === SYNC_KEY_MSG;
   lines.push(d.stateOk ? 'Restore backup: saved' : full ? 'Restore backup: not saved. The Google script\'s backup cell is full and needs the script update. Your workouts are safe in the Sheet and on this phone.' : keyErr ? 'Restore backup: waiting for the sync key' : 'Restore backup: not saved' + (d.stateErr ? ' (' + escHtml(d.stateErr) + ')' : ''));
-  if (keyErr) lines.push('Cloud: key missing. Open the pairing link once (or paste the key in Settings). Everything stays on this phone and waits.');
+  if (keyErr) lines.push('Cloud: this phone isn\'t paired with the script yet. Everything stays on this phone and waits.');
   else if (d.err && !full) lines.push('Cloud says: ' + escHtml(d.err));
   const km = syncKeyLine(); if (km) lines.push(km);
   return lines;
@@ -13147,11 +13144,8 @@ function renderSettings() {
         <input type="url" value="${escHtml(s.sheets||'').replace(/"/g, '&quot;')}" placeholder="Apps Script URL"
           onchange="saveSetting('sheets',this.value)" style="font-size:var(--fs-sm);width:160px">
       </div>
-      <div class="settings-row"><label>Sync key<br><span class="settings-sub">${escHtml(syncKeyLine() || 'Not set. The pairing link fills it in.')}</span></label>
-        <div style="display:flex;gap:6px;align-items:center">
-          <input id="sync-key-input" type="password" autocomplete="off" placeholder="Paste key" style="font-size:var(--fs-sm);width:110px">
-          <button class="btn-sm" onclick="saveSyncKeyFromSettings()">Save</button>
-        </div>
+      <div class="settings-row"><label>Sync key<br><span class="settings-sub">${escHtml(syncKeyLine() || 'Made on this phone and paired on its own')}</span></label>
+        ${isKeyPaired() ? '' : '<button class="btn-sm" onclick="pairKeyFromSettings()">Pair</button>'}
       </div>
       ${deletedWorkoutsSettingsHTML()}
       <div class="settings-row"><label>Recover from cloud</label>
@@ -13718,7 +13712,7 @@ document.addEventListener('visibilitychange', () => {
 // hiding the real cause. Read as text and say what actually happened.
 // ── ota-36: private sync key + time limit on every call to the Google script ────
 // The key lives only on this phone (localStorage + the IndexedDB vault), never in the code.
-// It arrives once through a pairing link (…/#k=…) or the Settings field.
+// ota-37: the phone makes it and registers it once (see pairKeyIfOpen).
 const SHEETS_TIMEOUT_MS = 25000;
 const SYNC_KEY_MSG = 'sync key needed';
 function getSyncKey() { const k = LS.get('dcrgym_sync_key', null); return (typeof k === 'string' && k) ? k : ''; }
@@ -13728,15 +13722,53 @@ function setSyncKey(k) {
   LS.set('dcrgym_sync_key', k); idbSet('dcrgym_sync_key', k);
   return true;
 }
-function takeSyncKeyFromLink() {
+// ota-37: no key ever travels through a link or a chat. The phone makes its own key, keeps it
+// (localStorage + the IndexedDB vault, never the Sheet or the restore copy) and registers it once
+// with the script while the script's short pairing window is open. First phone wins.
+function dropKeyFromLink() {   // an old pairing link: the key in it is retired, so it is never saved
   try {
-    const m = /(?:^#|&)(?:k|synckey)=([^&#\s]{16,400})/.exec(location.hash || '');
-    if (!m) return false;
-    let k = m[1]; try { k = decodeURIComponent(k); } catch (e) {}
-    const ok = setSyncKey(k);
-    try { history.replaceState(history.state, '', location.pathname + location.search); } catch (e) {}
-    return ok;
-  } catch (e) { return false; }
+    if (/(?:^#|&)(?:k|synckey)=/.test(location.hash || '')) history.replaceState(history.state, '', location.pathname + location.search);
+  } catch (e) {}
+}
+function makeSyncKey() {
+  const b = new Uint8Array(24);
+  (window.crypto || self.crypto).getRandomValues(b);
+  let bin = ''; for (const x of b) bin += String.fromCharCode(x);
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');   // 32 characters
+}
+function ensurePhoneKey() {
+  if (getSyncKey()) return getSyncKey();
+  const k = makeSyncKey();
+  return setSyncKey(k) ? k : '';
+}
+function isKeyPaired() { const p = LS.get('dcrgym_key_paired', null); return !!(p && p.at); }
+function markKeyPaired() {
+  if (isKeyPaired()) return;
+  const v = { at: Date.now(), build: APP_BUILD };
+  LS.set('dcrgym_key_paired', v); idbSet('dcrgym_key_paired', v);
+}
+// Called after each ping. Registers at most once per open, and only when the script says its
+// pairing window is open and it holds no key. Never sends anything to an older script.
+async function pairKeyIfOpen(ping) {
+  if (IS_PREVIEW || !ping || !ping.ok) return false;
+  if (ping.keyOk === true) { markKeyPaired(); ST.pairState = 'paired'; return true; }
+  if (isKeyPaired() && ping.keyHeld === true) { ST.pairState = ping.keyOk === false ? 'other' : 'paired'; return false; }
+  if (ping.keyHeld === true) { ST.pairState = 'other'; return false; }   // another phone already paired
+  if (ping.pairingOpen !== true) { ST.pairState = 'waiting'; return false; }
+  if (ST._pairTried) return false;
+  ST._pairTried = true;
+  const key = ensurePhoneKey();
+  if (!key) return false;
+  try {
+    const s = getSettings();
+    const r = await sheetsFetch(s.sheets, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'registerKey', key }) });
+    const data = r && r.ok ? await readSheetsJson(r) : null;
+    if (data && data.ok && data.paired === true) { markKeyPaired(); ST.keyOk = true; ST.pairState = 'paired'; return true; }
+    const err = String((data && (data.error || data.message)) || '');
+    ST.pairState = /already-paired/.test(err) ? 'other' : 'waiting';
+  } catch (e) { ST.pairState = 'waiting'; }
+  return false;
 }
 function sheetsGetUrl(base, action) {
   const k = getSyncKey();
@@ -13801,6 +13833,8 @@ async function probeSheetsServer() {
     // ota-36: the script says whether it checks the key, and whether ours is right
     ST.keyMode = (data && data.keyMode) ? String(data.keyMode) : null;            // off | log | enforce
     ST.keyOk = (data && typeof data.keyOk === 'boolean') ? data.keyOk : null;
+    // ota-37: register this phone's own key while the script's pairing window is open
+    if (data && data.ok) { try { await pairKeyIfOpen(data); } catch (eP) {} }
     ST.keyRefused = !!(data && data.keyMode === 'enforce' && data.keyOk !== true);
     if (ST.keyRefused) { ST.lastCloudSyncError = SYNC_KEY_MSG; return false; }
     return !!(data && data.ok);
@@ -13900,7 +13934,9 @@ function ensureSeedHistoryMerged() {
 // so nothing he changed or removed comes back.
 const VAULT_EXTRA_KEYS = ['dcrgym_measurements', 'dcrgym_slot_defaults', 'dcrgym_custom_exercises', 'dcrgym_blacklist',
   'dcrgym_rest', 'dcrgym_rows_synced', 'dcrgym_deleted_archive', 'dcrgym_restored_ids', 'dcrgym_schema_version',
-  'dcrgym_sync_key', 'dcrgym_repairs_frozen', 'dcrgym_cloud_deleted_ids', 'dcrgym_hr'];
+  'dcrgym_sync_key', 'dcrgym_key_paired', 'dcrgym_repairs_frozen', 'dcrgym_cloud_deleted_ids', 'dcrgym_hr'];
+// The vault is on this phone only. buildCloudExtras() below picks what goes to the cloud copy, and
+// the sync key is never one of them (a test checks no saved payload carries it).
 function _isEmptyVal(v) {
   if (v === null || v === undefined) return true;
   if (Array.isArray(v)) return v.length === 0;
@@ -14709,8 +14745,8 @@ function checkWeekComplete() {
 // ── Fault-tolerant bootstrap — all state access inside try/catch, LS proxy only ──
 async function bootstrapApp() {
   console.log('[DCR Gym Shell] Booting application...');
-  // ota-36: one-time pairing link carries the private sync key; it's saved on this phone only.
-  ST._keyJustPaired = !IS_PREVIEW && takeSyncKeyFromLink();
+  // ota-37: keys never come in through a link; an old pairing link is cleared from the address bar
+  if (!IS_PREVIEW) dropKeyFromLink();
   if (IS_PREVIEW) { try { document.documentElement.classList.add('is-preview'); } catch (e) {} }
 
   // ota-30: one-time copy of the full history in the IndexedDB vault before this build touches anything.
@@ -14971,7 +15007,7 @@ async function bootstrapApp() {
       Maps('home');
       if (!IS_PREVIEW) setTimeout(() => { try { autoFinishSavedIfIdle(); } catch (e) { console.warn('[ota-32] auto-finish skipped:', e); } }, 300); // ota-32 (2)
       if (IS_PREVIEW) setTimeout(() => { try { noticeSheet('Preview build', 'This is a look-only copy of the next update, using the workouts on this phone. Nothing you do here is saved or sent to the Sheet. Close it and open the app as usual to go back.'); } catch (e) {} }, 400);
-      else if (ST._keyJustPaired) setTimeout(() => { try { showToastMsg('Sync key saved on this phone'); } catch (e) {} }, 600);
+
     }
   } catch(err) {
     console.error('[DCR Gym Shell] Router fault:', err);
