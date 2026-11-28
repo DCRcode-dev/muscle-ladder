@@ -440,7 +440,7 @@ const H = win => JSON.parse(win.localStorage.getItem('dcrgym_history'));
     d3.win.close();
     const noHr = clone(hr); delete noHr[e3];
     const d2 = await run(baseStore(h, { dcrgym_hr: noHr }));
-    ok(!d2.win.document.querySelector('.metric-strain'), 'today\'s workout has no heart rate: hidden, no dash');
+    ok(/Pull strain · syncing/.test(d2.win.document.getElementById('screen-home').textContent.replace(/\s+/g, ' ')), 'today\'s workout has no heart rate yet: "syncing", no dash or number');
     d2.win.close();
     // fetching from the script
     const srv = fakeServer({ hr: wins => Object.fromEntries(wins.map(w => [w.id, { bpm: flat(Math.round((w.end - w.start) / 60000), 135) }])) });
@@ -473,6 +473,73 @@ const H = win => JSON.parse(win.localStorage.getItem('dcrgym_history'));
     eq(srv2.calls.filter(x => x.action === 'workoutHeartRate').length, 1, 'asked once, not in a loop');
     ok(!g.win.document.querySelector('.metric-strain'), 'and nothing shows');
     g.win.close();
+  }
+
+  // ── R. ota-40: strain right after a workout: "syncing" until the watch's heart rate is in, then a notification ──
+  {
+    const upW = (id, end, mins) => ({ id: String(id), programId: 'p14', sessionId: 'p14_s1', sessionName: 'Upper #1 (Strength Focus)', startTime: end - mins * 60000, endTime: end, duration: mins * 60,
+      sets: { p14_s1_0: [{ w: 100, r: 8, _name: 'Bench Press' }] } });
+    const flat = (n, b, peak) => { const a = Array(n).fill(b); if (peak) a[0] = peak; return a; };
+    const u1 = AST(2026, 11, 10, 18), u2 = AST(2026, 11, 20, 18), uT = NOW - 20 * 60000;
+    const h = clone(hA).concat([upW(u1, u1, 60), upW(u2, u2, 50), upW(uT, uT, 50)]);
+    const hr0 = { [u1]: { bpm: flat(60, 140, 180), at: 1 }, [u2]: { bpm: flat(50, 140), at: 1 } };
+    const srv = fakeServer({ hr: wins => Object.fromEntries(wins.map(w => [w.id, null])) });
+    const shown = [];
+    const b = await run(baseStore(h, { dcrgym_hr: hr0 }), { srv, wait: 3500, setup(w) { w.Notification = { permission: 'granted', requestPermission: () => Promise.resolve('granted') }; } });
+    const homeT = () => b.win.document.getElementById('screen-home').textContent.replace(/\s+/g, ' ');
+    ok(srv.calls.some(c => c.action === 'workoutHeartRate' && c.body.windows.some(x => x.id === String(uT))), 'heart rate asked for right after the workout');
+    ok(/Upper strain · syncing/.test(homeT()), 'Home right after: "Upper strain · syncing" (' + (homeT().match(/\S+ strain[^│]*/) || [''])[0].trim() + ')');
+    b.win.eval(`showStrainInfo()`);
+    ok(/hasn't reached Google yet/.test(b.win.document.body.textContent) && /notification when it's ready/.test(b.win.document.body.textContent), 'tap explains it and says a notification will come');
+    b.win.eval(`closeSheet()`);
+    const nCalls = () => srv.calls.filter(c => c.action === 'workoutHeartRate').length;
+    let n0 = nCalls();
+    await b.win.eval('refreshHeartRates()');
+    eq(nCalls(), n0, 'not asked again within 5 minutes');
+    b.win.__shown = shown;
+    b.win.eval(`ST.swReg = { showNotification: (t, o) => { window.__shown.push([t, o]); return Promise.resolve(); } }`);
+    const age = () => b.win.eval(`(() => { const c = getHrCache(); for (const k in c) if (c[k].at > 1) c[k].at -= 6 * 60000; LS.set('dcrgym_hr', c); })()`);
+    // part of it arrives: still syncing, nothing notified
+    srv.cfg.hr = wins => Object.fromEntries(wins.map(w => [w.id, { bpm: flat(20, 160) }]));
+    age(); await b.win.eval('refreshHeartRates()');
+    eq(nCalls(), n0 + 1, 'asked again after 5 minutes');
+    ok(/Upper strain · syncing/.test(homeT()), 'only part of the heart rate in: still syncing');
+    eq(shown.length, 0, 'no notification yet');
+    // less than before never replaces what's stored
+    srv.cfg.hr = wins => Object.fromEntries(wins.map(w => [w.id, { bpm: flat(10, 160) }]));
+    age(); await b.win.eval('refreshHeartRates()');
+    eq(b.win.eval(`getHrCache()['${uT}'].bpm.filter(x => x > 0).length`), 20, 'a smaller answer never replaces heart rate already stored');
+    srv.cfg.hr = wins => Object.fromEntries(wins.map(w => [w.id, null]));
+    age(); await b.win.eval('refreshHeartRates()');
+    eq(b.win.eval(`getHrCache()['${uT}'].bpm.length`), 20, 'an empty answer never wipes it either');
+    // all of it arrives
+    srv.cfg.hr = wins => Object.fromEntries(wins.map(w => [w.id, { bpm: flat(50, 160) }]));
+    age(); await b.win.eval('refreshHeartRates()');
+    ok(/strain ↑ 20% vs avg Upper/.test(homeT()), 'filled in on Home: "strain ↑ 20% vs avg Upper" (' + (homeT().match(/strain[^│]*/) || [''])[0].trim() + ')');
+    eq(shown.length, 1, 'one notification');
+    eq([shown[0][0], shown[0][1].body, shown[0][1].tag], ['Upper strain is in', 'Strain ↑ 20% vs avg Upper', 'dcr-strain'], 'notification says what it came to');
+    ok(!/\b(200|182|150|166)\b/.test(homeT()) && !/\b(200|182|150|166)\b/.test(shown[0][1].body), 'no raw score on Home or in the notification');
+    age(); await b.win.eval('refreshHeartRates()');
+    eq(nCalls(), n0 + 4, 'complete heart rate is not asked for again');
+    eq(b.win.eval('notifyStrainReady()'), false, 'never notified twice for the same workout');
+    eq(b.win.localStorage.getItem('dcrgym_history'), JSON.stringify(JSON.parse(b.win.localStorage.getItem('dcrgym_history'))), 'history stored as is');
+    eq(H(b.win).length, h.length, 'no workout added or removed');
+    eq(countSets(H(b.win)), countSets(h), 'every set kept');
+    b.win.close();
+    // notifications not allowed yet: the sheet offers Notify me; nothing is shown without permission
+    const srv2 = fakeServer({ hr: wins => Object.fromEntries(wins.map(w => [w.id, null])) });
+    const c = await run(baseStore(h, { dcrgym_hr: hr0 }), { srv: srv2, wait: 3500, setup(w) { w.Notification = { permission: 'default', requestPermission: () => Promise.resolve('granted') }; } });
+    c.win.eval(`showStrainInfo()`);
+    ok(/Notify me/.test(c.win.document.body.textContent), 'no permission yet: the sheet offers Notify me');
+    c.win.close();
+    // three hours on with no heart rate at all: the syncing line goes away
+    const d = await run(baseStore(h, { dcrgym_hr: Object.assign(clone(hr0), { [uT]: { none: 1, at: uT } }) }), { srv: fakeServer({ hr: wins => Object.fromEntries(wins.map(w => [w.id, null])) }), wait: 3500, now: uT + 3.5 * 3600000 });
+    ok(!/syncing/.test(d.win.document.getElementById('screen-home').textContent), 'after 3 hours with no heart rate: no syncing line left behind');
+    d.win.close();
+    // no other Upper with heart rate: nothing to compare with, so no syncing line either
+    const e = await run(baseStore(h, { dcrgym_hr: { [u1]: hr0[u1] } }), { srv: fakeServer({ hr: wins => Object.fromEntries(wins.map(w => [w.id, null])) }), wait: 3500 });
+    ok(!e.win.document.querySelector('.metric-strain'), 'only one other Upper with heart rate: nothing shown');
+    e.win.close();
   }
 
   // ── Q. ota-38: a start time after the finish is set from the first set, with its own Undo ──
