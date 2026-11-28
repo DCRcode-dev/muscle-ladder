@@ -413,7 +413,11 @@ const H = win => JSON.parse(win.localStorage.getItem('dcrgym_history'));
     eq(b.win.eval('ST.screen + "/" + ST.progressTab + "/" + ST.strainFocus'), 'history/strain/' + String(e3), 'tap opens Progress > Strain on today\'s Pull');
     const page = b.win.document.getElementById('screen-history').textContent.replace(/\s+/g, ' ');
     ok(/↑ 45% vs your last 2 Pulls/.test(page), 'the Strain page leads with the same comparison (' + (page.match(/[↑↓][^·]{0,40}Pulls/) || [''])[0] + ')');
-    ok(/Today|Nov 2[0-9]|Nov 28/.test(page) && /Nov 5/.test(page) && /Oct 10/.test(page), 'and lists his recent Pulls');
+    eq(b.win.document.querySelectorAll('#screen-history .st-dot').length, 3, 'one dot per Pull since Sep 1 with heart rate');
+    ok(/By exercise/.test(page) && !/Lat Pulldown/.test(page), 'exercise detail sits behind "By exercise", not on the page');
+    b.win.eval(`showStrainExercises()`);
+    ok(/Lat Pulldown/.test(b.win.document.getElementById('sheet-content').textContent), 'By exercise opens a sheet listing each exercise');
+    b.win.eval(`closeSheet()`);
     ok(!/\b(240|166|182|150|195|211)\b/.test(page), 'no raw strain scores on the page');
     // the rolling floor: Nov 5 only had one earlier Pull, so it has no comparison
     eq(JSON.parse(b.win.eval(`JSON.stringify(strainComparisons('pull').map(r => [r.pct, r.n]))`)), [[45, 2]], 'each Pull is judged only against the Pulls before it');

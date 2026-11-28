@@ -2698,6 +2698,9 @@ button.hist-month-card:active { transform:scale(0.99); }
 .st-row.static { cursor:default; }
 .st-row.static span:last-child { color:var(--text-secondary); font-size:var(--fs-sm); text-align:right; }
 .st-row.on { font-weight:700; }
+.st-byex { border-top:1px solid var(--border-subtle) !important; margin-top:4px; font-weight:600; }
+.st-sheet-note { font-size:var(--fs-sm); color:var(--text-tertiary); margin-bottom:6px; }
+.st-why { margin-bottom:4px; }
 .st-lowtxt { color:oklch(46% 0.130 35); }
 
 /* ── ota-34 (9): loading placeholders ── */
@@ -14454,73 +14457,72 @@ function strainTrendSVG(rows, focusId) {
   return `<svg viewBox="0 0 ${W} ${H}" class="mc-svg" role="img" aria-label="Strain for each session, with the band from your floor to your average">${band}${avgPts.length > 1 ? `<path d="${path(avgPts)}" class="st-avg"/>` : ''}${line}${dots}${labels}</svg>`;
 }
 
-function renderStrainTab() {
+// ota-41b: the Strain tab fits on one phone screen: type chips, the trend with his floor, and the
+// session he's looking at with the 2-3 things that changed most. Each exercise opens in a sheet.
+function strainFocusData() {
   const cache = getHrCache(), hrMax = strainHrMax(cache);
   const byType = {};
   STRAIN_TYPES.forEach(t => { const rows = strainRows(t, cache); if (rows.length) byType[t] = rows; });
   const types = Object.keys(byType).sort((a, b) => byType[b][byType[b].length - 1].w.endTime - byType[a][byType[a].length - 1].w.endTime);
-  if (!types.length) return `<div class="mc-empty">Strain shows here once your watch's heart rate has synced for a few workouts.</div>`;
+  if (!types.length) return null;
   const type = types.includes(ST.strainType) ? ST.strainType : types[0];
   const rows = byType[type];
   let fi = rows.findIndex(r => String(r.w.id) === String(ST.strainFocus));
   if (fi < 0) fi = rows.length - 1;
-  const focus = rows[fi], T = typeTitle(type);
-  const chips = `<div class="st-chips">${types.map(t => `<button class="st-chip${t === type ? ' on' : ''}" onclick="setStrainType('${t}')">${typeTitle(t)}</button>`).join('')}</div>`;
-  // trend: first sessions vs latest
-  let trend = '';
-  if (rows.length >= 6) {
-    const k = Math.min(STRAIN_WINDOW, Math.floor(rows.length / 2));
-    const a = rows.slice(0, k).reduce((s, r) => s + r.v, 0) / k, b = rows.slice(-k).reduce((s, r) => s + r.v, 0) / k;
-    const p = Math.round((b / a - 1) * 100);
-    trend = `Your last ${k} ${T}s were ${Math.abs(p) <= 3 ? 'about as hard as' : (Math.abs(p) + '% ' + (p > 0 ? 'harder than' : 'easier than'))} your first ${k} since Sep 1.`;
-  }
+  const focus = rows[fi];
   const base = rollingBase(rows, fi);
-  const pct = base ? strainPct(focus.v, base.avg) : null, ver = base ? strainVerdict(focus.v, base.avg) : null;
-  const head = base ? (ver === 'less' ? `↓ ${Math.abs(pct)}% vs your last ${base.n} ${T}s · below your floor` : ver === 'more' ? `↑ ${pct}% vs your last ${base.n} ${T}s` : `About the same as your last ${base.n} ${T}s`) : `Not enough earlier ${T}s with heart rate to compare yet`;
-  const cur = sessionStats(focus.w, cache, hrMax);
   const prevW = getHistory().filter(w => w && !w._dupOf && workoutTypeKey(w) === type && (w.endTime || 0) < focus.w.endTime && hasLoggedWorkingSets(w))
     .sort((a, b) => (b.endTime || 0) - (a.endTime || 0))[0];
+  return { cache, hrMax, types, type, rows, fi, focus, base, prevW };
+}
+function renderStrainTab() {
+  const d = strainFocusData();
+  if (!d) return `<div class="mc-empty">Strain shows here once your watch's heart rate has synced for a few workouts.</div>`;
+  const { cache, hrMax, types, type, rows, focus, base, prevW } = d, T = typeTitle(type);
+  const chips = `<div class="st-chips">${types.map(t => `<button class="st-chip${t === type ? ' on' : ''}" onclick="setStrainType('${t}')">${typeTitle(t)}</button>`).join('')}</div>`;
+  const pct = base ? strainPct(focus.v, base.avg) : null, ver = base ? strainVerdict(focus.v, base.avg) : null;
+  const head = base ? (ver === 'less' ? `↓ ${Math.abs(pct)}% vs your last ${base.n} · below your floor` : ver === 'more' ? `↑ ${pct}% vs your last ${base.n} ${T}s` : `About the same as your last ${base.n} ${T}s`) : `Not enough earlier ${T}s with heart rate to compare yet`;
+  const cur = sessionStats(focus.w, cache, hrMax);
   const prev = prevW ? sessionStats(prevW, cache, hrMax) : null;
+  const why = whatChanged(cur, prev, plateauRuns(focus.w.endTime), lastDoneBefore(focus.w.startTime || focus.w.endTime), ver).slice(0, 3);
+  return `${chips}
+    <div class="month-chart-card">
+      <div class="gc-head"><span class="hsi-label">${T} strain</span><span class="gc-sub">vs your last ${STRAIN_WINDOW}</span></div>
+      ${strainTrendSVG(rows, focus.w.id)}
+      <div class="st-legend"><span><i class="st-k st-k-band"></i>your usual range</span><span><i class="st-k st-k-low"></i>below floor</span><span class="st-dim">tap a dot</span></div>
+    </div>
+    <div class="month-chart-card">
+      <div class="gc-head"><span class="hsi-label">${escHtml(shortDay(focus.w.endTime))} · ${T}</span><span class="gc-sub">${cur.mins} min · ${cur.sets} sets</span></div>
+      <div class="st-headline${ver === 'less' ? ' low' : ''}">${head}</div>
+      ${why.length ? `<ul class="st-why">${why.map(t => `<li>${escHtml(t)}</li>`).join('')}</ul>` : prev ? `<div class="mc-note">Nothing big changed from your ${escHtml(shortDay(prev.w.endTime))} ${T}.</div>` : ''}
+      <button class="pg-ins st-byex" onclick="showStrainExercises()"><span>By exercise</span><span class="hm-chev" aria-hidden="true">›</span></button>
+    </div>`;
+}
+// The sheet behind "By exercise": each exercise vs the last time he did it.
+function showStrainExercises() {
+  const d = strainFocusData();
+  if (!d) return;
+  const { cache, hrMax, type, focus } = d, T = typeTitle(type);
+  const cur = sessionStats(focus.w, cache, hrMax);
   const plat = plateauRuns(focus.w.endTime);
   const lastDone = lastDoneBefore(focus.w.startTime || focus.w.endTime);
-  const why = whatChanged(cur, prev, plat, lastDone, ver);
   const unit = getWeightUnit();
-  const exRows = cur.exs.map(x => {
+  const rows = cur.exs.map(x => {
     const p = lastDone[x.norm], pl = plat[x.norm];
     let load = '<span class="st-tag">new</span>';
     if (p && x.topW > 0 && p.topW > 0) {
       if (x.topW > p.topW) load = `<span class="st-tag up">↑ ${Math.round(dispW(x.topW - p.topW))} ${unit}</span>`;
       else if (x.topW < p.topW) load = `<span class="st-tag down">↓ ${Math.round(dispW(p.topW - x.topW))} ${unit}</span>`;
       else if (x.topR > p.topR) load = `<span class="st-tag up">+${x.topR - p.topR} rep${x.topR - p.topR === 1 ? '' : 's'}</span>`;
-      else load = `<span class="st-tag flat">same${pl && pl.flat >= 3 ? ` · no best in ${pl.flat}` : ''}</span>`;
+      else load = `<span class="st-tag flat">same${pl && pl.flat >= 3 ? ` · flat ${pl.flat}` : ''}</span>`;
     } else if (p) load = '<span class="st-tag flat">same</span>';
-    const rest = x.rest != null ? `rest ${fmtRest(x.rest)}${p && p.rest != null && Math.abs(x.rest - p.rest) >= 15 ? ` <span class="st-dim">(${x.rest > p.rest ? '+' : '−'}${fmtRest(Math.abs(x.rest - p.rest))})</span>` : ''}` : '';
-    const heart = x.avgPct ? `heart ${x.avgPct}% of max` : '';
-    const when = p && p.at && focus.w.endTime - p.at > 14 * 86400000 ? ` <span class="st-dim">(last done ${shortDay(p.at)})</span>` : '';
-    return `<div class="st-ex"><div class="st-ex-top"><span class="st-ex-n">${escHtml(x.name)}</span>${load}</div><div class="st-ex-sub">${Math.round(dispW(x.topW))} ${unit} × ${x.topR}${rest ? ' · ' + rest : ''}${heart ? ' · ' + heart : ''}${when}</div></div>`;
+    const bits = [`${Math.round(dispW(x.topW))} ${unit} × ${x.topR}`];
+    if (x.rest != null) bits.push(`rest ${fmtRest(x.rest)}`);
+    if (x.avgPct) bits.push(`heart ${x.avgPct}%`);
+    if (p && p.at && focus.w.endTime - p.at > 14 * 86400000) bits.push(`last ${shortDay(p.at)}`);
+    return `<div class="st-ex"><div class="st-ex-top"><span class="st-ex-n">${escHtml(x.name)}</span>${load}</div><div class="st-ex-sub">${bits.join(' · ')}</div></div>`;
   }).join('');
-  const list = rows.slice().reverse().slice(0, 8).map(r => {
-    const i = rows.indexOf(r), b = rollingBase(rows, i), v = b ? strainVerdict(r.v, b.avg) : null, p = b ? strainPct(r.v, b.avg) : null;
-    const txt = v === 'more' ? `↑ ${p}%` : v === 'less' ? `↓ ${Math.abs(p)}%` : v === 'about' ? 'about avg' : '–';
-    return `<button class="st-row${r === focus ? ' on' : ''}" onclick="setStrainFocus('${escHtml(String(r.w.id))}')"><span>${shortDay(r.w.endTime)}</span><span class="${v === 'less' ? 'st-lowtxt' : ''}">${txt}${v === 'less' ? ' · below floor' : ''}</span></button>`;
-  }).join('');
-  return `${chips}
-    <div class="month-chart-card">
-      <div class="gc-head"><span class="hsi-label">${T} strain</span><span class="gc-sub">${rows.length} session${rows.length === 1 ? '' : 's'} since Sep 1</span></div>
-      ${strainTrendSVG(rows, focus.w.id)}
-      <div class="st-legend"><span><i class="st-k st-k-band"></i>between your floor and your average</span><span><i class="st-k st-k-low"></i>below floor</span></div>
-      ${trend ? `<div class="mc-note">${trend}</div>` : ''}
-      <div class="mc-note">Your average is your last ${STRAIN_WINDOW} ${T}s; the floor is 10% under it. Tap a dot to look at that session.</div>
-    </div>
-    <div class="month-chart-card">
-      <div class="gc-head"><span class="hsi-label">${escHtml(shortDay(focus.w.endTime))} · ${T}</span><span class="gc-sub">${cur.mins} min · ${cur.sets} sets</span></div>
-      <div class="st-headline${ver === 'less' ? ' low' : ''}">${head}</div>
-      ${prev ? `<div class="st-why-h">What was different from your ${shortDay(prev.w.endTime)} ${T}</div>${why.length ? `<ul class="st-why">${why.map(t => `<li>${escHtml(t)}</li>`).join('')}</ul>` : `<div class="mc-note">Nothing big: similar sets, rests and weights.</div>`}` : ''}
-      <div class="st-why-h">Each exercise vs the last time you did it</div>
-      <div class="st-exs">${exRows}</div>
-    </div>
-    <div class="month-chart-card"><div class="gc-head"><span class="hsi-label">Recent ${T}s</span></div><div class="st-list">${list}</div></div>
-    ${renderConditioningCard(cache, hrMax)}`;
+  noticeSheet(`${escHtml(shortDay(focus.w.endTime))} ${T} by exercise`, `<div class="st-sheet-note">Top set vs the last time you did it. Heart is your average during that exercise, as a % of your max.</div><div class="st-exs">${rows}</div>`);
 }
 
 // Conditioning: how fast heart rate drops after sets, and how much work he does per unit of strain.
@@ -14535,28 +14537,6 @@ function conditioningData(cache, hrMax) {
   });
   return { rec, eff };
 }
-function renderConditioningCard(cache, hrMax) {
-  const d = conditioningData(cache, hrMax);
-  const parts = [];
-  if (d.rec.length >= 6) {
-    const k = Math.min(5, Math.floor(d.rec.length / 2));
-    const a = Math.round(d.rec.slice(0, k).reduce((s, x) => s + x.v, 0) / k), b = Math.round(d.rec.slice(-k).reduce((s, x) => s + x.v, 0) / k);
-    // drawn as a 5-workout moving average so one odd session doesn't hide the trend
-    const sm = d.rec.map((x, i) => { const win = d.rec.slice(Math.max(0, i - 4), i + 1); return { v: win.reduce((s, y) => s + y.v, 0) / win.length }; });
-    const W = 340, H = 60, vs = sm.map(x => x.v), lo = Math.min(...vs), hi = Math.max(...vs);
-    const pts = sm.map((x, i) => `${(6 + (W - 12) * i / Math.max(1, d.rec.length - 1)).toFixed(1)},${(6 + (H - 12) * (1 - (x.v - lo) / ((hi - lo) || 1))).toFixed(1)}`).join(' ');
-    parts.push(`<div class="st-sub-h">Recovery after sets</div>
-      <svg viewBox="0 0 ${W} ${H}" class="mc-svg"><polyline points="${pts}" class="st-line"/></svg>
-      <div class="mc-note">Your heart rate falls about <b>${b} beats</b> in the minute after a set lately, vs ${a} in your first workouts with heart rate. ${b > a + 1 ? 'Faster recovery usually means better conditioning.' : b < a - 1 ? 'Slower recovery can come from fatigue, poor sleep or shorter rests.' : 'Steady.'}</div>`);
-  }
-  const effT = Object.keys(d.eff);
-  if (effT.length) parts.push(`<div class="st-sub-h">Work per heartbeat</div>
-      <div class="st-list">${effT.map(t => `<div class="st-row static"><span>${typeTitle(t)}</span><span class="${d.eff[t] < -3 ? 'st-lowtxt' : ''}">${d.eff[t] > 3 ? '↑ ' + d.eff[t] + '% more weight moved' : d.eff[t] < -3 ? '↓ ' + Math.abs(d.eff[t]) + '% less weight moved' : 'about the same'}</span></div>`).join('')}</div>
-      <div class="mc-note">Weight × reps for each point of strain, your latest 3 sessions vs your first 3. More work for the same heart effort means you're fitter for that session.</div>`);
-  if (!parts.length) return '';
-  return `<div class="month-chart-card"><div class="gc-head"><span class="hsi-label">Conditioning</span><span class="gc-sub">from your watch</span></div>${parts.join('')}</div>`;
-}
-
 // Strength tab: lifts that haven't set a new best for a while, newest first.
 function renderPlateauCard() {
   const plat = plateauRuns();
@@ -14592,7 +14572,10 @@ function progressInsights() {
     if (plat.length) out.push({ tab: 'strength', t: `${plat.length} lift${plat.length === 1 ? ' hasn\'t' : 's haven\'t'} set a new best in 3+ sessions.` });
     const d = conditioningData(cache, strainHrMax(cache));
     if (d.rec.length >= 6) { const k = Math.min(5, Math.floor(d.rec.length / 2)), a = d.rec.slice(0, k).reduce((s, x) => s + x.v, 0) / k, b = d.rec.slice(-k).reduce((s, x) => s + x.v, 0) / k;
-      if (Math.abs(b - a) >= 2) out.push({ tab: 'strain', t: `Heart-rate recovery after sets is ${b > a ? 'faster' : 'slower'} than when you started (${Math.round(b)} vs ${Math.round(a)} beats a minute).` }); }
+      if (Math.abs(b - a) >= 2) out.push({ info: ['Recovery after sets', `About a minute after each set, the app checks how far your watch's heart rate has dropped. Lately it drops about ${Math.round(b)} beats, vs ${Math.round(a)} in your first weeks with heart rate. ${b > a ? 'A faster drop usually means better conditioning.' : 'A slower drop can come from fatigue, short sleep or shorter rests.'}`], t: `Heart-rate recovery after sets is ${b > a ? 'faster' : 'slower'} than when you started (${Math.round(b)} vs ${Math.round(a)} beats a minute).` }); }
+    // work per heartbeat: the type with the biggest change, only when it's 10% or more
+    const eff = Object.entries(d.eff).sort((x, y) => Math.abs(y[1]) - Math.abs(x[1]))[0];
+    if (eff && Math.abs(eff[1]) >= 10) out.push({ tab: 'strain', type: eff[0], t: `Your ${typeTitle(eff[0])}s move ${Math.abs(eff[1])}% ${eff[1] > 0 ? 'more' : 'less'} weight for the same heart effort than when you started.` });
   } catch (e) {}
   return out.slice(0, 3);
 }
@@ -14605,7 +14588,8 @@ function renderInsightsCard() {
 function openInsight(i) {
   const x = (ST._insights || [])[i];
   if (!x) return;
-  if (x.tab === 'strain') openStrainPage(x.type, x.id); else setProgressTab(x.tab);
+  if (x.info) noticeSheet(escHtml(x.info[0]), escHtml(x.info[1]));
+  else if (x.tab === 'strain') openStrainPage(x.type, x.id); else setProgressTab(x.tab);
 }
 
 // Ask the script for heart rate of workouts that don't have it yet (read-only, never queued).

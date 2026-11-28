@@ -54,8 +54,10 @@ const store = {
   for (const t of ['overview', 'monthly', 'strength', 'strain', 'log', 'recent']) await tryRun('progress:' + t, `Maps('history'); setProgressTab('${t}')`);
   await tryRun('strain page upper', `openStrainPage('upper', '${tail[0].id}')`);
   await tryRun('strain page focus', `setStrainType('upper'); setStrainFocus('${tail[0].id}')`);
-  const strainTxt = win.document.getElementById('screen-history').textContent;
-  if (!/data-pwn="setName"/.test(strainTxt)) { console.error('FAIL: the Strain page did not draw the payload exercise names, so it was not tested'); process.exit(1); }
+  await tryRun('strain by exercise', `showStrainExercises()`);
+  const strainTxt = win.document.getElementById('sheet-content').textContent;
+  if (!/data-pwn="setName"/.test(strainTxt)) { console.error('FAIL: the By exercise sheet did not draw the payload exercise names, so it was not tested'); process.exit(1); }
+  await tryRun('close', `closeSheet(false)`);
   for (let i = 0; i < 3; i++) await tryRun('insight ' + i, `Maps('history'); setProgressTab('overview'); openInsight(${i})`);
   await tryRun('calendar day', `openCalDay('${target.id}')`);
   await tryRun('close cal', `closeCalPopup()`);
