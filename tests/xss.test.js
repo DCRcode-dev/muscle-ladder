@@ -20,10 +20,17 @@ for (const w of tail) {
   w.additions = [{ name: P('additionName'), muscle: 'Chest', sets: 3, reps: '10' }];
   w.sets.add_0 = [{ w: 50, r: 10, _name: P('additionSet') }];
 }
+// ota-41: one payload workout is an Upper with heart rate, so the Strain page draws its exercise names
+tail[0].sessionName = 'Upper ' + P('sessionName');
 const target = tail[tail.length - 1];
+const hrCache = {};
+for (const w of hist) if (w.startTime && w.endTime > w.startTime && w.endTime >= Date.UTC(2026, 8, 1)) {
+  const n = Math.round((w.endTime - w.startTime) / 60000); hrCache[w.id] = { bpm: Array.from({ length: n }, (_, i) => 120 + (i * 7) % 45), at: 1 };
+}
 const store = {
   dcrgym_history: hist, dcrgym_onboarded: true, dcrgym_schema_version: 3, dcrgym_default_prog: 'p14',
   dcrgym_settings: { sound: false, sheets: 'https://script.google.com/macros/s/x/exec', weightUnit: 'lb' },
+  dcrgym_hr: hrCache,
   dcrgym_rows_synced: hist.map(w => String(w.id)), dcrgym_rows_backfilled: true,
   dcrgym_notes: { [P('globalNoteKey')]: P('globalNote'), 'Bench Press': P('globalNote2') },
   dcrgym_custom_exercises: [{ name: P('customEx'), muscle: 'Chest', subMuscle: 'Chest' }],
@@ -44,7 +51,12 @@ const store = {
   const tryRun = (where, code, ms = 120) => { try { win.eval(code); } catch (e) { /* screen not applicable */ } return wait(ms).then(() => look(where)); };
   look('boot');
   await tryRun('home', `Maps('home')`);
-  for (const t of ['overview', 'monthly', 'recent']) await tryRun('progress:' + t, `Maps('history'); setProgressTab('${t}')`);
+  for (const t of ['overview', 'monthly', 'strength', 'strain', 'log', 'recent']) await tryRun('progress:' + t, `Maps('history'); setProgressTab('${t}')`);
+  await tryRun('strain page upper', `openStrainPage('upper', '${tail[0].id}')`);
+  await tryRun('strain page focus', `setStrainType('upper'); setStrainFocus('${tail[0].id}')`);
+  const strainTxt = win.document.getElementById('screen-history').textContent;
+  if (!/data-pwn="setName"/.test(strainTxt)) { console.error('FAIL: the Strain page did not draw the payload exercise names, so it was not tested'); process.exit(1); }
+  for (let i = 0; i < 3; i++) await tryRun('insight ' + i, `Maps('history'); setProgressTab('overview'); openInsight(${i})`);
   await tryRun('calendar day', `openCalDay('${target.id}')`);
   await tryRun('close cal', `closeCalPopup()`);
   await tryRun('settings', `Maps('settings')`);

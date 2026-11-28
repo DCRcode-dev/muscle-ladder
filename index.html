@@ -2651,6 +2651,55 @@ button.hist-month-card:active { transform:scale(0.99); }
 .mc-so-far { font-size:var(--fs-xs); text-transform:uppercase; letter-spacing:0.12em; color:var(--text-tertiary); margin-left:4px; }
 .mc-empty { margin:0 16px; padding:28px 16px; text-align:center; color:var(--text-tertiary); font-size:var(--fs-md); }
 
+
+/* ── ota-41: four Progress tabs and the Strain page ── */
+.history-tabs.four::before { width:calc((100% - 6px) / 4); }
+.history-tabs.four:has(.hist-tab:nth-child(2).active)::before { transform:translateX(100%); }
+.history-tabs.four:has(.hist-tab:nth-child(3).active)::before { transform:translateX(200%); }
+.history-tabs.four:has(.hist-tab:nth-child(4).active)::before { transform:translateX(300%); }
+.history-tabs.four .hist-tab { font-size:var(--fs-sm); padding:9px 4px; }
+.pg-back { display:block; margin:-6px 16px 10px; padding:4px 0; border:none; background:none; font:inherit; font-size:var(--fs-sm); font-weight:600; color:var(--text-secondary); cursor:pointer; }
+.pg-ins { display:flex; width:100%; align-items:center; justify-content:space-between; gap:10px; padding:10px 0; border:none; border-top:1px solid var(--border-subtle); background:none; font:inherit; font-size:var(--fs-md); color:var(--text-primary); text-align:left; line-height:1.35; cursor:pointer; }
+.pg-ins:first-of-type { border-top:none; }
+.st-chips { display:flex; gap:8px; margin:0 16px 12px; overflow-x:auto; scrollbar-width:none; }
+.st-chip { flex:0 0 auto; padding:7px 14px; border-radius:999px; border:1px solid var(--border-subtle); background:var(--surface-card); font:inherit; font-size:var(--fs-sm); font-weight:600; color:var(--text-secondary); cursor:pointer; }
+.st-chip.on { background:var(--text-primary); color:var(--surface-card); border-color:var(--text-primary); }
+.st-band { fill:oklch(56% 0.075 145 / 0.13); }
+.st-avg { fill:none; stroke:oklch(56% 0.075 145 / 0.75); stroke-width:1.4; stroke-dasharray:4 3; }
+.st-line { fill:none; stroke:var(--text-tertiary); stroke-width:1.2; opacity:0.55; }
+.st-dot { fill:oklch(66% 0.020 60 / 0.9); stroke:var(--surface-card); stroke-width:1.5; cursor:pointer; }
+.st-dot.st-high { fill:oklch(56% 0.075 145 / 0.95); }
+.st-dot.st-low { fill:oklch(48% 0.130 35 / 0.9); }
+.st-dot.st-focus { stroke:var(--text-primary); stroke-width:2; }
+.st-legend { display:flex; flex-wrap:wrap; gap:4px 14px; font-size:var(--fs-xs); color:var(--text-secondary); margin:2px 0 8px; }
+.st-legend span { display:flex; align-items:center; gap:6px; }
+.st-k { display:inline-block; width:12px; height:8px; border-radius:3px; }
+.st-k-band { background:oklch(56% 0.075 145 / 0.25); }
+.st-k-low { width:8px; border-radius:50%; background:oklch(48% 0.130 35 / 0.9); }
+.month-chart-card .mc-note + .mc-note { margin-top:6px; }
+.st-headline { font-size:var(--fs-lg); font-weight:700; color:var(--text-primary); margin:2px 0 10px; line-height:1.3; }
+.st-headline.low { color:oklch(48% 0.130 35); }
+.st-why-h, .st-sub-h { font-size:var(--fs-xs); letter-spacing:0.12em; text-transform:uppercase; font-weight:700; color:var(--text-tertiary); margin:10px 0 6px; }
+.st-why { margin:0 0 8px; padding-left:18px; font-size:var(--fs-md); color:var(--text-primary); line-height:1.4; }
+.st-why li { margin:4px 0; }
+.st-exs { border-top:1px solid var(--border-subtle); margin-top:8px; }
+.st-ex { padding:9px 0; border-bottom:1px solid var(--border-subtle); }
+.st-ex:last-child { border-bottom:none; }
+.st-ex-top { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.st-ex-n { font-size:var(--fs-md); font-weight:600; color:var(--text-primary); }
+.st-ex-sub { font-size:var(--fs-sm); color:var(--text-tertiary); margin-top:2px; font-variant-numeric:tabular-nums; }
+.st-dim { color:var(--text-tertiary); }
+.st-tag { flex-shrink:0; font-size:var(--fs-xs); font-weight:700; padding:3px 8px; border-radius:999px; background:var(--surface-sunken); color:var(--text-secondary); white-space:nowrap; }
+.st-tag.up { background:oklch(56% 0.075 145 / 0.16); color:oklch(42% 0.080 145); }
+.st-tag.down { background:oklch(48% 0.130 35 / 0.12); color:oklch(46% 0.130 35); }
+.st-list { display:flex; flex-direction:column; }
+.st-row { display:flex; justify-content:space-between; gap:10px; padding:9px 0; border:none; border-top:1px solid var(--border-subtle); background:none; font:inherit; font-size:var(--fs-md); color:var(--text-primary); text-align:left; font-variant-numeric:tabular-nums; cursor:pointer; }
+.st-row:first-child { border-top:none; }
+.st-row.static { cursor:default; }
+.st-row.static span:last-child { color:var(--text-secondary); font-size:var(--fs-sm); text-align:right; }
+.st-row.on { font-weight:700; }
+.st-lowtxt { color:oklch(46% 0.130 35); }
+
 /* ── ota-34 (9): loading placeholders ── */
 .skel-wrap { padding-left:20px; padding-right:20px; }
 .skel { background:linear-gradient(90deg, oklch(93% 0.010 72) 25%, oklch(96.5% 0.008 72) 50%, oklch(93% 0.010 72) 75%); background-size:200% 100%; border-radius:10px; animation:skelShimmer 1.3s ease-in-out infinite; }
@@ -5820,7 +5869,7 @@ function saveMeasurements(m) { LS.set('dcrgym_measurements', m); idbSet('dcrgym_
 // Schema-versioned, non-destructive, with rolling last-good backup.
 // History must survive every app update. Period.
 const SCHEMA_VERSION = 3;
-const APP_BUILD = '2026.11.28 · ota-40 · strain-sync';
+const APP_BUILD = '2026.11.28 · ota-41 · strain-page';
 const KG_TO_LB_CUTOFF_MS = 1788000000000; // Workouts before Sep 2026 were logged in kg; Sep 2026+ are already in lbs
 
 function hasLoggedWorkingSets(w) {
@@ -12403,6 +12452,7 @@ function renderMonthlyChart() {
   </div>`;
 }
 function setProgressTab(t) {
+  if (t === 'recent') t = 'log';
   if (ST.progressTab === t) return;
   ST.progressTab = t;
   haptic('tick');
@@ -12414,12 +12464,16 @@ function setProgressTab(t) {
 function renderHistory() {
   const el = document.getElementById('screen-history');
   if (!el) return;
-  const tab = ['overview', 'monthly', 'recent'].includes(ST.progressTab) ? ST.progressTab : 'overview';
+  // ota-41: four tabs, one subject each. Monthly opens from the month card (with a way back);
+  // the old "Recent" tab is now "Log".
+  if (ST.progressTab === 'recent') ST.progressTab = 'log';
+  const tab = ['overview', 'strength', 'strain', 'log', 'monthly'].includes(ST.progressTab) ? ST.progressTab : 'overview';
+  const tabOn = tab === 'monthly' ? 'overview' : tab;
 
   // ota-34 (1, 2): top = workouts this month against 4.5 a week on average. ota-35: tap it for the monthly chart.
   const mt = monthWorkoutTarget();
   const mtPct = mt.target > 0 ? Math.min(100, Math.round(mt.count / mt.target * 100)) : 0;
-  const tabBtn = (id, label) => `<button class="hist-tab${tab === id ? ' active' : ''}" onclick="setProgressTab('${id}')" role="tab" aria-selected="${tab === id}">${label}</button>`;
+  const tabBtn = (id, label) => `<button class="hist-tab${tabOn === id ? ' active' : ''}" onclick="setProgressTab('${id}')" role="tab" aria-selected="${tabOn === id}">${label}</button>`;
 
   let body = '';
   if (tab === 'overview') {
@@ -12434,13 +12488,17 @@ function renderHistory() {
       <div class="hm-sub">Target ${mt.target}: 4.5 a week on average</div>
     </button>
 
-    <!-- Calendar View -->
-    ${renderFiveWeekCalendar()}
+    ${renderInsightsCard()}
 
-    <!-- ota-34 (3): strength growth by muscle, this month vs last -->
-    ${renderGrowthFigure()}`;
+    <!-- Calendar View -->
+    ${renderFiveWeekCalendar()}`;
   } else if (tab === 'monthly') {
-    body = renderMonthlyChart();
+    body = `<button class="pg-back" onclick="setProgressTab('overview')">‹ Overview</button>${renderMonthlyChart()}`;
+  } else if (tab === 'strength') {
+    body = `${renderGrowthFigure()}${renderPlateauCard()}`;
+  } else if (tab === 'strain') {
+    let x = ''; try { x = renderStrainTab(); } catch (e) { x = `<div class="mc-empty">Strain couldn't be worked out just now.</div>`; }
+    body = x;
   } else {
     body = `<div class="workout-history-feed">${renderRecentWorkoutsFeed()}</div>`;
   }
@@ -12451,7 +12509,7 @@ function renderHistory() {
       <div style="font-size: var(--fs-xs); letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 4px; font-weight: 700;">Training Log</div>
       <h1 style="font-family: var(--font-hero); font-style: italic; font-size: 2.1rem; font-weight: 600; color: var(--text-primary); line-height: 1.1; letter-spacing: -0.015em; margin: 0;">Progress</h1>
     </div>
-    <div class="history-tabs three" role="tablist">${tabBtn('overview', 'Overview')}${tabBtn('monthly', 'Monthly')}${tabBtn('recent', 'Recent')}</div>
+    <div class="history-tabs four" role="tablist">${tabBtn('overview', 'Overview')}${tabBtn('strength', 'Strength')}${tabBtn('strain', 'Strain')}${tabBtn('log', 'Log')}</div>
     ${body}
   </div>`;
 }
@@ -14104,14 +14162,16 @@ function workoutStrain(w, cache, hrMax) {
   for (const b of mins) { const p = b / max; load += p >= 0.9 ? 5 : p >= 0.8 ? 4 : p >= 0.7 ? 3 : p >= 0.6 ? 2 : p >= 0.5 ? 1 : 0; }
   return Math.round(load);
 }
-// Average strain for one workout type (Upper, Lower, Push, Pull, Legs…) since Sep 1, 2026.
+// ota-41: his usual strain for one workout type is a rolling floor: the average of his last
+// STRAIN_WINDOW sessions of that type before the one being judged (not every session since Sep 1).
 function strainAverage(type, exceptId, cache) {
   cache = cache || getHrCache();
-  const max = strainHrMax(cache);
-  const vals = getHistory().filter(w => w && !w._dupOf && (w.endTime || 0) >= STRAIN_FROM_MS && workoutTypeKey(w) === type && String(w.id) !== String(exceptId))
-    .map(w => workoutStrain(w, cache, max)).filter(v => v != null);
-  if (!vals.length) return null;
-  return { avg: Math.round(vals.reduce((a, b) => a + b, 0) / vals.length), n: vals.length };
+  const rows = strainRows(type, cache);
+  const w = exceptId != null ? getHistory().find(x => x && String(x.id) === String(exceptId)) : null;
+  const prior = rows.filter(r => String(r.w.id) !== String(exceptId) && (!w || (r.w.endTime || 0) < (w.endTime || 0)));
+  const win = prior.slice(-STRAIN_WINDOW);
+  if (!win.length) return null;
+  return { avg: Math.round(win.reduce((a, r) => a + r.v, 0) / win.length), n: win.length };
 }
 // ota-39: strain is only ever shown as a comparison with his usual workout of the same type,
 // never as a bare score (the raw number sits on a different scale from Fitbit's Cardio Load).
@@ -14138,20 +14198,16 @@ function strainVerdict(v, avg) {
 }
 function strainPct(v, avg) { return (v == null || !avg) ? null : Math.round((v / avg - 1) * 100); }
 function strainTypeLabel(name) { return String(name || '').trim().split(/[\s#(]+/)[0] || 'Workout'; }
-// Each workout of one type since Sep 1 that has heart rate, compared with the average of the
-// others of that type. Newest first.
+// Each workout of one type since Sep 1 that has heart rate, compared with his rolling floor:
+// the average of the (up to) 6 sessions of that type before it. Newest first.
 function strainComparisons(type, cache) {
-  cache = cache || getHrCache();
-  const max = strainHrMax(cache);
-  const rows = getHistory().filter(w => w && !w._dupOf && (w.endTime || 0) >= STRAIN_FROM_MS && workoutTypeKey(w) === type)
-    .map(w => ({ w, v: workoutStrain(w, cache, max) })).filter(r => r.v != null);
+  const rows = strainRows(type, cache);
   const out = [];
-  for (const r of rows) {
-    const others = rows.filter(o => o !== r);
-    if (others.length < STRAIN_MIN_OTHERS) continue;
-    const avg = others.reduce((a, o) => a + o.v, 0) / others.length;
-    out.push({ id: String(r.w.id), end: r.w.endTime, pct: strainPct(r.v, avg), verdict: strainVerdict(r.v, avg) });
-  }
+  rows.forEach((r, i) => {
+    const b = rollingBase(rows, i);
+    if (!b) return;
+    out.push({ id: String(r.w.id), end: r.w.endTime, pct: strainPct(r.v, b.avg), verdict: strainVerdict(r.v, b.avg), n: b.n });
+  });
   return out.sort((a, b) => (b.end || 0) - (a.end || 0));
 }
 // What the Home stat shows: right after a workout, how it compared with his average for that
@@ -14222,6 +14278,8 @@ function showStrainInfo() {
     else noticeSheet('Strain', body);
     return;
   }
+  // ota-41: the result opens the Strain page in Progress, on this session
+  if (typeof openStrainPage === 'function') { openStrainPage(st.type || workoutTypeKey({ sessionName: st.name }), st.mode === 'after' ? st.id : st.lastId); return; }
   const rows = strainComparisons(st.type || workoutTypeKey({ sessionName: st.name })).slice(0, 5);
   const day = ms => {
     const d = new Date(ms), n = new Date();
@@ -14229,8 +14287,327 @@ function showStrainInfo() {
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
   const list = rows.length ? `<div style="margin-top:12px">${rows.map((r, i) => `<div style="display:flex;justify-content:space-between;padding:7px 0;${i ? 'border-top:1px solid var(--border-subtle);' : ''}"><span>${day(r.end)}</span><span style="font-variant-numeric:tabular-nums">${strainRowText(r)}</span></div>`).join('')}</div>` : '';
-  noticeSheet('Strain', `How hard each ${t} was on your heart, from your watch's heart rate, compared with your average ${t} since Sep 1. It isn't Fitbit's Cardio Load.${list}`);
+  noticeSheet('Strain', `How hard each ${t} was on your heart, from your watch's heart rate, compared with your last 6 ${t}s before it. It isn't Fitbit's Cardio Load.${list}`);
 }
+// ── ota-41: the Strain page (Progress > Strain) and analytics that join his sets with his watch ──
+// Every set carries the time it was logged, and the watch gives heart rate minute by minute, so
+// each exercise's slice of the workout can be matched to the heart rate during it. Nothing here
+// changes a workout: it only reads history and the heart-rate cache.
+const STRAIN_WINDOW = 6;           // the floor: his last 6 sessions of the same type
+const STRAIN_TYPES = ['upper', 'lower', 'push', 'pull', 'legs'];
+function strainRows(type, cache) {
+  cache = cache || getHrCache();
+  const max = strainHrMax(cache);
+  return getHistory().filter(w => w && !w._dupOf && (w.endTime || 0) >= STRAIN_FROM_MS && workoutTypeKey(w) === type)
+    .sort((a, b) => (a.endTime || 0) - (b.endTime || 0))
+    .map(w => ({ w, v: workoutStrain(w, cache, max) })).filter(r => r.v != null);
+}
+function rollingBase(rows, i) {
+  const prior = rows.slice(Math.max(0, i - STRAIN_WINDOW), i);
+  if (prior.length < STRAIN_MIN_OTHERS) return null;
+  return { avg: prior.reduce((a, r) => a + r.v, 0) / prior.length, n: prior.length };
+}
+function typeTitle(type) { return type ? type.charAt(0).toUpperCase() + type.slice(1) : 'Workout'; }
+function fmtRest(sec) { if (sec == null || !isFinite(sec)) return '–'; sec = Math.round(sec); return Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0'); }
+function shortDay(ms) { return new Date(ms).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
+
+// One entry per exercise in a workout: its working sets, top set, reps, rest between sets, time span.
+function sessionExercises(w) {
+  const out = [];
+  for (const [key, arr] of Object.entries((w && w.sets) || {})) {
+    if (key.endsWith('_wu') || !Array.isArray(arr)) continue;
+    const sets = arr.filter(s => s && s.r > 0 && countsAsWorkSet(s) && !s._suspect);
+    if (!sets.length) continue;
+    const name = stripSuperset(resolveWorkoutSetExName(w, key, arr) || '');
+    if (!name) continue;
+    const ts = sets.map(s => Number(s.ts)).filter(t => t > 0).sort((a, b) => a - b);
+    const top = sets.reduce((b, s) => (s.w > b.w || (s.w === b.w && s.r > b.r)) ? s : b, sets[0]);
+    const gaps = [];
+    for (let i = 1; i < ts.length; i++) { const g = (ts[i] - ts[i - 1]) / 1000; if (g >= 15 && g <= 600) gaps.push(g); }
+    out.push({ key, name, norm: normalizeEx(name), sets: sets.length, topW: Number(top.w) || 0, topR: Number(top.r) || 0,
+      e1: calcE1RM(top.w, top.r), reps: sets.reduce((a, s) => a + (Number(s.r) || 0), 0), vol: sets.reduce((a, s) => a + (s.w > 0 ? s.w * s.r : 0), 0),
+      first: ts[0] || null, last: ts[ts.length - 1] || null, ts, rest: gaps.length ? gaps.reduce((a, b) => a + b, 0) / gaps.length : null, gaps });
+  }
+  return out.sort((a, b) => (a.first || 0) - (b.first || 0));
+}
+// Heart rate during each exercise: the minutes from just before its first set to just after its last.
+function exerciseHeart(w, exs, e, hrMax) {
+  if (!e || !Array.isArray(e.bpm) || !w.startTime) return;
+  const zone = b => { const p = b / hrMax; return p >= 0.9 ? 5 : p >= 0.8 ? 4 : p >= 0.7 ? 3 : p >= 0.6 ? 2 : p >= 0.5 ? 1 : 0; };
+  exs.forEach((x, i) => {
+    if (!x.first) return;
+    const next = exs[i + 1] && exs[i + 1].first;
+    const from = x.first - 75000, to = Math.min(x.last + 90000, next ? next - 15000 : Infinity);
+    let load = 0, sum = 0, n = 0;
+    e.bpm.forEach((b, m) => { const mid = w.startTime + m * 60000 + 30000; if (b > 0 && mid >= from && mid <= to) { load += zone(b); sum += b; n++; } });
+    if (n) { x.load = load; x.avgPct = Math.round(sum / n / hrMax * 100); x.mins = n; }
+  });
+}
+// How far heart rate falls in the minute or two after a set (minute data, so it's approximate).
+function hrRecovery(w, e) {
+  if (!e || !Array.isArray(e.bpm) || !w.startTime) return null;
+  const ts = [];
+  for (const x of sessionExercises(w)) ts.push(...x.ts);
+  ts.sort((a, b) => a - b);
+  const drops = [];
+  ts.forEach((t, i) => {
+    if (ts[i + 1] && ts[i + 1] - t < 150000) return;           // next set too soon to see the drop
+    const m = Math.floor((t - w.startTime) / 60000);
+    const peak = Math.max(e.bpm[m] || 0, e.bpm[m + 1] || 0), after = e.bpm[m + 2] || 0;
+    if (peak > 0 && after > 0) drops.push(peak - after);
+  });
+  if (drops.length < 3) return null;
+  return Math.round(drops.reduce((a, b) => a + b, 0) / drops.length);
+}
+function sessionStats(w, cache, hrMax) {
+  const exs = sessionExercises(w), e = cache[String(w.id)];
+  exerciseHeart(w, exs, e, hrMax);
+  const gaps = [].concat(...exs.map(x => x.gaps));
+  const hard = e && Array.isArray(e.bpm) ? e.bpm.filter(b => b > 0 && b / hrMax >= 0.8).length : null;
+  return { w, exs, sets: exs.reduce((a, x) => a + x.sets, 0), vol: exs.reduce((a, x) => a + x.vol, 0),
+    mins: Math.round(((w.endTime || 0) - (w.startTime || 0)) / 60000), rest: gaps.length ? gaps.reduce((a, b) => a + b, 0) / gaps.length : null,
+    hard, rec: hrRecovery(w, e) };
+}
+// For each exercise, how many sessions in a row it has gone without a new best (estimated 1RM).
+function plateauRuns(beforeTs) {
+  const by = {};
+  // since Sep 1 only: that's when his training became consistent, and older imported sets can be off
+  getHistory().filter(w => w && !w._dupOf && !w.partial && (w.endTime || 0) >= STRAIN_FROM_MS && (w.endTime || 0) <= (beforeTs || Infinity))
+    .sort((a, b) => (a.endTime || 0) - (b.endTime || 0))
+    .forEach(w => sessionExercises(w).forEach(x => { if (x.e1 > 0) (by[x.norm] = by[x.norm] || { name: x.name, list: [] }).list.push({ e1: x.e1, w: x.topW, r: x.topR, at: w.endTime }); }));
+  const out = {};
+  for (const [k, v] of Object.entries(by)) {
+    let best = 0, sinceBest = 0, bestAt = null;
+    v.list.forEach(p => { if (p.e1 > best) { best = p.e1; sinceBest = 0; bestAt = p.at; } else sinceBest++; });
+    const last = v.list[v.list.length - 1];
+    out[k] = { name: v.name, flat: sinceBest, sessions: v.list.length, last, bestAt };
+  }
+  return out;
+}
+// The last time each exercise was done before a given time, in any session.
+function lastDoneBefore(ts) {
+  const out = {};
+  getHistory().filter(w => w && !w._dupOf && !w.partial && (w.endTime || 0) < ts)
+    .sort((a, b) => (b.endTime || 0) - (a.endTime || 0))
+    .forEach(w => sessionExercises(w).forEach(x => { if (!out[x.norm]) out[x.norm] = Object.assign({ at: w.endTime }, x); }));
+  return out;
+}
+// What was different from the previous session of the same type, biggest first. Weights are
+// compared with the last time he did each exercise. When the session was clearly harder or
+// easier, only the differences that push strain that way are listed.
+function whatChanged(cur, prev, plat, lastDone, verdict) {
+  const lines = [];
+  if (!prev) return lines;
+  lastDone = lastDone || {};
+  const pct = (a, b) => b ? (a - b) / b * 100 : 0;
+  const unit = getWeightUnit();
+  if (cur.rest != null && prev.rest != null && Math.abs(pct(cur.rest, prev.rest)) >= 15)
+    lines.push({ d: cur.rest > prev.rest ? -1 : 1, s: Math.abs(pct(cur.rest, prev.rest)), t: `${cur.rest > prev.rest ? 'Longer' : 'Shorter'} rests: ${fmtRest(cur.rest)} between sets vs ${fmtRest(prev.rest)}.` });
+  if (Math.abs(cur.sets - prev.sets) >= 2)
+    lines.push({ d: cur.sets < prev.sets ? -1 : 1, s: Math.abs(pct(cur.sets, prev.sets)), t: `${Math.abs(cur.sets - prev.sets)} ${cur.sets < prev.sets ? 'fewer' : 'more'} working sets (${cur.sets} vs ${prev.sets}).` });
+  if (prev.mins > 0 && Math.abs(pct(cur.mins, prev.mins)) >= 12)
+    lines.push({ d: cur.mins < prev.mins ? -1 : 1, s: Math.abs(pct(cur.mins, prev.mins)) * 0.8, t: `${cur.mins < prev.mins ? 'Shorter' : 'Longer'} session: ${cur.mins} min vs ${prev.mins}.` });
+  if (cur.hard != null && prev.hard != null && Math.abs(cur.hard - prev.hard) >= 4)
+    lines.push({ d: cur.hard < prev.hard ? -1 : 1, s: Math.abs(cur.hard - prev.hard) * 3, t: `${cur.hard < prev.hard ? 'Less' : 'More'} time near your max heart rate: ${cur.hard} min vs ${prev.hard}.` });
+  const up = [], down = [], same = [];
+  cur.exs.forEach(x => { const p = lastDone[x.norm]; if (!p || !(x.topW > 0) || !(p.topW > 0)) return;
+    if (x.topW > p.topW) up.push(`${x.name} +${Math.round(dispW(x.topW - p.topW))} ${unit}`); else if (x.topW < p.topW) down.push(`${x.name} −${Math.round(dispW(p.topW - x.topW))} ${unit}`); else same.push(x.name); });
+  if (up.length) lines.push({ d: 1, s: 18 + up.length, t: `Heavier than last time on ${up.length}: ${up.slice(0, 2).join(', ')}${up.length > 2 ? '…' : ''}.` });
+  if (down.length) lines.push({ d: -1, s: 17 + down.length, t: `Lighter than last time on ${down.length}: ${down.slice(0, 2).join(', ')}${down.length > 2 ? '…' : ''}.` });
+  const flat = cur.exs.filter(x => plat[x.norm] && plat[x.norm].flat >= 3);
+  if (same.length >= 3 && same.length >= cur.exs.length / 2)
+    lines.push({ d: -1, s: 16, t: `Same weights as last time on ${same.length} of ${cur.exs.length} exercises${flat.length ? `, and ${flat.length} ${flat.length === 1 ? 'hasn\'t' : 'haven\'t'} set a new best in 3+ sessions` : ''}. A familiar load tends to cost your heart less.` });
+  const want = verdict === 'more' ? 1 : verdict === 'less' ? -1 : 0;
+  return lines.filter(x => !want || x.d === want).sort((a, b) => b.s - a.s).slice(0, 3).map(x => x.t);
+}
+
+function openStrainPage(type, id) {
+  ST.strainType = type || ST.strainType;
+  ST.strainFocus = id || null;
+  ST.progressTab = 'strain';
+  if (ST.screen === 'history') renderHistory(); else Maps('history');
+  const el = document.getElementById('screen-history');
+  if (el) { el.scrollTop = 0; const sc = el.querySelector('.screen-content'); if (sc) sc.scrollTop = 0; }
+}
+function setStrainType(t) { ST.strainType = t; ST.strainFocus = null; haptic('tick'); renderHistory(); }
+function setStrainFocus(id) { ST.strainFocus = String(id); haptic('tick'); renderHistory(); }
+
+function strainTrendSVG(rows, focusId) {
+  const W = 340, H = 170, L = 8, R = 8, T = 14, B = 24;
+  const pts = rows.map((r, i) => ({ r, base: rollingBase(rows, i) }));
+  const vals = rows.map(r => r.v).concat(pts.filter(p => p.base).map(p => p.base.avg * 0.9));
+  const lo = Math.min(...vals) * 0.92, hi = Math.max(...vals) * 1.05;
+  const x = i => rows.length === 1 ? W / 2 : L + (W - L - R) * i / (rows.length - 1);
+  const y = v => T + (H - T - B) * (1 - (v - lo) / ((hi - lo) || 1));
+  const avgPts = pts.map((p, i) => p.base ? [x(i), y(p.base.avg)] : null).filter(Boolean);
+  const floorPts = pts.map((p, i) => p.base ? [x(i), y(p.base.avg * 0.9)] : null).filter(Boolean);
+  const path = a => a.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+  const band = avgPts.length > 1 ? `<path d="${path(avgPts)} ${floorPts.slice().reverse().map(p => 'L' + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ')} Z" class="st-band"/>` : '';
+  const line = `<path d="${path(rows.map((r, i) => [x(i), y(r.v)]))}" class="st-line"/>`;
+  const dots = pts.map((p, i) => {
+    const v = p.base ? strainVerdict(p.r.v, p.base.avg) : null;
+    const cls = 'st-dot' + (v === 'less' ? ' st-low' : v === 'more' ? ' st-high' : '') + (String(p.r.w.id) === String(focusId) ? ' st-focus' : '');
+    return `<circle cx="${x(i).toFixed(1)}" cy="${y(p.r.v).toFixed(1)}" r="${String(p.r.w.id) === String(focusId) ? 6 : 4.2}" class="${cls}" onclick="setStrainFocus('${escHtml(String(p.r.w.id))}')"/>`;
+  }).join('');
+  const labels = [0, Math.floor((rows.length - 1) / 2), rows.length - 1].filter((v, i, a) => a.indexOf(v) === i && rows[v])
+    .map(i => `<text x="${x(i).toFixed(1)}" y="${H - 6}" text-anchor="${i === 0 ? 'start' : i === rows.length - 1 ? 'end' : 'middle'}" class="mc-axis">${shortDay(rows[i].w.endTime)}</text>`).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" class="mc-svg" role="img" aria-label="Strain for each session, with the band from your floor to your average">${band}${avgPts.length > 1 ? `<path d="${path(avgPts)}" class="st-avg"/>` : ''}${line}${dots}${labels}</svg>`;
+}
+
+function renderStrainTab() {
+  const cache = getHrCache(), hrMax = strainHrMax(cache);
+  const byType = {};
+  STRAIN_TYPES.forEach(t => { const rows = strainRows(t, cache); if (rows.length) byType[t] = rows; });
+  const types = Object.keys(byType).sort((a, b) => byType[b][byType[b].length - 1].w.endTime - byType[a][byType[a].length - 1].w.endTime);
+  if (!types.length) return `<div class="mc-empty">Strain shows here once your watch's heart rate has synced for a few workouts.</div>`;
+  const type = types.includes(ST.strainType) ? ST.strainType : types[0];
+  const rows = byType[type];
+  let fi = rows.findIndex(r => String(r.w.id) === String(ST.strainFocus));
+  if (fi < 0) fi = rows.length - 1;
+  const focus = rows[fi], T = typeTitle(type);
+  const chips = `<div class="st-chips">${types.map(t => `<button class="st-chip${t === type ? ' on' : ''}" onclick="setStrainType('${t}')">${typeTitle(t)}</button>`).join('')}</div>`;
+  // trend: first sessions vs latest
+  let trend = '';
+  if (rows.length >= 6) {
+    const k = Math.min(STRAIN_WINDOW, Math.floor(rows.length / 2));
+    const a = rows.slice(0, k).reduce((s, r) => s + r.v, 0) / k, b = rows.slice(-k).reduce((s, r) => s + r.v, 0) / k;
+    const p = Math.round((b / a - 1) * 100);
+    trend = `Your last ${k} ${T}s were ${Math.abs(p) <= 3 ? 'about as hard as' : (Math.abs(p) + '% ' + (p > 0 ? 'harder than' : 'easier than'))} your first ${k} since Sep 1.`;
+  }
+  const base = rollingBase(rows, fi);
+  const pct = base ? strainPct(focus.v, base.avg) : null, ver = base ? strainVerdict(focus.v, base.avg) : null;
+  const head = base ? (ver === 'less' ? `↓ ${Math.abs(pct)}% vs your last ${base.n} ${T}s · below your floor` : ver === 'more' ? `↑ ${pct}% vs your last ${base.n} ${T}s` : `About the same as your last ${base.n} ${T}s`) : `Not enough earlier ${T}s with heart rate to compare yet`;
+  const cur = sessionStats(focus.w, cache, hrMax);
+  const prevW = getHistory().filter(w => w && !w._dupOf && workoutTypeKey(w) === type && (w.endTime || 0) < focus.w.endTime && hasLoggedWorkingSets(w))
+    .sort((a, b) => (b.endTime || 0) - (a.endTime || 0))[0];
+  const prev = prevW ? sessionStats(prevW, cache, hrMax) : null;
+  const plat = plateauRuns(focus.w.endTime);
+  const lastDone = lastDoneBefore(focus.w.startTime || focus.w.endTime);
+  const why = whatChanged(cur, prev, plat, lastDone, ver);
+  const unit = getWeightUnit();
+  const exRows = cur.exs.map(x => {
+    const p = lastDone[x.norm], pl = plat[x.norm];
+    let load = '<span class="st-tag">new</span>';
+    if (p && x.topW > 0 && p.topW > 0) {
+      if (x.topW > p.topW) load = `<span class="st-tag up">↑ ${Math.round(dispW(x.topW - p.topW))} ${unit}</span>`;
+      else if (x.topW < p.topW) load = `<span class="st-tag down">↓ ${Math.round(dispW(p.topW - x.topW))} ${unit}</span>`;
+      else if (x.topR > p.topR) load = `<span class="st-tag up">+${x.topR - p.topR} rep${x.topR - p.topR === 1 ? '' : 's'}</span>`;
+      else load = `<span class="st-tag flat">same${pl && pl.flat >= 3 ? ` · no best in ${pl.flat}` : ''}</span>`;
+    } else if (p) load = '<span class="st-tag flat">same</span>';
+    const rest = x.rest != null ? `rest ${fmtRest(x.rest)}${p && p.rest != null && Math.abs(x.rest - p.rest) >= 15 ? ` <span class="st-dim">(${x.rest > p.rest ? '+' : '−'}${fmtRest(Math.abs(x.rest - p.rest))})</span>` : ''}` : '';
+    const heart = x.avgPct ? `heart ${x.avgPct}% of max` : '';
+    const when = p && p.at && focus.w.endTime - p.at > 14 * 86400000 ? ` <span class="st-dim">(last done ${shortDay(p.at)})</span>` : '';
+    return `<div class="st-ex"><div class="st-ex-top"><span class="st-ex-n">${escHtml(x.name)}</span>${load}</div><div class="st-ex-sub">${Math.round(dispW(x.topW))} ${unit} × ${x.topR}${rest ? ' · ' + rest : ''}${heart ? ' · ' + heart : ''}${when}</div></div>`;
+  }).join('');
+  const list = rows.slice().reverse().slice(0, 8).map(r => {
+    const i = rows.indexOf(r), b = rollingBase(rows, i), v = b ? strainVerdict(r.v, b.avg) : null, p = b ? strainPct(r.v, b.avg) : null;
+    const txt = v === 'more' ? `↑ ${p}%` : v === 'less' ? `↓ ${Math.abs(p)}%` : v === 'about' ? 'about avg' : '–';
+    return `<button class="st-row${r === focus ? ' on' : ''}" onclick="setStrainFocus('${escHtml(String(r.w.id))}')"><span>${shortDay(r.w.endTime)}</span><span class="${v === 'less' ? 'st-lowtxt' : ''}">${txt}${v === 'less' ? ' · below floor' : ''}</span></button>`;
+  }).join('');
+  return `${chips}
+    <div class="month-chart-card">
+      <div class="gc-head"><span class="hsi-label">${T} strain</span><span class="gc-sub">${rows.length} session${rows.length === 1 ? '' : 's'} since Sep 1</span></div>
+      ${strainTrendSVG(rows, focus.w.id)}
+      <div class="st-legend"><span><i class="st-k st-k-band"></i>between your floor and your average</span><span><i class="st-k st-k-low"></i>below floor</span></div>
+      ${trend ? `<div class="mc-note">${trend}</div>` : ''}
+      <div class="mc-note">Your average is your last ${STRAIN_WINDOW} ${T}s; the floor is 10% under it. Tap a dot to look at that session.</div>
+    </div>
+    <div class="month-chart-card">
+      <div class="gc-head"><span class="hsi-label">${escHtml(shortDay(focus.w.endTime))} · ${T}</span><span class="gc-sub">${cur.mins} min · ${cur.sets} sets</span></div>
+      <div class="st-headline${ver === 'less' ? ' low' : ''}">${head}</div>
+      ${prev ? `<div class="st-why-h">What was different from your ${shortDay(prev.w.endTime)} ${T}</div>${why.length ? `<ul class="st-why">${why.map(t => `<li>${escHtml(t)}</li>`).join('')}</ul>` : `<div class="mc-note">Nothing big: similar sets, rests and weights.</div>`}` : ''}
+      <div class="st-why-h">Each exercise vs the last time you did it</div>
+      <div class="st-exs">${exRows}</div>
+    </div>
+    <div class="month-chart-card"><div class="gc-head"><span class="hsi-label">Recent ${T}s</span></div><div class="st-list">${list}</div></div>
+    ${renderConditioningCard(cache, hrMax)}`;
+}
+
+// Conditioning: how fast heart rate drops after sets, and how much work he does per unit of strain.
+function conditioningData(cache, hrMax) {
+  const ws = getHistory().filter(w => w && !w._dupOf && (w.endTime || 0) >= STRAIN_FROM_MS && cache[String(w.id)] && Array.isArray(cache[String(w.id)].bpm))
+    .sort((a, b) => a.endTime - b.endTime);
+  const rec = ws.map(w => ({ w, v: hrRecovery(w, cache[String(w.id)]) })).filter(x => x.v != null);
+  const eff = {};
+  STRAIN_TYPES.forEach(t => {
+    const rows = strainRows(t, cache).map(r => ({ r, e: workoutVolume(r.w) / r.v })).filter(x => x.e > 0 && isFinite(x.e));
+    if (rows.length >= 6) { const k = 3, a = rows.slice(0, k).reduce((s, x) => s + x.e, 0) / k, b = rows.slice(-k).reduce((s, x) => s + x.e, 0) / k; eff[t] = Math.round((b / a - 1) * 100); }
+  });
+  return { rec, eff };
+}
+function renderConditioningCard(cache, hrMax) {
+  const d = conditioningData(cache, hrMax);
+  const parts = [];
+  if (d.rec.length >= 6) {
+    const k = Math.min(5, Math.floor(d.rec.length / 2));
+    const a = Math.round(d.rec.slice(0, k).reduce((s, x) => s + x.v, 0) / k), b = Math.round(d.rec.slice(-k).reduce((s, x) => s + x.v, 0) / k);
+    // drawn as a 5-workout moving average so one odd session doesn't hide the trend
+    const sm = d.rec.map((x, i) => { const win = d.rec.slice(Math.max(0, i - 4), i + 1); return { v: win.reduce((s, y) => s + y.v, 0) / win.length }; });
+    const W = 340, H = 60, vs = sm.map(x => x.v), lo = Math.min(...vs), hi = Math.max(...vs);
+    const pts = sm.map((x, i) => `${(6 + (W - 12) * i / Math.max(1, d.rec.length - 1)).toFixed(1)},${(6 + (H - 12) * (1 - (x.v - lo) / ((hi - lo) || 1))).toFixed(1)}`).join(' ');
+    parts.push(`<div class="st-sub-h">Recovery after sets</div>
+      <svg viewBox="0 0 ${W} ${H}" class="mc-svg"><polyline points="${pts}" class="st-line"/></svg>
+      <div class="mc-note">Your heart rate falls about <b>${b} beats</b> in the minute after a set lately, vs ${a} in your first workouts with heart rate. ${b > a + 1 ? 'Faster recovery usually means better conditioning.' : b < a - 1 ? 'Slower recovery can come from fatigue, poor sleep or shorter rests.' : 'Steady.'}</div>`);
+  }
+  const effT = Object.keys(d.eff);
+  if (effT.length) parts.push(`<div class="st-sub-h">Work per heartbeat</div>
+      <div class="st-list">${effT.map(t => `<div class="st-row static"><span>${typeTitle(t)}</span><span class="${d.eff[t] < -3 ? 'st-lowtxt' : ''}">${d.eff[t] > 3 ? '↑ ' + d.eff[t] + '% more weight moved' : d.eff[t] < -3 ? '↓ ' + Math.abs(d.eff[t]) + '% less weight moved' : 'about the same'}</span></div>`).join('')}</div>
+      <div class="mc-note">Weight × reps for each point of strain, your latest 3 sessions vs your first 3. More work for the same heart effort means you're fitter for that session.</div>`);
+  if (!parts.length) return '';
+  return `<div class="month-chart-card"><div class="gc-head"><span class="hsi-label">Conditioning</span><span class="gc-sub">from your watch</span></div>${parts.join('')}</div>`;
+}
+
+// Strength tab: lifts that haven't set a new best for a while, newest first.
+function renderPlateauCard() {
+  const plat = plateauRuns();
+  const recent = Date.now() - 42 * 86400000;
+  const all = Object.values(plat).filter(p => p.flat >= 3 && p.sessions >= 4 && p.last && p.last.at >= recent)
+    .sort((a, b) => b.flat - a.flat);
+  const items = all.slice(0, 5), more = all.length - items.length;
+  const unit = getWeightUnit();
+  const best = Object.values(plat).filter(p => p.flat === 0 && p.last && p.last.at >= Date.now() - 14 * 86400000).length;
+  return `<div class="month-chart-card">
+    <div class="gc-head"><span class="hsi-label">Plateau watch</span><span class="gc-sub">last 6 weeks</span></div>
+    ${items.length ? `<div class="st-list">${items.map(p => `<div class="st-row static"><span>${escHtml(p.name)}</span><span>${Math.round(dispW(p.last.w))} ${unit} × ${p.last.r} · ${p.flat} sessions flat</span></div>`).join('')}</div>
+    ${more > 0 ? `<div class="mc-note">and ${more} more.</div>` : ''}
+    <div class="mc-note">No new best (estimated 1RM) since Sep 1 in that many sessions of the lift. One more rep or the smallest weight step next time usually breaks it.</div>`
+    : `<div class="mc-note">Nothing stuck: every lift you did in the last 6 weeks set a new best within its last 3 sessions.</div>`}
+    ${best ? `<div class="mc-note">${best} lift${best === 1 ? '' : 's'} set a new best in the last 2 weeks.</div>` : ''}
+  </div>`;
+}
+
+// Overview: up to three things worth knowing, each opening the tab it comes from.
+function progressInsights() {
+  const out = [];
+  try {
+    const cache = getHrCache();
+    const last = getHistory().filter(w => w && !w._dupOf && hasLoggedWorkingSets(w)).sort((a, b) => (b.endTime || 0) - (a.endTime || 0))[0];
+    if (last) {
+      const t = workoutTypeKey(last), rows = strainRows(t, cache), i = rows.findIndex(r => String(r.w.id) === String(last.id));
+      const b = i >= 0 ? rollingBase(rows, i) : null;
+      if (b) { const v = strainVerdict(rows[i].v, b.avg), p = strainPct(rows[i].v, b.avg);
+        out.push({ tab: 'strain', type: t, id: String(last.id), t: v === 'less' ? `Your last ${typeTitle(t)} was ${Math.abs(p)}% easier than your last ${b.n}, below your floor.` : v === 'more' ? `Your last ${typeTitle(t)} was ${p}% harder than your last ${b.n}.` : `Your last ${typeTitle(t)} was about as hard as your last ${b.n}.` }); }
+    }
+    const plat = Object.values(plateauRuns()).filter(p => p.flat >= 3 && p.sessions >= 4 && p.last && p.last.at >= Date.now() - 42 * 86400000);
+    if (plat.length) out.push({ tab: 'strength', t: `${plat.length} lift${plat.length === 1 ? ' hasn\'t' : 's haven\'t'} set a new best in 3+ sessions.` });
+    const d = conditioningData(cache, strainHrMax(cache));
+    if (d.rec.length >= 6) { const k = Math.min(5, Math.floor(d.rec.length / 2)), a = d.rec.slice(0, k).reduce((s, x) => s + x.v, 0) / k, b = d.rec.slice(-k).reduce((s, x) => s + x.v, 0) / k;
+      if (Math.abs(b - a) >= 2) out.push({ tab: 'strain', t: `Heart-rate recovery after sets is ${b > a ? 'faster' : 'slower'} than when you started (${Math.round(b)} vs ${Math.round(a)} beats a minute).` }); }
+  } catch (e) {}
+  return out.slice(0, 3);
+}
+function renderInsightsCard() {
+  const xs = progressInsights();
+  ST._insights = xs;
+  if (!xs.length) return '';
+  return `<div class="month-chart-card pg-insights"><div class="gc-head"><span class="hsi-label">Worth knowing</span></div>${xs.map((x, i) => `<button class="pg-ins" onclick="openInsight(${i})"><span>${escHtml(x.t)}</span><span class="hm-chev" aria-hidden="true">›</span></button>`).join('')}</div>`;
+}
+function openInsight(i) {
+  const x = (ST._insights || [])[i];
+  if (!x) return;
+  if (x.tab === 'strain') openStrainPage(x.type, x.id); else setProgressTab(x.tab);
+}
+
 // Ask the script for heart rate of workouts that don't have it yet (read-only, never queued).
 let _hrRun = null;
 function fetchWorkoutHeartRates() {
